@@ -159,15 +159,14 @@ function tocarSomFlapClack() {
   }
 }
 
-// ─── Componente de Palheta Mecânica Solari Auto-Adaptável aos Ecrãs ───────────
+// ─── Componente de Palheta Mecânica Solari 100% Branco e Responsivo ───────────
 
 interface FlapCellProps {
   char: string;
-  variant?: "yellow" | "white" | "amber" | "green";
   size?: "sm" | "md" | "lg" | "xl" | "hero";
 }
 
-function FlapCell({ char, variant = "yellow", size = "lg" }: FlapCellProps) {
+function FlapCell({ char, size = "lg" }: FlapCellProps) {
   const [prevChar, setPrevChar] = useState(char);
   const [animating, setAnimating] = useState(false);
 
@@ -183,7 +182,7 @@ function FlapCell({ char, variant = "yellow", size = "lg" }: FlapCellProps) {
     }
   }, [char, prevChar]);
 
-  // Dimensionamento fluido baseado em clamp() para caber perfeitamente em qualquer telemóvel
+  // Dimensionamento fluido com clamp() para telemóveis e ecrãs widescreen
   const dimensões = {
     sm: "w-[clamp(0.75rem,2.2vw,1.4rem)] h-[clamp(1.1rem,3.2vw,2rem)] text-[clamp(0.7rem,1.8vw,1.1rem)] font-black rounded-[2px]",
     md: "w-[clamp(0.9rem,3vw,1.8rem)] h-[clamp(1.3rem,4.2vw,2.5rem)] text-[clamp(0.8rem,2.5vw,1.4rem)] font-black rounded-[3px]",
@@ -192,12 +191,8 @@ function FlapCell({ char, variant = "yellow", size = "lg" }: FlapCellProps) {
     hero: "w-[clamp(1.5rem,5.5vw,3.6rem)] h-[clamp(2.1rem,7.4vw,4.8rem)] text-[clamp(1.3rem,4.5vw,3rem)] font-black rounded-[5px]",
   }[size];
 
-  const coresTexto = {
-    yellow: "text-[#facc15] bg-[#111319] border-[#222634] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]",
-    white: "text-[#f8fafc] bg-[#111319] border-[#222634] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]",
-    amber: "text-[#fbbf24] bg-[#16130b] border-[#382b13]",
-    green: "text-[#34d399] bg-[#0c1713] border-[#18392b]",
-  }[variant];
+  // 100% Branco Puro sobre fundo escuro mecânico
+  const coresTexto = "text-white bg-[#111319] border-[#252834] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]";
 
   const charExibir = char === " " ? "\u00A0" : char.toUpperCase();
 
@@ -210,42 +205,43 @@ function FlapCell({ char, variant = "yellow", size = "lg" }: FlapCellProps) {
       {/* Linha de corte central */}
       <span className="flap-split-line" />
 
-      {/* Letra ou Dígito */}
-      <span className="leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] tracking-tighter select-none">
+      {/* Letra ou Dígito em Branco */}
+      <span className="leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] tracking-tighter select-none">
         {charExibir}
       </span>
     </div>
   );
 }
 
-// ─── Componente de Palavra (Linha Contínua Flexível) ──────────────────────────
+// ─── Componente de Palavra Contínua em Branco ─────────────────────────────────
 
 interface FlapWordProps {
   text: string;
-  variant?: "yellow" | "white" | "amber" | "green";
   size?: "sm" | "md" | "lg" | "xl" | "hero";
 }
 
-function FlapWord({ text, variant = "yellow", size = "lg" }: FlapWordProps) {
+function FlapWord({ text, size = "lg" }: FlapWordProps) {
   const chars = (text || "").split("");
 
   return (
     <div className="flex items-center gap-[2px] sm:gap-1 flex-nowrap shrink-0 max-w-full">
       {chars.map((c, i) => (
-        <FlapCell key={i} char={c} variant={variant} size={size} />
+        <FlapCell key={i} char={c} size={size} />
       ))}
     </div>
   );
 }
 
-// ─── Componente Principal Painel Analógico Responsivo para Telemóveis ─────────
+// ─── Componente Principal com Fullscreen ao Toque e Letras Brancas ───────────
 
-export default function PainelAnalogicoMobileAdaptativo() {
+export default function PainelAnalogicoFullscreenBranco() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  const ativarAudio = () => {
+  // Alternar Ecrã Inteiro (Fullscreen) e Áudio com 1 Toque
+  const manipularToqueEcra = () => {
+    // 1. Activar áudio
     if (!globalAudioCtx) {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       globalAudioCtx = new AudioCtxClass();
@@ -254,6 +250,32 @@ export default function PainelAnalogicoMobileAdaptativo() {
       globalAudioCtx.resume();
     }
     tocarSomFlapClack();
+
+    // 2. Alternar Fullscreen
+    if (typeof document !== "undefined") {
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element;
+        webkitExitFullscreen?: () => Promise<void>;
+      };
+      const docEl = document.documentElement as HTMLElement & {
+        webkitRequestFullscreen?: () => Promise<void>;
+      };
+
+      const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+      if (!isFs) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen().catch(() => {});
+        }
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen().catch(() => {});
+        }
+      }
+    }
   };
 
   const buscarDados = useCallback(async () => {
@@ -291,23 +313,20 @@ export default function PainelAnalogicoMobileAdaptativo() {
 
   return (
     <main
-      onClick={ativarAudio}
-      className="min-h-screen w-full bg-[#060709] text-neutral-100 flex flex-col items-center justify-center p-2 xs:p-3 sm:p-6 select-none font-mono cursor-pointer relative overflow-x-hidden board-texture"
+      onClick={manipularToqueEcra}
+      className="min-h-screen w-full bg-[#050608] text-white flex flex-col items-center justify-center p-2 xs:p-3 sm:p-6 select-none font-mono cursor-pointer relative overflow-x-hidden board-texture"
     >
-      {/* Retroiluminação ambiente */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[800px] h-[300px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* ── QUADRO METÁLICO ANALÓGICO TOTALMENTE RESPONSIVO (AUTO-FIT MOBILE) ─ */}
-      <div className="w-full max-w-5xl bg-[#0b0c10] border-4 sm:border-8 md:border-[14px] border-[#14161f] rounded-2xl sm:rounded-[2.5rem] p-3 sm:p-6 md:p-8 shadow-[0_30px_90px_rgba(0,0,0,0.98),inset_0_2px_10px_rgba(255,255,255,0.06)] relative z-10 flex flex-col gap-3 sm:gap-6">
+      {/* ── QUADRO METÁLICO ANALÓGICO 100% BRANCO RESPONSIVO FULLSCREEN ─────── */}
+      <div className="w-full max-w-5xl bg-[#0a0b0e] border-4 sm:border-8 md:border-[14px] border-[#14161f] rounded-2xl sm:rounded-[2.5rem] p-3 sm:p-6 md:p-8 shadow-[0_30px_90px_rgba(0,0,0,0.98),inset_0_2px_10px_rgba(255,255,255,0.06)] relative z-10 flex flex-col gap-3 sm:gap-6">
         
         {/* ── ESTADO A CARREGAR PALHETAS ──────────────────────────────────── */}
         {carregando && (
           <div className="py-16 sm:py-24 flex flex-col items-center justify-center gap-3 text-center">
-            <FlapWord text="A CARREGAR" variant="yellow" size="lg" />
+            <FlapWord text="A CARREGAR" size="lg" />
           </div>
         )}
 
-        {/* ── MODO ANALÓGICO COM VOO ACTIVO (RESPONSIVO PARA TELEMÓVEIS) ──── */}
+        {/* ── MODO ANALÓGICO COM VOO ACTIVO (100% BRANCO) ─────────────────── */}
         {!carregando && vooAtual && infoVoo && (
           <div className="w-full flex flex-col gap-3 sm:gap-6">
             
@@ -333,7 +352,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                   <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                     VOO / FLIGHT
                   </span>
-                  <FlapWord text={infoVoo.numeroVoo} variant="yellow" size="xl" />
+                  <FlapWord text={infoVoo.numeroVoo} size="xl" />
                 </div>
               </div>
 
@@ -342,8 +361,8 @@ export default function PainelAnalogicoMobileAdaptativo() {
                 <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   AIRCRAFT
                 </span>
-                <FlapWord text={infoVoo.aeronave} variant="white" size="md" />
-                <span className="text-[10px] sm:text-xs font-bold text-amber-400/90 tracking-wider truncate max-w-[140px] sm:max-w-none">
+                <FlapWord text={infoVoo.aeronave} size="md" />
+                <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
                   {infoVoo.nomeCompanhia}
                 </span>
               </div>
@@ -359,21 +378,21 @@ export default function PainelAnalogicoMobileAdaptativo() {
                   ORIGEM
                 </span>
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <FlapWord text={infoVoo.origemCode} variant="yellow" size="hero" />
+                  <FlapWord text={infoVoo.origemCode} size="hero" />
                   <div className="hidden xs:block">
-                    <FlapWord text={infoVoo.origem} variant="white" size="sm" />
+                    <FlapWord text={infoVoo.origem} size="sm" />
                   </div>
                 </div>
               </div>
 
               {/* ÍCONE CENTRAL DE VOO */}
               <div className="flex flex-col items-center justify-center px-1 sm:px-3 shrink-0">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-emerald-400 font-bold animate-pulse">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-300 font-bold">
                   {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
                 </span>
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-amber-400 text-lg sm:text-3xl">✈</span>
-                  <div className="hidden sm:block w-8 sm:w-16 h-0.5 bg-amber-400/40" />
+                  <span className="text-white text-lg sm:text-3xl">✈</span>
+                  <div className="hidden sm:block w-8 sm:w-16 h-0.5 bg-white/40" />
                 </div>
               </div>
 
@@ -384,15 +403,15 @@ export default function PainelAnalogicoMobileAdaptativo() {
                 </span>
                 <div className="flex items-center gap-1 sm:gap-2">
                   <div className="hidden xs:block">
-                    <FlapWord text={infoVoo.destino} variant="white" size="sm" />
+                    <FlapWord text={infoVoo.destino} size="sm" />
                   </div>
-                  <FlapWord text={infoVoo.destinoCode} variant="yellow" size="hero" />
+                  <FlapWord text={infoVoo.destinoCode} size="hero" />
                 </div>
               </div>
 
             </div>
 
-            {/* ── LINHA 3: TELEMETRIA (3 COLUNAS AUTO-AJUSTÁVEIS) ─────────── */}
+            {/* ── LINHA 3: TELEMETRIA (3 COLUNAS EM BRANCO) ───────────────── */}
             <div className="w-full grid grid-cols-3 gap-2 sm:gap-4">
               
               {/* ALTITUDE */}
@@ -401,7 +420,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                   ALTITUDE
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
-                  <FlapWord text={`${infoVoo.altitudePes}`} variant="amber" size="md" />
+                  <FlapWord text={`${infoVoo.altitudePes}`} size="md" />
                   <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">FT</span>
                 </div>
               </div>
@@ -412,7 +431,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                   VELOCIDADE
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
-                  <FlapWord text={`${infoVoo.velocidadeKts}`} variant="amber" size="md" />
+                  <FlapWord text={`${infoVoo.velocidadeKts}`} size="md" />
                   <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">KTS</span>
                 </div>
               </div>
@@ -423,7 +442,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                   RUMO
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
-                  <FlapWord text={`${infoVoo.rumo}`} variant="green" size="md" />
+                  <FlapWord text={`${infoVoo.rumo}`} size="md" />
                   <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">°</span>
                 </div>
               </div>
@@ -438,10 +457,10 @@ export default function PainelAnalogicoMobileAdaptativo() {
           <div className="w-full flex flex-col items-center justify-center py-8 gap-4 sm:gap-6 text-center">
             
             <div className="flex flex-col items-center gap-2">
-              <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold">
+              <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
                 RADAR EM VALADARES / PORTO
               </span>
-              <FlapWord text="ESPACO AEREO LIVRE" variant="yellow" size="lg" />
+              <FlapWord text="ESPACO AEREO LIVRE" size="lg" />
             </div>
 
             <div className="w-full max-w-3xl bg-[#10121a] p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-white/10 grid grid-cols-3 gap-2 sm:gap-4 shadow-xl">
@@ -449,7 +468,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                 <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   LOCAL
                 </span>
-                <FlapWord text={meteorologia?.name || "PORTO"} variant="white" size="sm" />
+                <FlapWord text={meteorologia?.name || "PORTO"} size="sm" />
               </div>
 
               <div className="flex flex-col items-center gap-1">
@@ -457,7 +476,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                   TEMP
                 </span>
                 <div className="flex items-center gap-0.5">
-                  <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} variant="amber" size="md" />
+                  <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="md" />
                   <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">°C</span>
                 </div>
               </div>
@@ -466,7 +485,7 @@ export default function PainelAnalogicoMobileAdaptativo() {
                 <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   METEO
                 </span>
-                <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} variant="green" size="sm" />
+                <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="sm" />
               </div>
             </div>
 
