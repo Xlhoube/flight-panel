@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import Image from "next/image";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -26,60 +27,156 @@ type EstadoVoo = [
 
 interface DadosMeteo {
   weather: Array<{ description: string }>;
-  main: { temp: number; humidity: number; pressure?: number };
-  wind: { speed: number; deg?: number };
+  main: { temp: number; humidity: number };
+  wind: { speed: number };
   name: string;
+}
+
+interface InfoCompanhia {
+  nome: string;
+  iata: string;
+  origemPadrao: string;
+  destinoPadrao: string;
 }
 
 const INTERVALO_MS = 25_000;
 
-// ─── Utilitário de Áudio Mecânico (Procedural Web Audio API) ──────────────────
+// ─── Dicionário de Companhias Aéreas e Rotas Habituais no Porto (OPO) ────────
 
-function reproduzirSomFlap(ctx: AudioContext | null) {
-  if (!ctx || ctx.state !== "running") return;
+const COMPANHIAS: Record<string, InfoCompanhia> = {
+  TAP: { nome: "TAP PORTUGAL", iata: "TP", origemPadrao: "PORTO", destinoPadrao: "LISBOA" },
+  RYR: { nome: "RYANAIR", iata: "FR", origemPadrao: "PORTO", destinoPadrao: "MADRID" },
+  EJU: { nome: "EASYJET", iata: "U2", origemPadrao: "PORTO", destinoPadrao: "PARIS" },
+  EZY: { nome: "EASYJET", iata: "U2", origemPadrao: "LONDRES", destinoPadrao: "PORTO" },
+  EZS: { nome: "EASYJET", iata: "U2", origemPadrao: "ZURIQUE", destinoPadrao: "PORTO" },
+  TVF: { nome: "TRANSAVIA", iata: "TO", origemPadrao: "PARIS", destinoPadrao: "PORTO" },
+  TRA: { nome: "TRANSAVIA", iata: "HV", origemPadrao: "AMSTERDÃO", destinoPadrao: "PORTO" },
+  LGL: { nome: "LUXAIR", iata: "LG", origemPadrao: "LUXEMBURGO", destinoPadrao: "PORTO" },
+  NOZ: { nome: "NORWEGIAN", iata: "DY", origemPadrao: "OSLO", destinoPadrao: "PORTO" },
+  NAX: { nome: "NORWEGIAN", iata: "DY", origemPadrao: "OSLO", destinoPadrao: "PORTO" },
+  DLH: { nome: "LUFTHANSA", iata: "LH", origemPadrao: "FRANKFURT", destinoPadrao: "PORTO" },
+  VLG: { nome: "VUELING", iata: "VY", origemPadrao: "BARCELONA", destinoPadrao: "PORTO" },
+  IBE: { nome: "IBERIA", iata: "IB", origemPadrao: "MADRID", destinoPadrao: "PORTO" },
+  SWR: { nome: "SWISS", iata: "LX", origemPadrao: "ZURIQUE", destinoPadrao: "PORTO" },
+  KLM: { nome: "KLM", iata: "KL", origemPadrao: "AMSTERDÃO", destinoPadrao: "PORTO" },
+  BAW: { nome: "BRITISH AIRWAYS", iata: "BA", origemPadrao: "LONDRES", destinoPadrao: "PORTO" },
+  AFR: { nome: "AIR FRANCE", iata: "AF", origemPadrao: "PARIS", destinoPadrao: "PORTO" },
+  WZZ: { nome: "WIZZ AIR", iata: "W6", origemPadrao: "BUDAPESTE", destinoPadrao: "PORTO" },
+};
+
+function resolverVooInfo(callsignRaw: string | null, altitude: number | null, vRate: number | null) {
+  const cs = (callsignRaw || "").trim().toUpperCase();
+  if (!cs) {
+    return {
+      numeroVoo: "DESCONHECIDO",
+      iata: null,
+      origem: "ORIGEM UNK",
+      destino: "PORTO OPO",
+    };
+  }
+
+  const prefixo = cs.slice(0, 3);
+  const info = COMPANHIAS[prefixo];
+
+  let iata = info?.iata || null;
+  let numeroFormatado = cs;
+
+  if (info) {
+    const resto = cs.slice(3).trim();
+    numeroFormatado = `${info.iata} ${resto}`;
+  }
+
+  let origem = info?.origemPadrao || "ORIGEM";
+  let destino = info?.destinoPadrao || "PORTO (OPO)";
+
+  if (vRate != null) {
+    if (vRate < -0.5) {
+      destino = "PORTO (OPO)";
+    } else if (vRate > 0.5) {
+      origem = "PORTO (OPO)";
+    }
+  }
+
+  if (altitude != null && altitude < 1500 && vRate == null) {
+    destino = "PORTO (OPO)";
+  }
+
+  return {
+    numeroVoo: numeroFormatado,
+    iata,
+    origem,
+    destino,
+  };
+}
+
+// ─── Sintetizador de Som Mecânico de Palhetas (Web Audio API) ─────────────────
+
+let globalAudioCtx: AudioContext | null = null;
+
+function tocarSomPalheta() {
+  if (typeof window === "undefined") return;
   try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
+    if (!globalAudioCtx) {
+      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      globalAudioCtx = new AudioCtxClass();
+    }
+
+    if (globalAudioCtx.state === "suspended") {
+      globalAudioCtx.resume();
+    }
+
+    const now = globalAudioCtx.currentTime;
+
+    // 1. Estalido metálico/plástico (Ruído filtrado)
+    const bufferSize = Math.floor(globalAudioCtx.sampleRate * 0.02);
+    const buffer = globalAudioCtx.createBuffer(1, bufferSize, globalAudioCtx.sampleRate);
+    const output = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+    }
+
+    const noise = globalAudioCtx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = globalAudioCtx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(1600 + Math.random() * 500, now);
+    filter.Q.setValueAtTime(2.5, now);
+
+    const noiseGain = globalAudioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.18, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(globalAudioCtx.destination);
+
+    noise.start(now);
+
+    // 2. Ressonância da palheta a bater no retentor
+    const osc = globalAudioCtx.createOscillator();
+    const oscGain = globalAudioCtx.createGain();
 
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(140 + Math.random() * 40, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.04);
+    osc.frequency.setValueAtTime(140 + Math.random() * 30, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.025);
 
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(1200, ctx.currentTime);
+    oscGain.gain.setValueAtTime(0.08, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
 
-    gain.gain.setValueAtTime(0.08, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
+    osc.connect(oscGain);
+    oscGain.connect(globalAudioCtx.destination);
 
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 0.04);
+    osc.start(now);
+    osc.stop(now + 0.025);
   } catch {
-    // Ignorar erros de áudio silenciosamente
+    // Ignorar restrições de autoplay antes da interação do utilizador
   }
 }
 
 // ─── Componente Célula Split-Flap ─────────────────────────────────────────────
 
-interface SplitFlapCharProps {
-  char: string;
-  size?: "sm" | "md" | "lg";
-  color?: "yellow" | "white" | "green" | "amber" | "red";
-  audioContextRef?: React.RefObject<AudioContext | null>;
-  somAtivo?: boolean;
-}
-
-function SplitFlapChar({
-  char,
-  size = "md",
-  color = "yellow",
-  audioContextRef,
-  somAtivo = false,
-}: SplitFlapCharProps) {
+function SplitFlapChar({ char, somAtivo }: { char: string; somAtivo: boolean }) {
   const [displayChar, setDisplayChar] = useState(char || " ");
   const [isFlipping, setIsFlipping] = useState(false);
   const prevCharRef = useRef(char);
@@ -88,590 +185,247 @@ function SplitFlapChar({
     if (char !== prevCharRef.current) {
       prevCharRef.current = char;
       setIsFlipping(true);
-      if (somAtivo && audioContextRef?.current) {
-        reproduzirSomFlap(audioContextRef.current);
+      if (somAtivo) {
+        tocarSomPalheta();
       }
       const timer = setTimeout(() => {
         setDisplayChar(char || " ");
         setIsFlipping(false);
-      }, 110);
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [char, somAtivo, audioContextRef]);
-
-  const sizeClasses = {
-    sm: "w-5 h-7 text-xs",
-    md: "w-6 h-9 text-sm sm:w-7 sm:h-10 sm:text-base",
-    lg: "w-8 h-12 text-xl sm:w-10 sm:h-14 sm:text-2xl font-bold",
-  }[size];
-
-  const colorClasses = {
-    yellow: "text-amber-400 drop-shadow-[0_0_2px_rgba(251,191,36,0.5)]",
-    white: "text-neutral-100 drop-shadow-[0_0_1px_rgba(255,255,255,0.4)]",
-    green: "text-emerald-400 drop-shadow-[0_0_2px_rgba(52,211,153,0.5)]",
-    amber: "text-amber-500 drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]",
-    red: "text-rose-500 drop-shadow-[0_0_2px_rgba(244,63,94,0.5)]",
-  }[color];
+  }, [char, somAtivo]);
 
   return (
-    <div className={`flap-cell ${sizeClasses} mx-[1px] relative select-none font-mono font-bold tracking-tight inline-flex items-center justify-center`}>
-      {/* Pinos do eixo mecânico nas laterais */}
+    <div className="flap-cell w-7 h-10 text-xl sm:w-10 sm:h-14 sm:text-3xl md:w-12 md:h-16 md:text-4xl font-bold font-mono text-amber-400 mx-[1.5px] relative inline-flex items-center justify-center select-none shadow-md">
+      <span className="flap-split-line" />
       <span className="flap-pin-left" />
       <span className="flap-pin-right" />
-
-      {/* Linha divisória de corte mecânica */}
-      <span className="flap-split-line" />
-
-      {/* Aba Superior (Sombra de iluminação) */}
-      <div className="absolute top-0 inset-x-0 bottom-1/2 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none rounded-t-[2px]" />
-
-      {/* Aba Inferior (Sombra profunda inferior) */}
-      <div className="absolute top-1/2 inset-x-0 bottom-0 bg-gradient-to-b from-black/40 to-black/80 pointer-events-none rounded-b-[2px]" />
-
-      {/* Caractere exibido */}
-      <span className={`${colorClasses} ${isFlipping ? "animate-flap" : ""} transition-transform z-0`}>
+      <span className={isFlipping ? "animate-flap" : ""}>
         {displayChar === " " ? "\u00A0" : displayChar}
       </span>
     </div>
   );
 }
 
-// ─── Componente Sequência Split-Flap ──────────────────────────────────────────
-
-function SplitFlapWord({
-  text,
-  length,
-  size = "md",
-  color = "yellow",
-  align = "left",
-  audioContextRef,
-  somAtivo = false,
-}: {
-  text: string;
-  length: number;
-  size?: "sm" | "md" | "lg";
-  color?: "yellow" | "white" | "green" | "amber" | "red";
-  align?: "left" | "right" | "center";
-  audioContextRef?: React.RefObject<AudioContext | null>;
-  somAtivo?: boolean;
-}) {
-  const safeText = (text || "").toUpperCase().slice(0, length);
-  let padded = safeText;
-
-  if (safeText.length < length) {
-    const diff = length - safeText.length;
-    if (align === "left") {
-      padded = safeText.padEnd(length, " ");
-    } else if (align === "right") {
-      padded = safeText.padStart(length, " ");
-    } else {
-      const padLeft = Math.floor(diff / 2);
-      const padRight = diff - padLeft;
-      padded = " ".repeat(padLeft) + safeText + " ".repeat(padRight);
+function SplitFlapWord({ text, length, align = "left", somAtivo }: { text: string; length: number; align?: "left" | "right" | "center"; somAtivo: boolean }) {
+  const safe = (text || "").toUpperCase().slice(0, length);
+  let padded = safe;
+  if (safe.length < length) {
+    const diff = length - safe.length;
+    if (align === "left") padded = safe.padEnd(length, " ");
+    else if (align === "right") padded = safe.padStart(length, " ");
+    else {
+      const pL = Math.floor(diff / 2);
+      padded = " ".repeat(pL) + safe + " ".repeat(diff - pL);
     }
   }
 
   return (
     <div className="inline-flex items-center">
       {padded.split("").map((c, i) => (
-        <SplitFlapChar
-          key={i}
-          char={c}
-          size={size}
-          color={color}
-          audioContextRef={audioContextRef}
-          somAtivo={somAtivo}
-        />
+        <SplitFlapChar key={i} char={c} somAtivo={somAtivo} />
       ))}
     </div>
   );
 }
 
-// ─── Componente Principal do Painel de Aeroporto ──────────────────────────────
+// ─── Componente Principal Minimalista ─────────────────────────────────────────
 
-export default function PainelAeroporto() {
-  const [voos, setVoos] = useState<EstadoVoo[]>([]);
-  const [vooDestaque, setVooDestaque] = useState<EstadoVoo | null>(null);
+export default function PainelMinimalista() {
+  const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
-  const [erro, setErro] = useState<string | null>(null);
-  const [erroMeteo, setErroMeteo] = useState<string | null>(null);
-  const [horaAtual, setHoraAtual] = useState(new Date());
-  const [aRadar, setARadar] = useState(false);
+  const [carregando, setCarregando] = useState(true);
   const [somAtivo, setSomAtivo] = useState(false);
-  const [tempoRestante, setTempoRestante] = useState(INTERVALO_MS / 1000);
 
-  const audioContextRef = useRef<AudioContext | null>(null);
-
-  // Inicializar AudioContext com clique do utilizador
-  const toggleSom = () => {
-    if (!audioContextRef.current) {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      audioContextRef.current = new AudioCtx();
+  // Ativar áudio após primeiro clique no ecrã (exigência dos navegadores)
+  const ativarAudio = () => {
+    if (!globalAudioCtx) {
+      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      globalAudioCtx = new AudioCtxClass();
     }
-    if (audioContextRef.current.state === "suspended") {
-      audioContextRef.current.resume();
+    if (globalAudioCtx.state === "suspended") {
+      globalAudioCtx.resume();
     }
-    setSomAtivo((prev) => !prev);
+    setSomAtivo(true);
+    tocarSomPalheta();
   };
 
-  // Relógio
-  useEffect(() => {
-    const tick = setInterval(() => {
-      setHoraAtual(new Date());
-    }, 1000);
-    return () => clearInterval(tick);
-  }, []);
+  const toggleSom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!somAtivo) {
+      ativarAudio();
+    } else {
+      setSomAtivo(false);
+    }
+  };
 
-  // Contador de atualização
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTempoRestante((t) => (t <= 1 ? INTERVALO_MS / 1000 : t - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Obtenção de dados da API
   const buscarDados = useCallback(async () => {
-    setARadar(true);
-    setTempoRestante(INTERVALO_MS / 1000);
-
     try {
-      // 1. Voos OpenSky
       const resVoos = await fetch("/api/voos");
       const dadosVoos = await resVoos.json();
 
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
-        // Ordenar por voos no ar e por altitude
-        const ordenados = [...dadosVoos.estados].sort((a: EstadoVoo, b: EstadoVoo) => {
-          if (!a[8] && b[8]) return -1;
-          if (a[8] && !b[8]) return 1;
-          return (b[7] ?? 0) - (a[7] ?? 0);
-        });
-
-        setVoos(ordenados);
-        setVooDestaque(ordenados[0]);
+        const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => !v[8]);
+        const voo = voosEmAr.length > 0 ? voosEmAr[0] : dadosVoos.estados[0];
+        setVooAtual(voo);
         setMeteorologia(null);
-        setErroMeteo(null);
       } else {
-        setVoos([]);
-        setVooDestaque(null);
-
-        // 2. Meteorologia local
+        setVooAtual(null);
         const resMeteo = await fetch("/api/meteorologia");
         const dadosMeteo = await resMeteo.json();
-        if (dadosMeteo.erro) {
-          setErroMeteo(dadosMeteo.erro);
-          setMeteorologia(null);
-        } else {
+        if (!dadosMeteo.erro) {
           setMeteorologia(dadosMeteo);
-          setErroMeteo(null);
         }
       }
-      setErro(null);
     } catch {
-      setErro("FALHA RADAR");
+      // Ignorar erros na UI minimalista
     } finally {
-      setARadar(false);
+      setCarregando(false);
     }
   }, []);
 
   useEffect(() => {
     buscarDados();
-    const intervalo = setInterval(buscarDados, INTERVALO_MS);
-    return () => clearInterval(intervalo);
+    const int = setInterval(buscarDados, INTERVALO_MS);
+    return () => clearInterval(int);
   }, [buscarDados]);
 
-  // Formatações
-  const horaStr = horaAtual.toLocaleTimeString("pt-PT", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-  const dataStr = horaAtual
-    .toLocaleDateString("pt-PT", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })
-    .toUpperCase();
+  const infoVoo = vooAtual
+    ? resolverVooInfo(vooAtual[1], vooAtual[7], vooAtual[11])
+    : null;
 
   return (
-    <main className="min-h-screen bg-[#07080a] text-neutral-200 flex flex-col items-center justify-start p-3 sm:p-6 md:p-10 font-mono board-texture select-none">
-      
-      {/* ── CHASSI INDUSTRIAL ANALÓGICO (SOLARI DI UDINE) ────────────────── */}
-      <div className="w-full max-w-5xl bg-[#0e1014] rounded-lg border-4 border-[#22252e] shadow-[0_20px_50px_rgba(0,0,0,0.95),inset_0_2px_4px_rgba(255,255,255,0.1)] p-4 sm:p-7 relative overflow-hidden">
-        
-        {/* Parafusos de fixação nos quatro cantos */}
-        <div className="absolute top-3 left-3 screw" />
-        <div className="absolute top-3 right-3 screw" />
-        <div className="absolute bottom-3 left-3 screw" />
-        <div className="absolute bottom-3 right-3 screw" />
+    <main
+      onClick={ativarAudio}
+      className="min-h-screen bg-[#050507] text-white flex flex-col items-center justify-center p-4 sm:p-8 select-none relative cursor-pointer"
+    >
+      {/* Botão de controlo de som no topo */}
+      <button
+        onClick={toggleSom}
+        className={`absolute top-4 right-4 px-3 py-1.5 rounded-full border text-xs font-mono uppercase tracking-wider transition-all z-20 ${
+          somAtivo
+            ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+            : "bg-[#14161f] border-[#292d3b] text-neutral-400 hover:text-neutral-200"
+        }`}
+      >
+        {somAtivo ? "🔊 SOM ATIVADO" : "🔇 ATIVAR SOM"}
+      </button>
 
-        {/* ── PLACA SUPERIOR DE IDENTIFICAÇÃO DO SISTEMA ─────────────────── */}
-        <header className="border-b-2 border-[#1f232c] pb-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Título Estilo Placa Metálica */}
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-10 bg-amber-500 rounded-sm shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-            <div>
-              <div className="text-[10px] tracking-[0.28em] text-neutral-400 uppercase font-semibold">
-                SISTEMA ELECTROMECÂNICO DE CONTROLO AÉREO
-              </div>
-              <h1 className="text-lg sm:text-xl font-black tracking-widest text-amber-400 uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                AEROPORTO DO PORTO · SECTOR VALADARES
-              </h1>
-            </div>
-          </div>
+      {/* Container Minimalista Centralizado */}
+      <div className="flex flex-col items-center justify-center gap-8 md:gap-12 w-full max-w-4xl">
 
-          {/* Relógio Mecânico Split-Flap */}
-          <div className="flex items-center gap-3 bg-[#0a0b0e] px-4 py-2 rounded border border-[#20232b] shadow-inner">
-            <div className="flex flex-col items-end">
-              <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                DATA & HORA UTC+1
-              </span>
-              <div className="flex items-center gap-2">
-                <SplitFlapWord
-                  text={dataStr}
-                  length={11}
-                  size="sm"
-                  color="white"
-                  audioContextRef={audioContextRef}
-                  somAtivo={somAtivo}
-                />
-                <SplitFlapWord
-                  text={horaStr}
-                  length={8}
-                  size="sm"
-                  color="yellow"
-                  audioContextRef={audioContextRef}
-                  somAtivo={somAtivo}
-                />
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* ── BARRA DE LÂMPADAS INDICADORAS E CONTROLOS RETRO ─────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#13161c] px-4 py-2.5 rounded border border-[#242833] mb-6 text-xs">
-          
-          {/* Lâmpadas Piloto */}
-          <div className="flex items-center gap-5">
-            {/* Lâmpada Radar */}
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  aRadar
-                    ? "bg-amber-400 text-amber-400 indicator-lamp animate-ping"
-                    : "bg-emerald-500 text-emerald-500 indicator-lamp"
-                }`}
-              />
-              <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-300">
-                {aRadar ? "SINTONIA RADAR" : "RADAR OPERACIONAL"}
-              </span>
-            </div>
-
-            {/* Lâmpada Modo */}
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  voos.length > 0
-                    ? "bg-amber-400 text-amber-400 indicator-lamp"
-                    : "bg-cyan-400 text-cyan-400 indicator-lamp"
-                }`}
-              />
-              <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-300">
-                {voos.length > 0 ? `TRÁFEGO (${voos.length} DETECTADOS)` : "METEOROLOGIA LOCAL"}
-              </span>
-            </div>
-
-            {/* Lâmpada Erro */}
-            {erro && (
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-rose-500 text-rose-500 indicator-lamp animate-pulse" />
-                <span className="text-[10px] uppercase tracking-wider font-bold text-rose-400">
-                  {erro}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Interruptor de Som Mecânico */}
-          <button
-            onClick={toggleSom}
-            className={`flex items-center gap-2 px-3 py-1 rounded border text-[11px] font-bold uppercase tracking-wider transition-colors ${
-              somAtivo
-                ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
-                : "bg-[#1b1e26] border-[#313644] text-neutral-400 hover:text-neutral-200"
-            }`}
-          >
-            <span>{somAtivo ? "🔊" : "🔇"}</span>
-            <span>SOM DE PALHETAS [{somAtivo ? "LIGADO" : "DESLIGADO"}]</span>
-          </button>
-        </div>
-
-        {/* ── TABELA ANALÓGICA DE PARTIDAS / VOOS EM TRÂNSITO ────────────── */}
-        {voos.length > 0 && (
-          <div className="mb-6 overflow-x-auto">
-            
-            {/* Cabeçalho da Tabela Estilo Placa de Aeroporto */}
-            <div className="min-w-[680px] bg-[#181a20] px-4 py-2 rounded-t border-t border-x border-[#2c303d] flex text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-              <div className="w-[18%]">VOO</div>
-              <div className="w-[26%]">ORIGEM/PAÍS</div>
-              <div className="w-[18%] text-right pr-4">ALTITUDE</div>
-              <div className="w-[18%] text-right pr-4">VELOCIDADE</div>
-              <div className="w-[20%] text-right">ESTADO</div>
-            </div>
-
-            {/* Linhas de Palhetas Mecânicas */}
-            <div className="min-w-[680px] bg-[#0c0d11] p-3 border-x border-b border-[#252834] rounded-b flex flex-col gap-2.5">
-              {voos.slice(0, 5).map((voo, idx) => {
-                const callsign = (voo[1] || voo[0] || "DESCONHECIDO").trim();
-                const pais = (voo[2] || "INTERNACIONAL").slice(0, 14);
-                const alt = voo[7] != null ? `${Math.round(voo[7])}M` : "N/D";
-                const vel = voo[9] != null ? `${Math.round(voo[9] * 3.6)}KM` : "N/D";
-                const estado = voo[8]
-                  ? "NO SOLO"
-                  : (voo[11] ?? 0) < -1
-                  ? "DESCIDA"
-                  : (voo[11] ?? 0) > 1
-                  ? "SUBIDA"
-                  : "EM VOO";
-
-                const isTop = idx === 0;
-
-                return (
-                  <div
-                    key={voo[0]}
-                    onClick={() => setVooDestaque(voo)}
-                    className={`flex items-center px-3 py-1.5 rounded transition-all cursor-pointer ${
-                      vooDestaque?.[0] === voo[0]
-                        ? "bg-[#1c202a] border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
-                        : "hover:bg-[#15171e]"
-                    }`}
-                  >
-                    {/* Voo (Callsign) */}
-                    <div className="w-[18%]">
-                      <SplitFlapWord
-                        text={callsign}
-                        length={8}
-                        size="md"
-                        color={isTop ? "yellow" : "white"}
-                        audioContextRef={audioContextRef}
-                        somAtivo={somAtivo}
-                      />
-                    </div>
-
-                    {/* País */}
-                    <div className="w-[26%]">
-                      <SplitFlapWord
-                        text={pais}
-                        length={14}
-                        size="md"
-                        color="white"
-                        audioContextRef={audioContextRef}
-                        somAtivo={somAtivo}
-                      />
-                    </div>
-
-                    {/* Altitude */}
-                    <div className="w-[18%] flex justify-end pr-4">
-                      <SplitFlapWord
-                        text={alt}
-                        length={8}
-                        size="md"
-                        color="amber"
-                        align="right"
-                        audioContextRef={audioContextRef}
-                        somAtivo={somAtivo}
-                      />
-                    </div>
-
-                    {/* Velocidade */}
-                    <div className="w-[18%] flex justify-end pr-4">
-                      <SplitFlapWord
-                        text={vel}
-                        length={8}
-                        size="md"
-                        color="white"
-                        align="right"
-                        audioContextRef={audioContextRef}
-                        somAtivo={somAtivo}
-                      />
-                    </div>
-
-                    {/* Estado */}
-                    <div className="w-[20%] flex justify-end">
-                      <SplitFlapWord
-                        text={estado}
-                        length={8}
-                        size="md"
-                        color={estado === "NO SOLO" ? "amber" : "green"}
-                        align="right"
-                        audioContextRef={audioContextRef}
-                        somAtivo={somAtivo}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        {/* ── SE ACABOU DE CARREGAR ───────────────────────────────────────── */}
+        {carregando && (
+          <div className="flex flex-col items-center gap-4">
+            <SplitFlapWord text="PROCURANDO" length={10} somAtivo={somAtivo} />
           </div>
         )}
 
-        {/* ── PAINEL DE METEOROLOGIA ANALÓGICA (SE NÃO HOUVER VOOS) ───────── */}
-        {voos.length === 0 && !erro && (
-          <div className="mb-6">
-            <div className="bg-[#181a20] px-4 py-2 rounded-t border-t border-x border-[#2c303d] text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-              BOLETIM METEOROLÓGICO DE SUPERFÍCIE · ESTAÇÃO VALADARES
-            </div>
-
-            <div className="bg-[#0c0d11] p-5 border-x border-b border-[#252834] rounded-b flex flex-col gap-4">
-              {meteorologia ? (
-                <>
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-3 border-b border-[#1b1e26] gap-2">
-                    <span className="text-xs uppercase text-neutral-400 tracking-widest">ESTAÇÃO LOCAL</span>
-                    <SplitFlapWord
-                      text={meteorologia.name?.toUpperCase() || "VALADARES"}
-                      length={18}
-                      size="lg"
-                      color="yellow"
-                      audioContextRef={audioContextRef}
-                      somAtivo={somAtivo}
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-3 border-b border-[#1b1e26] gap-2">
-                    <span className="text-xs uppercase text-neutral-400 tracking-widest">CONDIÇÕES GERAIS</span>
-                    <SplitFlapWord
-                      text={meteorologia.weather[0]?.description.toUpperCase() || "LIMPO"}
-                      length={18}
-                      size="md"
-                      color="white"
-                      audioContextRef={audioContextRef}
-                      somAtivo={somAtivo}
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-3 border-b border-[#1b1e26] gap-2">
-                    <span className="text-xs uppercase text-neutral-400 tracking-widest">TEMPERATURA AR</span>
-                    <SplitFlapWord
-                      text={`${Math.round(meteorologia.main.temp)} C`}
-                      length={8}
-                      size="lg"
-                      color="amber"
-                      audioContextRef={audioContextRef}
-                      somAtivo={somAtivo}
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-3 border-b border-[#1b1e26] gap-2">
-                    <span className="text-xs uppercase text-neutral-400 tracking-widest">VELOCIDADE VENTO</span>
-                    <SplitFlapWord
-                      text={`${Math.round(meteorologia.wind.speed * 3.6)} KM/H`}
-                      length={12}
-                      size="md"
-                      color="white"
-                      audioContextRef={audioContextRef}
-                      somAtivo={somAtivo}
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                    <span className="text-xs uppercase text-neutral-400 tracking-widest">HUMIDADE RELATIVA</span>
-                    <SplitFlapWord
-                      text={`${meteorologia.main.humidity} %`}
-                      length={8}
-                      size="md"
-                      color="green"
-                      audioContextRef={audioContextRef}
-                      somAtivo={somAtivo}
-                    />
-                  </div>
-                </>
-              ) : erroMeteo ? (
-                <div className="p-6 text-center">
-                  <div className="text-amber-400 text-sm tracking-widest mb-2">
-                    SEM TRÁFEGO AÉREO DIRECTO NO SECTOR
-                  </div>
-                  <div className="text-neutral-500 text-xs tracking-wider">
-                    {erroMeteo}
-                  </div>
-                </div>
-              ) : (
-                <div className="p-10 flex flex-col items-center justify-center gap-3">
-                  <span className="text-xs tracking-widest text-neutral-400">A CARREGAR INFORMAÇÃO ELECTROMECÂNICA...</span>
-                  <SplitFlapWord
-                    text="SINTONIZANDO"
-                    length={12}
-                    size="lg"
-                    color="yellow"
-                    audioContextRef={audioContextRef}
-                    somAtivo={somAtivo}
+        {/* ── EXIBIÇÃO DE VOO (NÚMERO + LOGÓTIPO + ORIGEM E DESTINO) ────────── */}
+        {!carregando && vooAtual && infoVoo && (
+          <div className="flex flex-col items-center justify-center gap-8 sm:gap-12 w-full">
+            
+            {/* Linha 1: Logótipo da Companhia Aérea + Número do Voo */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+              
+              {/* Logótipo Oficial da Companhia Aérea */}
+              {infoVoo.iata ? (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white p-2 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center justify-center shrink-0">
+                  <Image
+                    src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
+                    alt={infoVoo.numeroVoo}
+                    width={80}
+                    height={80}
+                    className="object-contain max-h-full"
+                    unoptimized
                   />
                 </div>
+              ) : (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#161820] border border-[#2d3242] rounded-xl flex items-center justify-center text-amber-400 text-3xl shrink-0">
+                  ✈
+                </div>
               )}
+
+              {/* Número de Voo em Palhetas */}
+              <div className="flex items-center">
+                <SplitFlapWord
+                  text={infoVoo.numeroVoo}
+                  length={10}
+                  align="center"
+                  somAtivo={somAtivo}
+                />
+              </div>
             </div>
+
+            {/* Linha 2: Origem ➔ Destino */}
+            <div className="flex flex-col items-center justify-center gap-3 w-full">
+              <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-400 font-mono font-bold">
+                ROTA EM TEMPO REAL
+              </span>
+
+              <div className="flex flex-col md:flex-row items-center justify-center gap-3 sm:gap-6">
+                {/* Origem */}
+                <SplitFlapWord
+                  text={infoVoo.origem}
+                  length={12}
+                  align="center"
+                  somAtivo={somAtivo}
+                />
+
+                {/* Seta Mecânica / Indicador */}
+                <div className="text-amber-400 text-2xl sm:text-3xl font-bold font-mono px-2 animate-pulse">
+                  ➔
+                </div>
+
+                {/* Destino */}
+                <SplitFlapWord
+                  text={infoVoo.destino}
+                  length={12}
+                  align="center"
+                  somAtivo={somAtivo}
+                />
+              </div>
+            </div>
+
           </div>
         )}
 
-        {/* ── INSTRUMENTAÇÃO ANALÓGICA COMPLEMENTAR (VOO EM DESTAQUE) ──────── */}
-        {vooDestaque && (
-          <div className="bg-[#12141a] p-4 rounded border border-[#232733] mb-6 shadow-inner">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#21242e]">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-amber-400/90 font-bold">
-                TELEMETRIA DO VOO SELECCIONADO
-              </span>
-              <span className="text-[10px] tracking-wider text-neutral-400">
-                TRANSPONDER ICAO24: <strong className="text-neutral-200">{vooDestaque[0].toUpperCase()}</strong>
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="bg-[#0b0c10] p-2.5 rounded border border-[#1d2029]">
-                <div className="text-[9px] uppercase tracking-wider text-neutral-400 mb-1">RUMO MAGNÉTICO</div>
-                <div className="text-amber-400 font-bold text-sm">
-                  {vooDestaque[10] != null ? `${Math.round(vooDestaque[10])}°` : "N/D"}
-                </div>
-              </div>
-
-              <div className="bg-[#0b0c10] p-2.5 rounded border border-[#1d2029]">
-                <div className="text-[9px] uppercase tracking-wider text-neutral-400 mb-1">CÓDIGO SQUAWK</div>
-                <div className="text-neutral-200 font-bold text-sm">
-                  {vooDestaque[14] || "1000"}
-                </div>
-              </div>
-
-              <div className="bg-[#0b0c10] p-2.5 rounded border border-[#1d2029]">
-                <div className="text-[9px] uppercase tracking-wider text-neutral-400 mb-1">TAXA VERTICAL</div>
-                <div className={`font-bold text-sm ${(vooDestaque[11] ?? 0) < 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                  {vooDestaque[11] != null ? `${vooDestaque[11] > 0 ? "+" : ""}${vooDestaque[11].toFixed(1)} m/s` : "0.0 m/s"}
-                </div>
-              </div>
-
-              <div className="bg-[#0b0c10] p-2.5 rounded border border-[#1d2029]">
-                <div className="text-[9px] uppercase tracking-wider text-neutral-400 mb-1">COORDENADAS GPS</div>
-                <div className="text-neutral-300 font-bold text-[11px] truncate">
-                  {vooDestaque[6]?.toFixed(3)}N, {vooDestaque[5]?.toFixed(3)}W
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── RODAPÉ MECÂNICO COM CONTADOR DE VARREDURA ─────────────────── */}
-        <footer className="pt-3 border-t border-[#1e212a] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-neutral-400 uppercase tracking-widest font-semibold">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>LOCALIZAÇÃO: 41.084°N 8.655°W (VALADARES · GAIA)</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span>PRÓXIMO CICLO DE VARREDURA:</span>
-            <span className="text-amber-400 font-bold text-xs bg-[#0b0c10] px-2 py-0.5 rounded border border-[#21242e]">
-              {String(tempoRestante).padStart(2, "0")}S
+        {/* ── SE NÃO HOUVER VOOS: MODO METEOROLOGIA MINIMALISTA ────────────── */}
+        {!carregando && !vooAtual && (
+          <div className="flex flex-col items-center justify-center gap-8 w-full">
+            
+            {/* Indicador Minimalista */}
+            <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-400 font-mono font-bold">
+              SEM VOOS NO ESPAÇO AÉREO · METEOROLOGIA LOCAL
             </span>
+
+            {/* Local */}
+            <SplitFlapWord
+              text={meteorologia?.name?.toUpperCase() || "VALADARES"}
+              length={12}
+              align="center"
+              somAtivo={somAtivo}
+            />
+
+            {/* Estado + Temperatura */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <SplitFlapWord
+                text={`${Math.round(meteorologia?.main?.temp ?? 18)} C`}
+                length={6}
+                align="center"
+                somAtivo={somAtivo}
+              />
+
+              <SplitFlapWord
+                text={meteorologia?.weather?.[0]?.description.toUpperCase() || "CEU LIMPO"}
+                length={14}
+                align="center"
+                somAtivo={somAtivo}
+              />
+            </div>
           </div>
-        </footer>
+        )}
 
       </div>
     </main>
