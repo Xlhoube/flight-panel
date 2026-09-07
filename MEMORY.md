@@ -7,11 +7,11 @@
 ## Contexto Actual
 
 **Projecto:** Flight Panel — Painel analógico electromecânico de monitorização aérea e meteorológica  
-**Objectivo:** Apresentar o voo detetado em tempo real sobre Valadares (Porto) num formato ultra-minimalista com palhetas mecânicas (*Split-Flap*), exibindo unicamente o Logótipo da Companhia Aérea, o Número do Voo e a Rota (Origem ➔ Destino).  
-**Versão:** v0.2.1  
+**Objectivo:** Apresentar o voo detetado em tempo real sobre Valadares (Porto) num formato minimalista de alto impacto visual (*Split-Flap*), exibindo o Logótipo da Companhia Aérea, o Número do Voo e a Rota (Origem ➔ Destino).  
+**Versão:** v0.2.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Interface minimalista funcional com som mecânico procedural Web Audio API reativado e logótipos CDN de companhias aéreas.
+**Estado:** Interface minimalista aprimorada com moldura Solari de acabamento acrílico, resolução infalível para o campo Origem com fallback para país de registo e som mecânico.
 
 ---
 
@@ -21,7 +21,7 @@
 |-----------------|-----------------------------------|---------------------------------------------------|
 | Framework       | Next.js 16 (App Router)           | SSR + Route Handlers (API segura)                 |
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
-| Estilos         | Tailwind CSS v4 + Vanilla CSS     | Palhetas 3D Split-Flap e animações                |
+| Estilos         | Tailwind CSS v4 + Vanilla CSS     | Palhetas 3D Split-Flap e moldura Solari minimalista|
 | Áudio           | Web Audio API (Procedural)        | Sintetizador de estalido mecânico de palhetas     |
 | Font            | Geist Mono                        | Tipografia aeroportuária monoespaçada clássica    |
 | Logótipos       | Aviasales CDN (`pics.avs.io`)     | Logótipos oficiais de companhias por IATA          |
@@ -32,12 +32,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 004 — (Ver sessões anteriores)
+### ADR-001 a 005 — (Ver sessões anteriores)
 
-### ADR-005 — Simplificação Minimalista & Áudio Interativo (2026-09-07)
-**Contexto:** O utilizador solicitou um layout minimalista focado exclusivamente nas letras/palhetas, número do voo, logótipo da companhia e rota, reportando também falha de som.  
-**Decisão:** Eliminar elementos visuais secundários. Adicionar inicialização do `AudioContext` da Web Audio API através de gesto de utilizador (clique) e sintetizar proceduralmente o efeito sonoro de viragem de palhetas.  
-**Consequência:** Design ultra limpo e reprodução de som infalível em qualquer navegador moderno.
+### ADR-006 — Aprimoramento de Layout & Resolução de Origem (2026-09-07)
+**Contexto:** O campo da Origem por vezes não aparecia ou ficava indeterminado em companhias não registadas e o layout necessitava de refinamento estético.  
+**Decisão:** Integrar o `origin_country` da telemetria OpenSky como fallback automático e envolver o painel numa moldura Solari flutuante de vidro acrílico escurecido com iluminação e cartões de vidro fosco para os logótipos.  
+**Consequência:** A Origem aparece sempre de forma clara e a estética do painel atingiu um nível de design refinado.
 
 ---
 
@@ -48,3 +48,4 @@
 | 2026-09-06 | v0.1.0 | Projecto inicializado, estrutura base criada e segura                  |
 | 2026-09-07 | v0.2.0 | Redesign completo para painel analógico Split-Flap (Solari di Udine)   |
 | 2026-09-07 | v0.2.1 | Reformulação minimalista (Logótipo + Voo + Rota) e correcção do som    |
+| 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista      |
