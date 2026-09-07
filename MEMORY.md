@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v0.7.1  
+**Versão:** v0.7.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Painel analógico Split-Flap limpo (sem cabeçalho/rodapé decorativos), com foco estrito na informação do voo e telemetria em 16:9 Landscape.
+**Estado:** Painel analógico Split-Flap com letras e palhetas de grande dimensão, tipografia alinhada sem quebras de linha e disposição simétrica em 16:9 Landscape.
 
 ---
 
@@ -34,9 +34,9 @@
 ### ADR-001 a 015 — (Ver sessões anteriores)
 
 ### ADR-016 — Painel Analógico Solari Split-Flap Aeroporto em Landscape (2026-09-07)
-**Contexto:** O utilizador solicitou que a informação do voo passasse a ser apresentada com o design autêntico dos painéis analógicos dos aeroportos (Split-Flap Solari di Udine) em orientação Landscape (16:9).  
-**Decisão:** Reconstruir o painel com textura metálica mecânica (`.board-texture`), palhetas amarelas e brancas sobre fundo escuro com corte central e rotação 3D ao atualizar dados, removendo cabeçalhos e rodapés redundantes.  
-**Consequência:** Design analógico clássico focado e limpo em 16:9 Landscape.
+**Contexto:** O utilizador solicitou que a informação do voo passasse a ser apresentada com o design autêntico dos painéis analógicos dos aeroportos (Split-Flap Solari di Udine) em orientação Landscape (16:9), com letras grandes e perfeitamente organizadas.  
+**Decisão:** Eliminar quebras de linha nas palavras (`flex-nowrap`), aumentar as palhetas para tamanhos gigantes nos códigos IATA e número do voo, e renderizar a telemetria com dígitos destacados.  
+**Consequência:** Tipografia mecânica legível à distância, sem quebras indevidas de caracteres.
 
 ---
 
@@ -59,3 +59,4 @@
 | 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)|
 | 2026-09-07 | v0.7.0 | Painel analógico aeroporto Solari Split-Flap vintage em Landscape 16:9 |
 | 2026-09-07 | v0.7.1 | Remoção de cabeçalhos/rodapés redundantes e simplificação do layout    |
+| 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas|
