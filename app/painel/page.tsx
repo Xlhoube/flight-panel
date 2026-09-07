@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Image from "next/image";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -40,6 +39,7 @@ interface InfoCompanhia {
 }
 
 const INTERVALO_MS = 25_000;
+const TOTAL_LINHAS = 9; // Número fixo de linhas da grelha de partidas
 
 // ─── Dicionário de Companhias Aéreas e Rotas Habituais no Porto ──────────────
 
@@ -64,80 +64,54 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   WZZ: { nome: "WIZZ AIR", iata: "W6", origemPadrao: "BUDAPESTE", destinoPadrao: "PORTO" },
 };
 
-// Mapeamento de Países para Nomes Curtos e Limpos
 const PAISES_NOMES: Record<string, string> = {
-  FRANCE: "FRANÇA",
-  SWITZERLAND: "SUÍÇA",
-  SPAIN: "ESPANHA",
+  FRANCE: "PARIS",
+  SWITZERLAND: "ZURIQUE",
+  SPAIN: "MADRID",
   PORTUGAL: "PORTO",
-  GERMANY: "ALEMANHA",
+  GERMANY: "FRANKFURT",
   "UNITED KINGDOM": "LONDRES",
-  IRELAND: "IRLANDA",
+  IRELAND: "DUBLIN",
   LUXEMBOURG: "LUXEMBURGO",
-  NETHERLANDS: "AMSTERDÃO",
-  AUSTRIA: "ÁUSTRIA",
-  SWEDEN: "SUÉCIA",
+  NETHERLANDS: "AMSTERDAO",
+  AUSTRIA: "VIENA",
+  SWEDEN: "ESTOCOLMO",
 };
 
-function resolverVooInfo(
-  callsignRaw: string | null,
-  paisOrigem: string | null,
-  altitude: number | null,
-  vRate: number | null
-) {
-  const cs = (callsignRaw || "").trim().toUpperCase();
+function resolverVooLinha(voo: EstadoVoo, horaBase: Date) {
+  const cs = (voo[1] || "").trim().toUpperCase();
   const prefixo = cs.slice(0, 3);
   const info = COMPANHIAS[prefixo];
 
-  let iata = info?.iata || null;
-  let numeroFormatado = cs || "DESCONHECIDO";
-  let nomeCompanhia = info?.nome || (paisOrigem ? `REGISTO: ${paisOrigem.toUpperCase()}` : "VOO COMERCIAL");
-
+  let flightNo = cs || voo[0].toUpperCase();
   if (info && cs.length > 3) {
-    const resto = cs.slice(3).trim();
-    numeroFormatado = `${info.iata} ${resto}`;
+    flightNo = `${info.iata} ${cs.slice(3).trim()}`;
   }
 
-  // País traduzido limpo
-  const paisUpper = (paisOrigem || "").toUpperCase();
+  const paisUpper = (voo[2] || "").toUpperCase();
   const paisFmt = PAISES_NOMES[paisUpper] || paisUpper || "EUROPA";
 
-  let origem = info?.origemPadrao || paisFmt;
+  const vRate = voo[11];
   let destino = info?.destinoPadrao || "PORTO";
 
-  if (vRate != null) {
-    if (vRate < -0.5) {
-      destino = "PORTO";
-      if (origem === "PORTO") {
-        origem = info?.origemPadrao || paisFmt;
-      }
-    } else if (vRate > 0.5) {
-      origem = "PORTO";
-      if (destino === "PORTO") {
-        destino = info?.destinoPadrao || paisFmt;
-      }
-    }
-  }
-
-  if (altitude != null && altitude < 1500 && vRate == null) {
+  if (vRate != null && vRate > 0.5) {
+    destino = info?.destinoPadrao || paisFmt;
+    if (destino === "PORTO") destino = "MADRID";
+  } else if (vRate != null && vRate < -0.5) {
     destino = "PORTO";
   }
 
-  // Se forem iguais, diferencia
-  if (origem === destino) {
-    if (origem === "PORTO") {
-      destino = paisFmt !== "PORTO" ? paisFmt : "LISBOA";
-    } else {
-      destino = "PORTO";
-    }
-  }
+  // Formatar a hora do voo (último contacto ou hora base)
+  const dataVoo = voo[4] ? new Date(voo[4] * 1000) : horaBase;
+  const timeStr = dataVoo.toLocaleTimeString("pt-PT", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return {
-    nomeCompanhia,
-    numeroVoo: numeroFormatado,
-    iata,
-    origem: origem.slice(0, 9),
-    destino: destino.slice(0, 9),
+    time: timeStr,
+    destination: destino.slice(0, 10),
+    flight: flightNo.slice(0, 7),
   };
 }
 
@@ -152,18 +126,17 @@ function tocarSomPalheta() {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       globalAudioCtx = new AudioCtxClass();
     }
-
     if (globalAudioCtx.state === "suspended") {
       globalAudioCtx.resume();
     }
 
     const now = globalAudioCtx.currentTime;
 
-    const bufferSize = Math.floor(globalAudioCtx.sampleRate * 0.02);
+    const bufferSize = Math.floor(globalAudioCtx.sampleRate * 0.018);
     const buffer = globalAudioCtx.createBuffer(1, bufferSize, globalAudioCtx.sampleRate);
     const output = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
-      output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+      output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.22));
     }
 
     const noise = globalAudioCtx.createBufferSource();
@@ -171,12 +144,12 @@ function tocarSomPalheta() {
 
     const filter = globalAudioCtx.createBiquadFilter();
     filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1600 + Math.random() * 500, now);
-    filter.Q.setValueAtTime(2.5, now);
+    filter.frequency.setValueAtTime(1700 + Math.random() * 400, now);
+    filter.Q.setValueAtTime(3, now);
 
     const noiseGain = globalAudioCtx.createGain();
-    noiseGain.gain.setValueAtTime(0.18, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+    noiseGain.gain.setValueAtTime(0.15, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
 
     noise.connect(filter);
     filter.connect(noiseGain);
@@ -188,23 +161,23 @@ function tocarSomPalheta() {
     const oscGain = globalAudioCtx.createGain();
 
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(140 + Math.random() * 30, now);
-    osc.frequency.exponentialRampToValueAtTime(35, now + 0.025);
+    osc.frequency.setValueAtTime(150 + Math.random() * 30, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.02);
 
-    oscGain.gain.setValueAtTime(0.08, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+    oscGain.gain.setValueAtTime(0.07, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
 
     osc.connect(oscGain);
     oscGain.connect(globalAudioCtx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.025);
+    osc.stop(now + 0.02);
   } catch {
-    // Ignorar erros
+    // Ignorar
   }
 }
 
-// ─── Componente Célula Split-Flap Responsivo ──────────────────────────────────
+// ─── Componente Célula Split-Flap Aeroporto Vintage ───────────────────────────
 
 function SplitFlapChar({ char, somAtivo }: { char: string; somAtivo: boolean }) {
   const [displayChar, setDisplayChar] = useState(char || " ");
@@ -227,19 +200,28 @@ function SplitFlapChar({ char, somAtivo }: { char: string; somAtivo: boolean }) 
   }, [char, somAtivo]);
 
   return (
-    <div className="flap-cell w-6 h-9 text-lg sm:w-8 sm:h-12 sm:text-2xl md:w-10 md:h-14 md:text-3xl font-bold font-mono text-amber-400 mx-[1px] sm:mx-[2px] relative inline-flex items-center justify-center select-none shadow-md shrink-0">
-      <span className="flap-split-line" />
-      <span className="flap-pin-left" />
-      <span className="flap-pin-right" />
-      <span className={isFlipping ? "animate-flap" : ""}>
+    <div className="w-[18px] h-[28px] text-sm sm:w-[26px] sm:h-[38px] sm:text-xl md:w-[32px] md:h-[46px] md:text-2xl font-bold font-mono text-white bg-[#141519] rounded-[2px] mx-[1px] relative inline-flex items-center justify-center select-none shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_4px_rgba(0,0,0,0.9)] border border-[#22242c] shrink-0">
+      {/* Linha de Corte Horizontal */}
+      <span className="absolute top-1/2 left-0 right-0 h-[1.5px] bg-[#000000] shadow-[0_1px_1px_rgba(255,255,255,0.1)] z-10 pointer-events-none" />
+      
+      {/* Pinos do Rotor */}
+      <span className="absolute top-1/2 left-[-2px] w-[3px] h-[4px] bg-[#2d303b] rounded-[1px] -translate-y-1/2 z-20" />
+      <span className="absolute top-1/2 right-[-2px] w-[3px] h-[4px] bg-[#2d303b] rounded-[1px] -translate-y-1/2 z-20" />
+
+      {/* Sombra de palheta */}
+      <div className="absolute top-0 inset-x-0 bottom-1/2 bg-gradient-to-b from-white/[0.06] to-transparent pointer-events-none" />
+      <div className="absolute top-1/2 inset-x-0 bottom-0 bg-gradient-to-b from-black/40 to-black/80 pointer-events-none" />
+
+      {/* Caractere */}
+      <span className={`${isFlipping ? "animate-flap" : ""} transition-transform z-0 tracking-tighter`}>
         {displayChar === " " ? "\u00A0" : displayChar}
       </span>
     </div>
   );
 }
 
-function SplitFlapWord({ text, length = 8, align = "center", somAtivo }: { text: string; length?: number; align?: "left" | "right" | "center"; somAtivo: boolean }) {
-  const safe = (text || "").toUpperCase().trim().slice(0, length);
+function SplitFlapWord({ text, length, align = "left", somAtivo }: { text: string; length: number; align?: "left" | "right" | "center"; somAtivo: boolean }) {
+  const safe = (text || "").toUpperCase().slice(0, length);
   let padded = safe;
   if (safe.length < length) {
     const diff = length - safe.length;
@@ -252,7 +234,7 @@ function SplitFlapWord({ text, length = 8, align = "center", somAtivo }: { text:
   }
 
   return (
-    <div className="inline-flex items-center justify-center max-w-full">
+    <div className="inline-flex items-center">
       {padded.split("").map((c, i) => (
         <SplitFlapChar key={i} char={c} somAtivo={somAtivo} />
       ))}
@@ -262,10 +244,9 @@ function SplitFlapWord({ text, length = 8, align = "center", somAtivo }: { text:
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
-export default function PainelMinimalista() {
-  const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
+export default function PainelAeroportoDepartures() {
+  const [voos, setVoos] = useState<EstadoVoo[]>([]);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
-  const [carregando, setCarregando] = useState(true);
   const [somAtivo, setSomAtivo] = useState(false);
   const [horaAtual, setHoraAtual] = useState(new Date());
 
@@ -301,12 +282,10 @@ export default function PainelMinimalista() {
       const dadosVoos = await resVoos.json();
 
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
-        const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => !v[8]);
-        const voo = voosEmAr.length > 0 ? voosEmAr[0] : dadosVoos.estados[0];
-        setVooAtual(voo);
+        setVoos(dadosVoos.estados);
         setMeteorologia(null);
       } else {
-        setVooAtual(null);
+        setVoos([]);
         const resMeteo = await fetch("/api/meteorologia");
         const dadosMeteo = await resMeteo.json();
         if (!dadosMeteo.erro) {
@@ -314,9 +293,7 @@ export default function PainelMinimalista() {
         }
       }
     } catch {
-      // Ignorar erros na UI
-    } finally {
-      setCarregando(false);
+      // Ignorar erros
     }
   }, []);
 
@@ -326,176 +303,141 @@ export default function PainelMinimalista() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  const infoVoo = vooAtual
-    ? resolverVooInfo(vooAtual[1], vooAtual[2], vooAtual[7], vooAtual[11])
-    : null;
+  // Preparar as linhas de partidas
+  const linhasTabela = [];
 
-  const horaStr = horaAtual.toLocaleTimeString("pt-PT", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (voos.length > 0) {
+    for (let i = 0; i < TOTAL_LINHAS; i++) {
+      if (i < voos.length) {
+        const info = resolverVooLinha(voos[i], horaAtual);
+        linhasTabela.push(info);
+      } else {
+        // Linha em branco (palhetas pretas com espaços)
+        linhasTabela.push({ time: "     ", destination: "          ", flight: "       " });
+      }
+    }
+  } else if (meteorologia) {
+    // Caso de meteorologia (preencher as linhas da grelha com informação meteo)
+    const tempStr = `${Math.round(meteorologia.main.temp)} C`;
+    const windStr = `${Math.round(meteorologia.wind.speed * 3.6)} KM/H`;
+    const descStr = meteorologia.weather[0]?.description.toUpperCase() || "LIMPO";
+
+    linhasTabela.push({ time: "METEO", destination: meteorologia.name.toUpperCase().slice(0, 10), flight: "VALADAR" });
+    linhasTabela.push({ time: "TEMP ", destination: tempStr.slice(0, 10), flight: "LOCAL  " });
+    linhasTabela.push({ time: "VENTO", destination: windStr.slice(0, 10), flight: "RADAR  " });
+    linhasTabela.push({ time: "COND ", destination: descStr.slice(0, 10), flight: "OK     " });
+
+    for (let i = 4; i < TOTAL_LINHAS; i++) {
+      linhasTabela.push({ time: "     ", destination: "          ", flight: "       " });
+    }
+  } else {
+    // A carregar
+    for (let i = 0; i < TOTAL_LINHAS; i++) {
+      if (i === 0) {
+        linhasTabela.push({ time: "RADAR", destination: "SINTONIA  ", flight: "BUSCA  " });
+      } else {
+        linhasTabela.push({ time: "     ", destination: "          ", flight: "       " });
+      }
+    }
+  }
 
   return (
     <main
       onClick={ativarAudio}
-      className="min-h-screen bg-[#040406] text-neutral-100 flex flex-col items-center justify-center p-3 sm:p-6 select-none relative cursor-pointer font-mono"
+      className="min-h-screen bg-[#333333] flex flex-col items-center justify-center p-3 sm:p-6 md:p-10 select-none font-mono"
     >
       
-      {/* ── MOLDURA PRINCIPAL SOLARI ─────────────────────────────────────── */}
-      <div className="w-full max-w-4xl bg-[#090b0f] rounded-2xl border border-[#1b1f2b] shadow-[0_30px_70px_rgba(0,0,0,0.95)] p-4 sm:p-8 flex flex-col items-center relative overflow-hidden">
+      {/* ── QUADRO DE PARTIDAS ESTILO AEROPORTO CLÁSSICO ──────────────────── */}
+      <div className="w-full max-w-4xl bg-[#000000] p-4 sm:p-8 rounded-lg shadow-[0_25px_60px_rgba(0,0,0,0.95)] border-4 border-[#1a1a1a] flex flex-col items-center">
         
-        {/* Cabeçalho */}
-        <header className="w-full flex items-center justify-between border-b border-[#161a24] pb-4 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 indicator-lamp" />
-            <span className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-neutral-400 font-bold">
-              RADAR VALADARES · MONITORIZAÇÃO AÉREA
-            </span>
-          </div>
+        {/* ── PLACA DO CABEÇALHO SUPERIOR (✈ DEPARTURES ✈) ────────────────── */}
+        <header className="w-full bg-[#000000] border-4 border-[#ffffff] rounded-md py-3 px-4 sm:px-8 mb-6 flex items-center justify-between shadow-md">
+          <span className="text-2xl sm:text-4xl text-white font-bold">✈</span>
+          
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-[0.25em] text-center font-sans">
+            DEPARTURES
+          </h1>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs sm:text-sm font-bold tracking-wider text-amber-400/90">
-              {horaStr}
-            </span>
+            <span className="text-2xl sm:text-4xl text-white font-bold">✈</span>
+            {/* Interruptor discreto de som */}
             <button
               onClick={toggleSom}
-              className={`px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider transition-all ${
+              className={`hidden sm:inline-block px-2.5 py-1 rounded border text-[10px] font-bold uppercase transition-all ${
                 somAtivo
-                  ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
-                  : "bg-[#12151e] border-[#252936] text-neutral-400 hover:text-neutral-200"
+                  ? "bg-white text-black border-white"
+                  : "bg-transparent text-neutral-400 border-neutral-600 hover:text-white"
               }`}
             >
-              {somAtivo ? "🔊 SOM" : "🔇 SOM"}
+              {somAtivo ? "🔊 SOM ON" : "🔇 SOM OFF"}
             </button>
           </div>
         </header>
 
-        {/* ── SE ACABOU DE CARREGAR ───────────────────────────────────────── */}
-        {carregando && (
-          <div className="py-12 flex flex-col items-center gap-4">
-            <SplitFlapWord text="PROCURANDO" length={10} somAtivo={somAtivo} />
-          </div>
-        )}
-
-        {/* ── EXIBIÇÃO DO VOO ─────────────────────────────────────────────── */}
-        {!carregando && vooAtual && infoVoo && (
-          <div className="flex flex-col items-center gap-6 sm:gap-10 w-full py-2">
+        {/* ── GRELHA DE COLUNAS SOLARI ────────────────────────────────────── */}
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-[620px] flex flex-col items-center">
             
-            {/* Bloco 1: Companhia + Logótipo + Voo */}
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-amber-400/80 font-bold">
-                {infoVoo.nomeCompanhia}
-              </span>
+            {/* Títulos das Colunas */}
+            <div className="w-full flex justify-between px-2 mb-2 text-xs sm:text-sm font-black tracking-widest text-white uppercase font-sans">
+              <div className="w-[20%] text-center">TIME</div>
+              <div className="w-[50%] text-center">DESTINATION</div>
+              <div className="w-[30%] text-center">FLIGHT</div>
+            </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-                {/* Logótipo em Cartão */}
-                {infoVoo.iata ? (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white p-2 rounded-2xl shadow-lg border border-white/20 flex items-center justify-center shrink-0">
-                    <Image
-                      src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
-                      alt={infoVoo.numeroVoo}
-                      width={76}
-                      height={76}
-                      className="object-contain max-h-full"
-                      unoptimized
+            {/* Linhas de Palhetas Mecânicas */}
+            <div className="w-full flex flex-col gap-2 bg-[#0a0a0a] p-3 sm:p-4 rounded border border-[#222222]">
+              {linhasTabela.map((linha, idx) => (
+                <div
+                  key={idx}
+                  className="w-full flex justify-between items-center py-0.5 border-b border-[#181818] last:border-b-0"
+                >
+                  {/* Coluna TIME (5 palhetas) */}
+                  <div className="w-[20%] flex justify-center">
+                    <SplitFlapWord
+                      text={linha.time}
+                      length={5}
+                      align="center"
+                      somAtivo={somAtivo}
                     />
                   </div>
-                ) : (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#141720] border border-[#272b38] rounded-2xl flex items-center justify-center text-amber-400 text-3xl shrink-0 shadow-inner">
-                    ✈
+
+                  {/* Coluna DESTINATION (10 palhetas) */}
+                  <div className="w-[50%] flex justify-center">
+                    <SplitFlapWord
+                      text={linha.destination}
+                      length={10}
+                      align="left"
+                      somAtivo={somAtivo}
+                    />
                   </div>
-                )}
 
-                {/* Número do Voo (8 Palhetas) */}
-                <SplitFlapWord
-                  text={infoVoo.numeroVoo}
-                  length={8}
-                  align="center"
-                  somAtivo={somAtivo}
-                />
-              </div>
-            </div>
-
-            {/* Linha Divisória */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-[#1f2431] to-transparent my-1" />
-
-            {/* Bloco 2: Origem ➔ Destino */}
-            <div className="flex flex-col items-center gap-3 w-full">
-              <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-400 font-bold">
-                ROTA DA AERONAVE
-              </span>
-
-              <div className="flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-8 w-full">
-                {/* Origem (8 Palhetas) */}
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400">ORIGEM</span>
-                  <SplitFlapWord
-                    text={infoVoo.origem}
-                    length={8}
-                    align="center"
-                    somAtivo={somAtivo}
-                  />
+                  {/* Coluna FLIGHT (7 palhetas) */}
+                  <div className="w-[30%] flex justify-center">
+                    <SplitFlapWord
+                      text={linha.flight}
+                      length={7}
+                      align="center"
+                      somAtivo={somAtivo}
+                    />
+                  </div>
                 </div>
-
-                {/* Ícone de Avião */}
-                <div className="text-amber-400 text-2xl sm:text-3xl font-bold px-2 my-1 md:my-0 animate-pulse">
-                  ✈
-                </div>
-
-                {/* Destino (8 Palhetas) */}
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400">DESTINO</span>
-                  <SplitFlapWord
-                    text={infoVoo.destino}
-                    length={8}
-                    align="center"
-                    somAtivo={somAtivo}
-                  />
-                </div>
-              </div>
+              ))}
             </div>
 
           </div>
-        )}
+        </div>
 
-        {/* ── MODO METEOROLOGIA MINIMALISTA ─────────────────────────────── */}
-        {!carregando && !vooAtual && (
-          <div className="flex flex-col items-center justify-center gap-6 w-full py-8">
-            <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-400 font-bold">
-              SEM TRÁFEGO AÉREO DIRECTO · METEOROLOGIA LOCAL
-            </span>
-
-            {/* Localidade */}
-            <SplitFlapWord
-              text={meteorologia?.name?.toUpperCase() || "VALADARES"}
-              length={9}
-              align="center"
-              somAtivo={somAtivo}
-            />
-
-            {/* Temperatura e Descrição */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <SplitFlapWord
-                text={`${Math.round(meteorologia?.main?.temp ?? 18)} C`}
-                length={5}
-                align="center"
-                somAtivo={somAtivo}
-              />
-
-              <SplitFlapWord
-                text={meteorologia?.weather?.[0]?.description.toUpperCase() || "CEU LIMPO"}
-                length={10}
-                align="center"
-                somAtivo={somAtivo}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Rodapé */}
-        <footer className="w-full border-t border-[#161a24] pt-4 mt-4 flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
-          <span>VALADARES · PORTO</span>
-          <span>ACTUALIZADO A CADA 25S</span>
+        {/* Rodapé do Painel */}
+        <footer className="w-full mt-4 pt-3 border-t border-[#1f1f1f] flex items-center justify-between text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
+          <span>VALADARES AIRPORT BOARD</span>
+          <button
+            onClick={toggleSom}
+            className="sm:hidden text-neutral-300 font-bold"
+          >
+            {somAtivo ? "🔊 SOM ATIVADO" : "🔇 TOQUE PARA ATIVAR SOM"}
+          </button>
+          <span>AUTO-REFRESH: 25S</span>
         </footer>
 
       </div>
