@@ -41,7 +41,7 @@ interface InfoCompanhia {
 
 const INTERVALO_MS = 25_000;
 
-// ─── Dicionário de Companhias Aéreas e Rotas Habituais no Porto (OPO) ────────
+// ─── Dicionário de Companhias Aéreas e Rotas Habituais no Porto ──────────────
 
 const COMPANHIAS: Record<string, InfoCompanhia> = {
   TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origemPadrao: "PORTO", destinoPadrao: "LISBOA" },
@@ -50,7 +50,7 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   EZY: { nome: "EASYJET", iata: "U2", origemPadrao: "LONDRES", destinoPadrao: "PORTO" },
   EZS: { nome: "EASYJET SWISS", iata: "U2", origemPadrao: "ZURIQUE", destinoPadrao: "PORTO" },
   TVF: { nome: "TRANSAVIA FRANCE", iata: "TO", origemPadrao: "PARIS", destinoPadrao: "PORTO" },
-  TRA: { nome: "TRANSAVIA", iata: "HV", origemPadrao: "AMSTERDÃO", destinoPadrao: "PORTO" },
+  TRA: { nome: "TRANSAVIA", iata: "HV", origemPadrao: "AMSTERDAO", destinoPadrao: "PORTO" },
   LGL: { nome: "LUXAIR", iata: "LG", origemPadrao: "LUXEMBURGO", destinoPadrao: "PORTO" },
   NOZ: { nome: "NORWEGIAN", iata: "DY", origemPadrao: "OSLO", destinoPadrao: "PORTO" },
   NAX: { nome: "NORWEGIAN AIR", iata: "DY", origemPadrao: "OSLO", destinoPadrao: "PORTO" },
@@ -58,10 +58,25 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   VLG: { nome: "VUELING", iata: "VY", origemPadrao: "BARCELONA", destinoPadrao: "PORTO" },
   IBE: { nome: "IBERIA", iata: "IB", origemPadrao: "MADRID", destinoPadrao: "PORTO" },
   SWR: { nome: "SWISS AIRLINES", iata: "LX", origemPadrao: "ZURIQUE", destinoPadrao: "PORTO" },
-  KLM: { nome: "KLM ROYAL DUTCH", iata: "KL", origemPadrao: "AMSTERDÃO", destinoPadrao: "PORTO" },
+  KLM: { nome: "KLM ROYAL DUTCH", iata: "KL", origemPadrao: "AMSTERDAO", destinoPadrao: "PORTO" },
   BAW: { nome: "BRITISH AIRWAYS", iata: "BA", origemPadrao: "LONDRES", destinoPadrao: "PORTO" },
   AFR: { nome: "AIR FRANCE", iata: "AF", origemPadrao: "PARIS", destinoPadrao: "PORTO" },
   WZZ: { nome: "WIZZ AIR", iata: "W6", origemPadrao: "BUDAPESTE", destinoPadrao: "PORTO" },
+};
+
+// Mapeamento de Países para Nomes Curtos e Limpos
+const PAISES_NOMES: Record<string, string> = {
+  FRANCE: "FRANÇA",
+  SWITZERLAND: "SUÍÇA",
+  SPAIN: "ESPANHA",
+  PORTUGAL: "PORTO",
+  GERMANY: "ALEMANHA",
+  "UNITED KINGDOM": "LONDRES",
+  IRELAND: "IRLANDA",
+  LUXEMBOURG: "LUXEMBURGO",
+  NETHERLANDS: "AMSTERDÃO",
+  AUSTRIA: "ÁUSTRIA",
+  SWEDEN: "SUÉCIA",
 };
 
 function resolverVooInfo(
@@ -75,7 +90,7 @@ function resolverVooInfo(
   const info = COMPANHIAS[prefixo];
 
   let iata = info?.iata || null;
-  let numeroFormatado = cs || "VOO DESCONHECIDO";
+  let numeroFormatado = cs || "DESCONHECIDO";
   let nomeCompanhia = info?.nome || (paisOrigem ? `REGISTO: ${paisOrigem.toUpperCase()}` : "VOO COMERCIAL");
 
   if (info && cs.length > 3) {
@@ -83,40 +98,37 @@ function resolverVooInfo(
     numeroFormatado = `${info.iata} ${resto}`;
   }
 
-  // País de registo formatado
-  const paisFmt = (paisOrigem || "INTERNACIONAL").toUpperCase();
+  // País traduzido limpo
+  const paisUpper = (paisOrigem || "").toUpperCase();
+  const paisFmt = PAISES_NOMES[paisUpper] || paisUpper || "EUROPA";
 
   let origem = info?.origemPadrao || paisFmt;
-  let destino = info?.destinoPadrao || "PORTO (OPO)";
+  let destino = info?.destinoPadrao || "PORTO";
 
   if (vRate != null) {
     if (vRate < -0.5) {
-      destino = "PORTO (OPO)";
-      if (origem === "PORTO (OPO)") {
+      destino = "PORTO";
+      if (origem === "PORTO") {
         origem = info?.origemPadrao || paisFmt;
       }
     } else if (vRate > 0.5) {
-      origem = "PORTO (OPO)";
-      if (destino === "PORTO (OPO)") {
+      origem = "PORTO";
+      if (destino === "PORTO") {
         destino = info?.destinoPadrao || paisFmt;
       }
     }
   }
 
   if (altitude != null && altitude < 1500 && vRate == null) {
-    destino = "PORTO (OPO)";
+    destino = "PORTO";
   }
 
-  // Garantir que a Origem nunca fica vazia ou igual ao destino sem distinção
-  if (!origem || origem.trim() === "") {
-    origem = paisFmt || "ORIGEM";
-  }
-
+  // Se forem iguais, diferencia
   if (origem === destino) {
-    if (origem === "PORTO (OPO)") {
-      destino = paisFmt !== "PORTUGAL" ? paisFmt : "EUROPA";
+    if (origem === "PORTO") {
+      destino = paisFmt !== "PORTO" ? paisFmt : "LISBOA";
     } else {
-      destino = "PORTO (OPO)";
+      destino = "PORTO";
     }
   }
 
@@ -124,8 +136,8 @@ function resolverVooInfo(
     nomeCompanhia,
     numeroVoo: numeroFormatado,
     iata,
-    origem,
-    destino,
+    origem: origem.slice(0, 9),
+    destino: destino.slice(0, 9),
   };
 }
 
@@ -188,11 +200,11 @@ function tocarSomPalheta() {
     osc.start(now);
     osc.stop(now + 0.025);
   } catch {
-    // Ignorar erros de autoplay
+    // Ignorar erros
   }
 }
 
-// ─── Componente Célula Split-Flap ─────────────────────────────────────────────
+// ─── Componente Célula Split-Flap Responsivo ──────────────────────────────────
 
 function SplitFlapChar({ char, somAtivo }: { char: string; somAtivo: boolean }) {
   const [displayChar, setDisplayChar] = useState(char || " ");
@@ -215,7 +227,7 @@ function SplitFlapChar({ char, somAtivo }: { char: string; somAtivo: boolean }) 
   }, [char, somAtivo]);
 
   return (
-    <div className="flap-cell w-7 h-11 text-xl sm:w-10 sm:h-15 sm:text-3xl md:w-12 md:h-18 md:text-4xl font-bold font-mono text-amber-400 mx-[2px] relative inline-flex items-center justify-center select-none shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
+    <div className="flap-cell w-6 h-9 text-lg sm:w-8 sm:h-12 sm:text-2xl md:w-10 md:h-14 md:text-3xl font-bold font-mono text-amber-400 mx-[1px] sm:mx-[2px] relative inline-flex items-center justify-center select-none shadow-md shrink-0">
       <span className="flap-split-line" />
       <span className="flap-pin-left" />
       <span className="flap-pin-right" />
@@ -226,8 +238,8 @@ function SplitFlapChar({ char, somAtivo }: { char: string; somAtivo: boolean }) 
   );
 }
 
-function SplitFlapWord({ text, length, align = "left", somAtivo }: { text: string; length: number; align?: "left" | "right" | "center"; somAtivo: boolean }) {
-  const safe = (text || "").toUpperCase().slice(0, length);
+function SplitFlapWord({ text, length = 8, align = "center", somAtivo }: { text: string; length?: number; align?: "left" | "right" | "center"; somAtivo: boolean }) {
+  const safe = (text || "").toUpperCase().trim().slice(0, length);
   let padded = safe;
   if (safe.length < length) {
     const diff = length - safe.length;
@@ -240,7 +252,7 @@ function SplitFlapWord({ text, length, align = "left", somAtivo }: { text: strin
   }
 
   return (
-    <div className="inline-flex items-center">
+    <div className="inline-flex items-center justify-center max-w-full">
       {padded.split("").map((c, i) => (
         <SplitFlapChar key={i} char={c} somAtivo={somAtivo} />
       ))}
@@ -257,7 +269,6 @@ export default function PainelMinimalista() {
   const [somAtivo, setSomAtivo] = useState(false);
   const [horaAtual, setHoraAtual] = useState(new Date());
 
-  // Relógio
   useEffect(() => {
     const tick = setInterval(() => setHoraAtual(new Date()), 1000);
     return () => clearInterval(tick);
@@ -327,22 +338,22 @@ export default function PainelMinimalista() {
   return (
     <main
       onClick={ativarAudio}
-      className="min-h-screen bg-[#040406] text-neutral-100 flex flex-col items-center justify-center p-4 sm:p-8 select-none relative cursor-pointer font-mono"
+      className="min-h-screen bg-[#040406] text-neutral-100 flex flex-col items-center justify-center p-3 sm:p-6 select-none relative cursor-pointer font-mono"
     >
       
-      {/* ── MOLDURA PRINCIPAL SOLARI MINIMALISTA ─────────────────────────── */}
-      <div className="w-full max-w-4xl bg-[#090b0f] rounded-2xl border border-[#1b1f2b] shadow-[0_30px_70px_rgba(0,0,0,0.95),inset_0_1px_2px_rgba(255,255,255,0.08)] p-6 sm:p-10 flex flex-col items-center relative overflow-hidden">
+      {/* ── MOLDURA PRINCIPAL SOLARI ─────────────────────────────────────── */}
+      <div className="w-full max-w-4xl bg-[#090b0f] rounded-2xl border border-[#1b1f2b] shadow-[0_30px_70px_rgba(0,0,0,0.95)] p-4 sm:p-8 flex flex-col items-center relative overflow-hidden">
         
-        {/* Lâmpada de estado e Hora no topo */}
-        <header className="w-full flex items-center justify-between border-b border-[#161a24] pb-4 mb-8">
-          <div className="flex items-center gap-2.5">
+        {/* Cabeçalho */}
+        <header className="w-full flex items-center justify-between border-b border-[#161a24] pb-4 mb-6">
+          <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 indicator-lamp" />
-            <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-neutral-400 font-bold">
+            <span className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-neutral-400 font-bold">
               RADAR VALADARES · MONITORIZAÇÃO AÉREA
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <span className="text-xs sm:text-sm font-bold tracking-wider text-amber-400/90">
               {horaStr}
             </span>
@@ -366,22 +377,20 @@ export default function PainelMinimalista() {
           </div>
         )}
 
-        {/* ── EXIBIÇÃO DO VOO MINIMALISTA PREMIA ──────────────────────────── */}
+        {/* ── EXIBIÇÃO DO VOO ─────────────────────────────────────────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="flex flex-col items-center gap-8 sm:gap-12 w-full py-4">
+          <div className="flex flex-col items-center gap-6 sm:gap-10 w-full py-2">
             
-            {/* Bloco 1: Logótipo + Nome da Companhia + Número do Voo */}
-            <div className="flex flex-col items-center gap-4">
-              
-              {/* Nome discreto da Companhia Aérea */}
+            {/* Bloco 1: Companhia + Logótipo + Voo */}
+            <div className="flex flex-col items-center gap-3">
               <span className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-amber-400/80 font-bold">
                 {infoVoo.nomeCompanhia}
               </span>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-                {/* Logótipo em Cartão com vidro fosco */}
+                {/* Logótipo em Cartão */}
                 {infoVoo.iata ? (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white p-2.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] border border-white/20 flex items-center justify-center shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white p-2 rounded-2xl shadow-lg border border-white/20 flex items-center justify-center shrink-0">
                     <Image
                       src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
                       alt={infoVoo.numeroVoo}
@@ -397,18 +406,18 @@ export default function PainelMinimalista() {
                   </div>
                 )}
 
-                {/* Número do Voo em Palhetas */}
+                {/* Número do Voo (8 Palhetas) */}
                 <SplitFlapWord
                   text={infoVoo.numeroVoo}
-                  length={10}
+                  length={8}
                   align="center"
                   somAtivo={somAtivo}
                 />
               </div>
             </div>
 
-            {/* Linha Divisória Mecânica */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-[#202533] to-transparent my-1" />
+            {/* Linha Divisória */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-[#1f2431] to-transparent my-1" />
 
             {/* Bloco 2: Origem ➔ Destino */}
             <div className="flex flex-col items-center gap-3 w-full">
@@ -416,29 +425,29 @@ export default function PainelMinimalista() {
                 ROTA DA AERONAVE
               </span>
 
-              <div className="flex flex-col md:flex-row items-center justify-center gap-3 sm:gap-6">
-                {/* Cidade / País de Origem */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-8 w-full">
+                {/* Origem (8 Palhetas) */}
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-[9px] uppercase tracking-widest text-neutral-400">ORIGEM</span>
                   <SplitFlapWord
-                    text={infoVoo.origem || "DESCONHECIDA"}
-                    length={12}
+                    text={infoVoo.origem}
+                    length={8}
                     align="center"
                     somAtivo={somAtivo}
                   />
                 </div>
 
-                {/* Ícone de Avião / Seta Mecânica */}
-                <div className="text-amber-400 text-2xl sm:text-3xl font-bold px-2 my-2 md:my-0 animate-pulse">
+                {/* Ícone de Avião */}
+                <div className="text-amber-400 text-2xl sm:text-3xl font-bold px-2 my-1 md:my-0 animate-pulse">
                   ✈
                 </div>
 
-                {/* Cidade / País de Destino */}
+                {/* Destino (8 Palhetas) */}
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-[9px] uppercase tracking-widest text-neutral-400">DESTINO</span>
                   <SplitFlapWord
-                    text={infoVoo.destino || "PORTO (OPO)"}
-                    length={12}
+                    text={infoVoo.destino}
+                    length={8}
                     align="center"
                     somAtivo={somAtivo}
                   />
@@ -451,7 +460,7 @@ export default function PainelMinimalista() {
 
         {/* ── MODO METEOROLOGIA MINIMALISTA ─────────────────────────────── */}
         {!carregando && !vooAtual && (
-          <div className="flex flex-col items-center justify-center gap-8 w-full py-8">
+          <div className="flex flex-col items-center justify-center gap-6 w-full py-8">
             <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-400 font-bold">
               SEM TRÁFEGO AÉREO DIRECTO · METEOROLOGIA LOCAL
             </span>
@@ -459,7 +468,7 @@ export default function PainelMinimalista() {
             {/* Localidade */}
             <SplitFlapWord
               text={meteorologia?.name?.toUpperCase() || "VALADARES"}
-              length={12}
+              length={9}
               align="center"
               somAtivo={somAtivo}
             />
@@ -468,14 +477,14 @@ export default function PainelMinimalista() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <SplitFlapWord
                 text={`${Math.round(meteorologia?.main?.temp ?? 18)} C`}
-                length={6}
+                length={5}
                 align="center"
                 somAtivo={somAtivo}
               />
 
               <SplitFlapWord
                 text={meteorologia?.weather?.[0]?.description.toUpperCase() || "CEU LIMPO"}
-                length={14}
+                length={10}
                 align="center"
                 somAtivo={somAtivo}
               />
@@ -483,7 +492,7 @@ export default function PainelMinimalista() {
           </div>
         )}
 
-        {/* Rodapé do Painel */}
+        {/* Rodapé */}
         <footer className="w-full border-t border-[#161a24] pt-4 mt-4 flex items-center justify-between text-[10px] uppercase tracking-widest text-neutral-400">
           <span>VALADARES · PORTO</span>
           <span>ACTUALIZADO A CADA 25S</span>

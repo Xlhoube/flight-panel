@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel analógico electromecânico de monitorização aérea e meteorológica  
 **Objectivo:** Apresentar o voo detetado em tempo real sobre Valadares (Porto) num formato minimalista de alto impacto visual (*Split-Flap*), exibindo o Logótipo da Companhia Aérea, o Número do Voo e a Rota (Origem ➔ Destino).  
-**Versão:** v0.2.2  
+**Versão:** v0.2.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Interface minimalista aprimorada com moldura Solari de acabamento acrílico, resolução infalível para o campo Origem com fallback para país de registo e som mecânico.
+**Estado:** Ajuste das dimensões responsivas das palhetas (*Split-Flap*) e nomes limpos de Origem/Destino (ex: `PARIS ➔ PORTO`) eliminando qualquer corte horizontal no ecrã.
 
 ---
 
@@ -32,12 +32,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 005 — (Ver sessões anteriores)
+### ADR-001 a 006 — (Ver sessões anteriores)
 
-### ADR-006 — Aprimoramento de Layout & Resolução de Origem (2026-09-07)
-**Contexto:** O campo da Origem por vezes não aparecia ou ficava indeterminado em companhias não registadas e o layout necessitava de refinamento estético.  
-**Decisão:** Integrar o `origin_country` da telemetria OpenSky como fallback automático e envolver o painel numa moldura Solari flutuante de vidro acrílico escurecido com iluminação e cartões de vidro fosco para os logótipos.  
-**Consequência:** A Origem aparece sempre de forma clara e a estética do painel atingiu um nível de design refinado.
+### ADR-007 — Optimização Responsiva de Palhetas & Nomes Limpos (2026-09-07)
+**Contexto:** Na imagem enviada pelo utilizador, o nome da cidade de origem `PARIS` e o destino `PORTO (OPO)` sofriam cortes horizontais nas pontas devido à largura excessiva de 12 palhetas por bloco.  
+**Decisão:** Reduzir o número de palhetas por bloco para 8 e simplificar nomes (ex: `PARIS` e `PORTO`), ajustando o tamanho responsivo da célula `w-6 h-9 sm:w-8 sm:h-12 md:w-10 md:h-14` com `shrink-0`.  
+**Consequência:** Nenhuma letra fica cortada independentemente da resolução ou dispositivo.
 
 ---
 
@@ -49,3 +49,4 @@
 | 2026-09-07 | v0.2.0 | Redesign completo para painel analógico Split-Flap (Solari di Udine)   |
 | 2026-09-07 | v0.2.1 | Reformulação minimalista (Logótipo + Voo + Rota) e correcção do som    |
 | 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista      |
+| 2026-09-07 | v0.2.3 | Correcção do corte de letras e alinhamento responsivo das palhetas    |
