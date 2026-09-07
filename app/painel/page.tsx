@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Image from "next/image";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -131,7 +130,7 @@ function resolverVooInfo(callsignRaw: string | null, paisOrigem: string | null, 
   };
 }
 
-// ─── Sintetizador de Som Monocromático de Palhetas ───────────────────────────
+// ─── Sintetizador de Som Mecânico ─────────────────────────────────────────────
 
 let globalAudioCtx: AudioContext | null = null;
 
@@ -177,6 +176,74 @@ function tocarSomPalheta() {
   }
 }
 
+// ─── Componente Logótipo Pixel Art Monocromático (Canvas Pixelation) ─────────
+
+function PixelLogo({ iata }: { iata: string | null }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    if (!iata || typeof window === "undefined") return;
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.src = `https://pics.avs.io/200/200/${iata}.png`;
+
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const size = 24; // Grelha Pixel Art 24x24
+      canvas.width = size;
+      canvas.height = size;
+
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, 0, 0, size, size);
+
+      try {
+        const imgData = ctx.getImageData(0, 0, size, size);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          // Converter para valor monocromático 1-bit pixel art
+          const brightness = (d[i] + d[i + 1] + d[i + 2]) / 3;
+          const alpha = d[i + 3];
+
+          if (alpha < 40) {
+            d[i + 3] = 0;
+          } else {
+            const isBright = brightness > 128;
+            const colorVal = isBright ? 255 : 0;
+            d[i] = colorVal;
+            d[i + 1] = colorVal;
+            d[i + 2] = colorVal;
+            d[i + 3] = 255;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      } catch {
+        // Fallback de imagem simples se o CORS bloquear o getImageData
+      }
+    };
+  }, [iata]);
+
+  if (!iata) {
+    return (
+      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-white/20 rounded-xl flex items-center justify-center text-white text-3xl shrink-0">
+        ✈
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-neutral-700 p-2 rounded-xl flex items-center justify-center shrink-0 shadow-md">
+      <canvas
+        ref={canvasRef}
+        className="w-12 h-12 sm:w-16 sm:h-16 [image-rendering:pixelated] [image-rendering:crisp-edges]"
+      />
+    </div>
+  );
+}
+
 // ─── Componente Célula Split-Flap Monocromático ──────────────────────────────
 
 function SplitFlapChar({ char }: { char: string }) {
@@ -199,14 +266,10 @@ function SplitFlapChar({ char }: { char: string }) {
 
   return (
     <div className="w-7 h-11 text-xl sm:w-10 sm:h-15 sm:text-3xl md:w-12 md:h-17 md:text-4xl font-bold font-mono text-white bg-[#121212] rounded-[2px] mx-[1.5px] sm:mx-[2px] relative inline-flex items-center justify-center select-none shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.9)] border border-[#262626] shrink-0">
-      {/* Linha de corte horizontal central */}
       <span className="absolute top-1/2 left-0 right-0 h-[1.5px] bg-[#000000] z-10 pointer-events-none" />
-      
-      {/* Pinos do rotor */}
       <span className="absolute top-1/2 left-[-2px] w-[3px] h-[4px] bg-[#333333] rounded-[1px] -translate-y-1/2 z-20" />
       <span className="absolute top-1/2 right-[-2px] w-[3px] h-[4px] bg-[#333333] rounded-[1px] -translate-y-1/2 z-20" />
 
-      {/* Caractere */}
       <span className={`${isFlipping ? "animate-flap" : ""} transition-transform z-0 tracking-tighter`}>
         {displayChar === " " ? "\u00A0" : displayChar}
       </span>
@@ -236,9 +299,9 @@ function SplitFlapWord({ text, length, align = "center" }: { text: string; lengt
   );
 }
 
-// ─── Componente Principal 100% Monocromático Minimalista ─────────────────────
+// ─── Componente Principal ─────────────────────────────────────────────────────
 
-export default function PainelMonocromatico() {
+export default function PainelMonocromaticoPixel() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -272,7 +335,7 @@ export default function PainelMonocromatico() {
         }
       }
     } catch {
-      // Ignorar erros
+      // Ignorar
     } finally {
       setCarregando(false);
     }
@@ -302,31 +365,13 @@ export default function PainelMonocromatico() {
           </div>
         )}
 
-        {/* ── EXIBIÇÃO MONOCROMÁTICA DO VOO ──────────────────────────────── */}
+        {/* ── EXIBIÇÃO MONOCROMÁTICA DO VOO COM LOGÓTIPO PIXEL ART ────────── */}
         {!carregando && vooAtual && infoVoo && (
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 w-full">
             
-            {/* 1. Logótipo Monocromático + Número do Voo */}
+            {/* 1. Logótipo Pixel Art + Número do Voo */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-7">
-              {/* Logótipo Oficial em Escala de Cinzentos / Silhueta Branca */}
-              {infoVoo.iata ? (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-neutral-700 p-2.5 rounded-xl shadow-md flex items-center justify-center shrink-0">
-                  <Image
-                    src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
-                    alt={infoVoo.numeroVoo}
-                    width={80}
-                    height={80}
-                    className="object-contain max-h-full grayscale brightness-200 invert"
-                    unoptimized
-                  />
-                </div>
-              ) : (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-neutral-700 rounded-xl flex items-center justify-center text-white text-3xl shrink-0">
-                  ✈
-                </div>
-              )}
-
-              {/* Número do Voo */}
+              <PixelLogo iata={infoVoo.iata} />
               <SplitFlapWord text={infoVoo.numeroVoo} length={9} align="center" />
             </div>
 
@@ -352,15 +397,10 @@ export default function PainelMonocromatico() {
         {/* ── MODO METEOROLOGIA MONOCROMÁTICO (SEM VOOS) ─────────────────── */}
         {!carregando && !vooAtual && (
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 w-full">
-            {/* Ícone Voo / Meteo Monocromático */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-neutral-700 rounded-xl flex items-center justify-center text-white text-3xl shrink-0">
-              ✈
-            </div>
+            <PixelLogo iata={null} />
 
-            {/* Número Voo Fictício/Status */}
             <SplitFlapWord text="METEOROL" length={9} align="center" />
 
-            {/* Origem (Localidade) */}
             <div className="flex flex-col items-center justify-center gap-2.5 w-full">
               <span className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-neutral-500 font-bold">
                 ORIGEM
@@ -372,7 +412,6 @@ export default function PainelMonocromatico() {
               />
             </div>
 
-            {/* Destino (Temperatura) */}
             <div className="flex flex-col items-center justify-center gap-2.5 w-full">
               <span className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-neutral-500 font-bold">
                 DESTINO
