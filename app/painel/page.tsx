@@ -365,6 +365,26 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setPromptInstalacao(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const instalarApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (promptInstalacao) {
+      promptInstalacao.prompt();
+      promptInstalacao.userChoice.then(() => {
+        setPromptInstalacao(null);
+      });
+    }
+  };
 
   // Fullscreen com 1 toque no ecrã
   const manipularToqueEcra = () => {
@@ -484,11 +504,21 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              {/* Aeronave e Nome da Companhia */}
+              {/* Aeronave, Nome da Companhia e Botão de Instalação PWA */}
               <div className="flex flex-col items-end gap-0.5 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  AIRCRAFT
-                </span>
+                <div className="flex items-center gap-2">
+                  {promptInstalacao && (
+                    <button
+                      onClick={instalarApp}
+                      className="bg-white/10 hover:bg-white/20 text-white text-[9px] sm:text-[11px] font-bold px-2 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse"
+                    >
+                      📲 INSTALAR
+                    </button>
+                  )}
+                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                    AIRCRAFT
+                  </span>
+                </div>
                 <FlapWord text={infoVoo.aeronave} size="md" />
                 <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
                   {infoVoo.nomeCompanhia}

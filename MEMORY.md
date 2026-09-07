@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v0.9.1  
+**Versão:** v1.0.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Painel analógico Split-Flap borderless (moldura externa removida), com visual edge-to-edge moderno, logótipos FlightAware e encaixe sem scroll em ecrã inteiro.
+**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
 
 ---
 
@@ -19,8 +19,9 @@
 
 | Componente      | Tecnologia                        | Justificação                                       |
 |-----------------|-----------------------------------|---------------------------------------------------|
-| Framework       | Next.js 16 (App Router)           | SSR + Route Handlers (API segura)                 |
+| Framework       | Next.js 16 (App Router) + PWA     | SSR + Route Handlers + Web App Manifest           |
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
+| PWA / Mobile    | Service Worker + Manifest + Icons | Instalação nativa direta no ecrã do telemóvel     |
 | Estilos         | Tailwind CSS v4 + Split-Flap CSS  | Células de palhetas mecânicas brancas 3D          |
 | Áudio           | Web Audio API (Flap Clack)        | Som mecânico sintetizado ao alternar palhetas    |
 | Imagens         | FlightAware ICAO DB + Aviasales   | Base de dados com milhares de logótipos por ICAO  |
@@ -31,22 +32,17 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 018 — (Ver sessões anteriores)
-
-### ADR-019 — Auto-Fit 100dvh / Zero Scroll em Fullscreen e Cidades nas Origens (2026-09-07)
-**Contexto:** Ao activar o Fullscreen no telemóvel, o ecrã necessitava de scroll vertical/horizontal e faltava a cidade/aeroporto nas origens.  
-**Decisão:** Fixar o layout em `100dvh`/`100dvw` com escalamento por `min(vw, vh)` que adapta a altura à orientação do telemóvel sem qualquer transbordo ou scroll; mapear países e rotas para nomes de cidades/aeroportos (`MADRID`, `PARIS`, `LONDRES`, `LISBOA`, etc.) e exibi-los a par do código IATA.  
-**Consequência:** Experiência 100% ajustada ao ecrã inteiro do telemóvel com zero scroll.
-
-### ADR-020 — Chassis Compacto sem Vazios e Base Global de Logótipos ICAO (2026-09-07)
-**Contexto:** Existiam grandes espaços negros vazios entre e dentro das caixas; e companhias charters/cargueiras (como Titan Airways `AWC`) não exibiam o logótipo oficial.  
-**Decisão:** Integrar a base de dados global de logótipos aeronáuticos indexada por código ICAO (`Jxck-S/airline-logos` com assets do FlightAware) e redesenhar o chassis com distribuição proporcional vertical (`flex-1` na rota, telemetria preenchida e letras ampliadas).  
-**Consequência:** Painel visualmente denso, equilibrado, com logótipos oficiais permanentes para todas as companhias mundiais.
+### ADR-001 a 020 — (Ver sessões anteriores)
 
 ### ADR-021 — Remoção da Moldura de Fundo / Layout Borderless (2026-09-07)
 **Contexto:** O utilizador solicitou a remoção da moldura de fundo externa para eliminar margens e molduras artificiais.  
 **Decisão:** Eliminar os contornos e sombras da moldura exterior circundante, permitindo que as secções do painel preencham o ecrã de forma limpa e borderless *edge-to-edge*.  
 **Consequência:** Estética minimalista e maximização do espaço útil do ecrã.
+
+### ADR-022 — Instalador PWA para Telemóveis Android e iPhone (2026-09-07)
+**Contexto:** O utilizador solicitou um instalador para usar o painel no telemóvel como uma aplicação dedicada.  
+**Decisão:** Implementar a arquitetura completa de Progressive Web App (PWA): manifest.json, ícones dedicados (192x192 e 512x512), Service Worker (sw.js), metadados Apple Mobile Web App e botão/prompt nativo de instalação.  
+**Consequência:** A aplicação pode ser instalada com 1 toque no telemóvel, abrindo com o seu próprio ícone no ecrã principal sem barras de navegação do browser em modo landscape autónomo.
 
 ---
 
@@ -76,3 +72,4 @@
 | 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens |
 | 2026-09-07 | v0.9.0 | Chassis preenchido sem vazios e base global de logótipos ICAO         |
 | 2026-09-07 | v0.9.1 | Remoção da moldura de fundo externa (design borderless edge-to-edge)  |
+| 2026-09-07 | v1.0.0 | Lançamento oficial v1.0.0 com suporte completo a instalador PWA Mobile |
