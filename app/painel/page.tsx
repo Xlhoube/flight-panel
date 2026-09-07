@@ -69,38 +69,52 @@ const CIDADES_PAISES: Record<string, { cidade: string; code: string }> = {
   PORTUGAL: { cidade: "LISBOA", code: "LIS" },
 };
 
-// ─── Dicionário de Companhias Aéreas ──────────────────────────────────────────
+// ─── Dicionário Expandido de Companhias Aéreas ────────────────────────────────
 
 const COMPANHIAS: Record<string, InfoCompanhia> = {
+  // Principais em Portugal
   TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origem: "PORTO", destino: "LISBOA", origemCode: "OPO", destinoCode: "LIS", aeronave: "A320-251N" },
+  RYR: { nome: "RYANAIR", iata: "FR", origem: "PORTO", destino: "MADRID", origemCode: "OPO", destinoCode: "MAD", aeronave: "B737-800" },
+  RUK: { nome: "RYANAIR UK", iata: "RK", origem: "LONDRES", destino: "PORTO", origemCode: "STN", destinoCode: "OPO", aeronave: "B737-800" },
+  EJU: { nome: "EASYJET EUROPE", iata: "U2", origem: "PORTO", destino: "PARIS", origemCode: "OPO", destinoCode: "CDG", aeronave: "A320-214" },
+  EZY: { nome: "EASYJET UK", iata: "U2", origem: "LONDRES", destino: "PORTO", origemCode: "LGW", destinoCode: "OPO", aeronave: "A320-214" },
+  EZS: { nome: "EASYJET SWISS", iata: "DS", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A320-214" },
+  
+  // Charter e Companhias UK / Europa
+  AWC: { nome: "TITAN AIRWAYS", iata: "ZT", origem: "LONDRES", destino: "PORTO", origemCode: "STN", destinoCode: "OPO", aeronave: "A321NEO" },
+  EXS: { nome: "JET2.COM", iata: "LS", origem: "MANCHESTER", destino: "PORTO", origemCode: "MAN", destinoCode: "OPO", aeronave: "B737-800" },
+  BAW: { nome: "BRITISH AIRWAYS", iata: "BA", origem: "LONDRES", destino: "PORTO", origemCode: "LHR", destinoCode: "OPO", aeronave: "A320-232" },
+  TOM: { nome: "TUI AIRWAYS", iata: "BY", origem: "LONDRES", destino: "PORTO", origemCode: "LGW", destinoCode: "OPO", aeronave: "B737-800" },
+  TUI: { nome: "TUI FLY", iata: "TB", origem: "BRUXELAS", destino: "PORTO", origemCode: "BRU", destinoCode: "OPO", aeronave: "B737-800" },
+
+  // Espanha
   AEA: { nome: "AIR EUROPA", iata: "UX", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "B737-800" },
   IBE: { nome: "IBERIA", iata: "IB", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "A320-200" },
   IBS: { nome: "IBERIA EXPRESS", iata: "I2", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "A320-200" },
   VLG: { nome: "VUELING", iata: "VY", origem: "BARCELONA", destino: "PORTO", origemCode: "BCN", destinoCode: "OPO", aeronave: "A320-232" },
   VOE: { nome: "VOLOTEA", iata: "V7", origem: "NANTES", destino: "PORTO", origemCode: "NTE", destinoCode: "OPO", aeronave: "A319-100" },
   OBS: { nome: "ORBEST", iata: "6O", origem: "LISBOA", destino: "PORTO", origemCode: "LIS", destinoCode: "OPO", aeronave: "A330-900" },
-  RYR: { nome: "RYANAIR", iata: "FR", origem: "PORTO", destino: "MADRID", origemCode: "OPO", destinoCode: "MAD", aeronave: "B737-800" },
-  RUK: { nome: "RYANAIR UK", iata: "RK", origem: "LONDRES", destino: "PORTO", origemCode: "STN", destinoCode: "OPO", aeronave: "B737-800" },
-  EJU: { nome: "EASYJET EUROPE", iata: "U2", origem: "PORTO", destino: "PARIS", origemCode: "OPO", destinoCode: "CDG", aeronave: "A320-214" },
-  EZY: { nome: "EASYJET UK", iata: "U2", origem: "LONDRES", destino: "PORTO", origemCode: "LGW", destinoCode: "OPO", aeronave: "A320-214" },
-  EZS: { nome: "EASYJET SWISS", iata: "DS", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A320-214" },
-  WZZ: { nome: "WIZZ AIR", iata: "W6", origem: "BUDAPESTE", destino: "PORTO", origemCode: "BUD", destinoCode: "OPO", aeronave: "A321NEO" },
-  WUK: { nome: "WIZZ AIR UK", iata: "W9", origem: "LONDRES", destino: "PORTO", origemCode: "LTN", destinoCode: "OPO", aeronave: "A321NEO" },
+
+  // França e Benelux
+  AFR: { nome: "AIR FRANCE", iata: "AF", origem: "PARIS", destino: "PORTO", origemCode: "CDG", destinoCode: "OPO", aeronave: "A320-200" },
   TVF: { nome: "TRANSAVIA FRANCE", iata: "TO", origem: "PARIS", destino: "PORTO", origemCode: "ORY", destinoCode: "OPO", aeronave: "B737-800" },
   TRA: { nome: "TRANSAVIA", iata: "HV", origem: "AMSTERDAO", destino: "PORTO", origemCode: "AMS", destinoCode: "OPO", aeronave: "B737-800" },
-  EXS: { nome: "JET2.COM", iata: "LS", origem: "MANCHESTER", destino: "PORTO", origemCode: "MAN", destinoCode: "OPO", aeronave: "B737-800" },
-  NOZ: { nome: "NORWEGIAN", iata: "DY", origem: "OSLO", destino: "PORTO", origemCode: "OSL", destinoCode: "OPO", aeronave: "B737 MAX 8" },
-  AFR: { nome: "AIR FRANCE", iata: "AF", origem: "PARIS", destino: "PORTO", origemCode: "CDG", destinoCode: "OPO", aeronave: "A320-200" },
-  DLH: { nome: "LUFTHANSA", iata: "LH", origem: "FRANKFURT", destino: "PORTO", origemCode: "FRA", destinoCode: "OPO", aeronave: "A321-271NX" },
   KLM: { nome: "KLM ROYAL DUTCH", iata: "KL", origem: "AMSTERDAO", destino: "PORTO", origemCode: "AMS", destinoCode: "OPO", aeronave: "B737-800" },
-  BAW: { nome: "BRITISH AIRWAYS", iata: "BA", origem: "LONDRES", destino: "PORTO", origemCode: "LHR", destinoCode: "OPO", aeronave: "A320-232" },
-  SWR: { nome: "SWISS AIR LINES", iata: "LX", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A220-300" },
-  AUA: { nome: "AUSTRIAN AIRLINES", iata: "OS", origem: "VIENA", destino: "PORTO", origemCode: "VIE", destinoCode: "OPO", aeronave: "A320-200" },
   BEL: { nome: "BRUSSELS AIRLINES", iata: "SN", origem: "BRUXELAS", destino: "PORTO", origemCode: "BRU", destinoCode: "OPO", aeronave: "A319-100" },
   LGL: { nome: "LUXAIR", iata: "LG", origem: "LUXEMBURGO", destino: "PORTO", origemCode: "LUX", destinoCode: "OPO", aeronave: "DASH 8-400" },
+
+  // Centro e Leste Europeu
+  DLH: { nome: "LUFTHANSA", iata: "LH", origem: "FRANKFURT", destino: "PORTO", origemCode: "FRA", destinoCode: "OPO", aeronave: "A321-271NX" },
+  SWR: { nome: "SWISS AIR LINES", iata: "LX", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A220-300" },
+  AUA: { nome: "AUSTRIAN AIRLINES", iata: "OS", origem: "VIENA", destino: "PORTO", origemCode: "VIE", destinoCode: "OPO", aeronave: "A320-200" },
+  WZZ: { nome: "WIZZ AIR", iata: "W6", origem: "BUDAPESTE", destino: "PORTO", origemCode: "BUD", destinoCode: "OPO", aeronave: "A321NEO" },
+  WUK: { nome: "WIZZ AIR UK", iata: "W9", origem: "LONDRES", destino: "PORTO", origemCode: "LTN", destinoCode: "OPO", aeronave: "A321NEO" },
+  LOT: { nome: "LOT POLISH", iata: "LO", origem: "VARSOVIA", destino: "PORTO", origemCode: "WAW", destinoCode: "OPO", aeronave: "B737-800" },
+  NOZ: { nome: "NORWEGIAN", iata: "DY", origem: "OSLO", destino: "PORTO", origemCode: "OSL", destinoCode: "OPO", aeronave: "B737 MAX 8" },
   FIN: { nome: "FINNAIR", iata: "AY", origem: "HELSINQUIA", destino: "PORTO", origemCode: "HEL", destinoCode: "OPO", aeronave: "A321-200" },
   SAS: { nome: "SCANDINAVIAN AIRLINES", iata: "SK", origem: "ESTOCOLMO", destino: "PORTO", origemCode: "ARN", destinoCode: "OPO", aeronave: "A320NEO" },
-  LOT: { nome: "LOT POLISH", iata: "LO", origem: "VARSOVIA", destino: "PORTO", origemCode: "WAW", destinoCode: "OPO", aeronave: "B737-800" },
+
+  // Mediterrâneo e Médio Oriente
   THY: { nome: "TURKISH AIRLINES", iata: "TK", origem: "ISTAMBUL", destino: "PORTO", origemCode: "IST", destinoCode: "OPO", aeronave: "A321NEO" },
   AEE: { nome: "AEGEAN AIRLINES", iata: "A3", origem: "ATENAS", destino: "PORTO", origemCode: "ATH", destinoCode: "OPO", aeronave: "A320NEO" },
   UAE: { nome: "EMIRATES", iata: "EK", origem: "DUBAI", destino: "PORTO", origemCode: "DXB", destinoCode: "OPO", aeronave: "B777-300ER" },
@@ -115,21 +129,23 @@ function resolverVooInfo(voo: EstadoVoo) {
   const prefixo2 = cs.slice(0, 2);
   
   let info = COMPANHIAS[prefixo3];
+  let icao = prefixo3;
   let iata = info?.iata || null;
+
   if (!iata) {
-    if (prefixo2 === "TP") iata = "TP";
-    else if (prefixo2 === "FR") iata = "FR";
-    else if (prefixo2 === "U2") iata = "U2";
-    else if (prefixo2 === "UX") iata = "UX";
-    else if (prefixo2 === "IB") iata = "IB";
-    else if (prefixo2 === "VY") iata = "VY";
-    else if (prefixo2 === "LH") iata = "LH";
-    else if (prefixo2 === "AF") iata = "AF";
-    else if (prefixo2 === "BA") iata = "BA";
-    else if (prefixo2 === "KL") iata = "KL";
-    else if (prefixo2 === "TO") iata = "TO";
-    else if (prefixo2 === "HV") iata = "HV";
-    else if (prefixo2 === "W6") iata = "W6";
+    if (prefixo2 === "TP") { iata = "TP"; icao = "TAP"; }
+    else if (prefixo2 === "FR") { iata = "FR"; icao = "RYR"; }
+    else if (prefixo2 === "U2") { iata = "U2"; icao = "EJU"; }
+    else if (prefixo2 === "UX") { iata = "UX"; icao = "AEA"; }
+    else if (prefixo2 === "IB") { iata = "IB"; icao = "IBE"; }
+    else if (prefixo2 === "VY") { iata = "VY"; icao = "VLG"; }
+    else if (prefixo2 === "LH") { iata = "LH"; icao = "DLH"; }
+    else if (prefixo2 === "AF") { iata = "AF"; icao = "AFR"; }
+    else if (prefixo2 === "BA") { iata = "BA"; icao = "BAW"; }
+    else if (prefixo2 === "KL") { iata = "KL"; icao = "KLM"; }
+    else if (prefixo2 === "TO") { iata = "TO"; icao = "TVF"; }
+    else if (prefixo2 === "HV") { iata = "HV"; icao = "TRA"; }
+    else if (prefixo2 === "W6") { iata = "W6"; icao = "WZZ"; }
   }
 
   let numeroVoo = cs || voo[0].toUpperCase();
@@ -167,10 +183,11 @@ function resolverVooInfo(voo: EstadoVoo) {
 
   return {
     callsign: cs,
+    icao,
+    iata,
     numeroVoo,
     nomeCompanhia: info?.nome || (voo[2] ? `COMPANHIA (${voo[2]})` : "AVIAÇÃO COMERCIAL"),
     aeronave: info?.aeronave || "A320",
-    iata,
     origem,
     origemCode,
     destino,
@@ -227,7 +244,58 @@ function tocarSomFlapClack() {
   }
 }
 
-// ─── Componente de Palheta com Escala Universal Auto-Fit (min(vw, vh)) ─────────
+// ─── Componente de Logótipo Universal de Companhias Aéreas ────────────────────
+
+interface AirlineLogoProps {
+  icao?: string;
+  iata?: string | null;
+  nome: string;
+}
+
+function AirlineLogo({ icao, iata, nome }: AirlineLogoProps) {
+  // URLs da base de dados global de logótipos FlightAware / Jxck-S (por ICAO) e Aviasales (por IATA)
+  const [urlIndex, setUrlIndex] = useState(0);
+
+  const urls: string[] = [];
+  if (icao) {
+    urls.push(`https://raw.githubusercontent.com/Jxck-S/airline-logos/main/flightaware_logos/${icao.toUpperCase()}.png`);
+    urls.push(`https://raw.githubusercontent.com/Jxck-S/airline-logos/main/custom_logos/${icao.toUpperCase()}.png`);
+  }
+  if (iata) {
+    urls.push(`https://pics.avs.io/200/200/${iata.toUpperCase()}.png`);
+  }
+
+  const handleImgError = () => {
+    if (urlIndex < urls.length - 1) {
+      setUrlIndex((prev) => prev + 1);
+    }
+  };
+
+  const srcAtual = urls[urlIndex];
+
+  return (
+    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white p-1 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
+      {srcAtual ? (
+        <Image
+          key={srcAtual}
+          src={srcAtual}
+          alt={nome}
+          width={64}
+          height={64}
+          className="object-contain max-h-full max-w-full"
+          onError={handleImgError}
+          unoptimized
+        />
+      ) : (
+        <span className="font-black text-xs sm:text-sm text-neutral-800 uppercase">
+          {icao?.slice(0, 3) || "AIR"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ─── Componente de Palheta com Escala Universal Auto-Fit ──────────────────────
 
 interface FlapCellProps {
   char: string;
@@ -250,13 +318,13 @@ function FlapCell({ char, size = "lg" }: FlapCellProps) {
     }
   }, [char, prevChar]);
 
-  // Dimensionamento proporcional a min(vw, vh) para CABER 100% NO ECRÃ EM FULLSCREEN SEM SCROLL
+  // Dimensionamento proporcional para preencher a moldura sem transbordo
   const dimensões = {
-    sm: "w-[clamp(0.65rem,min(2vw,4.2vh),1.3rem)] h-[clamp(0.95rem,min(3vw,5.8vh),1.8rem)] text-[clamp(0.65rem,min(1.8vw,3.6vh),1.1rem)] font-black rounded-[2px]",
-    md: "w-[clamp(0.8rem,min(2.6vw,5.2vh),1.6rem)] h-[clamp(1.15rem,min(3.8vw,7.2vh),2.3rem)] text-[clamp(0.75rem,min(2.4vw,4.5vh),1.3rem)] font-black rounded-[3px]",
-    lg: "w-[clamp(0.95rem,min(3.4vw,6.5vh),2.1rem)] h-[clamp(1.4rem,min(4.8vw,9vh),2.9rem)] text-[clamp(0.9rem,min(3vw,5.5vh),1.7rem)] font-black rounded-[4px]",
-    xl: "w-[clamp(1.1rem,min(4.2vw,8vh),2.6rem)] h-[clamp(1.6rem,min(5.8vw,11vh),3.6rem)] text-[clamp(1rem,min(3.6vw,7vh),2.1rem)] font-black rounded-[5px]",
-    hero: "w-[clamp(1.3rem,min(5vw,9.5vh),3.2rem)] h-[clamp(1.8rem,min(6.8vw,13vh),4.3rem)] text-[clamp(1.2rem,min(4.4vw,8.5vh),2.6rem)] font-black rounded-[5px]",
+    sm: "w-[clamp(0.75rem,min(2.4vw,5vh),1.5rem)] h-[clamp(1.1rem,min(3.5vw,7vh),2.2rem)] text-[clamp(0.75rem,min(2.2vw,4.5vh),1.3rem)] font-black rounded-[2px]",
+    md: "w-[clamp(0.9rem,min(3vw,6vh),1.9rem)] h-[clamp(1.3rem,min(4.4vw,8.5vh),2.7rem)] text-[clamp(0.85rem,min(2.8vw,5.5vh),1.5rem)] font-black rounded-[3px]",
+    lg: "w-[clamp(1.1rem,min(3.8vw,7.5vh),2.4rem)] h-[clamp(1.6rem,min(5.5vw,10.5vh),3.4rem)] text-[clamp(1rem,min(3.5vw,6.8vh),2rem)] font-black rounded-[4px]",
+    xl: "w-[clamp(1.3rem,min(4.6vw,9vh),2.9rem)] h-[clamp(1.8rem,min(6.5vw,12.5vh),4rem)] text-[clamp(1.15rem,min(4.2vw,8vh),2.4rem)] font-black rounded-[5px]",
+    hero: "w-[clamp(1.5rem,min(5.5vw,11vh),3.5rem)] h-[clamp(2.1rem,min(7.8vw,15vh),4.8rem)] text-[clamp(1.35rem,min(5vw,9.5vh),3rem)] font-black rounded-[5px]",
   }[size];
 
   const coresTexto = "text-white bg-[#111319] border-[#252834] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]";
@@ -274,7 +342,7 @@ function FlapCell({ char, size = "lg" }: FlapCellProps) {
   );
 }
 
-// ─── Componente de Palavra (Sem Quebra de Linha) ──────────────────────────────
+// ─── Componente de Palavra Contínua ───────────────────────────────────────────
 
 interface FlapWordProps {
   text: string;
@@ -293,7 +361,7 @@ function FlapWord({ text, size = "lg" }: FlapWordProps) {
   );
 }
 
-// ─── Componente Principal Painel Analógico 100% Fullscreen Mobile Fit ─────────
+// ─── Componente Principal Painel Analógico ────────────────────────────────────
 
 export default function PainelAnalogicoMobileFullscreen() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
@@ -387,10 +455,10 @@ export default function PainelAnalogicoMobileFullscreen() {
   return (
     <main
       onClick={manipularToqueEcra}
-      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-center p-1.5 sm:p-4 select-none font-mono cursor-pointer relative overflow-hidden board-texture"
+      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-center p-2 sm:p-4 select-none font-mono cursor-pointer relative overflow-hidden board-texture"
     >
-      {/* ── QUADRO METÁLICO TOTALMENTE INTEGRADO (ZERO SCROLL EM FULLSCREEN) ── */}
-      <div className="w-full max-w-5xl h-full max-h-full bg-[#0a0b0e] border-2 sm:border-6 md:border-[10px] border-[#14161f] rounded-xl sm:rounded-3xl p-2 sm:p-5 md:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.98),inset_0_2px_8px_rgba(255,255,255,0.06)] relative z-10 flex flex-col justify-between overflow-hidden">
+      {/* ── CHASSIS METÁLICO INTEGRADO (SEM ESPAÇOS VAZIOS / SEM SCROLL) ───── */}
+      <div className="w-full max-w-5xl h-full max-h-full bg-[#0a0b0e] border-2 sm:border-4 md:border-[8px] border-[#14161f] rounded-xl sm:rounded-3xl p-3 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.98),inset_0_2px_8px_rgba(255,255,255,0.06)] relative z-10 flex flex-col justify-center gap-2.5 sm:gap-4 overflow-hidden">
         
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
@@ -399,35 +467,20 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         )}
 
-        {/* ── MODO 1: VOO ACTIVO NO RADAR ─────────────────────────────────── */}
+        {/* ── MODO 1: VOO ACTIVO DETECTADO NO RADAR ────────────────────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="h-full flex flex-col justify-between gap-1.5 sm:gap-3">
+          <div className="h-full flex flex-col justify-between gap-2 sm:gap-3.5">
             
-            {/* LINHA 1: VOO & LOGÓTIPO & COMPANHIA */}
-            <div className="w-full bg-[#10121a] p-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg">
+            {/* ── LINHA 1: CABEÇALHO COESO COM LOGÓTIPO & VOO & COMPANHIA ─────── */}
+            <div className="w-full bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
               
-              {/* Voo e Logótipo Oficial */}
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                <div className="w-9 h-9 sm:w-14 sm:h-14 bg-white p-1 rounded-md sm:rounded-lg border border-neutral-700 shadow-md flex items-center justify-center shrink-0">
-                  {infoVoo.iata ? (
-                    <Image
-                      src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
-                      alt={infoVoo.nomeCompanhia}
-                      width={48}
-                      height={48}
-                      className="object-contain max-h-full"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-black rounded flex items-center justify-center text-white font-black text-xs sm:text-base">
-                      ✈
-                    </div>
-                  )}
-                </div>
+              {/* Logótipo Oficial Garantido + Voo */}
+              <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} />
 
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
-                    VOO
+                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                    VOO / FLIGHT
                   </span>
                   <FlapWord text={infoVoo.numeroVoo} size="xl" />
                 </div>
@@ -435,88 +488,89 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* Aeronave e Nome da Companhia */}
               <div className="flex flex-col items-end gap-0.5 text-right">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
-                  AERONAVE
+                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                  AIRCRAFT
                 </span>
                 <FlapWord text={infoVoo.aeronave} size="md" />
-                <span className="text-[9px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[130px] sm:max-w-none">
+                <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
                   {infoVoo.nomeCompanhia}
                 </span>
               </div>
 
             </div>
 
-            {/* LINHA 2: ROTA COMPLETA (CÓDIGO IATA + CIDADE / AEROPORTO) ────── */}
-            <div className="w-full bg-[#10121a] p-2 sm:p-4 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-1 sm:gap-3 shadow-lg">
+            {/* ── LINHA 2: SECÇÃO PRINCIPAL DE ROTA (PREENCHE O ESPAÇO CENTRAL) ─ */}
+            <div className="w-full flex-1 bg-[#10121a] p-3 sm:p-5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 sm:gap-6 shadow-lg min-h-[90px]">
               
-              {/* ORIGEM (CÓDIGO + CIDADE / AEROPORTO) */}
-              <div className="flex flex-col items-start gap-0.5">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
-                  ORIGEM
+              {/* ORIGEM (CÓDIGO IATA + CIDADE / AEROPORTO) */}
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                  ORIGEM / DEPARTURE
                 </span>
-                <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <FlapWord text={infoVoo.origemCode} size="hero" />
-                  <FlapWord text={infoVoo.origem} size="md" />
+                  <FlapWord text={infoVoo.origem} size="lg" />
                 </div>
               </div>
 
-              {/* ÍCONE CENTRAL DE VOO */}
-              <div className="flex flex-col items-center justify-center px-1 shrink-0">
-                <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-neutral-300 font-bold">
+              {/* TRACK CENTRAL DE VOO */}
+              <div className="flex flex-col items-center justify-center px-2 shrink-0">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-300 font-bold mb-1">
                   {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
                 </span>
-                <div className="flex items-center gap-1">
-                  <span className="text-white text-base sm:text-2xl">✈</span>
-                  <div className="hidden sm:block w-6 sm:w-12 h-0.5 bg-white/40" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-6 sm:w-12 h-0.5 bg-white/40" />
+                  <span className="text-white text-xl sm:text-3xl">✈</span>
+                  <div className="w-6 sm:w-12 h-0.5 bg-white/40" />
                 </div>
               </div>
 
-              {/* DESTINO (CÓDIGO + CIDADE / AEROPORTO) */}
-              <div className="flex flex-col items-end gap-0.5 text-right">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
-                  DESTINO
+              {/* DESTINO (CÓDIGO IATA + CIDADE / AEROPORTO) */}
+              <div className="flex flex-col items-end gap-1 text-right">
+                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                  DESTINO / DESTINATION
                 </span>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <FlapWord text={infoVoo.destino} size="md" />
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
                   <FlapWord text={infoVoo.destinoCode} size="hero" />
+                  <FlapWord text={infoVoo.destino} size="lg" />
                 </div>
               </div>
 
             </div>
 
-            {/* LINHA 3: TELEMETRIA EM 3 COLUNAS ───────────────────────────── */}
-            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-3">
+            {/* ── LINHA 3: TELEMETRIA EM 3 MÓDULOS SUBSTANCIAIS ───────────────── */}
+            <div className="w-full grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
               
               {/* ALTITUDE */}
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+              <div className="bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   ALTITUDE
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
-                  <FlapWord text={`${infoVoo.altitudePes}`} size="md" />
-                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">FT</span>
+                <div className="flex items-center gap-1">
+                  <FlapWord text={`${infoVoo.altitudePes}`} size="lg" />
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">FT</span>
                 </div>
               </div>
 
               {/* VELOCIDADE */}
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+              <div className="bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   VELOCIDADE
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
-                  <FlapWord text={`${infoVoo.velocidadeKts}`} size="md" />
-                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">KTS</span>
+                <div className="flex items-center gap-1">
+                  <FlapWord text={`${infoVoo.velocidadeKts}`} size="lg" />
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KTS</span>
                 </div>
               </div>
 
               {/* RUMO */}
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  RUMO
+              <div className="bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+                  RUMO / HEADING
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
-                  <FlapWord text={`${infoVoo.rumo}`} size="md" />
-                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">°</span>
+                <div className="flex items-center gap-1">
+                  <FlapWord text={`${infoVoo.rumo}`} size="lg" />
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">°</span>
                 </div>
               </div>
 
@@ -527,16 +581,16 @@ export default function PainelAnalogicoMobileFullscreen() {
 
         {/* ── MODO 2: SEM VOOS -> MODO METEOROLOGIA AUTOMÁTICO ────────────── */}
         {!carregando && !vooAtual && (
-          <div className="h-full flex flex-col justify-between gap-1.5 sm:gap-3">
+          <div className="h-full flex flex-col justify-between gap-2 sm:gap-3.5">
             
             {/* Cabeçalho Meteorológico */}
-            <div className="w-full bg-[#10121a] p-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-9 h-9 sm:w-14 sm:h-14 bg-white p-1 rounded-md sm:rounded-lg border border-neutral-700 shadow-md flex items-center justify-center text-base sm:text-2xl shrink-0">
+            <div className="w-full bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white p-1 rounded-lg border border-neutral-700 shadow-md flex items-center justify-center text-xl sm:text-2xl shrink-0">
                   🌤️
                 </div>
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                     STATUS RADAR
                   </span>
                   <FlapWord text="ESPACO LIVRE" size="xl" />
@@ -544,7 +598,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               <div className="flex flex-col items-end gap-0.5 text-right">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   LOCALIDADE
                 </span>
                 <FlapWord text={meteorologia?.name || "PORTO"} size="md" />
@@ -552,54 +606,54 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* Linha Principal Meteorológica */}
-            <div className="w-full bg-[#10121a] p-2 sm:p-4 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg">
-              <div className="flex flex-col items-start gap-0.5">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+            <div className="w-full flex-1 bg-[#10121a] p-3 sm:p-5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-4 shadow-lg min-h-[90px]">
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   CONDIÇÃO DO TEMPO
                 </span>
                 <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
               </div>
 
-              <div className="flex flex-col items-end gap-0.5 text-right">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+              <div className="flex flex-col items-end gap-1 text-right">
+                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   TEMPERATURA
                 </span>
                 <div className="flex items-center gap-1">
                   <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
-                  <span className="text-base sm:text-2xl font-black text-white">°C</span>
+                  <span className="text-xl sm:text-3xl font-black text-white">°C</span>
                 </div>
               </div>
             </div>
 
             {/* Telemetria Meteorológica */}
-            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-3">
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+            <div className="w-full grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
+              <div className="bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   VENTO
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1">
                   <FlapWord text={`${Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="md" />
-                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">KM/H</span>
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KM/H</span>
                 </div>
               </div>
 
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+              <div className="bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   HUMIDADE
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1">
                   <FlapWord text={`${meteorologia?.main?.humidity ?? 70}`} size="md" />
-                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">%</span>
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">%</span>
                 </div>
               </div>
 
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+              <div className="bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   SENSAÇÃO
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1">
                   <FlapWord text={`${Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}`} size="md" />
-                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">°C</span>
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">°C</span>
                 </div>
               </div>
             </div>
