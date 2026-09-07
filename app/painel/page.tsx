@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -114,6 +114,21 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   FIN: { nome: "FINNAIR", iata: "AY", origem: "HELSINQUIA", destino: "PORTO", origemCode: "HEL", destinoCode: "OPO", aeronave: "A321-200" },
   SAS: { nome: "SCANDINAVIAN AIRLINES", iata: "SK", origem: "ESTOCOLMO", destino: "PORTO", origemCode: "ARN", destinoCode: "OPO", aeronave: "A320NEO" },
 
+  // Roménia
+  ROT: { nome: "TAROM", iata: "RO", origem: "BUCARESTE", destino: "PORTO", origemCode: "OTP", destinoCode: "OPO", aeronave: "B737-800" },
+  BMS: { nome: "BLUE AIR", iata: "0B", origem: "BUCARESTE", destino: "PORTO", origemCode: "OTP", destinoCode: "OPO", aeronave: "B737-800" },
+  JOC: { nome: "DAN AIR", iata: "DN", origem: "BRASOV", destino: "PORTO", origemCode: "GHV", destinoCode: "OPO", aeronave: "A320-200" },
+  KRP: { nome: "CARPATAIR", iata: "V3", origem: "TIMISOARA", destino: "PORTO", origemCode: "TSR", destinoCode: "OPO", aeronave: "A319-100" },
+  LIL: { nome: "FLY LILI", iata: "LIL", origem: "BRASOV", destino: "PORTO", origemCode: "GHV", destinoCode: "OPO", aeronave: "A320-200" },
+  ANX: { nome: "ANIMAWINGS", iata: "A2", origem: "BUCARESTE", destino: "PORTO", origemCode: "OTP", destinoCode: "OPO", aeronave: "A220-300" },
+
+  // Aviação Executiva e Charter Internacional
+  NJE: { nome: "NETJETS EUROPE", iata: "1I", origem: "LONDRES", destino: "PORTO", origemCode: "EGGW", destinoCode: "OPO", aeronave: "CITATION LATITUDE" },
+  EJA: { nome: "NETJETS US", iata: "QS", origem: "NOVA IORQUE", destino: "PORTO", origemCode: "TEB", destinoCode: "OPO", aeronave: "CHALLENGER 350" },
+  VJT: { nome: "VISTAJET", iata: "VJ", origem: "GENEBRA", destino: "PORTO", origemCode: "GVA", destinoCode: "OPO", aeronave: "GLOBAL 6000" },
+  GES: { nome: "GESTAIR", iata: "GP", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "CITATION XLS" },
+  TAG: { nome: "TAG AVIATION", iata: "FP", origem: "FARNBOROUGH", destino: "PORTO", origemCode: "FAB", destinoCode: "OPO", aeronave: "FALCON 2000" },
+
   // Mediterrâneo e Médio Oriente
   THY: { nome: "TURKISH AIRLINES", iata: "TK", origem: "ISTAMBUL", destino: "PORTO", origemCode: "IST", destinoCode: "OPO", aeronave: "A321NEO" },
   AEE: { nome: "AEGEAN AIRLINES", iata: "A3", origem: "ATENAS", destino: "PORTO", origemCode: "ATH", destinoCode: "OPO", aeronave: "A320NEO" },
@@ -123,14 +138,41 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   ITY: { nome: "ITA AIRWAYS", iata: "AZ", origem: "ROMA", destino: "PORTO", origemCode: "FCO", destinoCode: "OPO", aeronave: "A320NEO" },
 };
 
+// ─── Prefixos Internacionais de Matrícula Aeronáutica ──────────────────────────
+
+const PREFIXOS_REGISTO: Record<string, { pais: string; cidade: string; code: string }> = {
+  YR: { pais: "ROMÉNIA", cidade: "BUCARESTE", code: "OTP" },
+  CS: { pais: "PORTUGAL", cidade: "LISBOA", code: "LIS" },
+  CR: { pais: "PORTUGAL", cidade: "LISBOA", code: "LIS" },
+  EC: { pais: "ESPANHA", cidade: "MADRID", code: "MAD" },
+  OE: { pais: "ÁUSTRIA", cidade: "VIENA", code: "VIE" },
+  HB: { pais: "SUÍÇA", cidade: "ZURIQUE", code: "ZRH" },
+  OO: { pais: "BÉLGICA", cidade: "BRUXELAS", code: "BRU" },
+  PH: { pais: "PAÍSES BAIXOS", cidade: "AMSTERDÃO", code: "AMS" },
+  SE: { pais: "SUÉCIA", cidade: "ESTOCOLMO", code: "ARN" },
+  LN: { pais: "NORUEGA", cidade: "OSLO", code: "OSL" },
+  TF: { pais: "ISLÂNDIA", cidade: "REIQUIAVIQUE", code: "KEF" },
+  SX: { pais: "GRÉCIA", cidade: "ATENAS", code: "ATH" },
+  TC: { pais: "TURQUIA", cidade: "ISTAMBUL", code: "IST" },
+  "9H": { pais: "MALTA", cidade: "VALLETA", code: "MLA" },
+  EI: { pais: "IRLANDA", cidade: "DUBLIN", code: "DUB" },
+  SP: { pais: "POLÓNIA", cidade: "VARSÓVIA", code: "WAW" },
+  LX: { pais: "LUXEMBURGO", cidade: "LUXEMBURGO", code: "LUX" },
+  OM: { pais: "ESLOVÁQUIA", cidade: "BRATISLAVA", code: "BTS" },
+  OK: { pais: "CHÉQUIA", cidade: "PRAGA", code: "PRG" },
+  HA: { pais: "HUNGRIA", cidade: "BUDAPESTE", code: "BUD" },
+  LZ: { pais: "BULGÁRIA", cidade: "SÓFIA", code: "SOF" },
+};
+
 function resolverVooInfo(voo: EstadoVoo) {
   const cs = (voo[1] || "").trim().toUpperCase();
   const prefixo3 = cs.slice(0, 3);
   const prefixo2 = cs.slice(0, 2);
   
   let info = COMPANHIAS[prefixo3];
-  let icao = prefixo3;
+  let icao = /^[A-Z]{3}$/.test(prefixo3) ? prefixo3 : "";
   let iata = info?.iata || null;
+  const regPais = PREFIXOS_REGISTO[prefixo2];
 
   if (!iata) {
     if (prefixo2 === "TP") { iata = "TP"; icao = "TAP"; }
@@ -146,6 +188,7 @@ function resolverVooInfo(voo: EstadoVoo) {
     else if (prefixo2 === "TO") { iata = "TO"; icao = "TVF"; }
     else if (prefixo2 === "HV") { iata = "HV"; icao = "TRA"; }
     else if (prefixo2 === "W6") { iata = "W6"; icao = "WZZ"; }
+    else if (prefixo2 === "RO") { iata = "RO"; icao = "ROT"; }
   }
 
   let numeroVoo = cs || voo[0].toUpperCase();
@@ -156,9 +199,9 @@ function resolverVooInfo(voo: EstadoVoo) {
   const paisUpper = (voo[2] || "").toUpperCase();
   const dadosPais = CIDADES_PAISES[paisUpper];
 
-  let origem = info?.origem || dadosPais?.cidade || "MADRID";
+  let origem = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
   let destino = info?.destino || "PORTO";
-  let origemCode = info?.origemCode || dadosPais?.code || "MAD";
+  let origemCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
   let destinoCode = info?.destinoCode || "OPO";
 
   const vRate = voo[11];
@@ -181,13 +224,23 @@ function resolverVooInfo(voo: EstadoVoo) {
   const velocidadeKts = voo[9] != null ? Math.round(voo[9] * 1.94384) : 0;
   const rumo = voo[10] != null ? Math.round(voo[10]) : 0;
 
+  // Determinar nome legível e elegante para a companhia ou tipo de operação
+  let nomeFinalCompanhia = "AVIAÇÃO COMERCIAL";
+  if (info?.nome) {
+    nomeFinalCompanhia = info.nome;
+  } else if (regPais) {
+    nomeFinalCompanhia = `AVIAÇÃO PRIVADA (${regPais.pais})`;
+  } else if (voo[2]) {
+    nomeFinalCompanhia = `OPERADOR (${voo[2].toUpperCase()})`;
+  }
+
   return {
     callsign: cs,
     icao,
     iata,
     numeroVoo,
-    nomeCompanhia: info?.nome || (voo[2] ? `COMPANHIA (${voo[2]})` : "AVIAÇÃO COMERCIAL"),
-    aeronave: info?.aeronave || "A320",
+    nomeCompanhia: nomeFinalCompanhia,
+    aeronave: info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320"),
     origem,
     origemCode,
     destino,
@@ -250,30 +303,55 @@ interface AirlineLogoProps {
   icao?: string;
   iata?: string | null;
   nome: string;
+  callsign?: string;
 }
 
-function AirlineLogo({ icao, iata, nome }: AirlineLogoProps) {
+function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
   const [urlIndex, setUrlIndex] = useState(0);
+  const [hasFailed, setHasFailed] = useState(false);
 
-  const urls: string[] = [];
-  if (icao) {
-    urls.push(`https://raw.githubusercontent.com/Jxck-S/airline-logos/main/flightaware_logos/${icao.toUpperCase()}.png`);
-    urls.push(`https://raw.githubusercontent.com/Jxck-S/airline-logos/main/custom_logos/${icao.toUpperCase()}.png`);
-  }
-  if (iata) {
-    urls.push(`https://pics.avs.io/200/200/${iata.toUpperCase()}.png`);
-  }
+  // Lista de URLs prioritárias em CDN globais
+  const urls = useMemo(() => {
+    const list: string[] = [];
+    const icaoUp = (icao || "").trim().toUpperCase();
+    const iataUp = (iata || "").trim().toUpperCase();
+
+    // Apenas se tiver formato ICAO válido de 3 letras
+    if (icaoUp.length === 3 && /^[A-Z]{3}$/.test(icaoUp)) {
+      list.push(`https://raw.githubusercontent.com/Jxck-S/airline-logos/main/flightaware_logos/${icaoUp}.png`);
+      list.push(`https://raw.githubusercontent.com/Jxck-S/airline-logos/main/custom_logos/${icaoUp}.png`);
+    }
+    // Apenas se tiver formato IATA válido de 2 caracteres
+    if (iataUp.length === 2 && /^[A-Z0-9]{2}$/.test(iataUp)) {
+      list.push(`https://pics.avs.io/200/200/${iataUp}.png`);
+    }
+    return list;
+  }, [icao, iata]);
+
+  // Sempre que mudar a aeronave ou o voo, reiniciar tentativas
+  useEffect(() => {
+    setUrlIndex(0);
+    setHasFailed(false);
+  }, [icao, iata, callsign]);
 
   const handleImgError = () => {
-    if (urlIndex < urls.length - 1) {
+    if (urlIndex + 1 < urls.length) {
       setUrlIndex((prev) => prev + 1);
+    } else {
+      setHasFailed(true);
     }
   };
 
-  const srcAtual = urls[urlIndex];
+  const srcAtual = !hasFailed && urls.length > 0 ? urls[urlIndex] : null;
+
+  // Sigla aeronáutica para o emblema elegante caso não exista logótipo
+  const siglaEmblema =
+    (icao && icao.length === 3 && /^[A-Z]{3}$/.test(icao))
+      ? icao
+      : (callsign ? callsign.slice(0, 3) : "AIR");
 
   return (
-    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white p-1 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
+    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
       {srcAtual ? (
         <Image
           key={srcAtual}
@@ -286,9 +364,18 @@ function AirlineLogo({ icao, iata, nome }: AirlineLogoProps) {
           unoptimized
         />
       ) : (
-        <span className="font-black text-xs sm:text-sm text-neutral-800 uppercase">
-          {icao?.slice(0, 3) || "AIR"}
-        </span>
+        <div className="w-full h-full bg-gradient-to-br from-neutral-900 via-neutral-950 to-black rounded-md sm:rounded-lg flex flex-col items-center justify-center p-0.5 border border-white/10 shadow-inner">
+          {/* Silhueta aeronáutica estilizada */}
+          <svg
+            className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 fill-current drop-shadow"
+            viewBox="0 0 24 24"
+          >
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+          </svg>
+          <span className="font-mono font-black text-[7px] sm:text-[9px] text-white tracking-widest uppercase leading-none mt-0.5">
+            {siglaEmblema}
+          </span>
+        </div>
       )}
     </div>
   );
@@ -494,7 +581,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               
               {/* Logótipo Oficial Garantido + Voo */}
               <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-                <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} />
+                <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
 
                 <div className="flex flex-col items-start gap-0.5">
                   <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
