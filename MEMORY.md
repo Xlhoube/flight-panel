@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v0.8.0  
+**Versão:** v0.8.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Painel analógico Split-Flap com letras 100% brancas de alto contraste, suporte a Ecrã Inteiro (Fullscreen) com 1 único toque no ecrã e áudio mecânico integrado.
+**Estado:** Painel analógico Split-Flap com exibição garantida de logótipos de companhias aéreas e transição automática para o modo meteorológico completo quando não houver aviões no ar.
 
 ---
 
@@ -23,7 +23,7 @@
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
 | Estilos         | Tailwind CSS v4 + Split-Flap CSS  | Células de palhetas mecânicas brancas 3D          |
 | Áudio           | Web Audio API (Flap Clack)        | Som mecânico sintetizado ao alternar palhetas    |
-| Imagens         | Aviasales CDN                     | Logótipos oficiais de companhias aéreas           |
+| Imagens         | Aviasales CDN + Emblem Fallback   | Logótipos oficiais e emblemas de aviação          |
 | Voos            | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo               |
 | Meteorologia    | OpenWeatherMap (gratuito)         | API meteorológica em PT                           |
 
@@ -37,6 +37,11 @@
 **Contexto:** O utilizador solicitou que todas as letras fossem em branco e que um toque no ecrã colocasse o painel automaticamente em ecrã inteiro (Fullscreen).  
 **Decisão:** Integrar a Fullscreen API no elemento raiz activada ao toque/clique em conjunto com o áudio, e uniformizar todas as células de palhetas mecânicas com tipografia monocromática 100% branca sobre fundo escuro.  
 **Consequência:** Experiência imersiva em telemóvel/tablet/ecrã sem barras de navegação do browser, com estética minimalista monocromática.
+
+### ADR-018 — Resolução Universal de Logótipos e Transição Meteo Automática (2026-09-07)
+**Contexto:** Garantir que o logótipo da companhia aérea nunca fica em falta (mesmo para códigos ICAO não catalogados) e que a ausência de voos no ar transita automaticamente para o modo meteorológico.  
+**Decisão:** Expandir o dicionário de operadoras aéreas, adicionar resolução IATA de 2 letras e emblema de cauda de aviação de reserva; verificar ativamente a ausência de tráfego em voo para carregar a estação meteorológica em palhetas brancas.  
+**Consequência:** Visual 100% consistente, sem falhas visuais no logótipo e com informação meteorológica sempre que o radar estiver livre.
 
 ---
 
@@ -62,3 +67,4 @@
 | 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas|
 | 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis    |
 | 2026-09-07 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
+| 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar |
