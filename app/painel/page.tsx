@@ -40,43 +40,28 @@ interface InfoCompanhia {
   origemCode: string;
   destinoCode: string;
   aeronave: string;
-  imagemUrl: string;
 }
 
 const INTERVALO_MS = 25_000;
 
-// ─── Imagens de Aeronaves/Pinturas para o Estilo Flight Wall ─────────────────
-
-const IMAGENS_AERONAVES: Record<string, string> = {
-  TAP: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1200&auto=format&fit=crop",
-  RYR: "https://images.unsplash.com/photo-1520437358207-323b43b50729?q=80&w=1200&auto=format&fit=crop",
-  EJU: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?q=80&w=1200&auto=format&fit=crop",
-  EZY: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?q=80&w=1200&auto=format&fit=crop",
-  EZS: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?q=80&w=1200&auto=format&fit=crop",
-  DLH: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop",
-  KLM: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop",
-  BAW: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop",
-  PADRAO: "https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?q=80&w=1200&auto=format&fit=crop",
-};
-
-// ─── Dicionário de Companhias Aéreas Flight Wall ──────────────────────────────
+// ─── Dicionário de Companhias Aéreas ──────────────────────────────────────────
 
 const COMPANHIAS: Record<string, InfoCompanhia> = {
-  TAP: { nome: "TAP Air Portugal", iata: "TP", origem: "Porto", destino: "Lisboa", origemCode: "OPO", destinoCode: "LIS", aeronave: "Airbus A320-251N", imagemUrl: IMAGENS_AERONAVES.TAP },
-  RYR: { nome: "Ryanair", iata: "FR", origem: "Porto", destino: "Madrid", origemCode: "OPO", destinoCode: "MAD", aeronave: "Boeing 737-800", imagemUrl: IMAGENS_AERONAVES.RYR },
-  EJU: { nome: "easyJet Europe", iata: "U2", origem: "Porto", destino: "Paris", origemCode: "OPO", destinoCode: "CDG", aeronave: "Airbus A320-214", imagemUrl: IMAGENS_AERONAVES.EJU },
-  EZY: { nome: "easyJet UK", iata: "U2", origem: "Londres", destino: "Porto", origemCode: "LGW", destinoCode: "OPO", aeronave: "Airbus A320-214", imagemUrl: IMAGENS_AERONAVES.EZY },
-  EZS: { nome: "easyJet Switzerland", iata: "U2", origem: "Zurique", destino: "Porto", origemCode: "ZRH", destinoCode: "OPO", aeronave: "Airbus A320-214", imagemUrl: IMAGENS_AERONAVES.EZS },
-  TVF: { nome: "Transavia France", iata: "TO", origem: "Paris", destino: "Porto", origemCode: "ORY", destinoCode: "OPO", aeronave: "Boeing 737-800", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  TRA: { nome: "Transavia", iata: "HV", origem: "Amsterdão", destino: "Porto", origemCode: "AMS", destinoCode: "OPO", aeronave: "Boeing 737-800", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  LGL: { nome: "Luxair", iata: "LG", origem: "Luxemburgo", destino: "Porto", origemCode: "LUX", destinoCode: "OPO", aeronave: "De Havilland Dash 8", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  NOZ: { nome: "Norwegian", iata: "DY", origem: "Oslo", destino: "Porto", origemCode: "OSL", destinoCode: "OPO", aeronave: "Boeing 737 MAX 8", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  DLH: { nome: "Lufthansa", iata: "LH", origem: "Frankfurt", destino: "Porto", origemCode: "FRA", destinoCode: "OPO", aeronave: "Airbus A321-271NX", imagemUrl: IMAGENS_AERONAVES.DLH },
-  VLG: { nome: "Vueling", iata: "VY", origem: "Barcelona", destino: "Porto", origemCode: "BCN", destinoCode: "OPO", aeronave: "Airbus A320-232", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  IBE: { nome: "Iberia", iata: "IB", origem: "Madrid", destino: "Porto", origemCode: "MAD", destinoCode: "OPO", aeronave: "Airbus A320-200", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  SWR: { nome: "Swiss Air Lines", iata: "LX", origem: "Zurique", destino: "Porto", origemCode: "ZRH", destinoCode: "OPO", aeronave: "Airbus A220-300", imagemUrl: IMAGENS_AERONAVES.PADRAO },
-  KLM: { nome: "KLM Royal Dutch", iata: "KL", origem: "Amsterdão", destino: "Porto", origemCode: "AMS", destinoCode: "OPO", aeronave: "Boeing 737-800", imagemUrl: IMAGENS_AERONAVES.KLM },
-  BAW: { nome: "British Airways", iata: "BA", origem: "Londres", destino: "Porto", origemCode: "LHR", destinoCode: "OPO", aeronave: "Airbus A320-232", imagemUrl: IMAGENS_AERONAVES.BAW },
+  TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origem: "PORTO", destino: "LISBOA", origemCode: "OPO", destinoCode: "LIS", aeronave: "A320-251N" },
+  RYR: { nome: "RYANAIR", iata: "FR", origem: "PORTO", destino: "MADRID", origemCode: "OPO", destinoCode: "MAD", aeronave: "B737-800" },
+  EJU: { nome: "EASYJET EUROPE", iata: "U2", origem: "PORTO", destino: "PARIS", origemCode: "OPO", destinoCode: "CDG", aeronave: "A320-214" },
+  EZY: { nome: "EASYJET UK", iata: "U2", origem: "LONDRES", destino: "PORTO", origemCode: "LGW", destinoCode: "OPO", aeronave: "A320-214" },
+  EZS: { nome: "EASYJET SWISS", iata: "U2", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A320-214" },
+  TVF: { nome: "TRANSAVIA FRANCE", iata: "TO", origem: "PARIS", destino: "PORTO", origemCode: "ORY", destinoCode: "OPO", aeronave: "B737-800" },
+  TRA: { nome: "TRANSAVIA", iata: "HV", origem: "AMSTERDAO", destino: "PORTO", origemCode: "AMS", destinoCode: "OPO", aeronave: "B737-800" },
+  LGL: { nome: "LUXAIR", iata: "LG", origem: "LUXEMBURGO", destino: "PORTO", origemCode: "LUX", destinoCode: "OPO", aeronave: "DASH 8-400" },
+  NOZ: { nome: "NORWEGIAN", iata: "DY", origem: "OSLO", destino: "PORTO", origemCode: "OSL", destinoCode: "OPO", aeronave: "B737 MAX 8" },
+  DLH: { nome: "LUFTHANSA", iata: "LH", origem: "FRANKFURT", destino: "PORTO", origemCode: "FRA", destinoCode: "OPO", aeronave: "A321-271NX" },
+  VLG: { nome: "VUELING", iata: "VY", origem: "BARCELONA", destino: "PORTO", origemCode: "BCN", destinoCode: "OPO", aeronave: "A320-232" },
+  IBE: { nome: "IBERIA", iata: "IB", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "A320-200" },
+  SWR: { nome: "SWISS AIR LINES", iata: "LX", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A220-300" },
+  KLM: { nome: "KLM ROYAL DUTCH", iata: "KL", origem: "AMSTERDAO", destino: "PORTO", origemCode: "AMS", destinoCode: "OPO", aeronave: "B737-800" },
+  BAW: { nome: "BRITISH AIRWAYS", iata: "BA", origem: "LONDRES", destino: "PORTO", origemCode: "LHR", destinoCode: "OPO", aeronave: "A320-232" },
 };
 
 function resolverVooInfo(voo: EstadoVoo) {
@@ -87,57 +72,53 @@ function resolverVooInfo(voo: EstadoVoo) {
   let iata = info?.iata || null;
   let numeroVoo = cs || voo[0].toUpperCase();
   if (info && cs.length > 3) {
-    numeroVoo = `${info.iata}${cs.slice(3).trim()}`;
+    numeroVoo = `${info.iata} ${cs.slice(3).trim()}`;
   }
 
   const paisUpper = (voo[2] || "").toUpperCase();
-  let origem = info?.origem || paisUpper || "Internacional";
-  let destino = info?.destino || "Porto";
+  let origem = info?.origem || paisUpper || "INTERNACIONAL";
+  let destino = info?.destino || "PORTO";
   let origemCode = info?.origemCode || "ORG";
   let destinoCode = info?.destinoCode || "OPO";
 
   const vRate = voo[11];
   if (vRate != null) {
     if (vRate < -0.5) {
-      destino = "Porto";
+      destino = "PORTO";
       destinoCode = "OPO";
     } else if (vRate > 0.5) {
-      origem = "Porto";
+      origem = "PORTO";
       origemCode = "OPO";
     }
   }
 
   const altitudeMetros = voo[7] != null ? Math.round(voo[7]) : 0;
   const altitudePes = Math.round(altitudeMetros * 3.28084);
-  const velocidadeKmh = voo[9] != null ? Math.round(voo[9] * 3.6) : 0;
   const velocidadeKts = voo[9] != null ? Math.round(voo[9] * 1.94384) : 0;
   const rumo = voo[10] != null ? Math.round(voo[10]) : 0;
 
   return {
     callsign: cs,
     numeroVoo,
-    nomeCompanhia: info?.nome || (voo[2] ? `Companhia (${voo[2]})` : "Companhia Aérea"),
-    aeronave: info?.aeronave || "Airbus A320 Comercial",
-    imagemUrl: info?.imagemUrl || IMAGENS_AERONAVES.PADRAO,
+    nomeCompanhia: info?.nome || (voo[2] ? `COMPANHIA (${voo[2]})` : "COMPANHIA AEREA"),
+    aeronave: info?.aeronave || "A320",
     iata,
     origem,
     origemCode,
     destino,
     destinoCode,
-    altitudeMetros,
     altitudePes,
-    velocidadeKmh,
     velocidadeKts,
     rumo,
     noSolo: voo[8],
   };
 }
 
-// ─── Sintetizador de Som ──────────────────────────────────────────────────────
+// ─── Sintetizador de Som Mecânico (Split-Flap Clack) ──────────────────────────
 
 let globalAudioCtx: AudioContext | null = null;
 
-function tocarSomChime() {
+function tocarSomFlapClack() {
   if (typeof window === "undefined") return;
   try {
     if (!globalAudioCtx) {
@@ -148,28 +129,118 @@ function tocarSomChime() {
       globalAudioCtx.resume();
     }
     const now = globalAudioCtx.currentTime;
-    const osc = globalAudioCtx.createOscillator();
+
+    // Efeito de clique seco de palheta mecânica
+    const bufferSize = globalAudioCtx.sampleRate * 0.03;
+    const buffer = globalAudioCtx.createBuffer(1, bufferSize, globalAudioCtx.sampleRate);
+    const output = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
+    }
+
+    const noise = globalAudioCtx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = globalAudioCtx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(1200, now);
+    filter.Q.setValueAtTime(3.0, now);
+
     const gain = globalAudioCtx.createGain();
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
 
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(523.25, now); // C5
-    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-
-    gain.gain.setValueAtTime(0.08, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-    osc.connect(gain);
+    noise.connect(filter);
+    filter.connect(gain);
     gain.connect(globalAudioCtx.destination);
-    osc.start(now);
-    osc.stop(now + 0.25);
+
+    noise.start(now);
   } catch {
     // Ignorar
   }
 }
 
-// ─── Componente Estilo The Flight Wall (Smart Display) ───────────────────────
+// ─── Componente de Palheta Mecânica Solari (Split-Flap Tile) ──────────────────
 
-export default function TheFlightWall() {
+interface FlapCellProps {
+  char: string;
+  variant?: "yellow" | "white" | "amber" | "green";
+  size?: "sm" | "md" | "lg" | "xl";
+}
+
+function FlapCell({ char, variant = "yellow", size = "md" }: FlapCellProps) {
+  const [prevChar, setPrevChar] = useState(char);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (char !== prevChar) {
+      setAnimating(true);
+      tocarSomFlapClack();
+      const timer = setTimeout(() => {
+        setPrevChar(char);
+        setAnimating(false);
+      }, 220);
+      return () => clearTimeout(timer);
+    }
+  }, [char, prevChar]);
+
+  const dimensões = {
+    sm: "w-6 h-9 text-base font-black rounded-[3px]",
+    md: "w-8 h-12 text-xl font-black rounded-[4px]",
+    lg: "w-11 h-16 text-3xl font-black rounded-[5px]",
+    xl: "w-14 h-20 text-4xl font-black rounded-[6px]",
+  }[size];
+
+  const coresTexto = {
+    yellow: "text-[#facc15] bg-[#111319] border-[#222634] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]",
+    white: "text-[#f8fafc] bg-[#111319] border-[#222634] shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]",
+    amber: "text-[#fbbf24] bg-[#16130b] border-[#382b13]",
+    green: "text-[#34d399] bg-[#0c1713] border-[#18392b]",
+  }[variant];
+
+  const charExibir = char === " " ? "\u00A0" : char.toUpperCase();
+
+  return (
+    <div className={`flap-cell ${dimensões} ${coresTexto} ${animating ? "animate-flap" : ""}`}>
+      {/* Pinos metálicos laterais do rotor */}
+      <span className="flap-pin-left" />
+      <span className="flap-pin-right" />
+
+      {/* Linha de corte horizontal central da palheta */}
+      <span className="flap-split-line" />
+
+      {/* Carácter impresso na palheta */}
+      <span className="leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] tracking-tighter">
+        {charExibir}
+      </span>
+    </div>
+  );
+}
+
+// ─── Componente de Palavra / Linha Solari (FlapWord) ──────────────────────────
+
+interface FlapWordProps {
+  text: string;
+  length: number;
+  variant?: "yellow" | "white" | "amber" | "green";
+  size?: "sm" | "md" | "lg" | "xl";
+}
+
+function FlapWord({ text, length, variant = "yellow", size = "md" }: FlapWordProps) {
+  const padText = (text || "").padEnd(length, " ").slice(0, length);
+
+  return (
+    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+      {padText.split("").map((c, i) => (
+        <FlapCell key={i} char={c} variant={variant} size={size} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Componente Principal Painel Analógico Aeroporto (Landscape Edition) ──────
+
+export default function PainelAnalogicoAeroporto() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -190,7 +261,7 @@ export default function TheFlightWall() {
       globalAudioCtx.resume();
     }
     setSomAtivo(true);
-    tocarSomChime();
+    tocarSomFlapClack();
   };
 
   const toggleSom = (e: React.MouseEvent) => {
@@ -238,174 +309,189 @@ export default function TheFlightWall() {
   const horaStr = horaAtual.toLocaleTimeString("pt-PT", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   });
 
   return (
     <main
       onClick={ativarAudio}
-      className="min-h-screen bg-[#07080a] text-neutral-100 flex flex-col items-center justify-center p-3 sm:p-6 select-none font-sans cursor-pointer relative overflow-hidden"
+      className="min-h-screen bg-[#07080a] text-neutral-100 flex flex-col items-center justify-center p-3 sm:p-6 select-none font-mono cursor-pointer relative overflow-hidden board-texture"
     >
-      {/* Moldura / Quadro Físico 'The Flight Wall' */}
-      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-[#0e1015] border-[10px] border-[#181a20] rounded-[2.5rem] p-5 sm:p-7 shadow-[0_40px_100px_rgba(0,0,0,0.95),inset_0_2px_8px_rgba(255,255,255,0.05)] relative z-10 flex flex-col items-center">
+      {/* Glow mecânico de retroiluminação das palhetas */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* ── QUADRO METÁLICO ANALÓGICO SOLARI (16:9 LANDSCAPE WIDESCREEN) ─────── */}
+      <div className="w-full max-w-5xl bg-[#0c0d12] border-[12px] sm:border-[16px] border-[#161820] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-7 shadow-[0_50px_120px_rgba(0,0,0,0.98),inset_0_2px_10px_rgba(255,255,255,0.06)] relative z-10 flex flex-col">
         
-        {/* Placa de Identificação do Quadro */}
-        <header className="w-full flex items-center justify-between pb-4 border-b border-white/10 mb-5">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-neutral-400">
-              The Flight Wall
-            </span>
+        {/* Parafusos industriais nos 4 cantos da moldura */}
+        <span className="screw absolute top-3 left-3" />
+        <span className="screw absolute top-3 right-3" />
+        <span className="screw absolute bottom-3 left-3" />
+        <span className="screw absolute bottom-3 right-3" />
+
+        {/* ── CABEÇALHO ANALÓGICO DO PAINEL DE PARTIDAS ─────────────────────── */}
+        <header className="w-full flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+          
+          {/* Lâmpadas indicadoras vintage & Título */}
+          <div className="flex items-center gap-3">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 indicator-lamp animate-pulse" />
+            <div className="flex flex-col">
+              <span className="text-sm sm:text-base font-black uppercase tracking-[0.3em] text-amber-400 drop-shadow-[0_2px_4px_rgba(251,191,36,0.3)]">
+                DEPARTURES · SOLARI SPLIT-FLAP
+              </span>
+              <span className="text-[10px] text-neutral-500 tracking-widest uppercase font-bold">
+                AEROPORTO DO PORTO · VALADARES RADAR
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono font-bold text-neutral-300">
-              {horaStr}
-            </span>
+          {/* Relógio de Palhetas e Controlo de Som */}
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 bg-[#12141c] px-3 py-1.5 rounded-lg border border-white/10 shadow-inner">
+              <span className="text-[10px] text-neutral-400 uppercase tracking-widest">HORA</span>
+              <span className="text-sm font-black text-amber-400 tracking-widest font-mono">
+                {horaStr}
+              </span>
+            </div>
+
             <button
               onClick={toggleSom}
-              className={`p-1.5 rounded-full text-xs transition-all ${
-                somAtivo ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "bg-neutral-800 text-neutral-400"
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all border ${
+                somAtivo
+                  ? "bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                  : "bg-neutral-800 text-neutral-400 border-neutral-700"
               }`}
             >
-              {somAtivo ? "🔊" : "🔇"}
+              {somAtivo ? "🔊 CLAQUE ON" : "🔇 CLAQUE OFF"}
             </button>
           </div>
         </header>
 
-        {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
+        {/* ── ESTADO A CARREGAR PALHETAS ──────────────────────────────────── */}
         {carregando && (
           <div className="py-20 flex flex-col items-center gap-4 text-center">
-            <div className="w-12 h-12 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs tracking-widest text-neutral-400 uppercase font-mono">
-              Detectando Tráfego Aéreo...
+            <div className="flex items-center gap-2">
+              <FlapCell char="C" size="md" />
+              <FlapCell char="A" size="md" />
+              <FlapCell char="R" size="md" />
+              <FlapCell char="R" size="md" />
+              <FlapCell char="E" size="md" />
+              <FlapCell char="G" size="md" />
+              <FlapCell char="A" size="md" />
+              <FlapCell char="R" size="md" />
+            </div>
+            <span className="text-xs tracking-widest text-neutral-400 uppercase font-mono mt-2">
+              A SINCRONIZAR ROTORES MECÂNICOS...
             </span>
           </div>
         )}
 
-        {/* ── DESIGN FLIGHT WALL (AERONAVE EM TEMPO REAL) ────────────────── */}
+        {/* ── MODO ANALÓGICO COM VOO ACTIVO (LANDSCAPE WIDESCREEN) ────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="w-full flex flex-col items-center gap-5">
+          <div className="w-full flex flex-col gap-6 my-2">
             
-            {/* 1. Imagem de Alta Fidelidade do Avião / Livery Card */}
-            <div className="w-full h-48 sm:h-56 rounded-2xl relative overflow-hidden shadow-2xl border border-white/10 group">
-              <Image
-                src={infoVoo.imagemUrl}
-                alt={infoVoo.aeronave}
-                fill
-                className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                unoptimized
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-
-              {/* Logótipo Sobreposto no Canto Superior Esquerdo */}
-              {infoVoo.iata && (
-                <div className="absolute top-3 left-3 w-12 h-12 bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-white/40 flex items-center justify-center">
-                  <Image
-                    src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
-                    alt={infoVoo.nomeCompanhia}
-                    width={48}
-                    height={48}
-                    className="object-contain max-h-full"
-                    unoptimized
-                  />
-                </div>
-              )}
-
-              {/* Número do Voo e Aeronave no Canto Inferior */}
-              <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">
+            {/* LINHA 1: COMPANHIA AÉREA & NÚMERO DO VOO */}
+            <div className="w-full bg-[#12141c] p-4 sm:p-5 rounded-xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl">
+              
+              <div className="flex items-center gap-4">
+                {/* Badge/Logótipo da Companhia em cartão Solari */}
+                {infoVoo.iata && (
+                  <div className="w-14 h-14 bg-white p-1 rounded-lg border-2 border-neutral-700 shadow-md flex items-center justify-center shrink-0">
+                    <Image
+                      src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
+                      alt={infoVoo.nomeCompanhia}
+                      width={52}
+                      height={52}
+                      className="object-contain max-h-full"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                
                 <div className="flex flex-col">
-                  <span className="text-3xl font-black font-mono tracking-tight drop-shadow-md">
-                    {infoVoo.numeroVoo}
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                    VOO / FLIGHT
                   </span>
-                  <span className="text-xs text-neutral-300 font-medium">
-                    {infoVoo.nomeCompanhia}
-                  </span>
+                  <FlapWord text={infoVoo.numeroVoo} length={8} variant="yellow" size="lg" />
                 </div>
+              </div>
 
-                {/* Tag do Modelo */}
-                <span className="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono border border-white/20 text-neutral-300">
-                  {infoVoo.aeronave}
+              {/* Nome da Companhia e Modelo de Aeronave em Palhetas */}
+              <div className="flex flex-col items-start md:items-end w-full md:w-auto">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                  AERONAVE / AIRCRAFT
+                </span>
+                <FlapWord text={infoVoo.aeronave} length={14} variant="white" size="sm" />
+                <span className="text-xs text-amber-400/80 font-bold mt-1 tracking-wider">
+                  {infoVoo.nomeCompanhia}
                 </span>
               </div>
+
             </div>
 
-            {/* 2. Seção de Rota Origem ➔ Destino (flightwall.com style) */}
-            <div className="w-full bg-[#141720] p-5 rounded-2xl border border-white/5 flex items-center justify-between relative shadow-inner">
+            {/* LINHA 2: ROTA EM PALHETAS MECÂNICAS (ORIGEM ➔ DESTINO) */}
+            <div className="w-full bg-[#12141c] p-5 sm:p-6 rounded-xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
               
-              {/* Origem */}
-              <div className="flex flex-col items-start">
-                <span className="text-3xl font-black font-mono tracking-tight text-white">
-                  {infoVoo.origemCode}
+              {/* ORIGEM */}
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                  DEPARTURE / ORIGEM
                 </span>
-                <span className="text-xs text-neutral-400 font-medium truncate max-w-[110px]">
-                  {infoVoo.origem}
-                </span>
+                <div className="flex items-center gap-3">
+                  <FlapWord text={infoVoo.origemCode} length={3} variant="yellow" size="xl" />
+                  <FlapWord text={infoVoo.origem} length={10} variant="white" size="sm" />
+                </div>
               </div>
 
-              {/* Seta de Rota Animada */}
-              <div className="flex flex-col items-center px-2">
-                <span className="text-[10px] font-mono text-sky-400 font-bold uppercase tracking-wider mb-1">
+              {/* ÍCONE DE ESTADO DE VOO / FLAP STATUS */}
+              <div className="flex flex-col items-center justify-center px-4">
+                <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-2 animate-pulse">
                   {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
                 </span>
-                <div className="w-20 sm:w-28 h-0.5 bg-gradient-to-r from-sky-500/20 via-sky-400 to-sky-500/20 relative">
-                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sky-400 text-base">
-                    ✈
-                  </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400 text-2xl animate-bounce">✈</span>
+                  <span className="text-neutral-500 font-mono text-sm tracking-widest">━━━━</span>
                 </div>
               </div>
 
-              {/* Destino */}
-              <div className="flex flex-col items-end">
-                <span className="text-3xl font-black font-mono tracking-tight text-white">
-                  {infoVoo.destinoCode}
+              {/* DESTINO */}
+              <div className="flex flex-col items-start md:items-end gap-1">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                  DESTINATION / DESTINO
                 </span>
-                <span className="text-xs text-neutral-400 font-medium truncate max-w-[110px]">
-                  {infoVoo.destino}
-                </span>
+                <div className="flex items-center gap-3">
+                  <FlapWord text={infoVoo.destinoCode} length={3} variant="yellow" size="xl" />
+                  <FlapWord text={infoVoo.destino} length={10} variant="white" size="sm" />
+                </div>
               </div>
+
             </div>
 
-            {/* 3. Barra de Métricas e Telemetria de Voo */}
-            <div className="w-full grid grid-cols-3 gap-2.5">
+            {/* LINHA 3: TELEMETRIA ANALÓGICA DE AVIAÇÃO */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
               
-              {/* Altitude */}
-              <div className="bg-[#141720] p-3 rounded-xl border border-white/5 flex flex-col items-center text-center">
-                <span className="text-[9px] uppercase tracking-wider font-bold text-neutral-400 mb-0.5">
-                  ALTITUDE
+              {/* ALTITUDE */}
+              <div className="bg-[#12141c] p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
+                  ALTITUDE (FT)
                 </span>
-                <span className="text-sm font-bold font-mono text-white">
-                  {infoVoo.altitudePes.toLocaleString("pt-PT")}
-                </span>
-                <span className="text-[9px] text-neutral-500 font-mono">FT</span>
+                <FlapWord text={`${infoVoo.altitudePes} FT`} length={9} variant="amber" size="md" />
               </div>
 
-              {/* Velocidade */}
-              <div className="bg-[#141720] p-3 rounded-xl border border-white/5 flex flex-col items-center text-center">
-                <span className="text-[9px] uppercase tracking-wider font-bold text-neutral-400 mb-0.5">
-                  VELOCIDADE
+              {/* VELOCIDADE */}
+              <div className="bg-[#12141c] p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
+                  VELOCIDADE (KTS)
                 </span>
-                <span className="text-sm font-bold font-mono text-white">
-                  {infoVoo.velocidadeKts}
-                </span>
-                <span className="text-[9px] text-neutral-500 font-mono">KTS</span>
+                <FlapWord text={`${infoVoo.velocidadeKts} KTS`} length={8} variant="amber" size="md" />
               </div>
 
-              {/* Bússola Rumo */}
-              <div className="bg-[#141720] p-3 rounded-xl border border-white/5 flex flex-col items-center text-center">
-                <span className="text-[9px] uppercase tracking-wider font-bold text-neutral-400 mb-0.5">
-                  RUMO
+              {/* RUMO / COMPASS */}
+              <div className="bg-[#12141c] p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
+                  RUMO / HEADING
                 </span>
-                <div className="flex items-center gap-1">
-                  <span
-                    className="inline-block text-xs text-sky-400"
-                    style={{ transform: `rotate(${infoVoo.rumo - 45}deg)` }}
-                  >
-                    ✈
-                  </span>
-                  <span className="text-sm font-bold font-mono text-white">
-                    {infoVoo.rumo}°
-                  </span>
-                </div>
+                <FlapWord text={`${infoVoo.rumo} DEG`} length={7} variant="green" size="md" />
               </div>
 
             </div>
@@ -413,48 +499,47 @@ export default function TheFlightWall() {
           </div>
         )}
 
-        {/* ── MODO METEOROLOGIA (SEM VOOS) ───────────────────────────────── */}
+        {/* ── MODO ANALÓGICO METEOROLÓGICO (SEM TRAFEGO) ───────────────────── */}
         {!carregando && !vooAtual && (
-          <div className="w-full flex flex-col items-center gap-5 py-6">
-            <div className="w-20 h-20 bg-sky-500/10 border border-sky-500/20 rounded-2xl flex items-center justify-center text-4xl shadow-inner">
-              🌤️
+          <div className="w-full flex flex-col items-center justify-center py-8 gap-6 text-center">
+            
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-1">
+                STATUS: RADAR LIVRE
+              </span>
+              <FlapWord text="ESPACO AEREO LIVRE" length={18} variant="yellow" size="lg" />
             </div>
 
-            <div className="flex flex-col items-center text-center">
-              <span className="text-xs uppercase tracking-widest text-sky-400 font-bold mb-1">
-                Espaço Aéreo Livre
-              </span>
-              <span className="text-2xl font-bold font-mono text-white">
-                {meteorologia?.name?.toUpperCase() || "VALADARES"}
-              </span>
-            </div>
+            <div className="w-full max-w-2xl bg-[#12141c] p-6 rounded-xl border border-white/10 flex flex-col md:flex-row items-center justify-around gap-6 shadow-2xl">
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
+                  CIDADE
+                </span>
+                <FlapWord text={meteorologia?.name || "PORTO"} length={8} variant="white" size="md" />
+              </div>
 
-            <div className="w-full grid grid-cols-2 gap-3 mt-2">
-              <div className="bg-[#141720] p-4 rounded-xl border border-white/5 flex flex-col items-center">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-400 mb-1">
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
                   TEMPERATURA
                 </span>
-                <span className="text-2xl font-black font-mono text-amber-400">
-                  {Math.round(meteorologia?.main?.temp ?? 18)}°C
-                </span>
+                <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)} C`} length={5} variant="amber" size="md" />
               </div>
 
-              <div className="bg-[#141720] p-4 rounded-xl border border-white/5 flex flex-col items-center">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-neutral-400 mb-1">
-                  ESTADO
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
+                  CONDAO METEO
                 </span>
-                <span className="text-xs font-bold font-mono text-emerald-400 uppercase text-center mt-1">
-                  {meteorologia?.weather?.[0]?.description || "CÉU LIMPO"}
-                </span>
+                <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} length={10} variant="green" size="sm" />
               </div>
             </div>
+
           </div>
         )}
 
-        {/* Rodapé The Flight Wall */}
-        <footer className="w-full mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-500 uppercase tracking-widest font-mono">
-          <span>The Flight Wall Display</span>
-          <span>Porto · Valadares</span>
+        {/* RODAPÉ DO PAINEL MECÂNICO */}
+        <footer className="w-full mt-6 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-500 uppercase tracking-widest font-mono">
+          <span>PAINEL ANALOGICO SOLARI DI UDINE · REPLICA VINTAGE</span>
+          <span>ATUALIZACAO: 25S</span>
         </footer>
 
       </div>

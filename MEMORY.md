@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v0.6.0  
+**Versão:** v0.7.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Réplica do estilo *The Flight Wall* operacional, responsiva, fluida e com suporte a meteorologia quando sem tráfego aéreo.
+**Estado:** Painel analógico Split-Flap (Solari di Udine) vintage operacional em orientação Landscape 16:9, com palhetas animadas, som de claque e suporte a meteorologia local.
 
 ---
 
@@ -21,9 +21,9 @@
 |-----------------|-----------------------------------|---------------------------------------------------|
 | Framework       | Next.js 16 (App Router)           | SSR + Route Handlers (API segura)                 |
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
-| Estilos         | Tailwind CSS v4 + Livery Card     | Moldura de quadro 'The Flight Wall'               |
-| Áudio           | Web Audio API (Chime)             | Chime de aviação ao toque                         |
-| Imagens         | Unsplash Aviation & Aviasales CDN | Fotografias de alta resolução de aeronaves e logos|
+| Estilos         | Tailwind CSS v4 + Split-Flap CSS  | Células de palhetas mecânicas Solari 3D           |
+| Áudio           | Web Audio API (Flap Clack)        | Som mecânico sintetizado ao alternar palhetas    |
+| Imagens         | Aviasales CDN                     | Logótipos oficiais de companhias aéreas           |
 | Voos            | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo               |
 | Meteorologia    | OpenWeatherMap (gratuito)         | API meteorológica em PT                           |
 
@@ -31,12 +31,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 014 — (Ver sessões anteriores)
+### ADR-001 a 015 — (Ver sessões anteriores)
 
-### ADR-015 — Réplica Autêntica do Estilo The Flight Wall (2026-09-07)
-**Contexto:** O utilizador especificou querer rigorosamente o estilo oficial do produto *The Flight Wall* (theflightwall.com).  
-**Decisão:** Reconstruir o painel com moldura acetinada física de quadro inteligente, cartão de pintura/fotografia HD da aeronave (*Livery Card*), logótipo sobreposto, número do voo em destaque, modelo oficial (ex: `Airbus A320-251N`), rota IATA e métricas de aviação (FT, KTS e Bússola Rumo °).  
-**Consequência:** Experiência visual idêntica à referência oficial do produto *The Flight Wall*.
+### ADR-016 — Painel Analógico Solari Split-Flap Aeroporto em Landscape (2026-09-07)
+**Contexto:** O utilizador solicitou que a informação do voo passasse a ser apresentada com o design autêntico dos painéis analógicos dos aeroportos (Split-Flap Solari di Udine) em orientação Landscape (16:9).  
+**Decisão:** Reconstruir o painel com textura metálica mecânica (`.board-texture`), parafusos de moldura industriais (`.screw`), LEDs indicadores vintage e palhetas amarelas e brancas sobre fundo escuro com corte central e rotação 3D ao atualizar dados.  
+**Consequência:** Design analógico clássico mecânico de aeroporto em 16:9 Landscape com efeito sonoro de claque.
 
 ---
 
@@ -57,3 +57,4 @@
 | 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
 | 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis      |
 | 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)|
+| 2026-09-07 | v0.7.0 | Painel analógico aeroporto Solari Split-Flap vintage em Landscape 16:9 |
