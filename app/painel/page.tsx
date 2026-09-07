@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -130,7 +130,6 @@ function tocarSomFlapClack() {
     }
     const now = globalAudioCtx.currentTime;
 
-    // Efeito de clique seco de palheta mecânica
     const bufferSize = globalAudioCtx.sampleRate * 0.03;
     const buffer = globalAudioCtx.createBuffer(1, bufferSize, globalAudioCtx.sampleRate);
     const output = buffer.getChannelData(0);
@@ -244,13 +243,6 @@ export default function PainelAnalogicoAeroporto() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
-  const [somAtivo, setSomAtivo] = useState(false);
-  const [horaAtual, setHoraAtual] = useState(new Date());
-
-  useEffect(() => {
-    const tick = setInterval(() => setHoraAtual(new Date()), 1000);
-    return () => clearInterval(tick);
-  }, []);
 
   const ativarAudio = () => {
     if (!globalAudioCtx) {
@@ -260,17 +252,7 @@ export default function PainelAnalogicoAeroporto() {
     if (globalAudioCtx.state === "suspended") {
       globalAudioCtx.resume();
     }
-    setSomAtivo(true);
     tocarSomFlapClack();
-  };
-
-  const toggleSom = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!somAtivo) {
-      ativarAudio();
-    } else {
-      setSomAtivo(false);
-    }
   };
 
   const buscarDados = useCallback(async () => {
@@ -306,67 +288,17 @@ export default function PainelAnalogicoAeroporto() {
 
   const infoVoo = vooAtual ? resolverVooInfo(vooAtual) : null;
 
-  const horaStr = horaAtual.toLocaleTimeString("pt-PT", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
   return (
     <main
       onClick={ativarAudio}
       className="min-h-screen bg-[#07080a] text-neutral-100 flex flex-col items-center justify-center p-3 sm:p-6 select-none font-mono cursor-pointer relative overflow-hidden board-texture"
     >
-      {/* Glow mecânico de retroiluminação das palhetas */}
+      {/* Retroiluminação subtil das palhetas */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* ── QUADRO METÁLICO ANALÓGICO SOLARI (16:9 LANDSCAPE WIDESCREEN) ─────── */}
-      <div className="w-full max-w-5xl bg-[#0c0d12] border-[12px] sm:border-[16px] border-[#161820] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-7 shadow-[0_50px_120px_rgba(0,0,0,0.98),inset_0_2px_10px_rgba(255,255,255,0.06)] relative z-10 flex flex-col">
+      {/* ── QUADRO METÁLICO ANALÓGICO LIMPO (16:9 LANDSCAPE) ──────────────── */}
+      <div className="w-full max-w-5xl bg-[#0c0d12] border-[10px] sm:border-[14px] border-[#161820] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 shadow-[0_50px_120px_rgba(0,0,0,0.98),inset_0_2px_10px_rgba(255,255,255,0.06)] relative z-10 flex flex-col">
         
-        {/* Parafusos industriais nos 4 cantos da moldura */}
-        <span className="screw absolute top-3 left-3" />
-        <span className="screw absolute top-3 right-3" />
-        <span className="screw absolute bottom-3 left-3" />
-        <span className="screw absolute bottom-3 right-3" />
-
-        {/* ── CABEÇALHO ANALÓGICO DO PAINEL DE PARTIDAS ─────────────────────── */}
-        <header className="w-full flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-          
-          {/* Lâmpadas indicadoras vintage & Título */}
-          <div className="flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 indicator-lamp animate-pulse" />
-            <div className="flex flex-col">
-              <span className="text-sm sm:text-base font-black uppercase tracking-[0.3em] text-amber-400 drop-shadow-[0_2px_4px_rgba(251,191,36,0.3)]">
-                DEPARTURES · SOLARI SPLIT-FLAP
-              </span>
-              <span className="text-[10px] text-neutral-500 tracking-widest uppercase font-bold">
-                AEROPORTO DO PORTO · VALADARES RADAR
-              </span>
-            </div>
-          </div>
-
-          {/* Relógio de Palhetas e Controlo de Som */}
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 bg-[#12141c] px-3 py-1.5 rounded-lg border border-white/10 shadow-inner">
-              <span className="text-[10px] text-neutral-400 uppercase tracking-widest">HORA</span>
-              <span className="text-sm font-black text-amber-400 tracking-widest font-mono">
-                {horaStr}
-              </span>
-            </div>
-
-            <button
-              onClick={toggleSom}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all border ${
-                somAtivo
-                  ? "bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                  : "bg-neutral-800 text-neutral-400 border-neutral-700"
-              }`}
-            >
-              {somAtivo ? "🔊 CLAQUE ON" : "🔇 CLAQUE OFF"}
-            </button>
-          </div>
-        </header>
-
         {/* ── ESTADO A CARREGAR PALHETAS ──────────────────────────────────── */}
         {carregando && (
           <div className="py-20 flex flex-col items-center gap-4 text-center">
@@ -380,21 +312,18 @@ export default function PainelAnalogicoAeroporto() {
               <FlapCell char="A" size="md" />
               <FlapCell char="R" size="md" />
             </div>
-            <span className="text-xs tracking-widest text-neutral-400 uppercase font-mono mt-2">
-              A SINCRONIZAR ROTORES MECÂNICOS...
-            </span>
           </div>
         )}
 
         {/* ── MODO ANALÓGICO COM VOO ACTIVO (LANDSCAPE WIDESCREEN) ────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="w-full flex flex-col gap-6 my-2">
+          <div className="w-full flex flex-col gap-6">
             
             {/* LINHA 1: COMPANHIA AÉREA & NÚMERO DO VOO */}
             <div className="w-full bg-[#12141c] p-4 sm:p-5 rounded-xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl">
               
               <div className="flex items-center gap-4">
-                {/* Badge/Logótipo da Companhia em cartão Solari */}
+                {/* Logótipo oficial da Companhia */}
                 {infoVoo.iata && (
                   <div className="w-14 h-14 bg-white p-1 rounded-lg border-2 border-neutral-700 shadow-md flex items-center justify-center shrink-0">
                     <Image
@@ -416,7 +345,7 @@ export default function PainelAnalogicoAeroporto() {
                 </div>
               </div>
 
-              {/* Nome da Companhia e Modelo de Aeronave em Palhetas */}
+              {/* Aeronave e Companhia */}
               <div className="flex flex-col items-start md:items-end w-full md:w-auto">
                 <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
                   AERONAVE / AIRCRAFT
@@ -443,13 +372,13 @@ export default function PainelAnalogicoAeroporto() {
                 </div>
               </div>
 
-              {/* ÍCONE DE ESTADO DE VOO / FLAP STATUS */}
+              {/* ÍCONE CENTRAL DE VOO */}
               <div className="flex flex-col items-center justify-center px-4">
                 <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-2 animate-pulse">
                   {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-400 text-2xl animate-bounce">✈</span>
+                  <span className="text-amber-400 text-2xl">✈</span>
                   <span className="text-neutral-500 font-mono text-sm tracking-widest">━━━━</span>
                 </div>
               </div>
@@ -467,7 +396,7 @@ export default function PainelAnalogicoAeroporto() {
 
             </div>
 
-            {/* LINHA 3: TELEMETRIA ANALÓGICA DE AVIAÇÃO */}
+            {/* LINHA 3: TELEMETRIA ANALÓGICA */}
             <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
               
               {/* ALTITUDE */}
@@ -486,7 +415,7 @@ export default function PainelAnalogicoAeroporto() {
                 <FlapWord text={`${infoVoo.velocidadeKts} KTS`} length={8} variant="amber" size="md" />
               </div>
 
-              {/* RUMO / COMPASS */}
+              {/* RUMO / HEADING */}
               <div className="bg-[#12141c] p-4 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
                 <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">
                   RUMO / HEADING
@@ -499,13 +428,13 @@ export default function PainelAnalogicoAeroporto() {
           </div>
         )}
 
-        {/* ── MODO ANALÓGICO METEOROLÓGICO (SEM TRAFEGO) ───────────────────── */}
+        {/* ── MODO METEOROLÓGICO (SEM TRÁFEGO NO RADAR) ───────────────────── */}
         {!carregando && !vooAtual && (
           <div className="w-full flex flex-col items-center justify-center py-8 gap-6 text-center">
             
             <div className="flex flex-col items-center gap-2">
               <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-1">
-                STATUS: RADAR LIVRE
+                RADAR
               </span>
               <FlapWord text="ESPACO AEREO LIVRE" length={18} variant="yellow" size="lg" />
             </div>
@@ -535,12 +464,6 @@ export default function PainelAnalogicoAeroporto() {
 
           </div>
         )}
-
-        {/* RODAPÉ DO PAINEL MECÂNICO */}
-        <footer className="w-full mt-6 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-500 uppercase tracking-widest font-mono">
-          <span>PAINEL ANALOGICO SOLARI DI UDINE · REPLICA VINTAGE</span>
-          <span>ATUALIZACAO: 25S</span>
-        </footer>
 
       </div>
     </main>
