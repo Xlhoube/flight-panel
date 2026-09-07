@@ -7,11 +7,11 @@
 ## Contexto Actual
 
 **Projecto:** Flight Panel — Painel analógico electromecânico de partidas de aeroporto (*Departures Solari Split-Flap Board*)  
-**Objectivo:** Replicar com precisão o painel de partidas analógico clássico de aeroporto (com placa de cabeçalho `DEPARTURES` com ícones de aviões e grelha de palhetas pretas divididas com colunas `TIME`, `DESTINATION` e `FLIGHT`).  
-**Versão:** v0.3.0  
+**Objectivo:** Apresentar a estética do painel clássico `✈ DEPARTURES ✈` da imagem com palhetas pretas divididas, mas exibindo **apenas um único voo de cada vez** em destaque no centro da placa.  
+**Versão:** v0.3.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Interface recriada com base na imagem de referência fornecida pelo utilizador. Grelha analógica completa com palhetas pretas, som procedural de viragem e suporte a tráfego aéreo/meteorologia.
+**Estado:** Interface simplificada para exibição de 1 único voo de cada vez na grelha `TIME` · `DESTINATION` · `FLIGHT` com palhetas em escala expandida.
 
 ---
 
@@ -31,12 +31,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 007 — (Ver sessões anteriores)
+### ADR-001 a 008 — (Ver sessões anteriores)
 
-### ADR-008 — Recriação Fiel do Painel Clássico de Partidas (2026-09-07)
-**Contexto:** O utilizador partilhou uma imagem de referência de um painel de partidas analógico tradicional de aeroporto (*DEPARTURES Board*) com palhetas pretas e colunas `TIME`, `DESTINATION` e `FLIGHT`.  
-**Decisão:** Reestruturar a página principal para replicar a estética da referência (moldura preta sólida com borda branca, placa superior `✈ DEPARTURES ✈`, colunas alinhadas `TIME` [5 palhetas], `DESTINATION` [10 palhetas] e `FLIGHT` [7 palhetas], com 9 linhas mecânicas fixas).  
-**Consequência:** Fidelidade visual absoluta ao modelo tradicional pretendido pelo utilizador.
+### ADR-009 — Exibição Focada de Único Voo Ativo (2026-09-07)
+**Contexto:** O utilizador solicitou apresentar apenas 1 único voo de cada vez mantendo o estilo visual da placa de partidas `✈ DEPARTURES ✈`.  
+**Decisão:** Reformular o layout para exibir uma única linha de palhetas mecânicas de dimensões expandidas (`w-[40px] h-[58px]`) alinhadas sob as colunas `TIME`, `DESTINATION` e `FLIGHT`.  
+**Consequência:** Foco total na aeronave ativa sobre Valadares sem poluição visual.
 
 ---
 
@@ -50,3 +50,4 @@
 | 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista      |
 | 2026-09-07 | v0.2.3 | Correcção do corte de letras e alinhamento responsivo das palhetas    |
 | 2026-09-07 | v0.3.0 | Recriação fiel do painel clássico de partidas (DEPARTURES board)       |
+| 2026-09-07 | v0.3.1 | Ajuste para exibição exclusiva de 1 único voo de cada vez              |
