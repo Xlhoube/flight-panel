@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel analógico electromecânico de monitorização aérea e meteorológica  
 **Objectivo:** Interface ultra-minimalista 100% monocromática com logótipo em estilo **Pixel Art 8-bit de Alta Definição (64x64)**, Número do Voo, Origem e Destino em palhetas mecânicas pretas e brancas (*Split-Flap*).  
-**Versão:** v0.4.2  
+**Versão:** v0.4.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Resolução de pixel art do logótipo aumentada de 24x24 para 64x64 para maior nitidez e definição dos contornos das companhias aéreas.
+**Estado:** Resolução de erro de compilação Turbopack no `@swc/helpers` através da limpeza forçada da cache `.next` e reinstalação limpa de `node_modules`.
 
 ---
 
@@ -32,12 +32,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 011 — (Ver sessões anteriores)
+### ADR-001 a 012 — (Ver sessões anteriores)
 
-### ADR-012 — Aumento de Resolução de Pixel Art para 64x64 (2026-09-07)
-**Contexto:** O utilizador pediu maior definição no logótipo em pixel art.  
-**Decisão:** Aumentar a resolução da matriz de binarização do `<PixelLogo>` de 24x24 para 64x64 pixeis.  
-**Consequência:** Contornos e letras das companhias aéreas muito mais definidos e nítidos, mantendo a estética retro pixel art monocromática.
+### ADR-013 — Correcção de Ficheiro Corrompido no SWC Helpers (2026-09-07)
+**Contexto:** Ocorreu um erro de leitura `EOF while parsing a value` num `package.json` interno de `@swc/helpers` gerado por interrupção de processos dev concorrentes.  
+**Decisão:** Limpar integralmente as pastas `node_modules` e `.next`, procedendo a uma reinstalação completa via `npm install`.  
+**Consequência:** Compilação Turbopack restaurada com sucesso com resposta HTTP 200 OK.
 
 ---
 
@@ -55,3 +55,4 @@
 | 2026-09-07 | v0.4.0 | Purificação da interface: 100% monocromático (Logo + Voo + Origem + Destino)|
 | 2026-09-07 | v0.4.1 | Conversão do logótipo da companhia para Pixel Art 8-bit monocromático  |
 | 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                    |
+| 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
