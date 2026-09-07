@@ -6,12 +6,12 @@
 
 ## Contexto Actual
 
-**Projecto:** Flight Panel — Painel analógico electromecânico de monitorização aérea e meteorológica  
-**Objectivo:** Interface ultra-minimalista 100% monocromática com logótipo em estilo **Pixel Art 8-bit de Alta Definição (64x64)**, Número do Voo, Origem e Destino em palhetas mecânicas pretas e brancas (*Split-Flap*).  
-**Versão:** v0.4.3  
+**Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Mobile Edition*)  
+**Objectivo:** Interface inspirada na referência **The Flight Wall**, totalmente optimizada para utilização tátil em telemóveis (Mobile First). Apresenta cartões táteis com o Logótipo da Companhia Aérea, Número do Voo, Rota com Códigos IATA (`OPO` ➔ `LIS`), Modelo de Aeronave (Airbus/Boeing) e métricas verticais de altitude, velocidade e rumo com avião rodado a 360°.  
+**Versão:** v0.5.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Resolução de erro de compilação Turbopack no `@swc/helpers` através da limpeza forçada da cache `.next` e reinstalação limpa de `node_modules`.
+**Estado:** Interface 'The Flight Wall Mobile' operacional, responsiva, fluida e com suporte a meteorologia quando sem tráfego aéreo.
 
 ---
 
@@ -21,10 +21,9 @@
 |-----------------|-----------------------------------|---------------------------------------------------|
 | Framework       | Next.js 16 (App Router)           | SSR + Route Handlers (API segura)                 |
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
-| Estilos         | Tailwind CSS v4 + Canvas HTML5    | Pixel Art 8-bit (64x64) + Palhetas 3D Split-Flap |
-| Áudio           | Web Audio API (Procedural)        | Sintetizador de estalido mecânico de palhetas     |
-| Font            | Geist Mono                        | Tipografia aeroportuária monoespaçada clássica    |
-| Logótipos       | Canvas HTML5 (Binarização 1-bit)  | Conversão do logótipo em Pixel Art HD             |
+| Estilos         | Tailwind CSS v4 + Glassmorphism   | Layout móvel estilo Smart Display / Flight Wall   |
+| Áudio           | Web Audio API                     | Som sintético tátil                               |
+| Logótipos       | Aviasales CDN (`pics.avs.io`)     | Logótipos oficiais de alta definição              |
 | Voos            | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo               |
 | Meteorologia    | OpenWeatherMap (gratuito)         | API meteorológica em PT                           |
 
@@ -32,12 +31,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 012 — (Ver sessões anteriores)
+### ADR-001 a 013 — (Ver sessões anteriores)
 
-### ADR-013 — Correcção de Ficheiro Corrompido no SWC Helpers (2026-09-07)
-**Contexto:** Ocorreu um erro de leitura `EOF while parsing a value` num `package.json` interno de `@swc/helpers` gerado por interrupção de processos dev concorrentes.  
-**Decisão:** Limpar integralmente as pastas `node_modules` e `.next`, procedendo a uma reinstalação completa via `npm install`.  
-**Consequência:** Compilação Turbopack restaurada com sucesso com resposta HTTP 200 OK.
+### ADR-014 — Implementação The Flight Wall Mobile Edition (2026-09-07)
+**Contexto:** O utilizador forneceu o link de referência de `theflightwall.com` solicitando um ecrã equivalente optimizado para utilização em telemóvel.  
+**Decisão:** Construir uma interface móvel vertical estilo cartão inteligente *Glassmorphism* com métricas de voo, logótipo da companhia, rota em códigos IATA (`OPO`, `LIS`, `CDG`, etc.), bússola de rumo 360° com rotação de aeronave e modo meteorologia móvel.  
+**Consequência:** Experiência móvel tátil idêntica a um Smart Display de aviação profissional.
 
 ---
 
@@ -56,3 +55,4 @@
 | 2026-09-07 | v0.4.1 | Conversão do logótipo da companhia para Pixel Art 8-bit monocromático  |
 | 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                    |
 | 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
+| 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis      |
