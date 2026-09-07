@@ -6,12 +6,12 @@
 
 ## Contexto Actual
 
-**Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Mobile Edition*)  
-**Objectivo:** Interface inspirada na referência **The Flight Wall**, totalmente optimizada para utilização tátil em telemóveis (Mobile First). Apresenta cartões táteis com o Logótipo da Companhia Aérea, Número do Voo, Rota com Códigos IATA (`OPO` ➔ `LIS`), Modelo de Aeronave (Airbus/Boeing) e métricas verticais de altitude, velocidade e rumo com avião rodado a 360°.  
-**Versão:** v0.5.0  
+**Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
+**Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
+**Versão:** v0.6.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Interface 'The Flight Wall Mobile' operacional, responsiva, fluida e com suporte a meteorologia quando sem tráfego aéreo.
+**Estado:** Réplica do estilo *The Flight Wall* operacional, responsiva, fluida e com suporte a meteorologia quando sem tráfego aéreo.
 
 ---
 
@@ -21,9 +21,9 @@
 |-----------------|-----------------------------------|---------------------------------------------------|
 | Framework       | Next.js 16 (App Router)           | SSR + Route Handlers (API segura)                 |
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
-| Estilos         | Tailwind CSS v4 + Glassmorphism   | Layout móvel estilo Smart Display / Flight Wall   |
-| Áudio           | Web Audio API                     | Som sintético tátil                               |
-| Logótipos       | Aviasales CDN (`pics.avs.io`)     | Logótipos oficiais de alta definição              |
+| Estilos         | Tailwind CSS v4 + Livery Card     | Moldura de quadro 'The Flight Wall'               |
+| Áudio           | Web Audio API (Chime)             | Chime de aviação ao toque                         |
+| Imagens         | Unsplash Aviation & Aviasales CDN | Fotografias de alta resolução de aeronaves e logos|
 | Voos            | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo               |
 | Meteorologia    | OpenWeatherMap (gratuito)         | API meteorológica em PT                           |
 
@@ -31,12 +31,12 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 013 — (Ver sessões anteriores)
+### ADR-001 a 014 — (Ver sessões anteriores)
 
-### ADR-014 — Implementação The Flight Wall Mobile Edition (2026-09-07)
-**Contexto:** O utilizador forneceu o link de referência de `theflightwall.com` solicitando um ecrã equivalente optimizado para utilização em telemóvel.  
-**Decisão:** Construir uma interface móvel vertical estilo cartão inteligente *Glassmorphism* com métricas de voo, logótipo da companhia, rota em códigos IATA (`OPO`, `LIS`, `CDG`, etc.), bússola de rumo 360° com rotação de aeronave e modo meteorologia móvel.  
-**Consequência:** Experiência móvel tátil idêntica a um Smart Display de aviação profissional.
+### ADR-015 — Réplica Autêntica do Estilo The Flight Wall (2026-09-07)
+**Contexto:** O utilizador especificou querer rigorosamente o estilo oficial do produto *The Flight Wall* (theflightwall.com).  
+**Decisão:** Reconstruir o painel com moldura acetinada física de quadro inteligente, cartão de pintura/fotografia HD da aeronave (*Livery Card*), logótipo sobreposto, número do voo em destaque, modelo oficial (ex: `Airbus A320-251N`), rota IATA e métricas de aviação (FT, KTS e Bússola Rumo °).  
+**Consequência:** Experiência visual idêntica à referência oficial do produto *The Flight Wall*.
 
 ---
 
@@ -56,3 +56,4 @@
 | 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                    |
 | 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
 | 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis      |
+| 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)|
