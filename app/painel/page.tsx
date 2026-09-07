@@ -193,7 +193,7 @@ function PixelLogo({ iata }: { iata: string | null }) {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const size = 24; // Grelha Pixel Art 24x24
+      const size = 64; // Alta Definição Pixel Art (64x64)
       canvas.width = size;
       canvas.height = size;
 
@@ -204,14 +204,13 @@ function PixelLogo({ iata }: { iata: string | null }) {
         const imgData = ctx.getImageData(0, 0, size, size);
         const d = imgData.data;
         for (let i = 0; i < d.length; i += 4) {
-          // Converter para valor monocromático 1-bit pixel art
           const brightness = (d[i] + d[i + 1] + d[i + 2]) / 3;
           const alpha = d[i + 3];
 
-          if (alpha < 40) {
+          if (alpha < 30) {
             d[i + 3] = 0;
           } else {
-            const isBright = brightness > 128;
+            const isBright = brightness > 120;
             const colorVal = isBright ? 255 : 0;
             d[i] = colorVal;
             d[i + 1] = colorVal;
@@ -221,14 +220,14 @@ function PixelLogo({ iata }: { iata: string | null }) {
         }
         ctx.putImageData(imgData, 0, 0);
       } catch {
-        // Fallback de imagem simples se o CORS bloquear o getImageData
+        // Fallback
       }
     };
   }, [iata]);
 
   if (!iata) {
     return (
-      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-white/20 rounded-xl flex items-center justify-center text-white text-3xl shrink-0">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black border-2 border-neutral-700 rounded-xl flex items-center justify-center text-white text-3xl shrink-0">
         ✈
       </div>
     );
