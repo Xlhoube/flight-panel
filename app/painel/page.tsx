@@ -44,10 +44,34 @@ interface InfoCompanhia {
 
 const INTERVALO_MS = 25_000;
 
-// ─── Dicionário Expandido de Companhias Aéreas ────────────────────────────────
+// ─── Mapeamento de Países para Cidades / Aeroportos de Ligação ────────────────
+
+const CIDADES_PAISES: Record<string, { cidade: string; code: string }> = {
+  SPAIN: { cidade: "MADRID", code: "MAD" },
+  FRANCE: { cidade: "PARIS", code: "CDG" },
+  "UNITED KINGDOM": { cidade: "LONDRES", code: "LHR" },
+  GERMANY: { cidade: "FRANKFURT", code: "FRA" },
+  SWITZERLAND: { cidade: "ZURIQUE", code: "ZRH" },
+  NETHERLANDS: { cidade: "AMSTERDAO", code: "AMS" },
+  ITALY: { cidade: "ROMA", code: "FCO" },
+  BELGIUM: { cidade: "BRUXELAS", code: "BRU" },
+  IRELAND: { cidade: "DUBLIN", code: "DUB" },
+  AUSTRIA: { cidade: "VIENA", code: "VIE" },
+  POLAND: { cidade: "VARSOVIA", code: "WAW" },
+  LUXEMBOURG: { cidade: "LUXEMBURGO", code: "LUX" },
+  NORWAY: { cidade: "OSLO", code: "OSL" },
+  SWEDEN: { cidade: "ESTOCOLMO", code: "ARN" },
+  DENMARK: { cidade: "COPENHAGA", code: "CPH" },
+  TURKEY: { cidade: "ISTAMBUL", code: "IST" },
+  "UNITED ARAB EMIRATES": { cidade: "DUBAI", code: "DXB" },
+  "UNITED STATES": { cidade: "NOVA IORQUE", code: "JFK" },
+  BRAZIL: { cidade: "SAO PAULO", code: "GRU" },
+  PORTUGAL: { cidade: "LISBOA", code: "LIS" },
+};
+
+// ─── Dicionário de Companhias Aéreas ──────────────────────────────────────────
 
 const COMPANHIAS: Record<string, InfoCompanhia> = {
-  // Portugal & Espanha
   TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origem: "PORTO", destino: "LISBOA", origemCode: "OPO", destinoCode: "LIS", aeronave: "A320-251N" },
   AEA: { nome: "AIR EUROPA", iata: "UX", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "B737-800" },
   IBE: { nome: "IBERIA", iata: "IB", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "A320-200" },
@@ -55,8 +79,6 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   VLG: { nome: "VUELING", iata: "VY", origem: "BARCELONA", destino: "PORTO", origemCode: "BCN", destinoCode: "OPO", aeronave: "A320-232" },
   VOE: { nome: "VOLOTEA", iata: "V7", origem: "NANTES", destino: "PORTO", origemCode: "NTE", destinoCode: "OPO", aeronave: "A319-100" },
   OBS: { nome: "ORBEST", iata: "6O", origem: "LISBOA", destino: "PORTO", origemCode: "LIS", destinoCode: "OPO", aeronave: "A330-900" },
-
-  // Low Cost Principais
   RYR: { nome: "RYANAIR", iata: "FR", origem: "PORTO", destino: "MADRID", origemCode: "OPO", destinoCode: "MAD", aeronave: "B737-800" },
   RUK: { nome: "RYANAIR UK", iata: "RK", origem: "LONDRES", destino: "PORTO", origemCode: "STN", destinoCode: "OPO", aeronave: "B737-800" },
   EJU: { nome: "EASYJET EUROPE", iata: "U2", origem: "PORTO", destino: "PARIS", origemCode: "OPO", destinoCode: "CDG", aeronave: "A320-214" },
@@ -68,8 +90,6 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   TRA: { nome: "TRANSAVIA", iata: "HV", origem: "AMSTERDAO", destino: "PORTO", origemCode: "AMS", destinoCode: "OPO", aeronave: "B737-800" },
   EXS: { nome: "JET2.COM", iata: "LS", origem: "MANCHESTER", destino: "PORTO", origemCode: "MAN", destinoCode: "OPO", aeronave: "B737-800" },
   NOZ: { nome: "NORWEGIAN", iata: "DY", origem: "OSLO", destino: "PORTO", origemCode: "OSL", destinoCode: "OPO", aeronave: "B737 MAX 8" },
-
-  // Legadas Europeias
   AFR: { nome: "AIR FRANCE", iata: "AF", origem: "PARIS", destino: "PORTO", origemCode: "CDG", destinoCode: "OPO", aeronave: "A320-200" },
   DLH: { nome: "LUFTHANSA", iata: "LH", origem: "FRANKFURT", destino: "PORTO", origemCode: "FRA", destinoCode: "OPO", aeronave: "A321-271NX" },
   KLM: { nome: "KLM ROYAL DUTCH", iata: "KL", origem: "AMSTERDAO", destino: "PORTO", origemCode: "AMS", destinoCode: "OPO", aeronave: "B737-800" },
@@ -80,7 +100,7 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   LGL: { nome: "LUXAIR", iata: "LG", origem: "LUXEMBURGO", destino: "PORTO", origemCode: "LUX", destinoCode: "OPO", aeronave: "DASH 8-400" },
   FIN: { nome: "FINNAIR", iata: "AY", origem: "HELSINQUIA", destino: "PORTO", origemCode: "HEL", destinoCode: "OPO", aeronave: "A321-200" },
   SAS: { nome: "SCANDINAVIAN AIRLINES", iata: "SK", origem: "ESTOCOLMO", destino: "PORTO", origemCode: "ARN", destinoCode: "OPO", aeronave: "A320NEO" },
-  LOT: { nome: "LOT POLISH", iata: "LO", origem: "VARSÓVIA", destino: "PORTO", origemCode: "WAW", destinoCode: "OPO", aeronave: "B737-800" },
+  LOT: { nome: "LOT POLISH", iata: "LO", origem: "VARSOVIA", destino: "PORTO", origemCode: "WAW", destinoCode: "OPO", aeronave: "B737-800" },
   THY: { nome: "TURKISH AIRLINES", iata: "TK", origem: "ISTAMBUL", destino: "PORTO", origemCode: "IST", destinoCode: "OPO", aeronave: "A321NEO" },
   AEE: { nome: "AEGEAN AIRLINES", iata: "A3", origem: "ATENAS", destino: "PORTO", origemCode: "ATH", destinoCode: "OPO", aeronave: "A320NEO" },
   UAE: { nome: "EMIRATES", iata: "EK", origem: "DUBAI", destino: "PORTO", origemCode: "DXB", destinoCode: "OPO", aeronave: "B777-300ER" },
@@ -94,10 +114,7 @@ function resolverVooInfo(voo: EstadoVoo) {
   const prefixo3 = cs.slice(0, 3);
   const prefixo2 = cs.slice(0, 2);
   
-  // 1. Procurar por código ICAO de 3 letras
   let info = COMPANHIAS[prefixo3];
-  
-  // 2. Se não encontrar, verificar se começa por código IATA de 2 letras
   let iata = info?.iata || null;
   if (!iata) {
     if (prefixo2 === "TP") iata = "TP";
@@ -121,9 +138,11 @@ function resolverVooInfo(voo: EstadoVoo) {
   }
 
   const paisUpper = (voo[2] || "").toUpperCase();
-  let origem = info?.origem || paisUpper || "ESP";
+  const dadosPais = CIDADES_PAISES[paisUpper];
+
+  let origem = info?.origem || dadosPais?.cidade || "MADRID";
   let destino = info?.destino || "PORTO";
-  let origemCode = info?.origemCode || (paisUpper ? paisUpper.slice(0, 3) : "ORG");
+  let origemCode = info?.origemCode || dadosPais?.code || "MAD";
   let destinoCode = info?.destinoCode || "OPO";
 
   const vRate = voo[11];
@@ -134,6 +153,10 @@ function resolverVooInfo(voo: EstadoVoo) {
     } else if (vRate > 0.5) {
       origem = "PORTO";
       origemCode = "OPO";
+      if (dadosPais && dadosPais.cidade !== "PORTO") {
+        destino = dadosPais.cidade;
+        destinoCode = dadosPais.code;
+      }
     }
   }
 
@@ -159,7 +182,7 @@ function resolverVooInfo(voo: EstadoVoo) {
   };
 }
 
-// ─── Sintetizador de Som Mecânico (Split-Flap Clack) ──────────────────────────
+// ─── Sintetizador de Som Mecânico ─────────────────────────────────────────────
 
 let globalAudioCtx: AudioContext | null = null;
 
@@ -204,7 +227,7 @@ function tocarSomFlapClack() {
   }
 }
 
-// ─── Componente de Palheta Mecânica Solari 100% Branco e Responsivo ───────────
+// ─── Componente de Palheta com Escala Universal Auto-Fit (min(vw, vh)) ─────────
 
 interface FlapCellProps {
   char: string;
@@ -227,12 +250,13 @@ function FlapCell({ char, size = "lg" }: FlapCellProps) {
     }
   }, [char, prevChar]);
 
+  // Dimensionamento proporcional a min(vw, vh) para CABER 100% NO ECRÃ EM FULLSCREEN SEM SCROLL
   const dimensões = {
-    sm: "w-[clamp(0.75rem,2.2vw,1.4rem)] h-[clamp(1.1rem,3.2vw,2rem)] text-[clamp(0.7rem,1.8vw,1.1rem)] font-black rounded-[2px]",
-    md: "w-[clamp(0.9rem,3vw,1.8rem)] h-[clamp(1.3rem,4.2vw,2.5rem)] text-[clamp(0.8rem,2.5vw,1.4rem)] font-black rounded-[3px]",
-    lg: "w-[clamp(1.1rem,3.8vw,2.4rem)] h-[clamp(1.6rem,5.2vw,3.3rem)] text-[clamp(0.95rem,3.2vw,1.9rem)] font-black rounded-[4px]",
-    xl: "w-[clamp(1.3rem,4.6vw,2.9rem)] h-[clamp(1.8rem,6.2vw,4rem)] text-[clamp(1.1rem,3.8vw,2.3rem)] font-black rounded-[5px]",
-    hero: "w-[clamp(1.5rem,5.5vw,3.6rem)] h-[clamp(2.1rem,7.4vw,4.8rem)] text-[clamp(1.3rem,4.5vw,3rem)] font-black rounded-[5px]",
+    sm: "w-[clamp(0.65rem,min(2vw,4.2vh),1.3rem)] h-[clamp(0.95rem,min(3vw,5.8vh),1.8rem)] text-[clamp(0.65rem,min(1.8vw,3.6vh),1.1rem)] font-black rounded-[2px]",
+    md: "w-[clamp(0.8rem,min(2.6vw,5.2vh),1.6rem)] h-[clamp(1.15rem,min(3.8vw,7.2vh),2.3rem)] text-[clamp(0.75rem,min(2.4vw,4.5vh),1.3rem)] font-black rounded-[3px]",
+    lg: "w-[clamp(0.95rem,min(3.4vw,6.5vh),2.1rem)] h-[clamp(1.4rem,min(4.8vw,9vh),2.9rem)] text-[clamp(0.9rem,min(3vw,5.5vh),1.7rem)] font-black rounded-[4px]",
+    xl: "w-[clamp(1.1rem,min(4.2vw,8vh),2.6rem)] h-[clamp(1.6rem,min(5.8vw,11vh),3.6rem)] text-[clamp(1rem,min(3.6vw,7vh),2.1rem)] font-black rounded-[5px]",
+    hero: "w-[clamp(1.3rem,min(5vw,9.5vh),3.2rem)] h-[clamp(1.8rem,min(6.8vw,13vh),4.3rem)] text-[clamp(1.2rem,min(4.4vw,8.5vh),2.6rem)] font-black rounded-[5px]",
   }[size];
 
   const coresTexto = "text-white bg-[#111319] border-[#252834] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]";
@@ -250,7 +274,7 @@ function FlapCell({ char, size = "lg" }: FlapCellProps) {
   );
 }
 
-// ─── Componente de Palavra Contínua em Branco ─────────────────────────────────
+// ─── Componente de Palavra (Sem Quebra de Linha) ──────────────────────────────
 
 interface FlapWordProps {
   text: string;
@@ -269,14 +293,14 @@ function FlapWord({ text, size = "lg" }: FlapWordProps) {
   );
 }
 
-// ─── Componente Principal Painel Analógico ────────────────────────────────────
+// ─── Componente Principal Painel Analógico 100% Fullscreen Mobile Fit ─────────
 
-export default function PainelAnalogicoPrincipal() {
+export default function PainelAnalogicoMobileFullscreen() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  // Fullscreen + Áudio ao toque
+  // Fullscreen com 1 toque no ecrã
   const manipularToqueEcra = () => {
     if (!globalAudioCtx) {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -330,7 +354,6 @@ export default function PainelAnalogicoPrincipal() {
       const resVoos = await fetch("/api/voos");
       const dadosVoos = await resVoos.json();
 
-      // Verificar se existem voos ACTIVOS EM AR (não no solo)
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
         const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => !v[8]);
         
@@ -338,12 +361,10 @@ export default function PainelAnalogicoPrincipal() {
           setVooAtual(voosEmAr[0]);
           setMeteorologia(null);
         } else {
-          // Sem voos no ar -> passar directamente para modo meteorologia
           setVooAtual(null);
           await carregarMeteorologia();
         }
       } else {
-        // Sem tráfego aéreo -> modo meteorologia
         setVooAtual(null);
         await carregarMeteorologia();
       }
@@ -366,141 +387,136 @@ export default function PainelAnalogicoPrincipal() {
   return (
     <main
       onClick={manipularToqueEcra}
-      className="min-h-screen w-full bg-[#050608] text-white flex flex-col items-center justify-center p-2 xs:p-3 sm:p-6 select-none font-mono cursor-pointer relative overflow-x-hidden board-texture"
+      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-center p-1.5 sm:p-4 select-none font-mono cursor-pointer relative overflow-hidden board-texture"
     >
-      {/* ── QUADRO METÁLICO ANALÓGICO 100% BRANCO RESPONSIVO ───────────────── */}
-      <div className="w-full max-w-5xl bg-[#0a0b0e] border-4 sm:border-8 md:border-[14px] border-[#14161f] rounded-2xl sm:rounded-[2.5rem] p-3 sm:p-6 md:p-8 shadow-[0_30px_90px_rgba(0,0,0,0.98),inset_0_2px_10px_rgba(255,255,255,0.06)] relative z-10 flex flex-col gap-3 sm:gap-6">
+      {/* ── QUADRO METÁLICO TOTALMENTE INTEGRADO (ZERO SCROLL EM FULLSCREEN) ── */}
+      <div className="w-full max-w-5xl h-full max-h-full bg-[#0a0b0e] border-2 sm:border-6 md:border-[10px] border-[#14161f] rounded-xl sm:rounded-3xl p-2 sm:p-5 md:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.98),inset_0_2px_8px_rgba(255,255,255,0.06)] relative z-10 flex flex-col justify-between overflow-hidden">
         
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
-          <div className="py-16 sm:py-24 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
             <FlapWord text="A CARREGAR" size="lg" />
           </div>
         )}
 
-        {/* ── MODO 1: VOO ACTIVO DETECTADO NO RADAR ────────────────────────── */}
+        {/* ── MODO 1: VOO ACTIVO NO RADAR ─────────────────────────────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="w-full flex flex-col gap-3 sm:gap-6">
+          <div className="h-full flex flex-col justify-between gap-1.5 sm:gap-3">
             
             {/* LINHA 1: VOO & LOGÓTIPO & COMPANHIA */}
-            <div className="w-full bg-[#10121a] p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-white/10 flex flex-row items-center justify-between gap-2 sm:gap-4 shadow-xl">
+            <div className="w-full bg-[#10121a] p-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg">
               
-              {/* Voo e Logótipo Oficial ou Emblema Garantido */}
-              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-white p-1 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0">
+              {/* Voo e Logótipo Oficial */}
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <div className="w-9 h-9 sm:w-14 sm:h-14 bg-white p-1 rounded-md sm:rounded-lg border border-neutral-700 shadow-md flex items-center justify-center shrink-0">
                   {infoVoo.iata ? (
                     <Image
                       src={`https://pics.avs.io/200/200/${infoVoo.iata}.png`}
                       alt={infoVoo.nomeCompanhia}
-                      width={56}
-                      height={56}
+                      width={48}
+                      height={48}
                       className="object-contain max-h-full"
                       unoptimized
                     />
                   ) : (
-                    // Emblema de cauda de aviação de reserva em alto contraste
-                    <div className="w-full h-full bg-black rounded-md flex items-center justify-center text-white font-black text-sm sm:text-xl">
+                    <div className="w-full h-full bg-black rounded flex items-center justify-center text-white font-black text-xs sm:text-base">
                       ✈
                     </div>
                   )}
                 </div>
 
-                <div className="flex flex-col items-start gap-0.5 sm:gap-1">
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    VOO / FLIGHT
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                    VOO
                   </span>
                   <FlapWord text={infoVoo.numeroVoo} size="xl" />
                 </div>
               </div>
 
               {/* Aeronave e Nome da Companhia */}
-              <div className="flex flex-col items-end gap-0.5 sm:gap-1 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  AIRCRAFT
+              <div className="flex flex-col items-end gap-0.5 text-right">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                  AERONAVE
                 </span>
                 <FlapWord text={infoVoo.aeronave} size="md" />
-                <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
+                <span className="text-[9px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[130px] sm:max-w-none">
                   {infoVoo.nomeCompanhia}
                 </span>
               </div>
 
             </div>
 
-            {/* LINHA 2: ROTA EM PALHETAS (ORIGEM ➔ DESTINO) */}
-            <div className="w-full bg-[#10121a] p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-white/10 flex flex-row items-center justify-between gap-1 sm:gap-4 shadow-xl">
+            {/* LINHA 2: ROTA COMPLETA (CÓDIGO IATA + CIDADE / AEROPORTO) ────── */}
+            <div className="w-full bg-[#10121a] p-2 sm:p-4 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-1 sm:gap-3 shadow-lg">
               
-              {/* DEPARTURE (ORIGEM) */}
-              <div className="flex flex-col items-start gap-1">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+              {/* ORIGEM (CÓDIGO + CIDADE / AEROPORTO) */}
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                   ORIGEM
                 </span>
-                <div className="flex items-center gap-1 sm:gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <FlapWord text={infoVoo.origemCode} size="hero" />
-                  <div className="hidden xs:block">
-                    <FlapWord text={infoVoo.origem} size="sm" />
-                  </div>
+                  <FlapWord text={infoVoo.origem} size="md" />
                 </div>
               </div>
 
               {/* ÍCONE CENTRAL DE VOO */}
-              <div className="flex flex-col items-center justify-center px-1 sm:px-3 shrink-0">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-300 font-bold">
+              <div className="flex flex-col items-center justify-center px-1 shrink-0">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-neutral-300 font-bold">
                   {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
                 </span>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-white text-lg sm:text-3xl">✈</span>
-                  <div className="hidden sm:block w-8 sm:w-16 h-0.5 bg-white/40" />
+                <div className="flex items-center gap-1">
+                  <span className="text-white text-base sm:text-2xl">✈</span>
+                  <div className="hidden sm:block w-6 sm:w-12 h-0.5 bg-white/40" />
                 </div>
               </div>
 
-              {/* DESTINATION (DESTINO) */}
-              <div className="flex flex-col items-end gap-1 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+              {/* DESTINO (CÓDIGO + CIDADE / AEROPORTO) */}
+              <div className="flex flex-col items-end gap-0.5 text-right">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                   DESTINO
                 </span>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <div className="hidden xs:block">
-                    <FlapWord text={infoVoo.destino} size="sm" />
-                  </div>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <FlapWord text={infoVoo.destino} size="md" />
                   <FlapWord text={infoVoo.destinoCode} size="hero" />
                 </div>
               </div>
 
             </div>
 
-            {/* LINHA 3: TELEMETRIA EM 3 COLUNAS BRANCAS */}
-            <div className="w-full grid grid-cols-3 gap-2 sm:gap-4">
+            {/* LINHA 3: TELEMETRIA EM 3 COLUNAS ───────────────────────────── */}
+            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-3">
               
               {/* ALTITUDE */}
-              <div className="bg-[#10121a] p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   ALTITUDE
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   <FlapWord text={`${infoVoo.altitudePes}`} size="md" />
-                  <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">FT</span>
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">FT</span>
                 </div>
               </div>
 
               {/* VELOCIDADE */}
-              <div className="bg-[#10121a] p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   VELOCIDADE
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   <FlapWord text={`${infoVoo.velocidadeKts}`} size="md" />
-                  <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">KTS</span>
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">KTS</span>
                 </div>
               </div>
 
               {/* RUMO */}
-              <div className="bg-[#10121a] p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   RUMO
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   <FlapWord text={`${infoVoo.rumo}`} size="md" />
-                  <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">°</span>
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">°</span>
                 </div>
               </div>
 
@@ -511,79 +527,79 @@ export default function PainelAnalogicoPrincipal() {
 
         {/* ── MODO 2: SEM VOOS -> MODO METEOROLOGIA AUTOMÁTICO ────────────── */}
         {!carregando && !vooAtual && (
-          <div className="w-full flex flex-col gap-3 sm:gap-6">
+          <div className="h-full flex flex-col justify-between gap-1.5 sm:gap-3">
             
-            {/* Cabeçalho Meteorológico Solari */}
-            <div className="w-full bg-[#10121a] p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-white/10 flex flex-row items-center justify-between gap-2 sm:gap-4 shadow-xl">
-              <div className="flex items-center gap-2 sm:gap-4">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-white p-1 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center text-xl sm:text-3xl shrink-0">
+            {/* Cabeçalho Meteorológico */}
+            <div className="w-full bg-[#10121a] p-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-9 h-9 sm:w-14 sm:h-14 bg-white p-1 rounded-md sm:rounded-lg border border-neutral-700 shadow-md flex items-center justify-center text-base sm:text-2xl shrink-0">
                   🌤️
                 </div>
-                <div className="flex flex-col items-start gap-0.5 sm:gap-1">
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                     STATUS RADAR
                   </span>
                   <FlapWord text="ESPACO LIVRE" size="xl" />
                 </div>
               </div>
 
-              <div className="flex flex-col items-end gap-0.5 sm:gap-1 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+              <div className="flex flex-col items-end gap-0.5 text-right">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                   LOCALIDADE
                 </span>
                 <FlapWord text={meteorologia?.name || "PORTO"} size="md" />
               </div>
             </div>
 
-            {/* Linha Principal de Meteorologia em Palhetas */}
-            <div className="w-full bg-[#10121a] p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-              <div className="flex flex-col items-start gap-1">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+            {/* Linha Principal Meteorológica */}
+            <div className="w-full bg-[#10121a] p-2 sm:p-4 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg">
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                   CONDIÇÃO DO TEMPO
                 </span>
                 <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
               </div>
 
-              <div className="flex flex-col items-end gap-1 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+              <div className="flex flex-col items-end gap-0.5 text-right">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                   TEMPERATURA
                 </span>
                 <div className="flex items-center gap-1">
                   <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
-                  <span className="text-xl sm:text-3xl font-black text-white">°C</span>
+                  <span className="text-base sm:text-2xl font-black text-white">°C</span>
                 </div>
               </div>
             </div>
 
             {/* Telemetria Meteorológica */}
-            <div className="w-full grid grid-cols-3 gap-2 sm:gap-4">
-              <div className="bg-[#10121a] p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-3">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   VENTO
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   <FlapWord text={`${Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="md" />
-                  <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">KM/H</span>
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">KM/H</span>
                 </div>
               </div>
 
-              <div className="bg-[#10121a] p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   HUMIDADE
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   <FlapWord text={`${meteorologia?.main?.humidity ?? 70}`} size="md" />
-                  <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">%</span>
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">%</span>
                 </div>
               </div>
 
-              <div className="bg-[#10121a] p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center shadow-lg">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   SENSAÇÃO
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   <FlapWord text={`${Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}`} size="md" />
-                  <span className="text-[9px] sm:text-xs text-neutral-400 font-bold">°C</span>
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">°C</span>
                 </div>
               </div>
             </div>

@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v0.8.1  
+**Versão:** v0.8.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-07  
-**Estado:** Painel analógico Split-Flap com exibição garantida de logótipos de companhias aéreas e transição automática para o modo meteorológico completo quando não houver aviões no ar.
+**Estado:** Painel analógico Split-Flap com encaixe 100% no ecrã (100dvh / 100dvw - zero scroll em fullscreen no telemóvel) e exibição detalhada de nomes de cidades/aeroportos nas origens e destinos.
 
 ---
 
@@ -31,17 +31,17 @@
 
 ## Decisões Técnicas (ADRs)
 
-### ADR-001 a 016 — (Ver sessões anteriores)
-
-### ADR-017 — Ecrã Inteiro (Fullscreen) com 1 Toque e Tipografia Branca (2026-09-07)
-**Contexto:** O utilizador solicitou que todas as letras fossem em branco e que um toque no ecrã colocasse o painel automaticamente em ecrã inteiro (Fullscreen).  
-**Decisão:** Integrar a Fullscreen API no elemento raiz activada ao toque/clique em conjunto com o áudio, e uniformizar todas as células de palhetas mecânicas com tipografia monocromática 100% branca sobre fundo escuro.  
-**Consequência:** Experiência imersiva em telemóvel/tablet/ecrã sem barras de navegação do browser, com estética minimalista monocromática.
+### ADR-001 a 017 — (Ver sessões anteriores)
 
 ### ADR-018 — Resolução Universal de Logótipos e Transição Meteo Automática (2026-09-07)
 **Contexto:** Garantir que o logótipo da companhia aérea nunca fica em falta (mesmo para códigos ICAO não catalogados) e que a ausência de voos no ar transita automaticamente para o modo meteorológico.  
 **Decisão:** Expandir o dicionário de operadoras aéreas, adicionar resolução IATA de 2 letras e emblema de cauda de aviação de reserva; verificar ativamente a ausência de tráfego em voo para carregar a estação meteorológica em palhetas brancas.  
 **Consequência:** Visual 100% consistente, sem falhas visuais no logótipo e com informação meteorológica sempre que o radar estiver livre.
+
+### ADR-019 — Auto-Fit 100dvh / Zero Scroll em Fullscreen e Cidades nas Origens (2026-09-07)
+**Contexto:** Ao activar o Fullscreen no telemóvel, o ecrã necessitava de scroll vertical/horizontal e faltava a cidade/aeroporto nas origens.  
+**Decisão:** Fixar o layout em `100dvh`/`100dvw` com escalamento por `min(vw, vh)` que adapta a altura à orientação do telemóvel sem qualquer transbordo ou scroll; mapear países e rotas para nomes de cidades/aeroportos (`MADRID`, `PARIS`, `LONDRES`, `LISBOA`, etc.) e exibi-los a par do código IATA.  
+**Consequência:** Experiência 100% ajustada ao ecrã inteiro do telemóvel com zero scroll.
 
 ---
 
@@ -68,3 +68,4 @@
 | 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis    |
 | 2026-09-07 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
 | 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar |
+| 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens |
