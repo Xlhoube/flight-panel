@@ -1,12 +1,92 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export interface RotaAdsb {
+  origem: string;
+  origemCode: string;
+  destino: string;
+  destinoCode: string;
+  airline?: string;
+  callsignIata?: string;
+  callsignIcao?: string;
+}
+
+const TRADUCOES_CIDADES: Record<string, string> = {
+  GENEVA: "GENEBRA",
+  ZURICH: "ZURIQUE",
+  LONDON: "LONDRES",
+  AMSTERDAM: "AMSTERDAO",
+  BRUSSELS: "BRUXELAS",
+  VIENNA: "VIENA",
+  WARSAW: "VARSOVIA",
+  ROME: "ROMA",
+  MILAN: "MILAO",
+  MUNICH: "MUNIQUE",
+  LISBON: "LISBOA",
+  FRANKFURT: "FRANKFURT",
+  MADRID: "MADRID",
+  PARIS: "PARIS",
+  BARCELONA: "BARCELONA",
+  DUBLIN: "DUBLIN",
+};
+
+const cacheRotasMemoria: Map<string, { rota: RotaAdsb | null; expiraEm: number }> = new Map();
+
+async function obterRotaPorCallsign(callsign: string): Promise<RotaAdsb | null> {
+  const cs = callsign.trim().toUpperCase();
+  if (!cs || cs.length < 3) return null;
+
+  const agora = Date.now();
+  const cached = cacheRotasMemoria.get(cs);
+  if (cached && cached.expiraEm > agora) {
+    return cached.rota;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`https://api.adsbdb.com/v0/callsign/${encodeURIComponent(cs)}`, {
+      signal: controller.signal,
+      headers: { "User-Agent": "FlightPanel/1.2 (Next.js Aviation Display)" },
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const data = await res.json();
+      const r = data.response?.flightroute;
+      if (r && r.origin && r.destination) {
+        const rawOrigem = (r.origin.municipality || r.origin.name || "PORTO").toUpperCase();
+        const rawDestino = (r.destination.municipality || r.destination.name || "DESTINO").toUpperCase();
+
+        const rota: RotaAdsb = {
+          origem: TRADUCOES_CIDADES[rawOrigem] || rawOrigem,
+          origemCode: r.origin.iata_code || "OPO",
+          destino: TRADUCOES_CIDADES[rawDestino] || rawDestino,
+          destinoCode: r.destination.iata_code || "DES",
+          airline: r.airline?.name,
+          callsignIata: r.callsign_iata,
+          callsignIcao: r.callsign_icao,
+        };
+        cacheRotasMemoria.set(cs, { rota, expiraEm: agora + 3600_000 });
+        return rota;
+      }
+    }
+  } catch {
+    // Falha silenciosa
+  }
+
+  cacheRotasMemoria.set(cs, { rota: null, expiraEm: agora + 300_000 });
+  return null;
+}
+
 // Cache de resiliência em memória
 let cacheMemoriaVoos: {
   timestamp: number;
   estados: any[];
+  rotas: Record<string, RotaAdsb>;
 } = {
   timestamp: 0,
   estados: [],
+  rotas: {},
 };
 
 // Conversão de dados do feed aberto ADS-B (adsb.fi) para o formato padrão EstadoVoo
@@ -122,14 +202,38 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Obter rotas ADS-B reais para aeronaves encontradas
+    const rotasMap: Record<string, RotaAdsb> = {};
+    if (estados.length > 0) {
+      const callsigns = Array.from(
+        new Set(
+          estados
+            .map((e) => (e[1] || "").trim().toUpperCase())
+            .filter((cs) => cs.length >= 3)
+        )
+      );
+
+      if (callsigns.length > 0) {
+        const promessas = callsigns.slice(0, 6).map(async (cs) => {
+          const rota = await obterRotaPorCallsign(cs);
+          if (rota) {
+            rotasMap[cs] = rota;
+          }
+        });
+        await Promise.allSettled(promessas);
+      }
+    }
+
     // Se obtivemos dados válidos, actualizar a cache de resiliência
     if (estados.length > 0) {
       cacheMemoriaVoos = {
         timestamp: Date.now(),
         estados,
+        rotas: rotasMap,
       };
       return NextResponse.json({
         estados,
+        rotas: rotasMap,
         fonte,
         total: estados.length,
       });
@@ -140,6 +244,7 @@ export async function GET(request: NextRequest) {
     if (cacheMemoriaVoos.estados.length > 0 && agora - cacheMemoriaVoos.timestamp < 120_000) {
       return NextResponse.json({
         estados: cacheMemoriaVoos.estados,
+        rotas: cacheMemoriaVoos.rotas,
         fonte: "cache-resiliencia",
         total: cacheMemoriaVoos.estados.length,
       });
@@ -147,12 +252,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       estados: [],
+      rotas: {},
       fonte: "nenhuma",
       total: 0,
     });
   } catch (err: any) {
     return NextResponse.json({
       estados: cacheMemoriaVoos.estados ?? [],
+      rotas: cacheMemoriaVoos.rotas ?? {},
       fonte: "cache-erro",
       total: (cacheMemoriaVoos.estados ?? []).length,
     });

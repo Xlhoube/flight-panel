@@ -164,10 +164,11 @@ const PREFIXOS_REGISTO: Record<string, { pais: string; cidade: string; code: str
   LZ: { pais: "BULGÁRIA", cidade: "SÓFIA", code: "SOF" },
 };
 
-function resolverVooInfo(voo: EstadoVoo) {
+function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const cs = (voo[1] || "").trim().toUpperCase();
-  const prefixo3 = cs.slice(0, 3);
-  const prefixo2 = cs.slice(0, 2);
+  const csLimpo = cs.replace(/\s+/g, "");
+  const prefixo3 = csLimpo.slice(0, 3);
+  const prefixo2 = csLimpo.slice(0, 2);
   
   let info = COMPANHIAS[prefixo3];
   let icao = /^[A-Z]{3}$/.test(prefixo3) ? prefixo3 : "";
@@ -191,12 +192,23 @@ function resolverVooInfo(voo: EstadoVoo) {
     else if (prefixo2 === "RO") { iata = "RO"; icao = "ROT"; }
   }
 
-  // Limpar espaços internos do callsign
-  const csLimpo = cs.replace(/\s+/g, "");
+  // Tentar rota ADS-B real (da base de dados internacional adsbdb)
+  const rotaReal = rotasMap ? (rotasMap[csLimpo] || rotasMap[cs]) : null;
 
+  // Determinar o identificador de voo para o display:
+  // 1. Se o sufixo for puramente numérico (ex: TAP1972 -> 1972), formata como IATA comercial (TP1972)
+  // 2. Se tiver caracteres alfanuméricos operacionais (ex: SWR1ZD, EZY62DK), mantém o callsign para corresponder ao FlightRadar24
   let numeroVoo = csLimpo || voo[0].toUpperCase();
+  let callsignIata: string | null = rotaReal?.callsignIata || null;
+
   if (info && csLimpo.length > 3) {
-    numeroVoo = `${info.iata}${csLimpo.slice(3)}`;
+    const sufixo = csLimpo.slice(3);
+    callsignIata = `${info.iata}${sufixo}`;
+    if (/^\d+$/.test(sufixo)) {
+      numeroVoo = `${info.iata}${sufixo}`;
+    } else {
+      numeroVoo = csLimpo;
+    }
   }
 
   const paisUpper = (voo[2] || "").toUpperCase();
@@ -207,18 +219,39 @@ function resolverVooInfo(voo: EstadoVoo) {
   let origemCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
   let destinoCode = info?.destinoCode || "OPO";
 
-  const vRate = voo[11];
-  if (vRate != null) {
-    if (vRate < -0.5) {
+  if (rotaReal) {
+    origem = rotaReal.origem;
+    origemCode = rotaReal.origemCode;
+    destino = rotaReal.destino;
+    destinoCode = rotaReal.destinoCode;
+  } else {
+    // Estimativa por perfil de subida / descida (vertical_rate)
+    const vRate = voo[11];
+    if (vRate != null) {
+      if (vRate < -0.5) {
+        // A descer / aproximação ao Porto: destino é Porto
+        destino = "PORTO";
+        destinoCode = "OPO";
+        origem = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
+        origemCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
+      } else if (vRate > 0.5) {
+        // A subir / descolagem do Porto: origem é Porto, destino é o hub da companhia
+        origem = "PORTO";
+        origemCode = "OPO";
+        destino = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
+        destinoCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
+      }
+    }
+  }
+
+  // Prevenção absoluta de rota fechada em si mesma (origem e destino NUNCA podem ser iguais)
+  if (origemCode === destinoCode) {
+    if (origemCode === "OPO") {
+      destino = info?.origem && info.origemCode !== "OPO" ? info.origem : (dadosPais?.cidade && dadosPais.cidade !== "PORTO" ? dadosPais.cidade : "LISBOA");
+      destinoCode = info?.origemCode && info.origemCode !== "OPO" ? info.origemCode : (dadosPais?.code && dadosPais.code !== "OPO" ? dadosPais.code : "LIS");
+    } else {
       destino = "PORTO";
       destinoCode = "OPO";
-    } else if (vRate > 0.5) {
-      origem = "PORTO";
-      origemCode = "OPO";
-      if (dadosPais && dadosPais.cidade !== "PORTO") {
-        destino = dadosPais.cidade;
-        destinoCode = dadosPais.code;
-      }
     }
   }
 
@@ -229,7 +262,9 @@ function resolverVooInfo(voo: EstadoVoo) {
 
   // Determinar nome legível e elegante para a companhia ou tipo de operação
   let nomeFinalCompanhia = "AVIAÇÃO COMERCIAL";
-  if (info?.nome) {
+  if (rotaReal?.airline) {
+    nomeFinalCompanhia = rotaReal.airline.toUpperCase();
+  } else if (info?.nome) {
     nomeFinalCompanhia = info.nome;
   } else if (regPais) {
     nomeFinalCompanhia = `AVIAÇÃO PRIVADA (${regPais.pais})`;
@@ -242,6 +277,7 @@ function resolverVooInfo(voo: EstadoVoo) {
     icao,
     iata,
     numeroVoo,
+    callsignIata,
     nomeCompanhia: nomeFinalCompanhia,
     aeronave: (voo[12] ? String(voo[12]).toUpperCase() : (info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320"))),
     origem,
@@ -473,6 +509,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [totalNoRadar, setTotalNoRadar] = useState(0);
   const [horaAtual, setHoraAtual] = useState("12:00");
   const [dataAtual, setDataAtual] = useState("08 SET");
+  const [rotasMap, setRotasMap] = useState<Record<string, any>>({});
 
   // Relógio de estação analógica em tempo real para o cabeçalho meteorológico
   useEffect(() => {
@@ -626,6 +663,10 @@ export default function PainelAnalogicoMobileFullscreen() {
       const resVoos = await fetch(`/api/voos?${params.toString()}`);
       const dadosVoos = await resVoos.json();
 
+      if (dadosVoos.rotas && Object.keys(dadosVoos.rotas).length > 0) {
+        setRotasMap((prev) => ({ ...prev, ...dadosVoos.rotas }));
+      }
+
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
         // Filtrar aeronaves no ar (não estacionadas no solo)
         const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => !v[8]);
@@ -675,7 +716,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  const infoVoo = vooAtual ? resolverVooInfo(vooAtual) : null;
+  const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMap) : null;
 
   return (
     <main
@@ -711,6 +752,11 @@ export default function PainelAnalogicoMobileFullscreen() {
                     {infoVoo.callsign && infoVoo.callsign !== infoVoo.numeroVoo && (
                       <span className="text-[8px] sm:text-[10px] text-amber-400/90 font-mono tracking-wider font-bold">
                         ATC: {infoVoo.callsign}
+                      </span>
+                    )}
+                    {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
+                      <span className="text-[8px] sm:text-[10px] text-sky-400/90 font-mono tracking-wider font-bold">
+                        IATA: {infoVoo.callsignIata}
                       </span>
                     )}
                   </div>
