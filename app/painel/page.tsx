@@ -548,11 +548,11 @@ function FlapCell({ char, size = "lg" }: FlapCellProps) {
   }, [char, prevChar]);
 
   const dimensões = {
-    sm: "w-[clamp(0.75rem,min(2.4vw,5vh),1.5rem)] h-[clamp(1.1rem,min(3.5vw,7vh),2.2rem)] text-[clamp(0.75rem,min(2.2vw,4.5vh),1.3rem)] font-black rounded-[2px]",
-    md: "w-[clamp(0.9rem,min(3vw,6vh),1.9rem)] h-[clamp(1.3rem,min(4.4vw,8.5vh),2.7rem)] text-[clamp(0.85rem,min(2.8vw,5.5vh),1.5rem)] font-black rounded-[3px]",
-    lg: "w-[clamp(1.1rem,min(3.8vw,7.5vh),2.4rem)] h-[clamp(1.6rem,min(5.5vw,10.5vh),3.4rem)] text-[clamp(1rem,min(3.5vw,6.8vh),2rem)] font-black rounded-[4px]",
-    xl: "w-[clamp(1.3rem,min(4.6vw,9vh),2.9rem)] h-[clamp(1.8rem,min(6.5vw,12.5vh),4rem)] text-[clamp(1.15rem,min(4.2vw,8vh),2.4rem)] font-black rounded-[5px]",
-    hero: "w-[clamp(1.5rem,min(5.5vw,11vh),3.5rem)] h-[clamp(2.1rem,min(7.8vw,15vh),4.8rem)] text-[clamp(1.35rem,min(5vw,9.5vh),3rem)] font-black rounded-[5px]",
+    sm: "w-[clamp(0.75rem,min(2.4vw,4.5vh),1.5rem)] h-[clamp(1.05rem,min(3.4vw,6vh),2.1rem)] text-[clamp(0.75rem,min(2.2vw,4vh),1.25rem)] font-black rounded-[2px]",
+    md: "w-[clamp(0.9rem,min(3vw,5.5vh),1.9rem)] h-[clamp(1.25rem,min(4.2vw,7.5vh),2.5rem)] text-[clamp(0.85rem,min(2.8vw,5vh),1.45rem)] font-black rounded-[3px]",
+    lg: "w-[clamp(1.05rem,min(3.6vw,6.5vh),2.3rem)] h-[clamp(1.45rem,min(5vw,9vh),3.1rem)] text-[clamp(0.95rem,min(3.3vw,6vh),1.9rem)] font-black rounded-[4px]",
+    xl: "w-[clamp(1.25rem,min(4.4vw,7.8vh),2.7rem)] h-[clamp(1.65rem,min(5.8vw,10.5vh),3.5rem)] text-[clamp(1.1rem,min(3.8vw,6.8vh),2.1rem)] font-black rounded-[5px]",
+    hero: "w-[clamp(1.35rem,min(4.8vw,8.5vh),3.1rem)] h-[clamp(1.8rem,min(6.5vw,11.5vh),3.9rem)] text-[clamp(1.2rem,min(4.4vw,7.8vh),2.5rem)] font-black rounded-[5px]",
   }[size];
 
   const coresTexto = "text-white bg-[#111319] border-[#252834] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]";
@@ -1265,39 +1265,34 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 2: SECÇÃO PRINCIPAL DE ROTA (EXPANDIDA NO CENTRO) ───────── */}
-            <div className="w-full flex-1 min-h-[60px] sm:min-h-[90px] bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 sm:gap-6 shadow-lg overflow-hidden">
+            <div className="w-full flex-1 min-h-0 bg-[#10121a] px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
               
-              {/* ORIGEM (CÓDIGO IATA + CIDADE / AEROPORTO) */}
-              <div className="flex flex-col items-start gap-1">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  ORIGEM / DEPARTURE
-                </span>
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {/* CABEÇALHO DEDICADO DE ROTA: ORIGEM | ESTADO DE VOO | DESTINO (NUNCA CORTA) */}
+              <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pt-0.5">
+                <span className="text-left">ORIGEM / DEPARTURE</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
+                  <div className="w-4 sm:w-8 h-px bg-white/30" />
+                  <span className="text-[8px] sm:text-[9px] text-amber-400 font-bold tracking-wider">
+                    {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
+                  </span>
+                  <span className="text-white text-xs sm:text-base">✈</span>
+                  <div className="w-4 sm:w-8 h-px bg-white/30" />
+                </div>
+                <span className="text-right">DESTINO / DESTINATION</span>
+              </div>
+
+              {/* CORPO DE FLAPS: CÓDIGOS IATA + CIDADES COM AUTO-FIT */}
+              <div className="w-full flex-1 flex items-center justify-between gap-2 sm:gap-6 min-h-0 pt-1">
+                {/* ORIGEM */}
+                <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap min-w-0">
                   <FlapWord text={infoVoo.origemCode} size="hero" />
-                  <FlapWord text={infoVoo.origem} size="lg" />
+                  <FlapWord text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "sm" : "md"} />
                 </div>
-              </div>
 
-              {/* TRACK CENTRAL DE VOO */}
-              <div className="flex flex-col items-center justify-center px-2 shrink-0">
-                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-300 font-bold mb-1">
-                  {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
-                </span>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-6 sm:w-12 h-0.5 bg-white/40" />
-                  <span className="text-white text-xl sm:text-3xl">✈</span>
-                  <div className="w-6 sm:w-12 h-0.5 bg-white/40" />
-                </div>
-              </div>
-
-              {/* DESTINO (CÓDIGO IATA + CIDADE / AEROPORTO) */}
-              <div className="flex flex-col items-end gap-1 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  DESTINO / DESTINATION
-                </span>
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+                {/* DESTINO */}
+                <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap justify-end min-w-0 text-right">
                   <FlapWord text={infoVoo.destinoCode} size="hero" />
-                  <FlapWord text={infoVoo.destino} size="lg" />
+                  <FlapWord text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "sm" : "md"} />
                 </div>
               </div>
 
@@ -1369,23 +1364,20 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   LOCALIZAÇÃO
                 </span>
-                <FlapWord text={coords ? "GPS LOCAL" : (meteorologia?.name && meteorologia.name !== "LOCAL" ? meteorologia.name : "VALADARES")} size="lg" />
+                <FlapWord text={localizacao.nome.length > 12 ? localizacao.nome.slice(0, 12) : localizacao.nome} size="md" />
               </div>
             </div>
 
             {/* Linha Principal Meteorológica */}
-            <div className="w-full flex-1 min-h-[60px] sm:min-h-[90px] bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-4 shadow-lg overflow-hidden">
-              <div className="flex flex-col items-start gap-1">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  CONDIÇÃO DO TEMPO
-                </span>
-                <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+            <div className="w-full flex-1 min-h-0 bg-[#10121a] px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
+              <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pt-0.5">
+                <span>CONDIÇÃO DO TEMPO</span>
+                <span>TEMPERATURA</span>
               </div>
 
-              <div className="flex flex-col items-end gap-1 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  TEMPERATURA
-                </span>
+              <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 pt-1">
+                <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+
                 <div className="flex items-center gap-1">
                   <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
                   <span className="text-xl sm:text-3xl font-black text-white">°C</span>

@@ -237,4 +237,5 @@
 | 2026-09-08 | v1.2.0 | Navegação multivoo por arrasto/swipe lateral, botões tácteis translúcidos, transição imediata para meteorologia e SW v9 |
 | 2026-09-08 | v1.3.0 | Sincronização estrita de coordenadas, modal analógico de localização (GPS/Cidades/Manual) e Espera Suave de 40s (SW v10) |
 | 2026-09-08 | v1.3.1 | Refinamento contínuo watchPosition (precisão satélite <10m), indicador de erro em metros (±Xm) e botão de partilha direta PC->Telemóvel (SW v11) |
+| 2026-09-08 | v1.3.2 | Reestruturação do cabeçalho de rota (linha dedicada ORIGEM/DESTINO anti-corte), proporções clamp de FlapCell para landscape móvel e SW v12 |
 
