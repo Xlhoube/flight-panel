@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.3.0  
+**Versão:** v1.3.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** Sincronização estrita de coordenadas geográficas, seletor analógico de localização (GPS/Cidades/Manual), retenção suave de 40s para apreciar voos antes da meteo, navegação por arrasto lateral e SW v10.
+**Estado:** Navegação multivoo operada exclusivamente por arrasto horizontal, botões dedicados de Ajustar e Ecrã Inteiro no rodapé, remoção de toque acidental para fullscreen e SW v13.
 
 ---
 
@@ -190,6 +190,11 @@
 3. **Espera Suave (40 Segundos):** Quando uma aeronave sai do raio de 20 km, o painel mantém os seus dados visíveis durante 40 segundos, apresentando o crachá dinâmico `ÚLTIMO CONTACTO (Xs)` no cabeçalho e `ESPERA: Xs` no rodapé. Se surgir outro voo durante a espera, a troca é instantânea; caso contrário, após os 40s transita suavemente para a meteorologia.  
 **Consequência:** Resolução definitiva das discrepâncias geográficas, suporte robusto a telemóveis e computadores em qualquer cidade, e tempo ideal para apreciar a passagem de cada voo.
 
+### ADR-037 — Navegação Multivoo Exclusiva por Arrasto & Botões Dedicados (2026-09-08)
+**Contexto:** O utilizador solicitou: (1) remoção das setas flutuantes e dos botões ◀/▶ de navegação de voo, deixando a mudança de aeronave exclusivamente por gesto de arrasto/swipe lateral; (2) remoção do toque simples no ecrã para entrar/sair de fullscreen (evitando disparos acidentais ao tocar ou arrastar); e (3) adição de dois botões dedicados na barra inferior: um para "Ajustar" (configurações de localização e raio) e outro para "Ecrã Inteiro / Janela" (fullscreen).  
+**Decisão:** Eliminar os botões translúcidos flutuantes de seta nas laterais e as setas do rodapé (mantendo apenas o badge informativo `VOO X/Y`); desativar a deteção de toque simples para fullscreen no listener de arrasto e definir `cursor-default` no contentor principal; e adicionar dois botões estilizados no rodapé: `⚙️ AJUSTAR` (que abre o modal de localização) e `⛶ ECRÃ INTEIRO` / `🗗 JANELA` (que alterna o modo ecrã inteiro nativo e reflete o estado em tempo real com `fullscreenchange`). Atualizar o Service Worker para `flight-panel-v13`.  
+**Consequência:** Interação tátil limpa sem comandos acidentais, controlo explícito de ecrã inteiro e navegação natural por gestos de swipe.
+
 ---
 
 ## Histórico
@@ -238,4 +243,5 @@
 | 2026-09-08 | v1.3.0 | Sincronização estrita de coordenadas, modal analógico de localização (GPS/Cidades/Manual) e Espera Suave de 40s (SW v10) |
 | 2026-09-08 | v1.3.1 | Refinamento contínuo watchPosition (precisão satélite <10m), indicador de erro em metros (±Xm) e botão de partilha direta PC->Telemóvel (SW v11) |
 | 2026-09-08 | v1.3.2 | Reestruturação do cabeçalho de rota (linha dedicada ORIGEM/DESTINO anti-corte), proporções clamp de FlapCell para landscape móvel e SW v12 |
+| 2026-09-08 | v1.3.3 | Remoção de setas, navegação exclusivamente por arrasto lateral, botões dedicados Ajustar e Ecrã Inteiro e SW v13 |
 

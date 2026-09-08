@@ -649,6 +649,21 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [modalLocalizacaoAberto, setModalLocalizacaoAberto] = useState(false);
   const [latManual, setLatManual] = useState<string>("41.15");
   const [lonManual, setLonManual] = useState<string>("-8.62");
+  const [estaEmFullScreen, setEstaEmFullScreen] = useState<boolean>(false);
+
+  // Escuta de alteração de modo ecrã inteiro nativo
+  useEffect(() => {
+    const handleFsChange = () => {
+      const doc = document as Document & { webkitFullscreenElement?: Element };
+      setEstaEmFullScreen(!!(doc.fullscreenElement || doc.webkitFullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    document.addEventListener("webkitfullscreenchange", handleFsChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFsChange);
+      document.removeEventListener("webkitfullscreenchange", handleFsChange);
+    };
+  }, []);
 
   // Espera suave do último voo (30-45s)
   const timestampSemVoosRef = useRef<number | null>(null);
@@ -915,8 +930,8 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Fullscreen com 1 toque no ecrã & activação de som e Wake Lock
-  const manipularToqueEcra = () => {
+  // Modo Ecrã Inteiro controlado exclusivamente por botão dedicado
+  const alternarFullScreen = () => {
     // Garantir que o ecrã se mantém ligado após interacção
     if (typeof window !== "undefined" && "wakeLock" in navigator) {
       (navigator as any).wakeLock.request("screen").catch(() => {});
@@ -957,7 +972,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Navegação entre múltiplos voos em sobrevoo
+  // Navegação entre múltiplos voos em sobrevoo (exclusivamente por arrasto lateral)
   const avancarVoo = useCallback(() => {
     setListaVoos((lista) => {
       if (lista.length <= 1) return lista;
@@ -997,7 +1012,6 @@ export default function PainelAnalogicoMobileFullscreen() {
 
     const deltaX = clientX - touchStartX.current;
     const deltaY = clientY - touchStartY.current;
-    const deltaTime = Date.now() - touchStartTime.current;
 
     touchStartX.current = null;
     touchStartY.current = null;
@@ -1011,13 +1025,8 @@ export default function PainelAnalogicoMobileFullscreen() {
         // Arrastar para a direita -> Voo anterior
         recuarVoo();
       }
-      return;
     }
-
-    // Se foi um toque ou clique simples (sem arrasto significativo e rápido)
-    if (Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15 && deltaTime < 450) {
-      manipularToqueEcra();
-    }
+    // Toque simples já não ativa fullscreen, garantindo total estabilidade do ecrã
   };
 
   const carregarMeteorologia = useCallback(async (localCoords?: { lat: number; lon: number } | null) => {
@@ -1167,32 +1176,8 @@ export default function PainelAnalogicoMobileFullscreen() {
       onTouchEnd={lidarComFimArrasto}
       onMouseDown={lidarComInicioArrasto}
       onMouseUp={lidarComFimArrasto}
-      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-pointer relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
+      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
     >
-      {/* ── BOTÕES LATERAIS TRANSLÚCIDOS DE NAVEGAÇÃO DE VOOS ─────────── */}
-      {listaVoos.length > 1 && (
-        <>
-          <button
-            onClick={(e) => { e.stopPropagation(); recuarVoo(); }}
-            title="Voo anterior (arrasta para a direita)"
-            className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-40 p-1.5 sm:p-2 bg-black/60 hover:bg-black/90 active:scale-90 text-white/80 hover:text-white rounded-full backdrop-blur-md border border-white/20 transition-all shadow-xl cursor-pointer"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); avancarVoo(); }}
-            title="Próximo voo (arrasta para a esquerda)"
-            className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-40 p-1.5 sm:p-2 bg-black/60 hover:bg-black/90 active:scale-90 text-white/80 hover:text-white rounded-full backdrop-blur-md border border-white/20 transition-all shadow-xl cursor-pointer"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </>
-      )}
 
       {/* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */}
       <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
@@ -1425,48 +1410,19 @@ export default function PainelAnalogicoMobileFullscreen() {
         <div 
           className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 transition-colors"
         >
-          {/* Botão Interativo de Configuração de Localização / GPS */}
-          <div 
-            onClick={(e) => {
-              e.stopPropagation();
-              setModalLocalizacaoAberto(true);
-            }}
-            title="Clica para configurar a localização / GPS do radar"
-            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors py-0.5 px-1 rounded hover:bg-white/5"
-          >
+          {/* Informação de Localização / GPS */}
+          <div className="flex items-center gap-1.5 py-0.5 px-1">
             <span className={`w-2 h-2 rounded-full ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
             <span className="font-bold text-neutral-200">
-              RADAR v1.3.0 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
-            </span>
-            <span className="text-[7px] sm:text-[8px] bg-white/10 px-1 py-0.5 rounded text-sky-300 font-bold ml-0.5">
-              ⚙️ AJUSTAR
+              RADAR v1.3.3 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {listaVoos.length > 1 && (
-              <div 
-                className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded border border-white/20 text-white font-mono text-[8px] sm:text-[10px]"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  onClick={(e) => { e.stopPropagation(); recuarVoo(); }}
-                  className="px-1 text-neutral-300 hover:text-white active:scale-95 cursor-pointer"
-                  title="Voo anterior (arrasta para a direita)"
-                >
-                  ◀
-                </button>
-                <span className="font-bold text-sky-400 tracking-wider">
-                  VOO {indiceVoo + 1}/{listaVoos.length}
-                </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); avancarVoo(); }}
-                  className="px-1 text-neutral-300 hover:text-white active:scale-95 cursor-pointer"
-                  title="Próximo voo (arrasta para a esquerda)"
-                >
-                  ▶
-                </button>
-              </div>
+              <span className="bg-white/10 px-2 py-0.5 rounded border border-white/20 text-sky-400 font-bold font-mono text-[8px] sm:text-[10px] tracking-wider">
+                VOO {indiceVoo + 1}/{listaVoos.length}
+              </span>
             )}
             {emEsperaSuave && (
               <span className="text-amber-400 bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold animate-pulse">
@@ -1479,6 +1435,32 @@ export default function PainelAnalogicoMobileFullscreen() {
               </span>
             )}
             <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
+
+            {/* BOTÃO 1: AJUSTAR */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setModalLocalizacaoAberto(true);
+              }}
+              title="Ajustar localização e raio do radar"
+              className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-2 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm ml-1"
+            >
+              <span>⚙️</span>
+              <span>AJUSTAR</span>
+            </button>
+
+            {/* BOTÃO 2: FULL SCREEN */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                alternarFullScreen();
+              }}
+              title={estaEmFullScreen ? "Sair do modo ecrã inteiro" : "Activar modo ecrã inteiro"}
+              className="flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/35 active:scale-95 text-amber-300 hover:text-white px-2 py-0.5 rounded border border-amber-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm"
+            >
+              <span>{estaEmFullScreen ? "🗗" : "⛶"}</span>
+              <span>{estaEmFullScreen ? "JANELA" : "ECRÃ INTEIRO"}</span>
+            </button>
           </div>
         </div>
 
