@@ -192,7 +192,83 @@ const NOMES_AERONAVES: Record<string, string> = {
   AT76: "ATR 72-600",
   DH8D: "DASH 8-400",
   CRJ9: "CRJ-900",
+  C55B: "CITATION BRAVO",
+  C56X: "CITATION XLS",
+  C680: "CITATION SOV",
+  C25A: "CITATION CJ2",
+  C25B: "CITATION CJ3",
+  C25C: "CITATION CJ4",
+  C510: "CITATION MUST",
+  C525: "CITATION M2",
+  C550: "CITATION II",
+  C560: "CITATION V",
+  CL30: "CHALLENGER 300",
+  CL35: "CHALLENGER 350",
+  CL60: "CHALLENGER 600",
+  CL65: "CHALLENGER 605",
+  FA7X: "FALCON 7X",
+  FA8X: "FALCON 8X",
+  F2TH: "FALCON 2000",
+  F900: "FALCON 900",
+  GL5T: "GLOBAL 5000",
+  GL6T: "GLOBAL 6000",
+  GL7T: "GLOBAL 7500",
+  GLEX: "GLOBAL EXP",
+  GLF4: "GULFSTREAM IV",
+  GLF5: "GULFSTREAM V",
+  GLF6: "GULFSTREAM 650",
+  PC12: "PILATUS PC-12",
+  PC24: "PILATUS PC-24",
+  BE20: "SUPER KING AIR",
+  B350: "KING AIR 350",
+  BE9L: "KING AIR 90",
+  SR20: "CIRRUS SR20",
+  SR22: "CIRRUS SR22",
+  C152: "CESSNA 152",
+  C172: "CESSNA 172",
+  R22:  "ROBINSON R22",
+  R44:  "ROBINSON R44",
 };
+
+function formatarNomeAeronave(raw: string): string {
+  if (!raw) return "A320";
+  let s = raw.trim().toUpperCase();
+
+  // 1. Mapeamento directo por código exacto ICAO
+  if (NOMES_AERONAVES[s]) {
+    return NOMES_AERONAVES[s];
+  }
+
+  // 2. Se for curto (<= 14 caracteres), mantemos intacto (ex: "CESSNA 172", "BOEING 737")
+  if (s.length <= 14) {
+    return s;
+  }
+
+  // 3. Limpeza de prefixos extensos se ultrapassar 14 caracteres
+  s = s
+    .replace(/^CESSNA\s+\d+[A-Z]*\s+/i, "")
+    .replace(/^CESSNA\s+/i, "")
+    .replace(/^BEECHCRAFT\s+(SUPER\s+)?/i, "")
+    .replace(/^DASSAULT\s+/i, "")
+    .replace(/^BOMBARDIER\s+/i, "")
+    .replace(/^GULFSTREAM\s+AEROSPACE\s+/i, "GULFSTREAM ")
+    .replace(/^EMBRAER\s+/i, "EMBRAER ")
+    .replace(/^AIRBUS\s+/i, "A")
+    .replace(/^BOEING\s+/i, "B")
+    .trim();
+
+  // 4. Compactação se ainda assim ultrapassar 14 caracteres
+  if (s.length > 14) {
+    if (s.includes("CITATION")) return "CITATION";
+    if (s.includes("CHALLENGER")) return "CHALLENGER";
+    if (s.includes("FALCON")) return "FALCON";
+    if (s.includes("KING AIR")) return "KING AIR";
+    if (s.includes("GLOBAL")) return "GLOBAL EXP";
+    s = s.slice(0, 14).trim();
+  }
+
+  return s;
+}
 
 function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const cs = (voo[1] || "").trim().toUpperCase();
@@ -298,7 +374,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   }
 
   const codAeronave = (voo[12] ? String(voo[12]).toUpperCase() : (rotaReal?.model || info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320")));
-  const nomeAeronave = NOMES_AERONAVES[codAeronave] || codAeronave;
+  const nomeAeronave = formatarNomeAeronave(codAeronave);
 
   return {
     callsign: cs,
@@ -771,7 +847,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
               
               {/* Logótipo Oficial Garantido + Voo */}
-              <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 shrink-0">
                 <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
 
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
@@ -793,7 +869,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               {/* Aeronave, Nome da Companhia e Botão de Instalação PWA */}
-              <div className="flex flex-col items-end gap-0.5 text-right">
+              <div className="flex flex-col items-end gap-0.5 text-right min-w-0 max-w-[55%] sm:max-w-[60%] overflow-hidden">
                 <div className="flex items-center gap-2">
                   {promptInstalacao && (
                     <button
@@ -807,7 +883,10 @@ export default function PainelAnalogicoMobileFullscreen() {
                     AIRCRAFT
                   </span>
                 </div>
-                <FlapWord text={infoVoo.aeronave} size="md" />
+                <FlapWord
+                  text={infoVoo.aeronave}
+                  size={infoVoo.aeronave.length >= 12 ? "sm" : infoVoo.aeronave.length >= 9 ? "md" : "lg"}
+                />
                 <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
                   {infoVoo.nomeCompanhia}
                 </span>
@@ -995,7 +1074,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         >
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>RADAR ADS-B v1.1.3 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 20 KM)</span>
+            <span>RADAR ADS-B v1.1.4 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 20 KM)</span>
           </div>
           <div className="flex items-center gap-2">
             <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>

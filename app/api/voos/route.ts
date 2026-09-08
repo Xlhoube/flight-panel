@@ -367,7 +367,7 @@ function converterAdsbParaEstado(ac: any): any[] {
     velMs,
     rumo,
     vertRate,
-    ac.desc || ac.t || null,
+    ac.t || ac.desc || null,
     null,
     ac.squawk || null,
     false,

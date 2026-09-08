@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.1.3  
+**Versão:** v1.1.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** Integração nativa do feed live FlightRadar24 com rotas em tempo real, raio de 20 km e nomes de aeronaves expandidos.
+**Estado:** Auto-fit inteligente de palhetas de aeronave (máx 14 caracteres), blindagem anti-sobreposição no cabeçalho e SW v7.
 
 ---
 
@@ -107,6 +107,16 @@
 4. No frontend (`painel/page.tsx`), priorizar o número de voo comercial real (`flightNumber`, ex: `FR573`) no badge e mapear códigos de modelo ICAO (`B738`, `B38M`, `A320`) para nomes expandidos nas palhetas mecânicas.  
 **Consequência:** Fidelidade absoluta a 100% com o FlightRadar24 em tempo real, eliminação de rotas residuais antigas e apresentação consistente de cidades e modelos de aeronave.
 
+### ADR-035 — Auto-Fit e Compactação de Nomes de Aeronaves & Blindagem do Cabeçalho (2026-09-08)
+**Contexto:** Descrições longas de aeronaves (ex: `CESSNA 550B CITATION BRAVO` com 28 caracteres) geradas por feeds externos expandiam excessivamente as palhetas mecânicas à direita, transbordando e atropelando o logótipo e o número de voo no lado esquerdo do cabeçalho.  
+**Decisão:**  
+1. Criar a função `formatarNomeAeronave()` que compacta inteligentemente nomes longos (> 14 caracteres), eliminando redundâncias de fabricantes (ex: `CESSNA 550B CITATION BRAVO` ➔ `CITATION BRAVO`), preservando nomes curtos e aplicando um tecto de 14 caracteres (capacidade máxima de palhetas).  
+2. Blindar o lado esquerdo do cabeçalho com `shrink-0` para garantir que o logótipo e o número de voo nunca são comprimidos ou sobrepostos.  
+3. Restringir a coluna direita de aeronave com `min-w-0 max-w-[55%] sm:max-w-[60%] overflow-hidden`.  
+4. Implementar dimensionamento dinâmico de palhetas na aeronave: `size="sm"` para 12-14 caracteres, `size="md"` para 9-11 caracteres e `size="lg"` para modelos curtos.  
+5. No endpoint `/api/voos`, priorizar o código de tipo ICAO conciso (`ac.t`, ex: `C55B`) antes da descrição de marketing (`ac.desc`).  
+**Consequência:** Eliminação total de sobreposições visuais, encaixe perfeito e harmonioso do cabeçalho em qualquer tamanho de ecrã e elegância mecânica autêntica de split-flap.
+
 ---
 
 ## Histórico
@@ -149,3 +159,4 @@
 | 2026-09-08 | v1.1.1 | Garantia de visibilidade da barra de rodapé em fullscreen móvel (flex-1 min-h-0) |
 | 2026-09-08 | v1.1.2 | Redução do raio de alcance do radar para 20 km (API, frontend e status) |
 | 2026-09-08 | v1.1.3 | Integração de feed live do FlightRadar24 (rotas em tempo real, nomes de aeronaves e resolução de rotas recicladas) |
+| 2026-09-08 | v1.1.4 | Auto-fit de palhetas de aeronaves (máx 14 caracteres), blindagem anti-sobreposição do cabeçalho e SW v7 |
