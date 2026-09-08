@@ -191,9 +191,12 @@ function resolverVooInfo(voo: EstadoVoo) {
     else if (prefixo2 === "RO") { iata = "RO"; icao = "ROT"; }
   }
 
-  let numeroVoo = cs || voo[0].toUpperCase();
-  if (info && cs.length > 3) {
-    numeroVoo = `${info.iata}${cs.slice(3).trim()}`;
+  // Limpar espaços internos do callsign
+  const csLimpo = cs.replace(/\s+/g, "");
+
+  let numeroVoo = csLimpo || voo[0].toUpperCase();
+  if (info && csLimpo.length > 3) {
+    numeroVoo = `${info.iata}${csLimpo.slice(3)}`;
   }
 
   const paisUpper = (voo[2] || "").toUpperCase();
@@ -697,14 +700,24 @@ export default function PainelAnalogicoMobileFullscreen() {
             <div className="w-full bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
               
               {/* Logótipo Oficial Garantido + Voo */}
-              <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
                 <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
 
-                <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    VOO / FLIGHT
-                  </span>
-                  <FlapWord text={infoVoo.numeroVoo} size="xl" />
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                      VOO / FLIGHT
+                    </span>
+                    {infoVoo.callsign && infoVoo.callsign !== infoVoo.numeroVoo && (
+                      <span className="text-[8px] sm:text-[10px] text-amber-400/90 font-mono tracking-wider font-bold">
+                        ATC: {infoVoo.callsign}
+                      </span>
+                    )}
+                  </div>
+                  <FlapWord
+                    text={infoVoo.numeroVoo}
+                    size={infoVoo.numeroVoo.length >= 7 ? "md" : infoVoo.numeroVoo.length >= 5 ? "lg" : "xl"}
+                  />
                 </div>
               </div>
 

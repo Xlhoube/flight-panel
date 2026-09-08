@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.6  
+**Versão:** v1.0.7  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA (Progressive Web App) completa com dupla fonte ADS-B, relógio Solari mecânico em tempo real (Data e Hora) e Localização no modo meteorológico.
+**Estado:** PWA (Progressive Web App) completa com auto-fit dinâmico de palhetas de voo (sem omissão de caracteres) e dupla indicação de voo comercial e callsign ATC.
 
 ---
 
@@ -68,6 +68,11 @@
 **Decisão:** Transformar a secção superior do modo meteorológico num relógio analógico Solari de estação em tempo real, exibindo a hora (HH:MM), data (DD MES) e a localização activa em palhetas mecânicas brancas com actualização contínua.  
 **Consequência:** O painel funciona como um elegante relógio de aeroporto vintage com meteorologia quando o espaço aéreo não tem voos activos.
 
+### ADR-028 — Resolução de Omissão de Letras no Número de Voo & Auto-Fit Responsivo (2026-09-08)
+**Contexto:** O utilizador identificou que o campo do número de voo parecia estar a omitir letras/dígitos.  
+**Decisão:** Eliminar cortes arbitrários de callsigns; limpar espaços internos sem amputar caracteres; implementar dimensionamento dinâmico automático das palhetas com base no comprimento do identificador (`xl` para curtos, `lg` para médios, `md` para longos com 7+ caracteres); e adicionar indicação do callsign ATC completo caso difira do código comercial.  
+**Consequência:** Visibilidade total e sem corte de caracteres em qualquer tamanho de ecrã ou modelo de aeronave.
+
 ---
 
 ## Histórico
@@ -103,3 +108,4 @@
 | 2026-09-08 | v1.0.4 | Implementação de Screen Wake Lock para manter o ecrã sempre ligado durante a utilização |
 | 2026-09-08 | v1.0.5 | Dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s e actualização de Service Worker |
 | 2026-09-08 | v1.0.6 | Relógio Solari em tempo real (Data e Hora) e Localização no cabeçalho meteorológico |
+| 2026-09-08 | v1.0.7 | Resolução de corte de letras no número do voo, auto-fit responsivo e callsign ATC |
