@@ -26,9 +26,35 @@ type EstadoVoo = [
 ];
 
 interface DadosMeteo {
-  weather: Array<{ description: string; main: string }>;
-  main: { temp: number; humidity: number; feels_like?: number };
-  wind: { speed: number };
+  weather: Array<{ description: string; main: string; code?: number }>;
+  main: {
+    temp: number;
+    humidity: number;
+    feels_like?: number;
+    temp_min?: number;
+    temp_max?: number;
+    pressure?: number;
+  };
+  wind: {
+    speed: number;
+    speed_kmh?: number;
+    speed_kts?: number;
+    direction_deg?: number;
+    direction_cardinal?: string;
+    gusts_kmh?: number;
+  };
+  aviation?: {
+    qnh: number;
+    condition: string;
+    flight_category: string;
+  };
+  environment?: {
+    is_day?: boolean;
+    precipitation_mm?: number;
+    uv_index?: number;
+    sunrise?: string;
+    sunset?: string;
+  };
   name: string;
 }
 
@@ -71,6 +97,7 @@ const CIDADES_PAISES: Record<string, { cidade: string; code: string }> = {
 
 // ─── Dicionário Expandido de Companhias Aéreas ────────────────────────────────
 
+const COMPANHIAS: Record<string, InfoCompanhia> = {
   // Força Aérea Portuguesa / Militar
   FAP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BA8 OVAR", destino: "MISSÃO TÁTICA", origemCode: "OVR", destinoCode: "OPS", aeronave: "UH-60 BLACK HAWK" },
   AFP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BASE AÉREA", destino: "MISSÃO TÁTICA", origemCode: "FAP", destinoCode: "OPS", aeronave: "F-16M FALCON" },
@@ -342,6 +369,8 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     csLimpo.startsWith("ZULU") ||
     csLimpo.startsWith("MILLENNIUM") ||
     csLimpo.startsWith("KOALA") ||
+    voo[2] === "29807" ||
+    (voo[12] && String(voo[12]).toUpperCase().includes("H60")) ||
     (rotaReal?.airline && /air\s*force|for[cç]a\s*[aá]erea/i.test(rotaReal.airline) && /portug/i.test(rotaReal.airline + " " + paisUpper));
 
   if (isFap) {
@@ -350,10 +379,10 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     info = COMPANHIAS.FAP;
   }
 
-  let origem = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
-  let destino = info?.destino || "PORTO";
-  let origemCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
-  let destinoCode = info?.destinoCode || "OPO";
+  let origem = "DESCONHECIDO";
+  let destino = "EM ROTA";
+  let origemCode = "N/D";
+  let destinoCode = "---";
 
   if (isFap) {
     if (csLimpo.startsWith("BLACK") || rotaReal?.model === "H60" || (voo[12] && String(voo[12]).toUpperCase().includes("H60"))) {
@@ -392,36 +421,46 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
       destino = "MISSÃO TÁTICA";
       destinoCode = "OPS";
     }
-  } else if (rotaReal) {
+  } else if (rotaReal && rotaReal.origem && rotaReal.destino) {
     origem = rotaReal.origem;
     origemCode = rotaReal.origemCode;
     destino = rotaReal.destino;
     destinoCode = rotaReal.destinoCode;
-  } else {
-    // Estimativa por perfil de subida / descida (vertical_rate)
+  } else if (info) {
+    // Linha aérea comercial reconhecida com hub mapeado
+    origem = info.origem;
+    origemCode = info.origemCode;
+    destino = info.destino;
+    destinoCode = info.destinoCode;
+
+    // Estimativa por perfil de subida / descida (apenas para voos comerciais reconhecidos)
     const vRate = voo[11];
     if (vRate != null) {
       if (vRate < -0.5) {
-        // A descer / aproximação ao Porto: destino é Porto
         destino = "PORTO";
         destinoCode = "OPO";
-        origem = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
-        origemCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
+        origem = info.origem;
+        origemCode = info.origemCode;
       } else if (vRate > 0.5) {
-        // A subir / descolagem do Porto: origem é Porto, destino é o hub da companhia
         origem = "PORTO";
         origemCode = "OPO";
-        destino = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
-        destinoCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
+        destino = info.origem;
+        destinoCode = info.origemCode;
       }
     }
+  } else {
+    // Aeronaves privadas ou sem rota registada: NUNCA inventar OPO -> MAD fictício
+    origem = regPais ? `LOCAL (${regPais.cidade})` : "SOBREVOO LOCAL";
+    origemCode = regPais ? regPais.code : "N/D";
+    destino = "EM ROTA";
+    destinoCode = "---";
   }
 
-  // Prevenção absoluta de rota fechada em si mesma (origem e destino NUNCA podem ser iguais)
-  if (origemCode === destinoCode && !isFap) {
+  // Prevenção de rota idêntica caso ocorra
+  if (origemCode === destinoCode && !isFap && origemCode !== "N/D" && origemCode !== "---") {
     if (origemCode === "OPO") {
-      destino = info?.origem && info.origemCode !== "OPO" ? info.origem : (dadosPais?.cidade && dadosPais.cidade !== "PORTO" ? dadosPais.cidade : "LISBOA");
-      destinoCode = info?.origemCode && info.origemCode !== "OPO" ? info.origemCode : (dadosPais?.code && dadosPais.code !== "OPO" ? dadosPais.code : "LIS");
+      destino = info?.origem && info.origemCode !== "OPO" ? info.origem : "LISBOA";
+      destinoCode = info?.origemCode && info.origemCode !== "OPO" ? info.origemCode : "LIS";
     } else {
       destino = "PORTO";
       destinoCode = "OPO";
@@ -515,6 +554,71 @@ function tocarSomFlapClack() {
   } catch {
     // Ignorar
   }
+}
+
+// ─── Componente de Ícones Meteorológicos Dinâmicos (SVG Cockpit Style) ────────
+
+function WeatherIconSVG({ code, isDay = true, className = "w-10 h-10" }: { code?: number; isDay?: boolean; className?: string }) {
+  const c = code ?? 0;
+  // Céu limpo / Bom tempo
+  if (c === 0 || c === 1) {
+    if (isDay) {
+      return (
+        <svg className={`${className} text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4" fill="currentColor" fillOpacity="0.8" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+      );
+    }
+    return (
+      <svg className={`${className} text-sky-300 drop-shadow-[0_0_8px_rgba(147,197,253,0.5)]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="currentColor" fillOpacity="0.8" />
+      </svg>
+    );
+  }
+  // Pouco nublado / Nuvens dispersas
+  if (c === 2) {
+    return (
+      <svg className={`${className} text-sky-200 drop-shadow`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="10" cy="9" r="3" fill="#fbbf24" stroke="#f59e0b" />
+        <path d="M7 16a4 4 0 0 1-.7-7.94 5.5 5.5 0 0 1 10.4 1.44A3.5 3.5 0 0 1 18 16H7Z" fill="#38bdf8" fillOpacity="0.3" />
+      </svg>
+    );
+  }
+  // Encoberto / Nevoeiro
+  if (c === 3 || c === 45 || c === 48) {
+    return (
+      <svg className={`${className} text-slate-300 drop-shadow`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" fill="#64748b" fillOpacity="0.4" />
+        {c >= 45 && <path d="M4 21h16M7 17h10" strokeWidth="2" stroke="#94a3b8" />}
+      </svg>
+    );
+  }
+  // Chuva / Chuviscos / Aguaceiros
+  if ((c >= 51 && c <= 65) || (c >= 80 && c <= 82)) {
+    return (
+      <svg className={`${className} text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 13a4.5 4.5 0 0 0-4-2.5 5.5 5.5 0 0 0-10.4-1.44A4 4 0 0 0 6 13" fill="#38bdf8" fillOpacity="0.2" />
+        <path d="M8 15l-1 4M12 15l-1 4M16 15l-1 4" stroke="#60a5fa" strokeWidth="2.5" />
+      </svg>
+    );
+  }
+  // Trovoada
+  if (c >= 95) {
+    return (
+      <svg className={`${className} text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 13a4.5 4.5 0 0 0-3-2.5 5.5 5.5 0 0 0-10.4-1.44A4 4 0 0 0 6 13" fill="#334155" fillOpacity="0.5" />
+        <path d="M13 10l-3 5h3l-1 5 5-7h-3l2-3Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1" />
+      </svg>
+    );
+  }
+  // Neve ou outro
+  return (
+    <svg className={`${className} text-sky-100 drop-shadow`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 13a4.5 4.5 0 0 0-4-2.5 5.5 5.5 0 0 0-10.4-1.44A4 4 0 0 0 6 13" fill="#cbd5e1" fillOpacity="0.3" />
+      <path d="M8 17h.01M12 19h.01M16 17h.01M10 15h.01M14 15h.01" strokeWidth="3" />
+    </svg>
+  );
 }
 
 // ─── Componente de Logótipo Universal de Companhias Aéreas ────────────────────
@@ -671,7 +775,6 @@ function FlapCell({ char, size = "lg" }: FlapCellProps) {
   useEffect(() => {
     if (char !== prevChar) {
       setAnimating(true);
-      tocarSomFlapClack();
       const timer = setTimeout(() => {
         setPrevChar(char);
         setAnimating(false);
@@ -956,7 +1059,6 @@ export default function PainelAnalogicoMobileFullscreen() {
   }, [obterGpsDoDispositivo]);
 
   const selecionarLocalPredefinido = (local: typeof LOCAIS_PREDEFINIDOS[0]) => {
-    tocarSomFlapClack();
     const novo: InfoLocalizacao = {
       lat: local.lat,
       lon: local.lon,
@@ -978,7 +1080,6 @@ export default function PainelAnalogicoMobileFullscreen() {
     const lat = parseFloat(latManual);
     const lon = parseFloat(lonManual);
     if (isNaN(lat) || isNaN(lon)) return;
-    tocarSomFlapClack();
     const novo: InfoLocalizacao = {
       lat: Number(lat.toFixed(4)),
       lon: Number(lon.toFixed(4)),
@@ -1070,7 +1171,6 @@ export default function PainelAnalogicoMobileFullscreen() {
     if (globalAudioCtx.state === "suspended") {
       globalAudioCtx.resume();
     }
-    tocarSomFlapClack();
 
     if (typeof document !== "undefined") {
       const doc = document as Document & {
@@ -1243,6 +1343,16 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   const vooAtual = listaVoos.length > 0 ? listaVoos[Math.min(indiceVoo, listaVoos.length - 1)] : null;
 
+  // Áudio mecânico Solari acionado exclusivamente quando muda de aeronave
+  const ultimoVooIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const idAtual = vooAtual ? (vooAtual[0] || vooAtual[1] || null) : null;
+    if (idAtual && ultimoVooIdRef.current !== null && idAtual !== ultimoVooIdRef.current) {
+      tocarSomFlapClack();
+    }
+    ultimoVooIdRef.current = idAtual;
+  }, [vooAtual]);
+
   const refLatAtual = localizacao.lat;
   const refLonAtual = localizacao.lon;
   const distVooAtual = (vooAtual && vooAtual[6] != null && vooAtual[5] != null)
@@ -1400,83 +1510,178 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         )}
 
-        {/* ── MODO 2: SEM VOOS -> MODO METEOROLOGIA AUTOMÁTICO ────────────── */}
+        {/* ── MODO 2: SEM VOOS -> MODO METEOROLOGIA AERONÁUTICA AUTOMÁTICA ─── */}
         {!carregando && !vooAtual && (
           <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
             
-            {/* Cabeçalho Meteorológico: Data, Hora e Localização */}
-            <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white p-1 rounded-lg border border-neutral-700 shadow-md flex items-center justify-center text-xl sm:text-2xl shrink-0">
-                  ⏱️
+            {/* LINHA 1: CABEÇALHO DA ESTAÇÃO METEOROLÓGICA & RADAR ────────────── */}
+            <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
+                  <WeatherIconSVG
+                    code={meteorologia?.weather?.[0]?.code}
+                    isDay={meteorologia?.environment?.is_day ?? true}
+                    className="w-6 h-6 sm:w-8 sm:h-8"
+                  />
                 </div>
-                <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    HORA • DATA
-                  </span>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <FlapWord text={horaAtual} size="xl" />
-                    <FlapWord text={dataAtual} size="lg" />
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-emerald-400 font-mono font-bold bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      {meteorologia?.aviation?.condition || "CAVOK"} • {meteorologia?.aviation?.flight_category || "VFR"}
+                    </span>
+                    <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono font-bold hidden xs:inline">
+                      RADAR ATIVO (20 KM)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <FlapWord text={horaAtual} size="lg" />
+                    <FlapWord text={dataAtual} size="md" />
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col items-end gap-0.5 text-right">
-                <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  LOCALIZAÇÃO
+              <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  LOCALIZAÇÃO / ESTAÇÃO
                 </span>
                 <FlapWord text={localizacao.nome.length > 12 ? localizacao.nome.slice(0, 12) : localizacao.nome} size="md" />
-              </div>
-            </div>
-
-            {/* Linha Principal Meteorológica */}
-            <div className="w-full flex-1 min-h-0 bg-[#10121a] px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
-              <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pt-0.5">
-                <span>CONDIÇÃO DO TEMPO</span>
-                <span>TEMPERATURA</span>
-              </div>
-
-              <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 pt-1">
-                <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
-
-                <div className="flex items-center gap-1">
-                  <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
-                  <span className="text-xl sm:text-3xl font-black text-white">°C</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Telemetria Meteorológica */}
-            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-2.5 shrink-0">
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
-                  VENTO
+                <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
+                  {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
                 </span>
-                <div className="flex items-center gap-1">
-                  <FlapWord text={`${Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="md" />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KM/H</span>
-                </div>
+              </div>
+            </div>
+
+            {/* LINHA 2: CONDIÇÕES CENTRAIS DE TEMPO & TEMPERATURA ─────────────── */}
+            <div className="w-full flex-1 min-h-0 bg-[#10121a] px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
+              <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                  CONDIÇÃO ATMOSFÉRICA
+                </span>
+                <span>TEMPERATURA & SENSAÇÃO</span>
               </div>
 
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
+                <div className="flex flex-col items-start gap-1 min-w-0">
+                  <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+                  <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono">
+                    <span className="text-amber-400/90 font-bold">
+                      SENSAÇÃO: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
+                    </span>
+                    <span>•</span>
+                    <span className="text-sky-300">
+                      MIN {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
+                    </span>
+                    <span>/</span>
+                    <span className="text-orange-400">
+                      MAX {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end shrink-0">
+                  <div className="flex items-center gap-1">
+                    <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
+                    <span className="text-2xl sm:text-4xl font-black text-white">°C</span>
+                  </div>
+                  {meteorologia?.environment?.precipitation_mm != null && (
+                    <span className="text-[8px] sm:text-[9px] font-mono text-cyan-400 font-bold">
+                      PRECIP: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* LINHA 3: TELEMETRIA METEOROLÓGICA EXPANDIDA (GRELHA DE 6 MÓDULOS) ── */}
+            <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 shrink-0">
+              
+              {/* Módulo 1: Vento e Rumo */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+                  VENTO / RUMO
+                </span>
+                <div className="flex items-center gap-0.5">
+                  <FlapWord text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
+                  <span className="text-[8px] text-neutral-400 font-bold font-mono">KM/H</span>
+                </div>
+                <span className="text-[8px] sm:text-[9px] text-amber-400 font-mono font-bold">
+                  {meteorologia?.wind?.direction_cardinal || "N"} ({meteorologia?.wind?.speed_kts ?? 7} KT)
+                </span>
+              </div>
+
+              {/* Módulo 2: Pressão QNH Barométrica */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+                  PRESSÃO QNH
+                </span>
+                <div className="flex items-center gap-0.5">
+                  <FlapWord text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
+                  <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
+                </div>
+                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">
+                  ALTÍMETRO
+                </span>
+              </div>
+
+              {/* Módulo 3: Humidade */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
                   HUMIDADE
                 </span>
-                <div className="flex items-center gap-1">
-                  <FlapWord text={`${meteorologia?.main?.humidity ?? 70}`} size="md" />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">%</span>
+                <div className="flex items-center gap-0.5">
+                  <FlapWord text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
+                  <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
                 </div>
+                <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">
+                  RELATIVA
+                </span>
               </div>
 
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
-                  SENSAÇÃO
+              {/* Módulo 4: Nascer do Sol */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+                  NASCER SOL
                 </span>
-                <div className="flex items-center gap-1">
-                  <FlapWord text={`${Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}`} size="md" />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">°C</span>
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
+                  <span className="text-amber-400">☀️</span>
+                  {meteorologia?.environment?.sunrise || "07:15"}
                 </div>
+                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">
+                  AURORA
+                </span>
               </div>
+
+              {/* Módulo 5: Pôr do Sol */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+                  PÔR DO SOL
+                </span>
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
+                  <span className="text-orange-400">🌙</span>
+                  {meteorologia?.environment?.sunset || "19:50"}
+                </div>
+                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">
+                  CREPÚSCULO
+                </span>
+              </div>
+
+              {/* Módulo 6: Índice UV / Visibilidade */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
+                  ÍNDICE UV
+                </span>
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[10px] sm:text-xs font-mono font-black text-amber-300">
+                    UV {meteorologia?.environment?.uv_index ?? 3}
+                  </span>
+                </div>
+                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">
+                  MODERADO
+                </span>
+              </div>
+
             </div>
 
           </div>
