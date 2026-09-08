@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.4  
+**Versão:** v1.0.5  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA (Progressive Web App) completa com telemetria de voos em tempo real com raio adaptativo, suporte a GPS, cache de resiliência e Screen Wake Lock para manter o ecrã sempre ligado.
+**Estado:** PWA (Progressive Web App) completa com dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s, Screen Wake Lock e cache control Network-First.
 
 ---
 
@@ -53,12 +53,15 @@
 ### ADR-024 — Resolução de Bloqueio no Modo Meteorológico & Telemetria Dinâmica (2026-09-08)
 **Contexto:** A aplicação inicializava no modo meteorológico sem transitar para a informação de voos devido a coordenadas estáticas restritas (~30 km no Porto), ausência de tráfego aéreo pontual na caixa delimitadora e bloqueios/rate limits da OpenSky Network.  
 **Decisão:** Tornar o endpoint `/api/voos` dinâmico aceitando coordenadas do dispositivo (GPS) e raio configurável; implementar expansão regional automática (até raio x 2) quando o cone imediato não tem aviões; adicionar cache de resiliência em memória para proteger contra 429/interrupções; e criar fallback meteorológico transparente sem dependência de chaves de API (Open-Meteo).  
-**Consequência:** Detecção imediata de aeronaves em tráfego regional, garantia de dados de voo no radar e eliminação do bloqueio estático no painel de meteorologia.
-
-### ADR-025 — Manter o Ecrã Sempre Ligado via Screen Wake Lock API (2026-09-08)
+**Consequência:** Detecçã### ADR-025 — Manter o Ecrã Sempre Ligado via Screen Wake Lock API (2026-09-08)
 **Contexto:** O utilizador solicitou que o ecrã do telemóvel ou computador permaneça sempre activo e ligado enquanto a aplicação estiver em execução.  
 **Decisão:** Integrar a Screen Wake Lock API com activação automática no carregamento, reactivação em `visibilitychange` (quando o utilizador regressa à aba) e reforço em gestos de toque no ecrã.  
 **Consequência:** O dispositivo não suspende nem desliga o ecrã por inactividade, funcionando de forma contínua como um ecrã físico dedicado de voos.
+
+### ADR-026 — Dupla Fonte de Telemetria ADS-B e Invalidação de Cache PWA (2026-09-08)
+**Contexto:** Voos detectados a sobrevoar a região não activavam o painel devido a bloqueios pontuais de datacenter na OpenSky Network e a cache estática retida no Service Worker móvel.  
+**Decisão:** Implementar arquitectura de dupla fonte com feed comunitário aberto `adsb.fi` (sem bloqueio de IP de datacenters e com descrições reais de modelo de aeronave) + `OpenSky Network` como redundância; acelerar o ciclo de sondagem para 10 segundos; adicionar barra de instrumentação de radar no fundo; e atualizar o Service Worker com estratégia Network-First para páginas com limpeza automática de cache antiga v1.  
+**Consequência:** Detecção imediata de aeronaves em tráfego de aproximação ou cruzeiro, transição em tempo real sem atrasos e garantia de código sempre actualizado no telemóvel.
 
 ---
 
@@ -83,7 +86,7 @@
 | 2026-09-07 | v0.7.1 | Remoção de cabeçalhos/rodapés redundantes e simplificação do layout    |
 | 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas|
 | 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis    |
-| 2026-09-07 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
+| 2026-09-08 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
 | 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar |
 | 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens |
 | 2026-09-07 | v0.9.0 | Chassis preenchido sem vazios e base global de logótipos ICAO         |
@@ -93,3 +96,4 @@
 | 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
 | 2026-09-08 | v1.0.3 | Resolução de bloqueio meteorológico: coordenadas dinâmicas, GPS, expansão de raio e cache anti-429 |
 | 2026-09-08 | v1.0.4 | Implementação de Screen Wake Lock para manter o ecrã sempre ligado durante a utilização |
+| 2026-09-08 | v1.0.5 | Dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s e actualização de Service Worker |

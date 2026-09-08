@@ -42,7 +42,7 @@ interface InfoCompanhia {
   aeronave: string;
 }
 
-const INTERVALO_MS = 25_000;
+const INTERVALO_MS = 10_000;
 
 // ─── Mapeamento de Países para Cidades / Aeroportos de Ligação ────────────────
 
@@ -240,7 +240,7 @@ function resolverVooInfo(voo: EstadoVoo) {
     iata,
     numeroVoo,
     nomeCompanhia: nomeFinalCompanhia,
-    aeronave: info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320"),
+    aeronave: (voo[12] ? String(voo[12]).toUpperCase() : (info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320"))),
     origem,
     origemCode,
     destino,
@@ -467,6 +467,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [totalNoRadar, setTotalNoRadar] = useState(0);
 
   // Detecção de GPS do telemóvel / computador para telemetria local real
   useEffect(() => {
@@ -625,17 +626,21 @@ export default function PainelAnalogicoMobileFullscreen() {
             return distA - distB;
           });
 
+          setTotalNoRadar(voosEmAr.length);
           setVooAtual(voosEmAr[0]);
           setMeteorologia(null);
         } else {
+          setTotalNoRadar(0);
           setVooAtual(null);
           await carregarMeteorologia(coords);
         }
       } else {
+        setTotalNoRadar(0);
         setVooAtual(null);
         await carregarMeteorologia(coords);
       }
     } catch {
+      setTotalNoRadar(0);
       setVooAtual(null);
       await carregarMeteorologia(coords);
     } finally {
@@ -869,6 +874,17 @@ export default function PainelAnalogicoMobileFullscreen() {
 
           </div>
         )}
+
+        {/* ── BARRA DE STATUS DO RADAR ADS-B NO FUNDO DO CHASSIS ─────────── */}
+        <div className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+            <span>RADAR ADS-B • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 50 KM)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
+          </div>
+        </div>
 
       </div>
     </main>
