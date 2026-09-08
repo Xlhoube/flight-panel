@@ -71,7 +71,10 @@ const CIDADES_PAISES: Record<string, { cidade: string; code: string }> = {
 
 // ─── Dicionário Expandido de Companhias Aéreas ────────────────────────────────
 
-const COMPANHIAS: Record<string, InfoCompanhia> = {
+  // Força Aérea Portuguesa / Militar
+  FAP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BA8 OVAR", destino: "MISSÃO TÁTICA", origemCode: "OVR", destinoCode: "OPS", aeronave: "UH-60 BLACK HAWK" },
+  AFP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BASE AÉREA", destino: "MISSÃO TÁTICA", origemCode: "FAP", destinoCode: "OPS", aeronave: "F-16M FALCON" },
+  
   // Principais em Portugal
   TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origem: "PORTO", destino: "LISBOA", origemCode: "OPO", destinoCode: "LIS", aeronave: "A320-251N" },
   RYR: { nome: "RYANAIR", iata: "FR", origem: "PORTO", destino: "MADRID", origemCode: "OPO", destinoCode: "MAD", aeronave: "B737-800" },
@@ -228,6 +231,17 @@ const NOMES_AERONAVES: Record<string, string> = {
   C172: "CESSNA 172",
   R22:  "ROBINSON R22",
   R44:  "ROBINSON R44",
+  // Aeronaves e Helicópteros Militares
+  H60:  "UH-60 BLACK HAWK",
+  UH60: "UH-60 BLACK HAWK",
+  S70:  "SIKORSKY S-70",
+  F16:  "F-16M FALCON",
+  C130: "LOCKHEED C-130H",
+  C390: "EMBRAER KC-390",
+  C295: "AIRBUS C-295M",
+  E101: "EH-101 MERLIN",
+  FA50: "FALCON 50",
+  A119: "AW119 KOALA",
 };
 
 function formatarNomeAeronave(raw: string): string {
@@ -315,12 +329,70 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const paisUpper = (voo[2] || "").toUpperCase();
   const dadosPais = CIDADES_PAISES[paisUpper];
 
+  // ── DETEÇÃO INTELIGENTE DE AVIAÇÃO MILITAR PORTUGUESA (FAP) ───────────────
+  const isFap =
+    csLimpo.startsWith("BLACK") ||
+    csLimpo.startsWith("FAP") ||
+    csLimpo.startsWith("AFP") ||
+    csLimpo.startsWith("MERLIN") ||
+    csLimpo.startsWith("JAGUAR") ||
+    csLimpo.startsWith("HULK") ||
+    csLimpo.startsWith("TURBO") ||
+    csLimpo.startsWith("ROMA") ||
+    csLimpo.startsWith("ZULU") ||
+    csLimpo.startsWith("MILLENNIUM") ||
+    csLimpo.startsWith("KOALA") ||
+    (rotaReal?.airline && /air\s*force|for[cç]a\s*[aá]erea/i.test(rotaReal.airline) && /portug/i.test(rotaReal.airline + " " + paisUpper));
+
+  if (isFap) {
+    icao = "FAP";
+    iata = "FAP";
+    info = COMPANHIAS.FAP;
+  }
+
   let origem = info?.origem || (regPais ? regPais.cidade : (dadosPais?.cidade || "MADRID"));
   let destino = info?.destino || "PORTO";
   let origemCode = info?.origemCode || (regPais ? regPais.code : (dadosPais?.code || "MAD"));
   let destinoCode = info?.destinoCode || "OPO";
 
-  if (rotaReal) {
+  if (isFap) {
+    if (csLimpo.startsWith("BLACK") || rotaReal?.model === "H60" || (voo[12] && String(voo[12]).toUpperCase().includes("H60"))) {
+      origem = "BA8 OVAR";
+      origemCode = "OVR";
+      destino = "MISSÃO TÁTICA";
+      destinoCode = "OPS";
+    } else if (csLimpo.startsWith("MERLIN")) {
+      origem = "BA6 MONTIJO";
+      origemCode = "MTO";
+      destino = "SAR SALVAMENTO";
+      destinoCode = "SAR";
+    } else if (csLimpo.startsWith("JAGUAR")) {
+      origem = "BA5 MONTE REAL";
+      origemCode = "MTR";
+      destino = "PATRULHA AÉREA";
+      destinoCode = "CAP";
+    } else if (csLimpo.startsWith("HULK") || csLimpo.startsWith("TURBO")) {
+      origem = "BA11 BEJA";
+      origemCode = "BYJ";
+      destino = "TRANSP TÁTICO";
+      destinoCode = "OPS";
+    } else if (csLimpo.startsWith("ROMA")) {
+      origem = "BA6 MONTIJO";
+      origemCode = "MTO";
+      destino = "VIGIL MARÍTIMA";
+      destinoCode = "OPS";
+    } else if (csLimpo.startsWith("ZULU") || csLimpo.startsWith("MILLENNIUM")) {
+      origem = "BA11 BEJA";
+      origemCode = "BYJ";
+      destino = "TRANSP TÁTICO";
+      destinoCode = "OPS";
+    } else {
+      origem = "BASE AÉREA";
+      origemCode = "FAP";
+      destino = "MISSÃO TÁTICA";
+      destinoCode = "OPS";
+    }
+  } else if (rotaReal) {
     origem = rotaReal.origem;
     origemCode = rotaReal.origemCode;
     destino = rotaReal.destino;
@@ -346,7 +418,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   }
 
   // Prevenção absoluta de rota fechada em si mesma (origem e destino NUNCA podem ser iguais)
-  if (origemCode === destinoCode) {
+  if (origemCode === destinoCode && !isFap) {
     if (origemCode === "OPO") {
       destino = info?.origem && info.origemCode !== "OPO" ? info.origem : (dadosPais?.cidade && dadosPais.cidade !== "PORTO" ? dadosPais.cidade : "LISBOA");
       destinoCode = info?.origemCode && info.origemCode !== "OPO" ? info.origemCode : (dadosPais?.code && dadosPais.code !== "OPO" ? dadosPais.code : "LIS");
@@ -363,7 +435,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 
   // Determinar nome legível e elegante para a companhia ou tipo de operação
   let nomeFinalCompanhia = "AVIAÇÃO COMERCIAL";
-  if (rotaReal?.airline) {
+  if (isFap) {
+    nomeFinalCompanhia = "FORÇA AÉREA PORTUGUESA";
+  } else if (rotaReal?.airline) {
     nomeFinalCompanhia = rotaReal.airline.toUpperCase();
   } else if (info?.nome) {
     nomeFinalCompanhia = info.nome;
@@ -373,7 +447,10 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     nomeFinalCompanhia = `OPERADOR (${voo[2].toUpperCase()})`;
   }
 
-  const codAeronave = (voo[12] ? String(voo[12]).toUpperCase() : (rotaReal?.model || info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320")));
+  let codAeronave = (voo[12] ? String(voo[12]).toUpperCase() : (rotaReal?.model || info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320")));
+  if (csLimpo.startsWith("BLACK") || codAeronave === "H60" || (voo[12] && String(voo[12]).toUpperCase().includes("H60"))) {
+    codAeronave = "UH-60 BLACK HAWK";
+  }
   const nomeAeronave = formatarNomeAeronave(codAeronave);
 
   return {
@@ -442,6 +519,46 @@ function tocarSomFlapClack() {
 
 // ─── Componente de Logótipo Universal de Companhias Aéreas ────────────────────
 
+function RoundelFAP() {
+  return (
+    <div className="w-full h-full bg-[#0a0c10] rounded-md sm:rounded-lg flex flex-col items-center justify-center p-0.5 border border-red-500/40 shadow-inner overflow-hidden">
+      <svg className="w-full h-full max-w-[48px] max-h-[48px] drop-shadow-md" viewBox="0 0 100 100">
+        {/* Aro Exterior Tático Cinza / Carbono */}
+        <circle cx="50" cy="50" r="48" fill="#181a20" stroke="#374151" strokeWidth="2.5" />
+        {/* Aro Vermelho Oficial FAP */}
+        <circle cx="50" cy="50" r="44" fill="#cc141d" />
+        {/* Disco Branco / Alumínio */}
+        <circle cx="50" cy="50" r="40" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+        
+        {/* Cruz da Ordem de Cristo (Braços Vermelhos Pátios com Alargamento) */}
+        {/* Braço Superior */}
+        <polygon points="44,45 56,45 66,18 34,18" fill="#cc141d" />
+        {/* Braço Inferior */}
+        <polygon points="44,55 56,55 66,82 34,82" fill="#cc141d" />
+        {/* Braço Esquerdo */}
+        <polygon points="45,44 45,56 18,66 18,34" fill="#cc141d" />
+        {/* Braço Direito */}
+        <polygon points="55,44 55,56 82,66 82,34" fill="#cc141d" />
+        {/* Centro da Cruz */}
+        <rect x="44" y="44" width="12" height="12" fill="#cc141d" />
+        
+        {/* Bordo das Extremidades da Cruz de Cristo */}
+        <polygon points="34,18 66,18 64,15 36,15" fill="#a00f16" />
+        <polygon points="34,82 66,82 64,85 36,85" fill="#a00f16" />
+        <polygon points="18,34 18,66 15,64 15,36" fill="#a00f16" />
+        <polygon points="82,34 82,66 85,64 85,36" fill="#a00f16" />
+
+        {/* Cruz Interior Branca Vazada da Ordem de Cristo */}
+        <rect x="47.5" y="21" width="5" height="58" fill="#f8fafc" />
+        <rect x="21" y="47.5" width="58" height="5" fill="#f8fafc" />
+      </svg>
+      <span className="font-mono font-black text-[5px] sm:text-[6px] text-red-400 tracking-widest uppercase leading-none mt-0.5">
+        FORÇA AÉREA
+      </span>
+    </div>
+  );
+}
+
 interface AirlineLogoProps {
   icao?: string;
   iata?: string | null;
@@ -453,8 +570,16 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
   const [urlIndex, setUrlIndex] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
 
+  // Verificação de Aviação Militar da Força Aérea Portuguesa
+  const isMilitarFap =
+    icao === "FAP" ||
+    icao === "AFP" ||
+    (nome && nome.includes("FORÇA AÉREA PORTUGUESA")) ||
+    (callsign && callsign.startsWith("BLACK"));
+
   // Lista de URLs prioritárias em CDN globais
   const urls = useMemo(() => {
+    if (isMilitarFap) return [];
     const list: string[] = [];
     const icaoUp = (icao || "").trim().toUpperCase();
     const iataUp = (iata || "").trim().toUpperCase();
@@ -469,13 +594,21 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
       list.push(`https://pics.avs.io/200/200/${iataUp}.png`);
     }
     return list;
-  }, [icao, iata]);
+  }, [icao, iata, isMilitarFap]);
 
   // Sempre que mudar a aeronave ou o voo, reiniciar tentativas
   useEffect(() => {
     setUrlIndex(0);
     setHasFailed(false);
   }, [icao, iata, callsign]);
+
+  if (isMilitarFap) {
+    return (
+      <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-red-500/50 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-black p-0.5 transition-all">
+        <RoundelFAP />
+      </div>
+    );
+  }
 
   const handleImgError = () => {
     if (urlIndex + 1 < urls.length) {
@@ -632,8 +765,6 @@ export const LOCAIS_PREDEFINIDOS = [
   { nome: "MADRID / ESPANHA", regiao: "Adolfo Suárez (MAD)", lat: 40.484, lon: -3.568 },
 ];
 
-const TEMPO_ESPERA_SUAVE_MS = 40_000; // 40 segundos de retenção de cortesia do último voo
-
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
   const listaVoosRef = useRef<EstadoVoo[]>([]);
@@ -664,11 +795,6 @@ export default function PainelAnalogicoMobileFullscreen() {
       document.removeEventListener("webkitfullscreenchange", handleFsChange);
     };
   }, []);
-
-  // Espera suave do último voo (30-45s)
-  const timestampSemVoosRef = useRef<number | null>(null);
-  const [emEsperaSuave, setEmEsperaSuave] = useState<boolean>(false);
-  const [segundosRestantesEspera, setSegundosRestantesEspera] = useState<number>(0);
 
   const [totalNoRadar, setTotalNoRadar] = useState(0);
   const [horaAtual, setHoraAtual] = useState("12:00");
@@ -1043,27 +1169,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   }, []);
 
   const tratarZeroVoos = useCallback(async (refLat: number, refLon: number) => {
-    // Se havia voos a ser exibidos no ecrã, reter durante 40 segundos de Espera Suave
-    if (listaVoosRef.current.length > 0) {
-      const agora = Date.now();
-      if (timestampSemVoosRef.current === null) {
-        timestampSemVoosRef.current = agora;
-      }
-      const decorrido = agora - timestampSemVoosRef.current;
-      if (decorrido < TEMPO_ESPERA_SUAVE_MS) {
-        // Dentro do período de cortesia: manter voo no ecrã!
-        setEmEsperaSuave(true);
-        const restantes = Math.max(1, Math.round((TEMPO_ESPERA_SUAVE_MS - decorrido) / 1000));
-        setSegundosRestantesEspera(restantes);
-        setTotalNoRadar(0);
-        return;
-      }
-    }
-
-    // Passaram os 40 segundos ou já estávamos na meteorologia: transição suave
-    timestampSemVoosRef.current = null;
-    setEmEsperaSuave(false);
-    setSegundosRestantesEspera(0);
+    // Remoção imediata: espaço aéreo livre transita de imediato para a meteorologia
     listaVoosRef.current = [];
     setListaVoos([]);
     setTotalNoRadar(0);
@@ -1111,10 +1217,6 @@ export default function PainelAnalogicoMobileFullscreen() {
             return distA - distB;
           });
 
-          // Novo voo ativo: cancelar espera suave e apresentar imediatamente
-          timestampSemVoosRef.current = null;
-          setEmEsperaSuave(false);
-          setSegundosRestantesEspera(0);
           listaVoosRef.current = voosEmAr;
           setListaVoos(voosEmAr);
           setTotalNoRadar(voosEmAr.length);
@@ -1132,27 +1234,6 @@ export default function PainelAnalogicoMobileFullscreen() {
       setCarregando(false);
     }
   }, [localizacao, carregarMeteorologia, tratarZeroVoos]);
-
-  // Contador de segundos da Espera Suave com transição automática ao expirar
-  useEffect(() => {
-    if (!emEsperaSuave || !timestampSemVoosRef.current) return;
-    const interval = setInterval(() => {
-      if (timestampSemVoosRef.current) {
-        const decorrido = Date.now() - timestampSemVoosRef.current;
-        const restantes = Math.max(0, Math.round((TEMPO_ESPERA_SUAVE_MS - decorrido) / 1000));
-        setSegundosRestantesEspera(restantes);
-        if (restantes <= 0) {
-          timestampSemVoosRef.current = null;
-          setEmEsperaSuave(false);
-          listaVoosRef.current = [];
-          setListaVoos([]);
-          setTotalNoRadar(0);
-          carregarMeteorologia({ lat: localizacao.lat, lon: localizacao.lon });
-        }
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [emEsperaSuave, localizacao, carregarMeteorologia]);
 
   useEffect(() => {
     buscarDados();
@@ -1208,11 +1289,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                     {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
                       <span className="text-[8px] sm:text-[10px] text-sky-400 font-mono tracking-wider font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
                         {infoVoo.callsignIata}
-                      </span>
-                    )}
-                    {emEsperaSuave && (
-                      <span className="text-[8px] sm:text-[10px] text-amber-400 font-mono tracking-wider font-bold bg-amber-400/15 px-1.5 py-0.5 rounded border border-amber-400/30 animate-pulse">
-                        ÚLTIMO CONTACTO ({segundosRestantesEspera}S)
                       </span>
                     )}
                   </div>
@@ -1414,7 +1490,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           <div className="flex items-center gap-1.5 py-0.5 px-1 min-w-0 shrink overflow-hidden whitespace-nowrap">
             <span className={`w-2 h-2 rounded-full shrink-0 ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
             <span className="font-bold text-neutral-200 truncate">
-              RADAR v1.3.4 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
+              RADAR v1.3.5 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
             </span>
           </div>
 
@@ -1422,11 +1498,6 @@ export default function PainelAnalogicoMobileFullscreen() {
             {listaVoos.length > 1 && (
               <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-sky-400 font-bold font-mono text-[8px] sm:text-[10px] tracking-wider shrink-0">
                 VOO {indiceVoo + 1}/{listaVoos.length}
-              </span>
-            )}
-            {emEsperaSuave && (
-              <span className="text-amber-400 bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold animate-pulse shrink-0">
-                ESPERA: {segundosRestantesEspera}S
               </span>
             )}
             {distVooAtual != null && (

@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.3.4  
+**Versão:** v1.3.5  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** Altura do rodapé rigidamente bloqueada (h-7 sm:h-8 / max-h-8) com tabular-nums na distância de voo, prevenindo layout shifts ao transitar entre 9.9 km e 10.0 km, e SW v14.
+**Estado:** Remoção instantânea de voos ao cruzar os 20 km (eliminação de tempos de retenção), suporte inteligente e Roundel oficial da Força Aérea Portuguesa (FAP) com Cruz de Cristo em SVG (BLACK32 / UH-60, etc.) e SW v15.
 
 ---
 
@@ -200,6 +200,11 @@
 **Decisão:** Bloquear a altura do rodapé de forma imutável (`h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem] overflow-hidden whitespace-nowrap`), adicionar largura mínima fixa com números tabulares na etiqueta de distância (`tabular-nums min-w-[4.4rem] inline-flex justify-center`) e aplicar `truncate min-w-0` na identificação da localização no radar. Atualizar o Service Worker para `flight-panel-v14`.  
 **Consequência:** Zero oscilações ou saltos verticais no rodapé; a altura permanece milimetricamente fixa e inabalável em qualquer transição de distância.
 
+### ADR-039 — Remoção Instantânea de Voos & Reconhecimento Militar com Roundel da FAP (2026-09-08)
+**Contexto:** O utilizador solicitou: (1) que a aeronave seja removida imediatamente assim que sai do raio circular de 20 km (eliminando qualquer tempo de espera de cortesia), transitando de imediato para a meteorologia; e (2) suporte e atribuição de logótipo a voos militares da Força Aérea Portuguesa (como o `BLACK32` / Sikorsky UH-60L Black Hawk da FAP detectado no radar).  
+**Decisão:** Eliminar a lógica de retenção de 40s (*Espera Suave*) e os crachás de contagem regressiva, esvaziando a lista de voos no exato momento em que `dist > 20 km` ou não há aeronaves no ar. Implementar deteção inteligente de voos da FAP (`BLACK*`, `FAP*`, `AFP*`, `MERLIN*`, `JAGUAR*`, `HULK*`, `ROMA*`, `ZULU*`, operador `"Portugal - Air Force"` ou aeronaves `H60`/`UH60`), atribuindo o modelo correto (`UH-60 BLACK HAWK`), base aérea correspondente (`BA8 OVAR`, etc.) e rota de missão tática. Integrar o **Roundel Oficial da Força Aérea Portuguesa** (Cruz de Cristo com disco branco e aro tático) desenhado em vetor SVG de alta definição diretamente no componente `AirlineLogo`. Atualizar o Service Worker para `flight-panel-v15`.  
+**Consequência:** Transições em tempo real sem latência artificial ao sair do raio de alcance e apresentação visual autêntica da aviação militar nacional com insígnia oficial impecável.
+
 ---
 
 ## Histórico
@@ -250,4 +255,5 @@
 | 2026-09-08 | v1.3.2 | Reestruturação do cabeçalho de rota (linha dedicada ORIGEM/DESTINO anti-corte), proporções clamp de FlapCell para landscape móvel e SW v12 |
 | 2026-09-08 | v1.3.3 | Remoção de setas, navegação exclusivamente por arrasto lateral, botões dedicados Ajustar e Ecrã Inteiro e SW v13 |
 | 2026-09-08 | v1.3.4 | Bloqueio rígido da altura do rodapé (h-7 sm:h-8 / max-h-8) e números tabulares no indicador de KM (SW v14) |
+| 2026-09-08 | v1.3.5 | Remoção imediata de voos ao cruzar os 20 km e suporte inteligente à Força Aérea Portuguesa (Roundel FAP em vetor) (SW v15) |
 
