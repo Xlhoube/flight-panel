@@ -604,12 +604,55 @@ function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+export interface InfoLocalizacao {
+  lat: number;
+  lon: number;
+  nome: string;
+  origem: "gps" | "preset" | "manual" | "padrao";
+}
+
+export const LOCALIZACAO_PADRAO: InfoLocalizacao = {
+  lat: 41.15,
+  lon: -8.62,
+  nome: "VALADARES / PORTO",
+  origem: "padrao",
+};
+
+export const LOCAIS_PREDEFINIDOS = [
+  { nome: "VALADARES / GAIA", regiao: "Vila Nova de Gaia (Porto)", lat: 41.091, lon: -8.642 },
+  { nome: "PORTO / CENTRO", regiao: "Porto Centro / Boavista", lat: 41.158, lon: -8.629 },
+  { nome: "AEROPORTO DO PORTO", regiao: "Francisco Sá Carneiro (OPO)", lat: 41.242, lon: -8.681 },
+  { nome: "LISBOA / AEROPORTO", regiao: "Humberto Delgado (LIS)", lat: 38.776, lon: -9.135 },
+  { nome: "CASCAIS / OEIRAS", regiao: "Linha de Cascais / Tires", lat: 38.726, lon: -9.355 },
+  { nome: "FARO / ALGARVE", regiao: "Aeroporto de Faro (FAO)", lat: 37.018, lon: -7.97 },
+  { nome: "COIMBRA", regiao: "Centro de Portugal", lat: 40.206, lon: -8.42 },
+  { nome: "BRAGA", regiao: "Minho / Palmeira", lat: 41.587, lon: -8.445 },
+  { nome: "FUNCHAL / MADEIRA", regiao: "Cristiano Ronaldo (FNC)", lat: 32.7, lon: -16.774 },
+  { nome: "PONTA DELGADA", regiao: "João Paulo II (PDL) - Açores", lat: 37.741, lon: -25.698 },
+  { nome: "MADRID / ESPANHA", regiao: "Adolfo Suárez (MAD)", lat: 40.484, lon: -3.568 },
+];
+
+const TEMPO_ESPERA_SUAVE_MS = 40_000; // 40 segundos de retenção de cortesia do último voo
+
 export default function PainelAnalogicoMobileFullscreen() {
-  const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
+  const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
+  const listaVoosRef = useRef<EstadoVoo[]>([]);
+  const [indiceVoo, setIndiceVoo] = useState(0);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
-  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [localizacao, setLocalizacao] = useState<InfoLocalizacao>(LOCALIZACAO_PADRAO);
+  const [statusGps, setStatusGps] = useState<"iniciando" | "ativo" | "bloqueado" | "erro" | "fixo">("iniciando");
+  const [detalheErroGps, setDetalheErroGps] = useState<string>("");
+  const [modalLocalizacaoAberto, setModalLocalizacaoAberto] = useState(false);
+  const [latManual, setLatManual] = useState<string>("41.15");
+  const [lonManual, setLonManual] = useState<string>("-8.62");
+
+  // Espera suave do último voo (30-45s)
+  const timestampSemVoosRef = useRef<number | null>(null);
+  const [emEsperaSuave, setEmEsperaSuave] = useState<boolean>(false);
+  const [segundosRestantesEspera, setSegundosRestantesEspera] = useState<number>(0);
+
   const [totalNoRadar, setTotalNoRadar] = useState(0);
   const [horaAtual, setHoraAtual] = useState("12:00");
   const [dataAtual, setDataAtual] = useState("08 SET");
@@ -632,23 +675,116 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(interval);
   }, []);
 
-  // Detecção de GPS do telemóvel / computador para telemetria local real
-  useEffect(() => {
-    if (typeof window !== "undefined" && "geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setCoords({
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-          });
-        },
-        () => {
-          // Manter coordenadas padrão caso o utilizador não conceda permissão de GPS
-        },
-        { timeout: 7000, enableHighAccuracy: false }
-      );
+  // Motor de Geolocalização com detecção de HTTPS e fallback de precisão
+  const obterGpsDoDispositivo = useCallback((altaPrecisao = true) => {
+    if (typeof window === "undefined") return;
+
+    if (!("geolocation" in navigator)) {
+      setStatusGps("erro");
+      setDetalheErroGps("O teu navegador não tem suporte a GPS.");
+      return;
     }
+
+    if (window.isSecureContext === false) {
+      setStatusGps("bloqueado");
+      setDetalheErroGps("Contexto inseguro (HTTP). Os navegadores bloqueiam o GPS do telemóvel fora de HTTPS. Podes selecionar a tua localidade na lista abaixo.");
+      return;
+    }
+
+    setStatusGps("iniciando");
+    setDetalheErroGps("A solicitar coordenadas ao satélite...");
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const novo: InfoLocalizacao = {
+          lat: Number(pos.coords.latitude.toFixed(4)),
+          lon: Number(pos.coords.longitude.toFixed(4)),
+          nome: "GPS DO DISPOSITIVO",
+          origem: "gps",
+        };
+        setLocalizacao(novo);
+        setStatusGps("ativo");
+        setDetalheErroGps(`Sinal GPS fixado com sucesso (${pos.coords.accuracy ? Math.round(pos.coords.accuracy) + "m precisão" : "Excelente"}).`);
+        setLatManual(novo.lat.toString());
+        setLonManual(novo.lon.toString());
+        try {
+          localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
+        } catch {}
+      },
+      (err) => {
+        if (altaPrecisao && err.code === err.TIMEOUT) {
+          obterGpsDoDispositivo(false);
+        } else {
+          if (err.code === err.PERMISSION_DENIED) {
+            setStatusGps("bloqueado");
+            setDetalheErroGps("Permissão de GPS negada no browser do telemóvel. Escolhe a tua localidade abaixo.");
+          } else {
+            setStatusGps("erro");
+            setDetalheErroGps(`Falha de GPS (${err.message}). Escolhe a tua localidade abaixo.`);
+          }
+        }
+      },
+      { timeout: 12000, enableHighAccuracy: altaPrecisao, maximumAge: 30000 }
+    );
   }, []);
+
+  // Recuperar localização guardada no dispositivo (localStorage) ou obter GPS inicial
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem("flight_panel_user_location");
+      if (salvo) {
+        const parsed = JSON.parse(salvo);
+        if (parsed.lat && parsed.lon) {
+          setLocalizacao(parsed);
+          setStatusGps(parsed.origem === "gps" ? "ativo" : "fixo");
+          setLatManual(parsed.lat.toString());
+          setLonManual(parsed.lon.toString());
+          return;
+        }
+      }
+    } catch {}
+
+    obterGpsDoDispositivo(true);
+  }, [obterGpsDoDispositivo]);
+
+  const selecionarLocalPredefinido = (local: typeof LOCAIS_PREDEFINIDOS[0]) => {
+    tocarSomFlapClack();
+    const novo: InfoLocalizacao = {
+      lat: local.lat,
+      lon: local.lon,
+      nome: local.nome,
+      origem: "preset",
+    };
+    setLocalizacao(novo);
+    setStatusGps("fixo");
+    setDetalheErroGps("");
+    setLatManual(local.lat.toString());
+    setLonManual(local.lon.toString());
+    try {
+      localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
+    } catch {}
+    setModalLocalizacaoAberto(false);
+  };
+
+  const guardarCoordenadasManuais = () => {
+    const lat = parseFloat(latManual);
+    const lon = parseFloat(lonManual);
+    if (isNaN(lat) || isNaN(lon)) return;
+    tocarSomFlapClack();
+    const novo: InfoLocalizacao = {
+      lat: Number(lat.toFixed(4)),
+      lon: Number(lon.toFixed(4)),
+      nome: `MANUAL (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`,
+      origem: "manual",
+    };
+    setLocalizacao(novo);
+    setStatusGps("fixo");
+    setDetalheErroGps("");
+    try {
+      localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
+    } catch {}
+    setModalLocalizacaoAberto(false);
+  };
 
   // Manter o ecrã sempre ligado enquanto a aplicação estiver aberta (Screen Wake Lock API)
   useEffect(() => {
@@ -743,6 +879,69 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
+  // Navegação entre múltiplos voos em sobrevoo
+  const avancarVoo = useCallback(() => {
+    setListaVoos((lista) => {
+      if (lista.length <= 1) return lista;
+      tocarSomFlapClack();
+      setIndiceVoo((prev) => (prev + 1) % lista.length);
+      return lista;
+    });
+  }, []);
+
+  const recuarVoo = useCallback(() => {
+    setListaVoos((lista) => {
+      if (lista.length <= 1) return lista;
+      tocarSomFlapClack();
+      setIndiceVoo((prev) => (prev - 1 + lista.length) % lista.length);
+      return lista;
+    });
+  }, []);
+
+  // Gestos de Swipe & Arrastar (Ecrã táctil móvel + Rato desktop)
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartTime = useRef<number>(0);
+
+  const lidarComInicioArrasto = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    touchStartX.current = clientX;
+    touchStartY.current = clientY;
+    touchStartTime.current = Date.now();
+  };
+
+  const lidarComFimArrasto = (e: React.TouchEvent | React.MouseEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const clientX = "changedTouches" in e ? e.changedTouches[0].clientX : e.clientX;
+    const clientY = "changedTouches" in e ? e.changedTouches[0].clientY : e.clientY;
+
+    const deltaX = clientX - touchStartX.current;
+    const deltaY = clientY - touchStartY.current;
+    const deltaTime = Date.now() - touchStartTime.current;
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    // Se foi um arrasto horizontal nítido (> 40px e predominantemente horizontal)
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      if (deltaX < 0) {
+        // Arrastar para a esquerda -> Próximo voo
+        avancarVoo();
+      } else {
+        // Arrastar para a direita -> Voo anterior
+        recuarVoo();
+      }
+      return;
+    }
+
+    // Se foi um toque ou clique simples (sem arrasto significativo e rápido)
+    if (Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15 && deltaTime < 450) {
+      manipularToqueEcra();
+    }
+  };
+
   const carregarMeteorologia = useCallback(async (localCoords?: { lat: number; lon: number } | null) => {
     try {
       const q = localCoords ? `?lat=${localCoords.lat}&lon=${localCoords.lon}` : "";
@@ -756,13 +955,40 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   }, []);
 
+  const tratarZeroVoos = useCallback(async (refLat: number, refLon: number) => {
+    // Se havia voos a ser exibidos no ecrã, reter durante 40 segundos de Espera Suave
+    if (listaVoosRef.current.length > 0) {
+      const agora = Date.now();
+      if (timestampSemVoosRef.current === null) {
+        timestampSemVoosRef.current = agora;
+      }
+      const decorrido = agora - timestampSemVoosRef.current;
+      if (decorrido < TEMPO_ESPERA_SUAVE_MS) {
+        // Dentro do período de cortesia: manter voo no ecrã!
+        setEmEsperaSuave(true);
+        const restantes = Math.max(1, Math.round((TEMPO_ESPERA_SUAVE_MS - decorrido) / 1000));
+        setSegundosRestantesEspera(restantes);
+        setTotalNoRadar(0);
+        return;
+      }
+    }
+
+    // Passaram os 40 segundos ou já estávamos na meteorologia: transição suave
+    timestampSemVoosRef.current = null;
+    setEmEsperaSuave(false);
+    setSegundosRestantesEspera(0);
+    listaVoosRef.current = [];
+    setListaVoos([]);
+    setTotalNoRadar(0);
+    setIndiceVoo(0);
+    await carregarMeteorologia({ lat: refLat, lon: refLon });
+  }, [carregarMeteorologia]);
+
   const buscarDados = useCallback(async () => {
     try {
       const params = new URLSearchParams();
-      if (coords) {
-        params.set("lat", coords.lat.toString());
-        params.set("lon", coords.lon.toString());
-      }
+      params.set("lat", localizacao.lat.toString());
+      params.set("lon", localizacao.lon.toString());
       params.set("radius", "20");
 
       const resVoos = await fetch(`/api/voos?${params.toString()}`);
@@ -773,10 +999,10 @@ export default function PainelAnalogicoMobileFullscreen() {
         setRotasMap((prev) => ({ ...prev, ...dadosVoos.rotas }));
       }
 
-      if (dadosVoos.estados && dadosVoos.estados.length > 0) {
-        const refLat = coords?.lat ?? 41.15;
-        const refLon = coords?.lon ?? -8.62;
+      const refLat = localizacao.lat;
+      const refLon = localizacao.lon;
 
+      if (dadosVoos.estados && dadosVoos.estados.length > 0) {
         // Filtrar aeronaves no ar (não no solo) e estritamente dentro do raio circular de 20 km (elimina cantos da caixa)
         const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => {
           if (v[8]) return false;
@@ -798,27 +1024,48 @@ export default function PainelAnalogicoMobileFullscreen() {
             return distA - distB;
           });
 
+          // Novo voo ativo: cancelar espera suave e apresentar imediatamente
+          timestampSemVoosRef.current = null;
+          setEmEsperaSuave(false);
+          setSegundosRestantesEspera(0);
+          listaVoosRef.current = voosEmAr;
+          setListaVoos(voosEmAr);
           setTotalNoRadar(voosEmAr.length);
-          setVooAtual(voosEmAr[0]);
+          setIndiceVoo((prev) => (prev >= voosEmAr.length ? 0 : prev));
           setMeteorologia(null);
         } else {
-          setTotalNoRadar(0);
-          setVooAtual(null);
-          await carregarMeteorologia(coords);
+          await tratarZeroVoos(refLat, refLon);
         }
       } else {
-        setTotalNoRadar(0);
-        setVooAtual(null);
-        await carregarMeteorologia(coords);
+        await tratarZeroVoos(refLat, refLon);
       }
     } catch {
-      setTotalNoRadar(0);
-      setVooAtual(null);
-      await carregarMeteorologia(coords);
+      await tratarZeroVoos(localizacao.lat, localizacao.lon);
     } finally {
       setCarregando(false);
     }
-  }, [coords, carregarMeteorologia]);
+  }, [localizacao, carregarMeteorologia, tratarZeroVoos]);
+
+  // Contador de segundos da Espera Suave com transição automática ao expirar
+  useEffect(() => {
+    if (!emEsperaSuave || !timestampSemVoosRef.current) return;
+    const interval = setInterval(() => {
+      if (timestampSemVoosRef.current) {
+        const decorrido = Date.now() - timestampSemVoosRef.current;
+        const restantes = Math.max(0, Math.round((TEMPO_ESPERA_SUAVE_MS - decorrido) / 1000));
+        setSegundosRestantesEspera(restantes);
+        if (restantes <= 0) {
+          timestampSemVoosRef.current = null;
+          setEmEsperaSuave(false);
+          listaVoosRef.current = [];
+          setListaVoos([]);
+          setTotalNoRadar(0);
+          carregarMeteorologia({ lat: localizacao.lat, lon: localizacao.lon });
+        }
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [emEsperaSuave, localizacao, carregarMeteorologia]);
 
   useEffect(() => {
     buscarDados();
@@ -826,8 +1073,10 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  const refLatAtual = coords?.lat ?? 41.15;
-  const refLonAtual = coords?.lon ?? -8.62;
+  const vooAtual = listaVoos.length > 0 ? listaVoos[Math.min(indiceVoo, listaVoos.length - 1)] : null;
+
+  const refLatAtual = localizacao.lat;
+  const refLonAtual = localizacao.lon;
   const distVooAtual = (vooAtual && vooAtual[6] != null && vooAtual[5] != null)
     ? calcularDistanciaHaversineKm(refLatAtual, refLonAtual, vooAtual[6], vooAtual[5])
     : null;
@@ -836,9 +1085,37 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   return (
     <main
-      onClick={manipularToqueEcra}
+      onTouchStart={lidarComInicioArrasto}
+      onTouchEnd={lidarComFimArrasto}
+      onMouseDown={lidarComInicioArrasto}
+      onMouseUp={lidarComFimArrasto}
       className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-pointer relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
     >
+      {/* ── BOTÕES LATERAIS TRANSLÚCIDOS DE NAVEGAÇÃO DE VOOS ─────────── */}
+      {listaVoos.length > 1 && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); recuarVoo(); }}
+            title="Voo anterior (arrasta para a direita)"
+            className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-40 p-1.5 sm:p-2 bg-black/60 hover:bg-black/90 active:scale-90 text-white/80 hover:text-white rounded-full backdrop-blur-md border border-white/20 transition-all shadow-xl cursor-pointer"
+          >
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); avancarVoo(); }}
+            title="Próximo voo (arrasta para a esquerda)"
+            className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-40 p-1.5 sm:p-2 bg-black/60 hover:bg-black/90 active:scale-90 text-white/80 hover:text-white rounded-full backdrop-blur-md border border-white/20 transition-all shadow-xl cursor-pointer"
+          >
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
+
       {/* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */}
       <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
         
@@ -868,6 +1145,11 @@ export default function PainelAnalogicoMobileFullscreen() {
                     {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
                       <span className="text-[8px] sm:text-[10px] text-sky-400 font-mono tracking-wider font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
                         {infoVoo.callsignIata}
+                      </span>
+                    )}
+                    {emEsperaSuave && (
+                      <span className="text-[8px] sm:text-[10px] text-amber-400 font-mono tracking-wider font-bold bg-amber-400/15 px-1.5 py-0.5 rounded border border-amber-400/30 animate-pulse">
+                        ÚLTIMO CONTACTO ({segundosRestantesEspera}S)
                       </span>
                     )}
                   </div>
@@ -1071,22 +1353,56 @@ export default function PainelAnalogicoMobileFullscreen() {
 
         {/* ── BARRA DE STATUS DO RADAR ADS-B NO FUNDO DO CHASSIS ─────────── */}
         <div 
-          onClick={(e) => {
-            e.stopPropagation();
-            if (typeof window !== "undefined" && "caches" in window) {
-              caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
-                window.location.reload();
-              });
-            }
-          }}
-          title="Toca para forçar actualização e limpar cache"
-          className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 cursor-pointer transition-colors"
+          className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 transition-colors"
         >
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>RADAR ADS-B v1.1.5 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO CIRCULAR 20 KM)</span>
+          {/* Botão Interativo de Configuração de Localização / GPS */}
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalLocalizacaoAberto(true);
+            }}
+            title="Clica para configurar a localização / GPS do radar"
+            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors py-0.5 px-1 rounded hover:bg-white/5"
+          >
+            <span className={`w-2 h-2 rounded-full ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
+            <span className="font-bold text-neutral-200">
+              RADAR v1.2.0 • 📍 {localizacao.nome} (20 KM)
+            </span>
+            <span className="text-[7px] sm:text-[8px] bg-white/10 px-1 py-0.5 rounded text-sky-300 font-bold ml-0.5">
+              ⚙️ AJUSTAR
+            </span>
           </div>
+
           <div className="flex items-center gap-2">
+            {listaVoos.length > 1 && (
+              <div 
+                className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded border border-white/20 text-white font-mono text-[8px] sm:text-[10px]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={(e) => { e.stopPropagation(); recuarVoo(); }}
+                  className="px-1 text-neutral-300 hover:text-white active:scale-95 cursor-pointer"
+                  title="Voo anterior (arrasta para a direita)"
+                >
+                  ◀
+                </button>
+                <span className="font-bold text-sky-400 tracking-wider">
+                  VOO {indiceVoo + 1}/{listaVoos.length}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); avancarVoo(); }}
+                  className="px-1 text-neutral-300 hover:text-white active:scale-95 cursor-pointer"
+                  title="Próximo voo (arrasta para a esquerda)"
+                >
+                  ▶
+                </button>
+              </div>
+            )}
+            {emEsperaSuave && (
+              <span className="text-amber-400 bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold animate-pulse">
+                ESPERA: {segundosRestantesEspera}S
+              </span>
+            )}
             {distVooAtual != null && (
               <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
                 📍 {distVooAtual.toFixed(1)} KM
@@ -1097,6 +1413,141 @@ export default function PainelAnalogicoMobileFullscreen() {
         </div>
 
       </div>
+
+      {/* ── MODAL ANALÓGICO DE CONFIGURAÇÃO DE LOCALIZAÇÃO DO RADAR ──── */}
+      {modalLocalizacaoAberto && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={(e) => { e.stopPropagation(); setModalLocalizacaoAberto(false); }}
+        >
+          <div 
+            className="w-full max-w-lg bg-[#0c0e14] border border-white/20 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4 text-white font-mono max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Título e Fechar */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📍</span>
+                <div>
+                  <h2 className="text-sm sm:text-base font-black tracking-wider text-amber-400 uppercase">
+                    Localização do Radar
+                  </h2>
+                  <p className="text-[10px] text-neutral-400">
+                    Define o centro do raio circular de 20 km
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setModalLocalizacaoAberto(false)}
+                className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Localização Atual Ativa */}
+            <div className="bg-[#151922] p-3 rounded-xl border border-white/10 flex items-center justify-between">
+              <div>
+                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">
+                  PONTO ACTUAL ACTIVO
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-sky-400">
+                  {localizacao.nome}
+                </span>
+                <span className="text-[10px] text-neutral-300 block font-mono">
+                  {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio 20 KM
+                </span>
+              </div>
+              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusGps === "ativo" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-neutral-700/50 text-neutral-300"}`}>
+                {localizacao.origem.toUpperCase()}
+              </span>
+            </div>
+
+            {/* Botão GPS */}
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => obterGpsDoDispositivo(true)}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
+              >
+                <span>📡</span>
+                <span>OBTER COORDENADAS POR GPS (TELEMÓVEL / PC)</span>
+              </button>
+              {detalheErroGps && (
+                <p className="text-[10px] sm:text-xs text-amber-300 bg-amber-950/40 p-2 rounded border border-amber-500/30 leading-relaxed">
+                  {detalheErroGps}
+                </p>
+              )}
+            </div>
+
+            {/* Predefinições Rápidas (1 Toque) */}
+            <div className="flex flex-col gap-2">
+              <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                OU SELECCIONA A TUA LOCALIDADE (1 TOQUE):
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {LOCAIS_PREDEFINIDOS.map((loc) => {
+                  const estaAtivo = Math.abs(loc.lat - localizacao.lat) < 0.005 && Math.abs(loc.lon - localizacao.lon) < 0.005;
+                  return (
+                    <button
+                      key={loc.nome}
+                      onClick={() => selecionarLocalPredefinido(loc)}
+                      className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between cursor-pointer ${estaAtivo ? "bg-sky-500/20 border-sky-400 text-white shadow-md shadow-sky-500/10" : "bg-[#141720] hover:bg-[#1a1f2c] border-white/10 text-neutral-300 hover:text-white"}`}
+                    >
+                      <span className="text-[11px] sm:text-xs font-bold font-mono tracking-wider">
+                        {loc.nome}
+                      </span>
+                      <span className="text-[9px] text-neutral-400 truncate mt-0.5">
+                        {loc.regiao}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Entrada Manual de Coordenadas */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+              <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                COORDENADAS PERSONALIZADAS (LATITUDE / LONGITUDE):
+              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={latManual}
+                  onChange={(e) => setLatManual(e.target.value)}
+                  placeholder="Latitude (ex: 41.15)"
+                  className="w-1/2 bg-[#141720] border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
+                />
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={lonManual}
+                  onChange={(e) => setLonManual(e.target.value)}
+                  placeholder="Longitude (ex: -8.62)"
+                  className="w-1/2 bg-[#141720] border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
+                />
+                <button
+                  onClick={guardarCoordenadasManuais}
+                  className="bg-amber-500 hover:bg-amber-400 text-black px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+                >
+                  GRAVAR
+                </button>
+              </div>
+            </div>
+
+            {/* Rodapé do Modal */}
+            <div className="flex justify-end pt-2 border-t border-white/10">
+              <button
+                onClick={() => setModalLocalizacaoAberto(false)}
+                className="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-lg text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer"
+              >
+                CONCLUÍDO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

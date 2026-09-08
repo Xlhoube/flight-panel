@@ -409,6 +409,7 @@ export async function GET(request: NextRequest) {
 
     let estados: any[] = [];
     let fonte = "";
+    let redeComSucesso = false;
     const rotasMap: Record<string, RotaAdsb> = {};
 
     // ── 1. FONTE PRIMÁRIA: Feed Directo Oficial FlightRadar24 ──────────────────
@@ -430,6 +431,7 @@ export async function GET(request: NextRequest) {
       clearTimeout(timeout);
 
       if (resFr24.ok) {
+        redeComSucesso = true;
         const dadosFr24 = await resFr24.json();
         for (const [key, v] of Object.entries(dadosFr24)) {
           if (Array.isArray(v)) {
@@ -604,9 +606,26 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 4. Se todos devolverem 0 ou erro temporário e tivermos cache recente (até 120s), servir cache
     const agora = Date.now();
-    if (cacheMemoriaVoos.estados.length > 0 && agora - cacheMemoriaVoos.timestamp < 120_000) {
+
+    // 4. Se a consulta ao FlightRadar24 respondeu com sucesso e o céu está limpo (0 aviões no raio de 20 km),
+    // libertar imediatamente para a meteorologia sem reter cache antiga de 2 minutos!
+    if (redeComSucesso) {
+      cacheMemoriaVoos = {
+        timestamp: agora,
+        estados: [],
+        rotas: {},
+      };
+      return NextResponse.json({
+        estados: [],
+        rotas: {},
+        fonte: "ceu-limpo",
+        total: 0,
+      });
+    }
+
+    // 5. Apenas se todas as fontes falharam por queda de rede/timeout e tivermos cache recente (até 60s), servir cache
+    if (cacheMemoriaVoos.estados.length > 0 && agora - cacheMemoriaVoos.timestamp < 60_000) {
       return NextResponse.json({
         estados: cacheMemoriaVoos.estados,
         rotas: cacheMemoriaVoos.rotas,

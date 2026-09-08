@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.1.5  
+**Versão:** v1.3.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** Filtro circular estrito Haversine (eliminação dos cantos do rectângulo), indicador de distância em tempo real (📍 X.X KM) e SW v8.
+**Estado:** Sincronização estrita de coordenadas geográficas, seletor analógico de localização (GPS/Cidades/Manual), retenção suave de 40s para apreciar voos antes da meteo, navegação por arrasto lateral e SW v10.
 
 ---
 
@@ -125,6 +125,14 @@
 3. Adicionar crachá de telemetria em tempo real no rodapé do radar (`📍 X.X KM`), permitindo ao utilizador acompanhar a distância exacta do avião em aproximação ou sobrevoo.  
 **Consequência:** Eliminação total da distorção dos cantos do rectângulo (máximo estrito de 20.0 km) e transparência métrica completa no ecrã.
 
+### ADR-037 — Navegação Multivoo por Gesto de Arrasto (Swipe) & Transição Imediata de Céu Limpo (2026-09-08)
+**Contexto:** O utilizador solicitou a capacidade de arrastar para as laterais para alternar e explorar outros voos no radar quando existirem múltiplas aeronaves no raio de 20 km, bem como o esclarecimento/optimização do tempo de espera para mudar para a meteorologia.  
+**Decisão:**  
+1. Implementar gestos tácteis e de rato para swipe horizontal: arrastar para a esquerda avança para o voo seguinte (`avancarVoo`), arrastar para a direita recua para o anterior (`recuarVoo`), com som mecânico a cada transição. Toque simples sem arrasto preserva a alternância de fullscreen.  
+2. Adicionar botões translúcidos flutuantes nas bordas laterais do ecrã (`◀` e `▶`) e selector paginado no rodapé (`VOO X/Y`) quando houver mais de 1 voo activo no radar.  
+3. Na rota `/api/voos`, eliminar a retenção de 2 minutos de cache quando o FlightRadar24 responde com sucesso a confirmar que o espaço aéreo está livre (`estados: []`), permitindo transição imediata (10s) para o modo meteorológico.  
+**Consequência:** Exploração fluida e interactiva de todas as aeronaves em voo na região com controlo gestual táctil e feedback sonoro Solari.
+
 ---
 
 ## Histórico
@@ -169,3 +177,63 @@
 | 2026-09-08 | v1.1.3 | Integração de feed live do FlightRadar24 (rotas em tempo real, nomes de aeronaves e resolução de rotas recicladas) |
 | 2026-09-08 | v1.1.4 | Auto-fit de palhetas de aeronaves (máx 14 caracteres), blindagem anti-sobreposição do cabeçalho e SW v7 |
 | 2026-09-08 | v1.1.5 | Filtro circular estrito Haversine (corte exato a 20.0 km sem cantos de rectângulo), badge de distância (📍 X.X KM) e SW v8 |
+### ADR-038 — Sincronização Estrita de Localização, Seletor Analógico & Espera Suave de 40s (2026-09-08)
+**Contexto:** O utilizador reportou que a localização do aparelho não estava a funcionar, indo buscar voos distantes enquanto aeronaves próximas não surgiam. Adicionalmente, solicitou uma "Espera Suave" (30 a 45 segundos) para manter os dados do último voo detectado no ecrã após a sua passagem antes de alternar para a meteorologia.  
+**Causa Raiz da Localização:** Identificou-se um desfasamento crítico de configuração: as variáveis `.env.local` apontavam para Lisboa (`38.7756, -9.1354`), enquanto o frontend assumia Porto (`41.15, -8.62`). Em telemóveis sem sinal de GPS ou quando acedidos via HTTP na rede local (onde os browsers bloqueiam a Geolocation API por questões de segurança), o backend procurava voos sobre Lisboa e o frontend rejeitava-os por estarem a ~275 km do Porto.  
+**Decisão:**  
+1. **Unificação Total de Coordenadas:** O frontend passa a enviar sempre explicitamente `lat` e `lon` para a rota `/api/voos`, sincronizando a bounding box do radar e a filtragem circular Haversine no mesmo ponto de referência. `.env.local` alinhado para Valadares / Porto (`41.15, -8.62`).
+2. **Seletor de Localização Analógico:** Adicionado modal interactivo ao clicar no indicador de localização do rodapé (`RADAR v1.2.0 • 📍 [CIDADE] ⚙️ AJUSTAR`):
+   - Botão para activar/re-solicitar GPS do telemóvel com detecção de contexto HTTPS e mensagens de diagnóstico claras.
+   - Grelha de selecção rápida a 1 toque para aeroportos e cidades (Valadares/Gaia, Porto, Sá Carneiro, Lisboa/Portela, Cascais, Faro, Coimbra, Braga, Funchal, Ponta Delgada, Madrid).
+   - Introdução manual de coordenadas (Latitude e Longitude) com gravação imediata.
+   - Persistência permanente em `localStorage` (`flight_panel_user_location`) para sobreviver a reinícios da PWA e sessões sem GPS.
+3. **Espera Suave (40 Segundos):** Quando uma aeronave sai do raio de 20 km, o painel mantém os seus dados visíveis durante 40 segundos, apresentando o crachá dinâmico `ÚLTIMO CONTACTO (Xs)` no cabeçalho e `ESPERA: Xs` no rodapé. Se surgir outro voo durante a espera, a troca é instantânea; caso contrário, após os 40s transita suavemente para a meteorologia.  
+**Consequência:** Resolução definitiva das discrepâncias geográficas, suporte robusto a telemóveis e computadores em qualquer cidade, e tempo ideal para apreciar a passagem de cada voo.
+
+---
+
+## Histórico
+
+| Data       | Versão | Acção                                                                  |
+|------------|--------|------------------------------------------------------------------------|
+| 2026-09-06 | v0.1.0 | Projecto inicializado, estrutura base criada e segura                  |
+| 2026-09-07 | v0.2.0 | Redesign completo para painel analógico Split-Flap (Solari di Udine)   |
+| 2026-09-07 | v0.2.1 | Reformulação minimalista (Logótipo + Voo + Rota) e correcção do som    |
+| 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista      |
+| 2026-09-07 | v0.2.3 | Correcção do corte de letras e alinhamento responsivo das palhetas    |
+| 2026-09-07 | v0.3.0 | Recriação fiel do painel clássico de partidas (DEPARTURES board)       |
+| 2026-09-07 | v0.3.1 | Ajuste para exibição exclusiva de 1 único voo de cada vez              |
+| 2026-09-07 | v0.4.0 | Purificação da interface: 100% monocromático (Logo + Voo + Origem + Destino)|
+| 2026-09-07 | v0.4.1 | Conversão do logótipo da companhia para Pixel Art 8-bit monocromático  |
+| 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                    |
+| 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
+| 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis      |
+| 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)|
+| 2026-09-07 | v0.7.0 | Painel analógico aeroporto Solari Split-Flap vintage em Landscape 16:9 |
+| 2026-09-07 | v0.7.1 | Remoção de cabeçalhos/rodapés redundantes e simplificação do layout    |
+| 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas|
+| 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis    |
+| 2026-09-08 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
+| 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar |
+| 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens |
+| 2026-09-07 | v0.9.0 | Chassis preenchido sem vazios e base global de logótipos ICAO         |
+| 2026-09-07 | v0.9.1 | Remoção da moldura de fundo externa (design borderless edge-to-edge)  |
+| 2026-09-07 | v1.0.0 | Lançamento oficial v1.0.0 com suporte completo a instalador PWA Mobile |
+| 2026-09-07 | v1.0.1 | Integração GitHub remota (Xlhoube/flight-panel) e suporte a deploy Vercel |
+| 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
+| 2026-09-08 | v1.0.3 | Resolução de bloqueio meteorológico: coordenadas dinâmicas, GPS, expansão de raio e cache anti-429 |
+| 2026-09-08 | v1.0.4 | Implementação de Screen Wake Lock para manter o ecrã sempre ligado durante a utilização |
+| 2026-09-08 | v1.0.5 | Dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s e actualização de Service Worker |
+| 2026-09-08 | v1.0.6 | Relógio Solari em tempo real (Data e Hora) e Localização no cabeçalho meteorológico |
+| 2026-09-08 | v1.0.7 | Resolução de corte de letras no número do voo, auto-fit responsivo e callsign ATC |
+| 2026-09-08 | v1.0.8 | Redefinição do raio de alcance do radar para 30 km (API, frontend e status) |
+| 2026-09-08 | v1.0.9 | Integração de rotas reais ADS-B (adsbdb), preservação de callsigns alfanuméricos e correcção OPO->OPO |
+| 2026-09-10 | v1.1.0 | Exibição integral de callsigns ICAO (sem omissão de letras), SW v5 Network-First e purge no status |
+| 2026-09-08 | v1.1.1 | Garantia de visibilidade da barra de rodapé em fullscreen móvel (flex-1 min-h-0) |
+| 2026-09-08 | v1.1.2 | Redução do raio de alcance do radar para 20 km (API, frontend e status) |
+| 2026-09-08 | v1.1.3 | Integração de feed live do FlightRadar24 (rotas em tempo real, nomes de aeronaves e resolução de rotas recicladas) |
+| 2026-09-08 | v1.1.4 | Auto-fit de palhetas de aeronaves (máx 14 caracteres), blindagem anti-sobreposição do cabeçalho e SW v7 |
+| 2026-09-08 | v1.1.5 | Filtro circular estrito Haversine (corte exato a 20.0 km sem cantos de rectângulo), badge de distância (📍 X.X KM) e SW v8 |
+| 2026-09-08 | v1.2.0 | Navegação multivoo por arrasto/swipe lateral, botões tácteis translúcidos, transição imediata para meteorologia e SW v9 |
+| 2026-09-08 | v1.3.0 | Sincronização estrita de coordenadas, modal analógico de localização (GPS/Cidades/Manual) e Espera Suave de 40s (SW v10) |
+
