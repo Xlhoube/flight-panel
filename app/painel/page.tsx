@@ -1408,33 +1408,33 @@ export default function PainelAnalogicoMobileFullscreen() {
 
         {/* ── BARRA DE STATUS DO RADAR ADS-B NO FUNDO DO CHASSIS ─────────── */}
         <div 
-          className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 transition-colors"
+          className="w-full h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem] flex items-center justify-between px-2 sm:px-2.5 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 transition-colors overflow-hidden whitespace-nowrap"
         >
           {/* Informação de Localização / GPS */}
-          <div className="flex items-center gap-1.5 py-0.5 px-1">
-            <span className={`w-2 h-2 rounded-full ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
-            <span className="font-bold text-neutral-200">
-              RADAR v1.3.3 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
+          <div className="flex items-center gap-1.5 py-0.5 px-1 min-w-0 shrink overflow-hidden whitespace-nowrap">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
+            <span className="font-bold text-neutral-200 truncate">
+              RADAR v1.3.4 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
             {listaVoos.length > 1 && (
-              <span className="bg-white/10 px-2 py-0.5 rounded border border-white/20 text-sky-400 font-bold font-mono text-[8px] sm:text-[10px] tracking-wider">
+              <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-sky-400 font-bold font-mono text-[8px] sm:text-[10px] tracking-wider shrink-0">
                 VOO {indiceVoo + 1}/{listaVoos.length}
               </span>
             )}
             {emEsperaSuave && (
-              <span className="text-amber-400 bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold animate-pulse">
+              <span className="text-amber-400 bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold animate-pulse shrink-0">
                 ESPERA: {segundosRestantesEspera}S
               </span>
             )}
             {distVooAtual != null && (
-              <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
+              <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20 tabular-nums shrink-0 inline-flex items-center justify-center min-w-[4.4rem]">
                 📍 {distVooAtual.toFixed(1)} KM
               </span>
             )}
-            <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
+            <span className="shrink-0">NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
 
             {/* BOTÃO 1: AJUSTAR */}
             <button
@@ -1443,7 +1443,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 setModalLocalizacaoAberto(true);
               }}
               title="Ajustar localização e raio do radar"
-              className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-2 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm ml-1"
+              className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-1.5 sm:px-2 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm ml-0.5 shrink-0"
             >
               <span>⚙️</span>
               <span>AJUSTAR</span>
@@ -1456,7 +1456,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 alternarFullScreen();
               }}
               title={estaEmFullScreen ? "Sair do modo ecrã inteiro" : "Activar modo ecrã inteiro"}
-              className="flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/35 active:scale-95 text-amber-300 hover:text-white px-2 py-0.5 rounded border border-amber-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm"
+              className="flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/35 active:scale-95 text-amber-300 hover:text-white px-1.5 sm:px-2 py-0.5 rounded border border-amber-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
             >
               <span>{estaEmFullScreen ? "🗗" : "⛶"}</span>
               <span>{estaEmFullScreen ? "JANELA" : "ECRÃ INTEIRO"}</span>

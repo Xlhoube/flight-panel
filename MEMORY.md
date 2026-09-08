@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.3.3  
+**Versão:** v1.3.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** Navegação multivoo operada exclusivamente por arrasto horizontal, botões dedicados de Ajustar e Ecrã Inteiro no rodapé, remoção de toque acidental para fullscreen e SW v13.
+**Estado:** Altura do rodapé rigidamente bloqueada (h-7 sm:h-8 / max-h-8) com tabular-nums na distância de voo, prevenindo layout shifts ao transitar entre 9.9 km e 10.0 km, e SW v14.
 
 ---
 
@@ -195,6 +195,11 @@
 **Decisão:** Eliminar os botões translúcidos flutuantes de seta nas laterais e as setas do rodapé (mantendo apenas o badge informativo `VOO X/Y`); desativar a deteção de toque simples para fullscreen no listener de arrasto e definir `cursor-default` no contentor principal; e adicionar dois botões estilizados no rodapé: `⚙️ AJUSTAR` (que abre o modal de localização) e `⛶ ECRÃ INTEIRO` / `🗗 JANELA` (que alterna o modo ecrã inteiro nativo e reflete o estado em tempo real com `fullscreenchange`). Atualizar o Service Worker para `flight-panel-v13`.  
 **Consequência:** Interação tátil limpa sem comandos acidentais, controlo explícito de ecrã inteiro e navegação natural por gestos de swipe.
 
+### ADR-038 — Bloqueio Rígido da Altura do Rodapé & Blindagem Anti-Layout Shift (2026-09-08)
+**Contexto:** O utilizador reportou que sempre que a distância de um voo em aproximação transitava de 9.9 km (1 dígito decimal) para 10.0 km (2 dígitos inteiros), a barra de rodapé sofria um aumento repentino de altura devido ao ganho de largura do crachá num ecrã estreito.  
+**Decisão:** Bloquear a altura do rodapé de forma imutável (`h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem] overflow-hidden whitespace-nowrap`), adicionar largura mínima fixa com números tabulares na etiqueta de distância (`tabular-nums min-w-[4.4rem] inline-flex justify-center`) e aplicar `truncate min-w-0` na identificação da localização no radar. Atualizar o Service Worker para `flight-panel-v14`.  
+**Consequência:** Zero oscilações ou saltos verticais no rodapé; a altura permanece milimetricamente fixa e inabalável em qualquer transição de distância.
+
 ---
 
 ## Histórico
@@ -244,4 +249,5 @@
 | 2026-09-08 | v1.3.1 | Refinamento contínuo watchPosition (precisão satélite <10m), indicador de erro em metros (±Xm) e botão de partilha direta PC->Telemóvel (SW v11) |
 | 2026-09-08 | v1.3.2 | Reestruturação do cabeçalho de rota (linha dedicada ORIGEM/DESTINO anti-corte), proporções clamp de FlapCell para landscape móvel e SW v12 |
 | 2026-09-08 | v1.3.3 | Remoção de setas, navegação exclusivamente por arrasto lateral, botões dedicados Ajustar e Ecrã Inteiro e SW v13 |
+| 2026-09-08 | v1.3.4 | Bloqueio rígido da altura do rodapé (h-7 sm:h-8 / max-h-8) e números tabulares no indicador de KM (SW v14) |
 
