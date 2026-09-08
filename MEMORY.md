@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.1.1  
+**Versão:** v1.1.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA com visibilidade garantida da barra de rodapé em ecrã inteiro móvel (flex-1 min-h-0 + safe-area insets), callsigns ICAO integrais e Service Worker v5.
+**Estado:** PWA com raio de cobertura focalizado em 20 km, barra de rodapé 100% visível em mobile fullscreen, callsigns ICAO integrais e rotas reais ADS-B.
 
 ---
 
@@ -93,6 +93,11 @@
 **Decisão:** Substituir `h-full` dos blocos de Modo 1 e Modo 2 por `flex-1 min-h-0`, ajustando o contentor exterior com `overflow-hidden` e espaçamentos dinâmicos (`gap-1.5 sm:gap-2.5`, `p-1.5 sm:p-3`), além de adicionar protecção de safe-area (`pb-[max(0.375rem,env(safe-area-inset-bottom))]`).  
 **Consequência:** A barra de rodapé permanece 100% visível e ancorada no fundo do ecrã em qualquer telemóvel ou tablet (portrait ou landscape fullscreen), sem ser empurrada para fora da vista.
 
+### ADR-033 — Redefinição do Raio de Alcance do Radar para 20 km (2026-09-08)
+**Contexto:** O utilizador solicitou o estreitamento do raio de detecção aérea de 30 km para 20 km para monitorizar apenas os voos na vizinhança aérea directa e sobrevoos imediatos.  
+**Decisão:** Atualizar o parâmetro padrão na rota `/api/voos` para 20 km (~11 NM na API ADS-B), sincronizar a requisição no frontend e atualizar a legenda na barra de rodapé para `(RAIO 20 KM)`.  
+**Consequência:** Foco restrito a aeronaves a sobrevoar a área imediata (20 km), filtrando tráfego mais distante e garantindo transição exacta.
+
 ---
 
 ## Histórico
@@ -133,3 +138,4 @@
 | 2026-09-08 | v1.0.9 | Integração de rotas reais ADS-B (adsbdb), preservação de callsigns alfanuméricos e correcção OPO->OPO |
 | 2026-09-08 | v1.1.0 | Exibição integral de callsigns ICAO (sem omissão de letras), SW v5 Network-First e purge no status |
 | 2026-09-08 | v1.1.1 | Garantia de visibilidade da barra de rodapé em fullscreen móvel (flex-1 min-h-0) |
+| 2026-09-08 | v1.1.2 | Redução do raio de alcance do radar para 20 km (API, frontend e status) |

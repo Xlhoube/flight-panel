@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
 
     const lat = latParam ? parseFloat(latParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.15");
     const lon = lonParam ? parseFloat(lonParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.62");
-    const radiusKm = radiusParam ? Math.max(10, Math.min(120, parseFloat(radiusParam))) : 30;
+    const radiusKm = radiusParam ? Math.max(10, Math.min(120, parseFloat(radiusParam))) : 20;
 
     let estados: any[] = [];
     let fonte = "";
