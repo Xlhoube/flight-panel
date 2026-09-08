@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.1.2  
+**Versão:** v1.1.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA com raio de cobertura focalizado em 20 km, barra de rodapé 100% visível em mobile fullscreen, callsigns ICAO integrais e rotas reais ADS-B.
+**Estado:** Integração nativa do feed live FlightRadar24 com rotas em tempo real, raio de 20 km e nomes de aeronaves expandidos.
 
 ---
 
@@ -98,6 +98,15 @@
 **Decisão:** Atualizar o parâmetro padrão na rota `/api/voos` para 20 km (~11 NM na API ADS-B), sincronizar a requisição no frontend e atualizar a legenda na barra de rodapé para `(RAIO 20 KM)`.  
 **Consequência:** Foco restrito a aeronaves a sobrevoar a área imediata (20 km), filtrando tráfego mais distante e garantindo transição exacta.
 
+### ADR-034 — Integração do Feed Live FlightRadar24 & Resolução de Rotas Recicladas (2026-09-08)
+**Contexto:** O voo Ryanair `RYR4BV` (comercial `FR573`), que operava no FlightRadar24 entre Porto (`OPO`) e Madrid (`MAD`), surgia no painel como Veneza (`VCE`) ➔ Helsínquia (`HEL`). Isto ocorria porque as bases estáticas comunitárias (`api.adsbdb.com`) retêm registos antigos onde `RYR4BV` foi utilizado numa temporada anterior noutra rota europeia, devido à reciclagem sazonal de callsigns alfanuméricos pelas companhias aéreas.  
+**Decisão:**  
+1. Integrar o feed live de zonas do FlightRadar24 (`https://data-cloud.flightradar24.com/zones/fcgi/feed.js`) como Fonte Primária #1 no endpoint `/api/voos`. Este feed fornece em tempo real a origem (`v[11]`), destino (`v[12]`), número de voo comercial (`v[13]`) e modelo da aeronave (`v[8]`), exactamente iguais aos dados apresentados pelo FlightRadar24.  
+2. Adicionar dicionário `AEROPORTOS_CIDADES` com ~150 aeroportos mundiais e europeus para tradução imediata dos códigos IATA para cidades em português (ex: `OPO` ➔ `PORTO`, `MAD` ➔ `MADRID`, `BCN` ➔ `BARCELONA`).  
+3. No fallback com `adsb.fi` e `adsbdb`, adicionar filtro de plausibilidade geográfica (rejeita rotas cuja origem ou destino distem mais de 1.300 km da aeronave quando esta está a subir ou a descer).  
+4. No frontend (`painel/page.tsx`), priorizar o número de voo comercial real (`flightNumber`, ex: `FR573`) no badge e mapear códigos de modelo ICAO (`B738`, `B38M`, `A320`) para nomes expandidos nas palhetas mecânicas.  
+**Consequência:** Fidelidade absoluta a 100% com o FlightRadar24 em tempo real, eliminação de rotas residuais antigas e apresentação consistente de cidades e modelos de aeronave.
+
 ---
 
 ## Histórico
@@ -139,3 +148,4 @@
 | 2026-09-08 | v1.1.0 | Exibição integral de callsigns ICAO (sem omissão de letras), SW v5 Network-First e purge no status |
 | 2026-09-08 | v1.1.1 | Garantia de visibilidade da barra de rodapé em fullscreen móvel (flex-1 min-h-0) |
 | 2026-09-08 | v1.1.2 | Redução do raio de alcance do radar para 20 km (API, frontend e status) |
+| 2026-09-08 | v1.1.3 | Integração de feed live do FlightRadar24 (rotas em tempo real, nomes de aeronaves e resolução de rotas recicladas) |

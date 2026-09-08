@@ -1,5 +1,5 @@
 // Service Worker para PWA com actualização contínua e sem bloqueio de cache
-const CACHE_NAME = 'flight-panel-v5';
+const CACHE_NAME = 'flight-panel-v6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

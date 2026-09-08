@@ -164,6 +164,36 @@ const PREFIXOS_REGISTO: Record<string, { pais: string; cidade: string; code: str
   LZ: { pais: "BULGÁRIA", cidade: "SÓFIA", code: "SOF" },
 };
 
+const NOMES_AERONAVES: Record<string, string> = {
+  B738: "BOEING 737-800",
+  B737: "BOEING 737-700",
+  B739: "BOEING 737-900",
+  B38M: "B737 MAX 8",
+  B39M: "B737 MAX 9",
+  A320: "AIRBUS A320",
+  A20N: "AIRBUS A320NEO",
+  A321: "AIRBUS A321",
+  A21N: "AIRBUS A321NEO",
+  A319: "AIRBUS A319",
+  A318: "AIRBUS A318",
+  A332: "AIRBUS A330-200",
+  A333: "AIRBUS A330-300",
+  A339: "AIRBUS A330-900",
+  A359: "AIRBUS A350-900",
+  A35K: "AIRBUS A350-1000",
+  B772: "BOEING 777-200",
+  B77W: "BOEING 777-300ER",
+  B788: "BOEING 787-8",
+  B789: "BOEING 787-9",
+  B78X: "BOEING 787-10",
+  E190: "EMBRAER 190",
+  E195: "EMBRAER 195",
+  E295: "EMBRAER E195-E2",
+  AT76: "ATR 72-600",
+  DH8D: "DASH 8-400",
+  CRJ9: "CRJ-900",
+};
+
 function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const cs = (voo[1] || "").trim().toUpperCase();
   const csLimpo = cs.replace(/\s+/g, "");
@@ -199,9 +229,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   // Exibir SEMPRE o callsign completo e integral (ex: EJU34XV, AFR442, SWR1ZD, TAP1972)
   // para coincidir com o FlightRadar24 sem omitir qualquer letra.
   let numeroVoo = csLimpo || voo[0].toUpperCase();
-  let callsignIata: string | null = rotaReal?.callsignIata || null;
+  let callsignIata: string | null = rotaReal?.flightNumber || rotaReal?.callsignIata || null;
 
-  if (info && csLimpo.length > 3) {
+  if (!callsignIata && info && csLimpo.length > 3) {
     const sufixo = csLimpo.slice(3);
     callsignIata = `${info.iata}${sufixo}`;
   }
@@ -267,6 +297,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     nomeFinalCompanhia = `OPERADOR (${voo[2].toUpperCase()})`;
   }
 
+  const codAeronave = (voo[12] ? String(voo[12]).toUpperCase() : (rotaReal?.model || info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320")));
+  const nomeAeronave = NOMES_AERONAVES[codAeronave] || codAeronave;
+
   return {
     callsign: cs,
     icao,
@@ -274,7 +307,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     numeroVoo,
     callsignIata,
     nomeCompanhia: nomeFinalCompanhia,
-    aeronave: (voo[12] ? String(voo[12]).toUpperCase() : (info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320"))),
+    aeronave: nomeAeronave,
     origem,
     origemCode,
     destino,
@@ -748,7 +781,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     </span>
                     {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
                       <span className="text-[8px] sm:text-[10px] text-sky-400 font-mono tracking-wider font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
-                        IATA: {infoVoo.callsignIata}
+                        {infoVoo.callsignIata}
                       </span>
                     )}
                   </div>
@@ -962,7 +995,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         >
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>RADAR ADS-B v1.1.2 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 20 KM)</span>
+            <span>RADAR ADS-B v1.1.3 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 20 KM)</span>
           </div>
           <div className="flex items-center gap-2">
             <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>

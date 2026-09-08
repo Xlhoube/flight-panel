@@ -8,7 +8,237 @@ export interface RotaAdsb {
   airline?: string;
   callsignIata?: string;
   callsignIcao?: string;
+  flightNumber?: string;
+  airlineIcao?: string;
+  model?: string;
 }
+
+// ─── Dicionário Global de Aeroportos para Cidades Oficiais ────────────────────
+const AEROPORTOS_CIDADES: Record<string, string> = {
+  OPO: "PORTO",
+  LIS: "LISBOA",
+  FAO: "FARO",
+  FNC: "FUNCHAL",
+  PDL: "PONTA DELGADA",
+  TER: "TERCEIRA",
+  PXO: "PORTO SANTO",
+  SMA: "SANTA MARIA",
+  HOR: "HORTA",
+  FLW: "FLORES",
+  GRW: "GRACIOSA",
+  SJZ: "SAO JORGE",
+  CVU: "CORVO",
+  VRL: "VILA REAL",
+  BGC: "BRAGANCA",
+  MAD: "MADRID",
+  BCN: "BARCELONA",
+  VLC: "VALENCIA",
+  SVQ: "SEVILHA",
+  AGP: "MALAGA",
+  ALC: "ALICANTE",
+  BIO: "BILBAO",
+  SCQ: "SANTIAGO",
+  VGO: "VIGO",
+  LCG: "CORUNHA",
+  PMI: "PALMA MAIORCA",
+  IBZ: "IBIZA",
+  MAH: "MENORCA",
+  TFS: "TENERIFE SUL",
+  TFN: "TENERIFE NORTE",
+  LPA: "GRAN CANARIA",
+  ACE: "LANZAROTE",
+  FUE: "FUERTEVENTURA",
+  SPC: "LA PALMA",
+  CDG: "PARIS",
+  ORY: "PARIS",
+  BVA: "PARIS",
+  LYS: "LYON",
+  MRS: "MARSELHA",
+  NCE: "NICE",
+  TLS: "TOULOUSE",
+  BOD: "BORDEUS",
+  NTE: "NANTES",
+  LHR: "LONDRES",
+  LGW: "LONDRES",
+  STN: "LONDRES",
+  LTN: "LONDRES",
+  LCY: "LONDRES",
+  SEN: "LONDRES",
+  MAN: "MANCHESTER",
+  BHX: "BIRMINGHAM",
+  EDI: "EDIMBURGO",
+  GLA: "GLASGOW",
+  BRS: "BRISTOL",
+  LPL: "LIVERPOOL",
+  NCL: "NEWCASTLE",
+  EMA: "EAST MIDLANDS",
+  BFS: "BELFAST",
+  BHD: "BELFAST",
+  DUB: "DUBLIN",
+  ORK: "CORK",
+  SNN: "SHANNON",
+  AMS: "AMSTERDAO",
+  EIN: "EINDHOVEN",
+  RTM: "ROTERDAO",
+  BRU: "BRUXELAS",
+  CRL: "CHARLEROI",
+  LUX: "LUXEMBURGO",
+  FRA: "FRANKFURT",
+  HHN: "FRANKFURT HAHN",
+  MUC: "MUNIQUE",
+  BER: "BERLIM",
+  HAM: "HAMBURGO",
+  DUS: "DUSSELDORF",
+  CGN: "COLONIA",
+  STR: "ESTUGARDA",
+  NUE: "NUREMBERGA",
+  HAJ: "HANNOVER",
+  ZRH: "ZURIQUE",
+  GVA: "GENEBRA",
+  BSL: "BASILEIA",
+  VIE: "VIENA",
+  SZG: "SALZBURGO",
+  FCO: "ROMA",
+  CIA: "ROMA",
+  MXP: "MILAO",
+  LIN: "MILAO",
+  BGY: "BERGAMO",
+  VCE: "VENEZA",
+  TSF: "TREVISO",
+  NAP: "NAPOLES",
+  BLQ: "BOLONHA",
+  TRN: "TURIM",
+  PSA: "PISA",
+  FLR: "FLORENCA",
+  CTA: "CATANIA",
+  PMO: "PALERMO",
+  WAW: "VARSOVIA",
+  WMI: "VARSOVIA",
+  KRK: "CRACOVIA",
+  GDN: "GDANSK",
+  WRO: "WROCLAW",
+  POZ: "POZNAN",
+  KTW: "KATOWICE",
+  PRG: "PRAGA",
+  BUD: "BUDAPESTE",
+  BTS: "BRATISLAVA",
+  OTP: "BUCARESTE",
+  SOF: "SOFIA",
+  BEG: "BELGRADO",
+  ZAG: "ZAGREB",
+  LJU: "LJUBLJANA",
+  CPH: "COPENHAGA",
+  BLL: "BILLUND",
+  OSL: "OSLO",
+  BGO: "BERGEN",
+  SVG: "STAVANGER",
+  TRD: "TRONDHEIM",
+  ARN: "ESTOCOLMO",
+  BMA: "ESTOCOLMO",
+  GOT: "GOTEBORGO",
+  HEL: "HELSINQUIA",
+  KEF: "REIQUIAVIQUE",
+  ATH: "ATENAS",
+  SKG: "SALONICA",
+  HER: "HERAKLION",
+  CHQ: "CHANIA",
+  RHO: "RODES",
+  CFU: "CORFU",
+  JTR: "SANTORINI",
+  JMK: "MYKONOS",
+  LCA: "LARNACA",
+  PFO: "PAFOS",
+  MLA: "MALTA",
+  IST: "ISTAMBUL",
+  SAW: "ISTAMBUL",
+  AYT: "ANTALYA",
+  ADB: "IZMIR",
+  DXB: "DUBAI",
+  DWC: "DUBAI",
+  DOH: "DOHA",
+  AUH: "ABU DHABI",
+  RUH: "RIADE",
+  JED: "JIDAH",
+  TLV: "TEL AVIV",
+  AMM: "AMA",
+  BEY: "BEIRUTE",
+  CAI: "CAIRO",
+  HRG: "HURGHADA",
+  SSH: "SHARM EL SHEIKH",
+  RAK: "MARRAQUEXE",
+  CMN: "CASABLANCA",
+  AGA: "AGADIR",
+  FEZ: "FES",
+  TNG: "TANGER",
+  TUN: "TUNIS",
+  NBE: "ENFIDHA",
+  DJE: "DJERBA",
+  ALG: "ARGEL",
+  DKR: "DAKAR",
+  DSS: "DAKAR",
+  BKO: "BAMAKO",
+  OXB: "BISSAU",
+  RAI: "PRAIA",
+  SID: "ILHA DO SAL",
+  BVC: "BOAVISTA",
+  VXE: "SAO VICENTE",
+  TMS: "SAO TOME",
+  LAD: "LUANDA",
+  MPM: "MAPUTO",
+  JNB: "JOANESBURGO",
+  CPT: "CIDADE DO CABO",
+  JFK: "NOVA IORQUE",
+  EWR: "NOVA IORQUE",
+  LGA: "NOVA IORQUE",
+  BOS: "BOSTON",
+  IAD: "WASHINGTON",
+  DCA: "WASHINGTON",
+  BWI: "BALTIMORE",
+  ORD: "CHICAGO",
+  MDW: "CHICAGO",
+  MIA: "MIAMI",
+  FLL: "FORT LAUDERDALE",
+  MCO: "ORLANDO",
+  TPA: "TAMPA",
+  ATL: "ATLANTA",
+  DFW: "DALLAS",
+  IAH: "HOUSTON",
+  LAX: "LOS ANGELES",
+  SFO: "SAO FRANCISCO",
+  SEA: "SEATTLE",
+  DEN: "DENVER",
+  LAS: "LAS VEGAS",
+  PHX: "PHOENIX",
+  YYZ: "TORONTO",
+  YUL: "MONTREAL",
+  YVR: "VANCOUVER",
+  YYC: "CALGARY",
+  GIG: "RIO DE JANEIRO",
+  SDU: "RIO DE JANEIRO",
+  GRU: "SAO PAULO",
+  CGH: "SAO PAULO",
+  VCP: "CAMPINAS",
+  BSB: "BRASILIA",
+  SSA: "SALVADOR",
+  REC: "RECIFE",
+  FOR: "FORTALEZA",
+  CNF: "BELO HORIZONTE",
+  POA: "PORTO ALEGRE",
+  CWB: "CURITIBA",
+  FLN: "FLORIANOPOLIS",
+  NAT: "NATAL",
+  MCZ: "MACEIO",
+  BPS: "PORTO SEGURO",
+  EZE: "BUENOS AIRES",
+  AEP: "BUENOS AIRES",
+  SCL: "SANTIAGO CHILE",
+  LIM: "LIMA",
+  BOG: "BOGOTA",
+  MDE: "MEDELLIN",
+  PTY: "CIDADE DO PANAMA",
+  MEX: "CIDADE DO MEXICO",
+  CUN: "CANCUN",
+};
 
 const TRADUCOES_CIDADES: Record<string, string> = {
   GENEVA: "GENEBRA",
@@ -31,7 +261,8 @@ const TRADUCOES_CIDADES: Record<string, string> = {
 
 const cacheRotasMemoria: Map<string, { rota: RotaAdsb | null; expiraEm: number }> = new Map();
 
-async function obterRotaPorCallsign(callsign: string): Promise<RotaAdsb | null> {
+// Consulta com validação geográfica de plausibilidade para bases estáticas (adsbdb)
+async function obterRotaPorCallsign(callsign: string, curLat?: number, curLon?: number): Promise<RotaAdsb | null> {
   const cs = callsign.trim().toUpperCase();
   if (!cs || cs.length < 3) return null;
 
@@ -54,14 +285,34 @@ async function obterRotaPorCallsign(callsign: string): Promise<RotaAdsb | null> 
       const data = await res.json();
       const r = data.response?.flightroute;
       if (r && r.origin && r.destination) {
+        // Validação geográfica: se o avião está em Portugal, a rota NÃO pode ter origem e destino no outro lado da Europa
+        if (curLat != null && curLon != null && r.origin.latitude != null && r.destination.latitude != null) {
+          const origLat = r.origin.latitude;
+          const origLon = r.origin.longitude;
+          const destLat = r.destination.latitude;
+          const destLon = r.destination.longitude;
+
+          const distOrig = Math.hypot(origLat - curLat, origLon - curLon);
+          const distDest = Math.hypot(destLat - curLat, destLon - curLon);
+
+          // Se ambos os aeroportos estiverem a mais de 12 graus (~1.300 km) da posição actual,
+          // o registo na base de dados é um callsign reutilizado/obsoleto (ex: Veneza -> Helsínquia sobrevoando o Porto)
+          if (distOrig > 12 && distDest > 12) {
+            cacheRotasMemoria.set(cs, { rota: null, expiraEm: agora + 3600_000 });
+            return null;
+          }
+        }
+
         const rawOrigem = (r.origin.municipality || r.origin.name || "PORTO").toUpperCase();
         const rawDestino = (r.destination.municipality || r.destination.name || "DESTINO").toUpperCase();
+        const origIata = r.origin.iata_code || "OPO";
+        const destIata = r.destination.iata_code || "DES";
 
         const rota: RotaAdsb = {
-          origem: TRADUCOES_CIDADES[rawOrigem] || rawOrigem,
-          origemCode: r.origin.iata_code || "OPO",
-          destino: TRADUCOES_CIDADES[rawDestino] || rawDestino,
-          destinoCode: r.destination.iata_code || "DES",
+          origem: AEROPORTOS_CIDADES[origIata] || TRADUCOES_CIDADES[rawOrigem] || rawOrigem,
+          origemCode: origIata,
+          destino: AEROPORTOS_CIDADES[destIata] || TRADUCOES_CIDADES[rawDestino] || rawDestino,
+          destinoCode: destIata,
           airline: r.airline?.name,
           callsignIata: r.callsign_iata,
           callsignIcao: r.callsign_icao,
@@ -103,8 +354,6 @@ function converterAdsbParaEstado(ac: any): any[] {
   const rumo = typeof ac.track === "number" ? Math.round(ac.track) : null;
   const vertRate = typeof ac.baro_rate === "number" ? Math.round(ac.baro_rate * 0.00508) : null;
 
-  // Formato compatível com OpenSky:
-  // 0: hex, 1: callsign, 2: country/reg, 3: time, 4: contact, 5: lon, 6: lat, 7: alt_m, 8: on_ground, 9: vel_ms, 10: track, 11: vert_rate, 12: desc, 13: geo_alt, 14: squawk, 15: spi, 16: source
   return [
     ac.hex || "000000",
     callsign,
@@ -118,7 +367,7 @@ function converterAdsbParaEstado(ac: any): any[] {
     velMs,
     rumo,
     vertRate,
-    ac.desc || ac.t || null, // Guardar descrição da aeronave
+    ac.desc || ac.t || null,
     null,
     ac.squawk || null,
     false,
@@ -138,43 +387,131 @@ export async function GET(request: NextRequest) {
     const lon = lonParam ? parseFloat(lonParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.62");
     const radiusKm = radiusParam ? Math.max(10, Math.min(120, parseFloat(radiusParam))) : 20;
 
+    const deltaLat = radiusKm / 111;
+    const deltaLon = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
+    const lamin = (lat - deltaLat).toFixed(4);
+    const lamax = (lat + deltaLat).toFixed(4);
+    const lomin = (lon - deltaLon).toFixed(4);
+    const lomax = (lon + deltaLon).toFixed(4);
+
     let estados: any[] = [];
     let fonte = "";
+    const rotasMap: Record<string, RotaAdsb> = {};
 
-    // 1. Tentar ADSB.fi (Feed aberto em tempo real de altíssima fidelidade e sem bloqueios)
+    // ── 1. FONTE PRIMÁRIA: Feed Directo Oficial FlightRadar24 ──────────────────
+    // Obtém em tempo real exacto os mesmos dados, rotas, códigos de voo comercial e callsigns do FR24
     try {
-      const distNm = Math.round(radiusKm * 0.539957);
-      const adsbUrl = `https://opendata.adsb.fi/api/v2/lat/${lat}/lon/${lon}/dist/${distNm}`;
-      const resAdsb = await fetch(adsbUrl, {
-        headers: { "User-Agent": "FlightPanel/1.2 (Next.js Aviation Display)" },
+      const fr24Url = `https://data-cloud.flightradar24.com/zones/fcgi/feed.js?bounds=${lamax},${lamin},${lomin},${lomax}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
+
+      const resFr24 = await fetch(fr24Url, {
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept: "application/json",
+          Referer: "https://www.flightradar24.com/",
+        },
         cache: "no-store",
       });
+      clearTimeout(timeout);
 
-      if (resAdsb.ok) {
-        const dadosAdsb = await resAdsb.json();
-        const listaAc = (dadosAdsb.aircraft || []).filter(
-          (a: any) => a.lat != null && a.lon != null
-        );
+      if (resFr24.ok) {
+        const dadosFr24 = await resFr24.json();
+        for (const [key, v] of Object.entries(dadosFr24)) {
+          if (Array.isArray(v)) {
+            const hex = v[0];
+            const acLat = v[1];
+            const acLon = v[2];
+            const track = v[3];
+            const altFeet = v[4];
+            const speedKts = v[5];
+            const model = v[8];
+            const reg = v[9];
+            const originCode = v[11];
+            const destCode = v[12];
+            const flightNumber = v[13];
+            const vertRate = v[15];
+            const callsign = (v[16] || flightNumber || hex || "").trim().toUpperCase();
+            const airlineIcao = v[18];
 
-        if (listaAc.length > 0) {
-          estados = listaAc.map(converterAdsbParaEstado);
-          fonte = "adsb.fi";
+            const altMetros = typeof altFeet === "number" ? Math.round(altFeet * 0.3048) : null;
+            const velMs = typeof speedKts === "number" ? Math.round(speedKts * 0.514444) : null;
+            const onGround = altFeet === 0 || altFeet === null;
+
+            estados.push([
+              hex,
+              callsign,
+              reg || "PORTUGAL",
+              null,
+              Date.now() / 1000,
+              acLon,
+              acLat,
+              altMetros,
+              onGround,
+              velMs,
+              track,
+              vertRate,
+              model,
+              null,
+              null,
+              false,
+              0,
+            ]);
+
+            if (originCode && destCode && callsign) {
+              const origCidade = AEROPORTOS_CIDADES[originCode] || originCode;
+              const destCidade = AEROPORTOS_CIDADES[destCode] || destCode;
+              rotasMap[callsign] = {
+                origem: origCidade,
+                origemCode: originCode,
+                destino: destCidade,
+                destinoCode: destCode,
+                flightNumber: flightNumber || callsign,
+                airlineIcao: airlineIcao,
+                model: model,
+              };
+            }
+          }
+        }
+
+        if (estados.length > 0) {
+          fonte = "flightradar24";
         }
       }
     } catch {
-      // Falha silenciosa para tentar OpenSky como redundância
+      // Falha silenciosa para avançar para a fonte de contingência
     }
 
-    // 2. Se o feed ADSB não encontrou aeronaves, tentar OpenSky Network como fallback
+    // ── 2. FONTE SECUNDÁRIA: ADSB.fi (Feed aberto Comunitário sem bloqueios) ───
     if (estados.length === 0) {
       try {
-        const deltaLat = radiusKm / 111;
-        const deltaLon = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
-        const lamin = (lat - deltaLat).toFixed(4);
-        const lamax = (lat + deltaLat).toFixed(4);
-        const lomin = (lon - deltaLon).toFixed(4);
-        const lomax = (lon + deltaLon).toFixed(4);
+        const distNm = Math.round(radiusKm * 0.539957);
+        const adsbUrl = `https://opendata.adsb.fi/api/v2/lat/${lat}/lon/${lon}/dist/${distNm}`;
+        const resAdsb = await fetch(adsbUrl, {
+          headers: { "User-Agent": "FlightPanel/1.2 (Next.js Aviation Display)" },
+          cache: "no-store",
+        });
 
+        if (resAdsb.ok) {
+          const dadosAdsb = await resAdsb.json();
+          const listaAc = (dadosAdsb.aircraft || []).filter(
+            (a: any) => a.lat != null && a.lon != null
+          );
+
+          if (listaAc.length > 0) {
+            estados = listaAc.map(converterAdsbParaEstado);
+            fonte = "adsb.fi";
+          }
+        }
+      } catch {
+        // Ignorar
+      }
+    }
+
+    // ── 3. FONTE TERCIÁRIA: OpenSky Network como redundância ──────────────────
+    if (estados.length === 0) {
+      try {
         const headers: Record<string, string> = {
           "User-Agent": "FlightPanel/1.2 (Next.js Aviation Display)",
           Accept: "application/json",
@@ -202,20 +539,19 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Obter rotas ADS-B reais para aeronaves encontradas
-    const rotasMap: Record<string, RotaAdsb> = {};
+    // Para voos obtidos via ADSB.fi ou OpenSky que não tenham rota, enriquecer com consulta validada geograficamente
     if (estados.length > 0) {
-      const callsigns = Array.from(
+      const callsignsSemRota = Array.from(
         new Set(
           estados
             .map((e) => (e[1] || "").trim().toUpperCase())
-            .filter((cs) => cs.length >= 3)
+            .filter((cs) => cs.length >= 3 && !rotasMap[cs])
         )
       );
 
-      if (callsigns.length > 0) {
-        const promessas = callsigns.slice(0, 6).map(async (cs) => {
-          const rota = await obterRotaPorCallsign(cs);
+      if (callsignsSemRota.length > 0) {
+        const promessas = callsignsSemRota.slice(0, 6).map(async (cs) => {
+          const rota = await obterRotaPorCallsign(cs, lat, lon);
           if (rota) {
             rotasMap[cs] = rota;
           }
@@ -239,7 +575,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 3. Se ambos devolverem 0 ou erro temporário e tivermos cache recente (até 120s), servir cache
+    // 4. Se todos devolverem 0 ou erro temporário e tivermos cache recente (até 120s), servir cache
     const agora = Date.now();
     if (cacheMemoriaVoos.estados.length > 0 && agora - cacheMemoriaVoos.timestamp < 120_000) {
       return NextResponse.json({
@@ -265,3 +601,4 @@ export async function GET(request: NextRequest) {
     });
   }
 }
+
