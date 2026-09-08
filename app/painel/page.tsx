@@ -774,13 +774,16 @@ export default function PainelAnalogicoMobileFullscreen() {
       }
 
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
-        // Filtrar aeronaves no ar (não estacionadas no solo)
-        const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => !v[8]);
+        const refLat = coords?.lat ?? 41.15;
+        const refLon = coords?.lon ?? -8.62;
 
-        if (voosEmAr.length > 0) {
-          // Ordenar pelo voo com menor distância em relação à localização do utilizador
-          const refLat = coords?.lat ?? 41.15;
-          const refLon = coords?.lon ?? -8.62;
+        // Filtrar aeronaves no ar (não no solo) e estritamente dentro do raio circular de 20 km (elimina cantos da caixa)
+        const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => {
+          if (v[8]) return false;
+          if (v[6] == null || v[5] == null) return false;
+          const dist = calcularDistanciaHaversineKm(refLat, refLon, v[6], v[5]);
+          return dist <= 20;
+        });
 
           voosEmAr.sort((a: EstadoVoo, b: EstadoVoo) => {
             const distA =
@@ -821,6 +824,12 @@ export default function PainelAnalogicoMobileFullscreen() {
     const int = setInterval(buscarDados, INTERVALO_MS);
     return () => clearInterval(int);
   }, [buscarDados]);
+
+  const refLatAtual = coords?.lat ?? 41.15;
+  const refLonAtual = coords?.lon ?? -8.62;
+  const distVooAtual = (vooAtual && vooAtual[6] != null && vooAtual[5] != null)
+    ? calcularDistanciaHaversineKm(refLatAtual, refLonAtual, vooAtual[6], vooAtual[5])
+    : null;
 
   const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMapRef.current) : null;
 
@@ -1074,9 +1083,14 @@ export default function PainelAnalogicoMobileFullscreen() {
         >
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>RADAR ADS-B v1.1.4 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 20 KM)</span>
+            <span>RADAR ADS-B v1.1.5 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO CIRCULAR 20 KM)</span>
           </div>
           <div className="flex items-center gap-2">
+            {distVooAtual != null && (
+              <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
+                📍 {distVooAtual.toFixed(1)} KM
+              </span>
+            )}
             <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
           </div>
         </div>

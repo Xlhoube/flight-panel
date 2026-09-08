@@ -375,6 +375,19 @@ function converterAdsbParaEstado(ac: any): any[] {
   ];
 }
 
+function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -385,7 +398,7 @@ export async function GET(request: NextRequest) {
 
     const lat = latParam ? parseFloat(latParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.15");
     const lon = lonParam ? parseFloat(lonParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.62");
-    const radiusKm = radiusParam ? Math.max(10, Math.min(120, parseFloat(radiusParam))) : 20;
+    const radiusKm = radiusParam ? Math.max(5, Math.min(120, parseFloat(radiusParam))) : 20;
 
     const deltaLat = radiusKm / 111;
     const deltaLon = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
@@ -423,6 +436,14 @@ export async function GET(request: NextRequest) {
             const hex = v[0];
             const acLat = v[1];
             const acLon = v[2];
+
+            // 🛑 FILTRO CIRCULAR ESTRITO: eliminar aeronaves nos cantos da bounding box que ultrapassam o raio
+            if (acLat != null && acLon != null) {
+              const distKm = calcularDistanciaHaversineKm(lat, lon, acLat, acLon);
+              if (distKm > radiusKm) {
+                continue;
+              }
+            }
             const track = v[3];
             const altFeet = v[4];
             const speedKts = v[5];
@@ -496,7 +517,10 @@ export async function GET(request: NextRequest) {
         if (resAdsb.ok) {
           const dadosAdsb = await resAdsb.json();
           const listaAc = (dadosAdsb.aircraft || []).filter(
-            (a: any) => a.lat != null && a.lon != null
+            (a: any) =>
+              a.lat != null &&
+              a.lon != null &&
+              calcularDistanciaHaversineKm(lat, lon, a.lat, a.lon) <= radiusKm
           );
 
           if (listaAc.length > 0) {
@@ -530,7 +554,12 @@ export async function GET(request: NextRequest) {
         if (resOpenSky.ok) {
           const dadosOpenSky = await resOpenSky.json();
           if (dadosOpenSky.states && dadosOpenSky.states.length > 0) {
-            estados = dadosOpenSky.states;
+            estados = dadosOpenSky.states.filter(
+              (e: any) =>
+                e[6] != null &&
+                e[5] != null &&
+                calcularDistanciaHaversineKm(lat, lon, e[6], e[5]) <= radiusKm
+            );
             fonte = "opensky";
           }
         }

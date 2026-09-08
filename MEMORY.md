@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.1.4  
+**Versão:** v1.1.5  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** Auto-fit inteligente de palhetas de aeronave (máx 14 caracteres), blindagem anti-sobreposição no cabeçalho e SW v7.
+**Estado:** Filtro circular estrito Haversine (eliminação dos cantos do rectângulo), indicador de distância em tempo real (📍 X.X KM) e SW v8.
 
 ---
 
@@ -117,6 +117,14 @@
 5. No endpoint `/api/voos`, priorizar o código de tipo ICAO conciso (`ac.t`, ex: `C55B`) antes da descrição de marketing (`ac.desc`).  
 **Consequência:** Eliminação total de sobreposições visuais, encaixe perfeito e harmonioso do cabeçalho em qualquer tamanho de ecrã e elegância mecânica autêntica de split-flap.
 
+### ADR-036 — Filtro de Raio Circular Estrito Haversine & Indicador de Distância em Tempo Real (2026-09-08)
+**Contexto:** O utilizador reportou a percepção de que o raio de 20 km parecia muito mais amplo. Verificou-se que a caixa delimitadora (bounding box retangular) admitia aeronaves nos cantos a uma distância de até $20 \times \sqrt{2} \approx 28.3\text{ km}$, uma vez que não existia corte circular estrito nem na API nem no frontend.  
+**Decisão:**  
+1. Implementar a fórmula trigonométrica de Haversine (`calcularDistanciaHaversineKm`) na rota `/api/voos` e descartar imediatamente qualquer aeronave cuja distância em linha reta exceda o raio configurado (`dist > radiusKm`), tanto no feed do FlightRadar24 como no `adsb.fi` e `OpenSky`.  
+2. Replicar o filtro circular estrito no frontend (`painel/page.tsx`) ancorado nas coordenadas GPS locais do dispositivo.  
+3. Adicionar crachá de telemetria em tempo real no rodapé do radar (`📍 X.X KM`), permitindo ao utilizador acompanhar a distância exacta do avião em aproximação ou sobrevoo.  
+**Consequência:** Eliminação total da distorção dos cantos do rectângulo (máximo estrito de 20.0 km) e transparência métrica completa no ecrã.
+
 ---
 
 ## Histórico
@@ -160,3 +168,4 @@
 | 2026-09-08 | v1.1.2 | Redução do raio de alcance do radar para 20 km (API, frontend e status) |
 | 2026-09-08 | v1.1.3 | Integração de feed live do FlightRadar24 (rotas em tempo real, nomes de aeronaves e resolução de rotas recicladas) |
 | 2026-09-08 | v1.1.4 | Auto-fit de palhetas de aeronaves (máx 14 caracteres), blindagem anti-sobreposição do cabeçalho e SW v7 |
+| 2026-09-08 | v1.1.5 | Filtro circular estrito Haversine (corte exato a 20.0 km sem cantos de rectângulo), badge de distância (📍 X.X KM) e SW v8 |
