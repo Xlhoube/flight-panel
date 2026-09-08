@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.1.0  
+**Versão:** v1.1.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA com exibição integral do callsign ICAO nas palhetas principais (sem corte ou omissão de letras), Service Worker v5 Network-First e purge manual de cache por toque no status.
+**Estado:** PWA com visibilidade garantida da barra de rodapé em ecrã inteiro móvel (flex-1 min-h-0 + safe-area insets), callsigns ICAO integrais e Service Worker v5.
 
 ---
 
@@ -88,6 +88,11 @@
 **Decisão:** Manter SEMPRE o callsign ICAO completo e integral nas palhetas principais (`EJU34XV`, `AFR442`, `SWR1ZD`, `TAP1972`), exactamente idêntico ao título principal do FlightRadar24; passar o código comercial IATA para o crachá complementar; actualizar o Service Worker para `v5` com estratégia Network-First forçada para `/_next/` e `/api/`; exibir a versão activa no rodapé (`v1.1.0`); e adicionar acção de limpeza imediata de cache com um simples toque na barra de status inferior.  
 **Consequência:** Fidelidade total letra por letra com o radar, sem omissões e actualização imediata sem retenção de cache antiga.
 
+### ADR-032 — Garantia de Visibilidade do Rodapé em Fullscreen Móvel (2026-09-08)
+**Contexto:** O utilizador reportou que na versão de telemóvel em fullscreen não conseguia visualizar a barra inferior de rodapé (`RADAR ADS-B`).  
+**Decisão:** Substituir `h-full` dos blocos de Modo 1 e Modo 2 por `flex-1 min-h-0`, ajustando o contentor exterior com `overflow-hidden` e espaçamentos dinâmicos (`gap-1.5 sm:gap-2.5`, `p-1.5 sm:p-3`), além de adicionar protecção de safe-area (`pb-[max(0.375rem,env(safe-area-inset-bottom))]`).  
+**Consequência:** A barra de rodapé permanece 100% visível e ancorada no fundo do ecrã em qualquer telemóvel ou tablet (portrait ou landscape fullscreen), sem ser empurrada para fora da vista.
+
 ---
 
 ## Histórico
@@ -127,3 +132,4 @@
 | 2026-09-08 | v1.0.8 | Redefinição do raio de alcance do radar para 30 km (API, frontend e status) |
 | 2026-09-08 | v1.0.9 | Integração de rotas reais ADS-B (adsbdb), preservação de callsigns alfanuméricos e correcção OPO->OPO |
 | 2026-09-08 | v1.1.0 | Exibição integral de callsigns ICAO (sem omissão de letras), SW v5 Network-First e purge no status |
+| 2026-09-08 | v1.1.1 | Garantia de visibilidade da barra de rodapé em fullscreen móvel (flex-1 min-h-0) |

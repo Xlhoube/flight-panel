@@ -718,10 +718,10 @@ export default function PainelAnalogicoMobileFullscreen() {
   return (
     <main
       onClick={manipularToqueEcra}
-      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-center p-2 sm:p-3.5 select-none font-mono cursor-pointer relative overflow-hidden board-texture"
+      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-pointer relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
     >
       {/* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */}
-      <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-2 sm:gap-3.5 overflow-hidden">
+      <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
         
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
@@ -732,10 +732,10 @@ export default function PainelAnalogicoMobileFullscreen() {
 
         {/* ── MODO 1: VOO ACTIVO DETECTADO NO RADAR ────────────────────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="h-full flex flex-col justify-between gap-2 sm:gap-3.5">
+          <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
             
             {/* LINHA 1: VOO & LOGÓTIPO & COMPANHIA */}
-            <div className="w-full bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
+            <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
               
               {/* Logótipo Oficial Garantido + Voo */}
               <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
@@ -783,7 +783,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 2: SECÇÃO PRINCIPAL DE ROTA (EXPANDIDA NO CENTRO) ───────── */}
-            <div className="w-full flex-1 bg-[#10121a] p-3 sm:p-5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 sm:gap-6 shadow-lg min-h-[90px]">
+            <div className="w-full flex-1 min-h-[60px] sm:min-h-[90px] bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 sm:gap-6 shadow-lg overflow-hidden">
               
               {/* ORIGEM (CÓDIGO IATA + CIDADE / AEROPORTO) */}
               <div className="flex flex-col items-start gap-1">
@@ -822,10 +822,10 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA EM 3 MÓDULOS ───────────────────────────────── */}
-            <div className="w-full grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
+            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-2.5 shrink-0">
               
               {/* ALTITUDE */}
-              <div className="bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   ALTITUDE
                 </span>
@@ -836,7 +836,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               {/* VELOCIDADE */}
-              <div className="bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   VELOCIDADE
                 </span>
@@ -847,7 +847,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               {/* RUMO */}
-              <div className="bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   RUMO / HEADING
                 </span>
@@ -864,10 +864,10 @@ export default function PainelAnalogicoMobileFullscreen() {
 
         {/* ── MODO 2: SEM VOOS -> MODO METEOROLOGIA AUTOMÁTICO ────────────── */}
         {!carregando && !vooAtual && (
-          <div className="h-full flex flex-col justify-between gap-2 sm:gap-3.5">
+          <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
             
             {/* Cabeçalho Meteorológico: Data, Hora e Localização */}
-            <div className="w-full bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
+            <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white p-1 rounded-lg border border-neutral-700 shadow-md flex items-center justify-center text-xl sm:text-2xl shrink-0">
                   ⏱️
@@ -892,7 +892,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* Linha Principal Meteorológica */}
-            <div className="w-full flex-1 bg-[#10121a] p-3 sm:p-5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-4 shadow-lg min-h-[90px]">
+            <div className="w-full flex-1 min-h-[60px] sm:min-h-[90px] bg-[#10121a] p-2.5 sm:p-4 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-4 shadow-lg overflow-hidden">
               <div className="flex flex-col items-start gap-1">
                 <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                   CONDIÇÃO DO TEMPO
@@ -912,8 +912,8 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* Telemetria Meteorológica */}
-            <div className="w-full grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
-              <div className="bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-2.5 shrink-0">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   VENTO
                 </span>
@@ -923,7 +923,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              <div className="bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   HUMIDADE
                 </span>
@@ -933,7 +933,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              <div className="bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   SENSAÇÃO
                 </span>
