@@ -785,6 +785,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           return dist <= 20;
         });
 
+        if (voosEmAr.length > 0) {
           voosEmAr.sort((a: EstadoVoo, b: EstadoVoo) => {
             const distA =
               a[6] != null && a[5] != null
