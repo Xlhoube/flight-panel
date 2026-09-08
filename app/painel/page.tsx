@@ -468,6 +468,24 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [totalNoRadar, setTotalNoRadar] = useState(0);
+  const [horaAtual, setHoraAtual] = useState("12:00");
+  const [dataAtual, setDataAtual] = useState("08 SET");
+
+  // Relógio de estação analógica em tempo real para o cabeçalho meteorológico
+  useEffect(() => {
+    const atualizarTempo = () => {
+      const agora = new Date();
+      const h = agora.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+      const dia = agora.getDate().toString().padStart(2, "0");
+      const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+      const mes = meses[agora.getMonth()];
+      setHoraAtual(h);
+      setDataAtual(`${dia} ${mes}`);
+    };
+    atualizarTempo();
+    const interval = setInterval(atualizarTempo, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Detecção de GPS do telemóvel / computador para telemetria local real
   useEffect(() => {
@@ -797,25 +815,28 @@ export default function PainelAnalogicoMobileFullscreen() {
         {!carregando && !vooAtual && (
           <div className="h-full flex flex-col justify-between gap-2 sm:gap-3.5">
             
-            {/* Cabeçalho Meteorológico */}
+            {/* Cabeçalho Meteorológico: Data, Hora e Localização */}
             <div className="w-full bg-[#10121a] p-2.5 sm:p-3.5 rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white p-1 rounded-lg border border-neutral-700 shadow-md flex items-center justify-center text-xl sm:text-2xl shrink-0">
-                  🌤️
+                  ⏱️
                 </div>
                 <div className="flex flex-col items-start gap-0.5">
                   <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    STATUS RADAR
+                    HORA • DATA
                   </span>
-                  <FlapWord text="ESPACO LIVRE" size="xl" />
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <FlapWord text={horaAtual} size="xl" />
+                    <FlapWord text={dataAtual} size="lg" />
+                  </div>
                 </div>
               </div>
 
               <div className="flex flex-col items-end gap-0.5 text-right">
                 <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                  LOCALIDADE
+                  LOCALIZAÇÃO
                 </span>
-                <FlapWord text={meteorologia?.name || "PORTO"} size="md" />
+                <FlapWord text={coords ? "GPS LOCAL" : (meteorologia?.name && meteorologia.name !== "LOCAL" ? meteorologia.name : "VALADARES")} size="lg" />
               </div>
             </div>
 

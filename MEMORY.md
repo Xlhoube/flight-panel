@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.5  
+**Versão:** v1.0.6  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA (Progressive Web App) completa com dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s, Screen Wake Lock e cache control Network-First.
+**Estado:** PWA (Progressive Web App) completa com dupla fonte ADS-B, relógio Solari mecânico em tempo real (Data e Hora) e Localização no modo meteorológico.
 
 ---
 
@@ -63,6 +63,11 @@
 **Decisão:** Implementar arquitectura de dupla fonte com feed comunitário aberto `adsb.fi` (sem bloqueio de IP de datacenters e com descrições reais de modelo de aeronave) + `OpenSky Network` como redundância; acelerar o ciclo de sondagem para 10 segundos; adicionar barra de instrumentação de radar no fundo; e atualizar o Service Worker com estratégia Network-First para páginas com limpeza automática de cache antiga v1.  
 **Consequência:** Detecção imediata de aeronaves em tráfego de aproximação ou cruzeiro, transição em tempo real sem atrasos e garantia de código sempre actualizado no telemóvel.
 
+### ADR-027 — Relógio Solari Mecânico (Data & Hora) e Localização no Modo Meteorologia (2026-09-08)
+**Contexto:** O utilizador solicitou a substituição do texto estático "ESPACO LIVRE" no cabeçalho meteorológico por data, hora e localização.  
+**Decisão:** Transformar a secção superior do modo meteorológico num relógio analógico Solari de estação em tempo real, exibindo a hora (HH:MM), data (DD MES) e a localização activa em palhetas mecânicas brancas com actualização contínua.  
+**Consequência:** O painel funciona como um elegante relógio de aeroporto vintage com meteorologia quando o espaço aéreo não tem voos activos.
+
 ---
 
 ## Histórico
@@ -97,3 +102,4 @@
 | 2026-09-08 | v1.0.3 | Resolução de bloqueio meteorológico: coordenadas dinâmicas, GPS, expansão de raio e cache anti-429 |
 | 2026-09-08 | v1.0.4 | Implementação de Screen Wake Lock para manter o ecrã sempre ligado durante a utilização |
 | 2026-09-08 | v1.0.5 | Dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s e actualização de Service Worker |
+| 2026-09-08 | v1.0.6 | Relógio Solari em tempo real (Data e Hora) e Localização no cabeçalho meteorológico |
