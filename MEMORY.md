@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.7  
+**Versão:** v1.0.8  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA (Progressive Web App) completa com auto-fit dinâmico de palhetas de voo (sem omissão de caracteres) e dupla indicação de voo comercial e callsign ATC.
+**Estado:** PWA completa com raio de cobertura padrão de 30 km, auto-fit de palhetas sem omissão de caracteres e dupla indicação de voo comercial e callsign ATC.
 
 ---
 
@@ -73,6 +73,11 @@
 **Decisão:** Eliminar cortes arbitrários de callsigns; limpar espaços internos sem amputar caracteres; implementar dimensionamento dinâmico automático das palhetas com base no comprimento do identificador (`xl` para curtos, `lg` para médios, `md` para longos com 7+ caracteres); e adicionar indicação do callsign ATC completo caso difira do código comercial.  
 **Consequência:** Visibilidade total e sem corte de caracteres em qualquer tamanho de ecrã ou modelo de aeronave.
 
+### ADR-029 — Redefinição do Raio de Alcance do Radar para 30 km (2026-09-08)
+**Contexto:** O utilizador solicitou o ajustamento do raio de monitorização aérea de 50 km para 30 km para focar as passagens aéreas mais próximas e relevantes.  
+**Decisão:** Atualizar o raio padrão de busca na rota `/api/voos` para 30 km (com conversão proporcional para ~16 NM no feed ADS-B), sincronizar a requisição no frontend e atualizar a legenda na barra de estado do radar.  
+**Consequência:** Foco restrito a aeronaves a sobrevoar a área imediata (30 km), transição precisa e coerência visual em toda a instrumentação.
+
 ---
 
 ## Histórico
@@ -109,3 +114,4 @@
 | 2026-09-08 | v1.0.5 | Dupla fonte ADS-B (adsb.fi + OpenSky), polling rápido de 10s e actualização de Service Worker |
 | 2026-09-08 | v1.0.6 | Relógio Solari em tempo real (Data e Hora) e Localização no cabeçalho meteorológico |
 | 2026-09-08 | v1.0.7 | Resolução de corte de letras no número do voo, auto-fit responsivo e callsign ATC |
+| 2026-09-08 | v1.0.8 | Redefinição do raio de alcance do radar para 30 km (API, frontend e status) |

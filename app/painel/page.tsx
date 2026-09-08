@@ -621,7 +621,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         params.set("lat", coords.lat.toString());
         params.set("lon", coords.lon.toString());
       }
-      params.set("radius", "50");
+      params.set("radius", "30");
 
       const resVoos = await fetch(`/api/voos?${params.toString()}`);
       const dadosVoos = await resVoos.json();
@@ -913,7 +913,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         <div className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>RADAR ADS-B • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 50 KM)</span>
+            <span>RADAR ADS-B • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 30 KM)</span>
           </div>
           <div className="flex items-center gap-2">
             <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
