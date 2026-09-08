@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.3  
+**Versão:** v1.0.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA (Progressive Web App) completa com telemetria de voos em tempo real com raio adaptativo, suporte a GPS, cache de resiliência e fallback meteorológico automático.
+**Estado:** PWA (Progressive Web App) completa com telemetria de voos em tempo real com raio adaptativo, suporte a GPS, cache de resiliência e Screen Wake Lock para manter o ecrã sempre ligado.
 
 ---
 
@@ -22,11 +22,12 @@
 | Framework       | Next.js 16 (App Router) + PWA     | SSR + Route Handlers + Web App Manifest           |
 | Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
 | PWA / Mobile    | Service Worker + Manifest + Icons | Instalação nativa direta no ecrã do telemóvel     |
+| Ecrã Activo     | Screen Wake Lock API              | Impede que o ecrã do telemóvel/PC se desligue      |
 | Estilos         | Tailwind CSS v4 + Split-Flap CSS  | Células de palhetas mecânicas brancas 3D          |
 | Áudio           | Web Audio API (Flap Clack)        | Som mecânico sintetizado ao alternar palhetas    |
 | Imagens         | FlightAware ICAO DB + Aviasales   | Base de dados com milhares de logótipos por ICAO  |
 | Voos            | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo               |
-| Meteorologia    | OpenWeatherMap (gratuito)         | API meteorológica em PT                           |
+| Meteorologia    | OpenWeatherMap + Open-Meteo       | API meteorológica em PT com fallback sem chaves   |
 
 ---
 
@@ -42,7 +43,9 @@
 ### ADR-022 — Instalador PWA para Telemóveis Android e iPhone (2026-09-07)
 **Contexto:** O utilizador solicitou um instalador para usar o painel no telemóvel como uma aplicação dedicada.  
 **Decisão:** Implementar a arquitetura completa de Progressive Web App (PWA): manifest.json, ícones dedicados (192x192 e 512x512), Service Worker (sw.js), metadados Apple Mobile Web App e botão/prompt nativo de instalação.  
-**Consequência:** A aplicação pode ser instalada com 1 toque no telemóvel, abrindo com o seu próprio ícone ### ADR-023 — Publicação no GitHub e Deploy na Nuvem Vercel (2026-09-07)
+**Consequência:** A aplicação pode ser instalada com 1 toque no telemóvel, abrindo com o seu próprio ícone no ecrã principal sem barras de navegação do browser em modo landscape autónomo.
+
+### ADR-023 — Publicação no GitHub e Deploy na Nuvem Vercel (2026-09-07)
 **Contexto:** O utilizador solicitou o envio do código para o GitHub (https://github.com/Xlhoube/flight-panel.git) e a disponibilização na Vercel para acesso a partir de qualquer rede ou telemóvel.  
 **Decisão:** Configurar o repositório remoto `origin` ligado ao GitHub oficial do utilizador, sincronizar a branch `main` e preparar a integração contínua com a Vercel.  
 **Consequência:** A aplicação passa a estar acessível globalmente a partir de qualquer dispositivo ou rede através de um endereço web seguro HTTPS com CI/CD automático.
@@ -51,6 +54,11 @@
 **Contexto:** A aplicação inicializava no modo meteorológico sem transitar para a informação de voos devido a coordenadas estáticas restritas (~30 km no Porto), ausência de tráfego aéreo pontual na caixa delimitadora e bloqueios/rate limits da OpenSky Network.  
 **Decisão:** Tornar o endpoint `/api/voos` dinâmico aceitando coordenadas do dispositivo (GPS) e raio configurável; implementar expansão regional automática (até raio x 2) quando o cone imediato não tem aviões; adicionar cache de resiliência em memória para proteger contra 429/interrupções; e criar fallback meteorológico transparente sem dependência de chaves de API (Open-Meteo).  
 **Consequência:** Detecção imediata de aeronaves em tráfego regional, garantia de dados de voo no radar e eliminação do bloqueio estático no painel de meteorologia.
+
+### ADR-025 — Manter o Ecrã Sempre Ligado via Screen Wake Lock API (2026-09-08)
+**Contexto:** O utilizador solicitou que o ecrã do telemóvel ou computador permaneça sempre activo e ligado enquanto a aplicação estiver em execução.  
+**Decisão:** Integrar a Screen Wake Lock API com activação automática no carregamento, reactivação em `visibilitychange` (quando o utilizador regressa à aba) e reforço em gestos de toque no ecrã.  
+**Consequência:** O dispositivo não suspende nem desliga o ecrã por inactividade, funcionando de forma contínua como um ecrã físico dedicado de voos.
 
 ---
 
@@ -84,3 +92,4 @@
 | 2026-09-07 | v1.0.1 | Integração GitHub remota (Xlhoube/flight-panel) e suporte a deploy Vercel |
 | 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
 | 2026-09-08 | v1.0.3 | Resolução de bloqueio meteorológico: coordenadas dinâmicas, GPS, expansão de raio e cache anti-429 |
+| 2026-09-08 | v1.0.4 | Implementação de Screen Wake Lock para manter o ecrã sempre ligado durante a utilização |

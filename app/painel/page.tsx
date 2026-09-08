@@ -486,6 +486,38 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   }, []);
 
+  // Manter o ecrã sempre ligado enquanto a aplicação estiver aberta (Screen Wake Lock API)
+  useEffect(() => {
+    let wakeLockInstance: any = null;
+
+    const solicitarWakeLock = async () => {
+      if (typeof window !== "undefined" && "wakeLock" in navigator && document.visibilityState === "visible") {
+        try {
+          wakeLockInstance = await (navigator as any).wakeLock.request("screen");
+        } catch {
+          // Ignorar silenciosamente caso a bateria fraca ou o sistema rejeitem
+        }
+      }
+    };
+
+    solicitarWakeLock();
+
+    const lidarComMudancaVisibilidade = () => {
+      if (document.visibilityState === "visible") {
+        solicitarWakeLock();
+      }
+    };
+
+    document.addEventListener("visibilitychange", lidarComMudancaVisibilidade);
+
+    return () => {
+      document.removeEventListener("visibilitychange", lidarComMudancaVisibilidade);
+      if (wakeLockInstance) {
+        wakeLockInstance.release().catch(() => {});
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
@@ -505,8 +537,13 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Fullscreen com 1 toque no ecrã
+  // Fullscreen com 1 toque no ecrã & activação de som e Wake Lock
   const manipularToqueEcra = () => {
+    // Garantir que o ecrã se mantém ligado após interacção
+    if (typeof window !== "undefined" && "wakeLock" in navigator) {
+      (navigator as any).wakeLock.request("screen").catch(() => {});
+    }
+
     if (!globalAudioCtx) {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       globalAudioCtx = new AudioCtxClass();
