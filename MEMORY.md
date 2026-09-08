@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.9  
+**Versão:** v1.1.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-08  
-**Estado:** PWA com telemetria ADS-B enriquecida com rotas reais globais (adsbdb), preservação de callsigns alfanuméricos operacionais (ex: SWR1ZD) e blindagem contra rotas circulares (OPO ➔ OPO).
+**Estado:** PWA com exibição integral do callsign ICAO nas palhetas principais (sem corte ou omissão de letras), Service Worker v5 Network-First e purge manual de cache por toque no status.
 
 ---
 
@@ -83,6 +83,11 @@
 **Decisão:** Integrar o serviço global de rotas `api.adsbdb.com` com cache em memória no endpoint `/api/voos` para descarregar aeroportos de partida e chegada reais (ex: `OPO ➔ GVA`); preservar o callsign original no mostrador principal quando o sufixo for alfanumérico (ex: `SWR1ZD`), convertendo para IATA apenas voos com sufixo estritamente numérico (ex: `TAP1972` ➔ `TP1972`); exibir badges complementares de `ATC` e `IATA`; e adicionar salvaguarda estrita para impedir que origem e destino sejam alguma vez idênticos.  
 **Consequência:** Correspondência a 100% com os dados do FlightRadar24, eliminação de destinos fictícios ou circulares (`OPO ➔ OPO`) e apresentação da rota real de voo.
 
+### ADR-031 — Exibição Integral de Callsigns ICAO sem Omissão e Service Worker v5 (2026-09-08)
+**Contexto:** Ao converter o código ICAO de 3 letras (ex: `EJU34XV`, `AFR442`) para IATA de 2 caracteres (`U234XV`, `AF442`), o utilizador interpretava que o sistema estava a omitir letras (`EJU` virava `U2`, `AFR` virava `AF`), para além de o Service Worker estar a reter activos em cache (`flight-panel-v2`).  
+**Decisão:** Manter SEMPRE o callsign ICAO completo e integral nas palhetas principais (`EJU34XV`, `AFR442`, `SWR1ZD`, `TAP1972`), exactamente idêntico ao título principal do FlightRadar24; passar o código comercial IATA para o crachá complementar; actualizar o Service Worker para `v5` com estratégia Network-First forçada para `/_next/` e `/api/`; exibir a versão activa no rodapé (`v1.1.0`); e adicionar acção de limpeza imediata de cache com um simples toque na barra de status inferior.  
+**Consequência:** Fidelidade total letra por letra com o radar, sem omissões e actualização imediata sem retenção de cache antiga.
+
 ---
 
 ## Histórico
@@ -121,3 +126,4 @@
 | 2026-09-08 | v1.0.7 | Resolução de corte de letras no número do voo, auto-fit responsivo e callsign ATC |
 | 2026-09-08 | v1.0.8 | Redefinição do raio de alcance do radar para 30 km (API, frontend e status) |
 | 2026-09-08 | v1.0.9 | Integração de rotas reais ADS-B (adsbdb), preservação de callsigns alfanuméricos e correcção OPO->OPO |
+| 2026-09-08 | v1.1.0 | Exibição integral de callsigns ICAO (sem omissão de letras), SW v5 Network-First e purge no status |

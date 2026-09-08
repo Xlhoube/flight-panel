@@ -1,5 +1,5 @@
-// Service Worker para PWA (Progressive Web App) com actualização imediata
-const CACHE_NAME = 'flight-panel-v2';
+// Service Worker para PWA com actualização contínua e sem bloqueio de cache
+const CACHE_NAME = 'flight-panel-v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -20,12 +20,15 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Rotas de API são sempre em tempo real directamente da rede
-  if (event.request.url.includes('/api/')) {
+  // Rotas de API e pacotes Next.js (_next) são sempre obtidos em tempo real directamente da rede
+  if (event.request.url.includes('/api/') || event.request.url.includes('/_next/')) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
     return;
   }
 
-  // Network First para documentos/páginas para receber actualizações instantâneas
+  // Navegação de páginas (HTML): Network-First para garantir que o utilizador recebe o código mais recente
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -35,9 +38,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Demais recursos estáticos (ícones, manifest, áudios): Cache com fallback de rede
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
     })
   );
 });
+

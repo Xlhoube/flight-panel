@@ -196,19 +196,14 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const rotaReal = rotasMap ? (rotasMap[csLimpo] || rotasMap[cs]) : null;
 
   // Determinar o identificador de voo para o display:
-  // 1. Se o sufixo for puramente numérico (ex: TAP1972 -> 1972), formata como IATA comercial (TP1972)
-  // 2. Se tiver caracteres alfanuméricos operacionais (ex: SWR1ZD, EZY62DK), mantém o callsign para corresponder ao FlightRadar24
+  // Exibir SEMPRE o callsign completo e integral (ex: EJU34XV, AFR442, SWR1ZD, TAP1972)
+  // para coincidir com o FlightRadar24 sem omitir qualquer letra.
   let numeroVoo = csLimpo || voo[0].toUpperCase();
   let callsignIata: string | null = rotaReal?.callsignIata || null;
 
   if (info && csLimpo.length > 3) {
     const sufixo = csLimpo.slice(3);
     callsignIata = `${info.iata}${sufixo}`;
-    if (/^\d+$/.test(sufixo)) {
-      numeroVoo = `${info.iata}${sufixo}`;
-    } else {
-      numeroVoo = csLimpo;
-    }
   }
 
   const paisUpper = (voo[2] || "").toUpperCase();
@@ -751,13 +746,8 @@ export default function PainelAnalogicoMobileFullscreen() {
                     <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                       VOO / FLIGHT
                     </span>
-                    {infoVoo.callsign && infoVoo.callsign !== infoVoo.numeroVoo && (
-                      <span className="text-[8px] sm:text-[10px] text-amber-400/90 font-mono tracking-wider font-bold">
-                        ATC: {infoVoo.callsign}
-                      </span>
-                    )}
                     {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
-                      <span className="text-[8px] sm:text-[10px] text-sky-400/90 font-mono tracking-wider font-bold">
+                      <span className="text-[8px] sm:text-[10px] text-sky-400 font-mono tracking-wider font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
                         IATA: {infoVoo.callsignIata}
                       </span>
                     )}
@@ -958,10 +948,21 @@ export default function PainelAnalogicoMobileFullscreen() {
         )}
 
         {/* ── BARRA DE STATUS DO RADAR ADS-B NO FUNDO DO CHASSIS ─────────── */}
-        <div className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm">
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (typeof window !== "undefined" && "caches" in window) {
+              caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
+                window.location.reload();
+              });
+            }
+          }}
+          title="Toca para forçar actualização e limpar cache"
+          className="w-full flex items-center justify-between px-2.5 py-1 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 cursor-pointer transition-colors"
+        >
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span>RADAR ADS-B • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 30 KM)</span>
+            <span>RADAR ADS-B v1.1.0 • {coords ? "GPS ACTIVO" : "VALADARES / PORTO"} (RAIO 30 KM)</span>
           </div>
           <div className="flex items-center gap-2">
             <span>NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
