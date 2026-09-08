@@ -448,11 +448,43 @@ function FlapWord({ text, size = "lg" }: FlapWordProps) {
 
 // ─── Componente Principal Painel Analógico Borderless ─────────────────────────
 
+function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function PainelAnalogicoMobileFullscreen() {
   const [vooAtual, setVooAtual] = useState<EstadoVoo | null>(null);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  // Detecção de GPS do telemóvel / computador para telemetria local real
+  useEffect(() => {
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCoords({
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+          });
+        },
+        () => {
+          // Manter coordenadas padrão caso o utilizador não conceda permissão de GPS
+        },
+        { timeout: 7000, enableHighAccuracy: false }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -510,9 +542,10 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  const carregarMeteorologia = async () => {
+  const carregarMeteorologia = useCallback(async (localCoords?: { lat: number; lon: number } | null) => {
     try {
-      const resMeteo = await fetch("/api/meteorologia");
+      const q = localCoords ? `?lat=${localCoords.lat}&lon=${localCoords.lon}` : "";
+      const resMeteo = await fetch(`/api/meteorologia${q}`);
       const dadosMeteo = await resMeteo.json();
       if (!dadosMeteo.erro) {
         setMeteorologia(dadosMeteo);
@@ -520,34 +553,58 @@ export default function PainelAnalogicoMobileFullscreen() {
     } catch {
       // Ignorar erros
     }
-  };
+  }, []);
 
   const buscarDados = useCallback(async () => {
     try {
-      const resVoos = await fetch("/api/voos");
+      const params = new URLSearchParams();
+      if (coords) {
+        params.set("lat", coords.lat.toString());
+        params.set("lon", coords.lon.toString());
+      }
+      params.set("radius", "50");
+
+      const resVoos = await fetch(`/api/voos?${params.toString()}`);
       const dadosVoos = await resVoos.json();
 
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
+        // Filtrar aeronaves no ar (não estacionadas no solo)
         const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => !v[8]);
-        
+
         if (voosEmAr.length > 0) {
+          // Ordenar pelo voo com menor distância em relação à localização do utilizador
+          const refLat = coords?.lat ?? 41.15;
+          const refLon = coords?.lon ?? -8.62;
+
+          voosEmAr.sort((a: EstadoVoo, b: EstadoVoo) => {
+            const distA =
+              a[6] != null && a[5] != null
+                ? calcularDistanciaHaversineKm(refLat, refLon, a[6], a[5])
+                : 9999;
+            const distB =
+              b[6] != null && b[5] != null
+                ? calcularDistanciaHaversineKm(refLat, refLon, b[6], b[5])
+                : 9999;
+            return distA - distB;
+          });
+
           setVooAtual(voosEmAr[0]);
           setMeteorologia(null);
         } else {
           setVooAtual(null);
-          await carregarMeteorologia();
+          await carregarMeteorologia(coords);
         }
       } else {
         setVooAtual(null);
-        await carregarMeteorologia();
+        await carregarMeteorologia(coords);
       }
     } catch {
       setVooAtual(null);
-      await carregarMeteorologia();
+      await carregarMeteorologia(coords);
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [coords, carregarMeteorologia]);
 
   useEffect(() => {
     buscarDados();

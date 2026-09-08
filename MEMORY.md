@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.2  
+**Versão:** v1.0.3  
 **Data de início:** 2026-09-06  
-**Última sessão:** 2026-09-07  
-**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
+**Última sessão:** 2026-09-08  
+**Estado:** PWA (Progressive Web App) completa com telemetria de voos em tempo real com raio adaptativo, suporte a GPS, cache de resiliência e fallback meteorológico automático.
 
 ---
 
@@ -42,12 +42,15 @@
 ### ADR-022 — Instalador PWA para Telemóveis Android e iPhone (2026-09-07)
 **Contexto:** O utilizador solicitou um instalador para usar o painel no telemóvel como uma aplicação dedicada.  
 **Decisão:** Implementar a arquitetura completa de Progressive Web App (PWA): manifest.json, ícones dedicados (192x192 e 512x512), Service Worker (sw.js), metadados Apple Mobile Web App e botão/prompt nativo de instalação.  
-**Consequência:** A aplicação pode ser instalada com 1 toque no telemóvel, abrindo com o seu próprio ícone no ecrã principal sem barras de navegação do browser em modo landscape autónomo.
-
-### ADR-023 — Publicação no GitHub e Deploy na Nuvem Vercel (2026-09-07)
+**Consequência:** A aplicação pode ser instalada com 1 toque no telemóvel, abrindo com o seu próprio ícone ### ADR-023 — Publicação no GitHub e Deploy na Nuvem Vercel (2026-09-07)
 **Contexto:** O utilizador solicitou o envio do código para o GitHub (https://github.com/Xlhoube/flight-panel.git) e a disponibilização na Vercel para acesso a partir de qualquer rede ou telemóvel.  
 **Decisão:** Configurar o repositório remoto `origin` ligado ao GitHub oficial do utilizador, sincronizar a branch `main` e preparar a integração contínua com a Vercel.  
 **Consequência:** A aplicação passa a estar acessível globalmente a partir de qualquer dispositivo ou rede através de um endereço web seguro HTTPS com CI/CD automático.
+
+### ADR-024 — Resolução de Bloqueio no Modo Meteorológico & Telemetria Dinâmica (2026-09-08)
+**Contexto:** A aplicação inicializava no modo meteorológico sem transitar para a informação de voos devido a coordenadas estáticas restritas (~30 km no Porto), ausência de tráfego aéreo pontual na caixa delimitadora e bloqueios/rate limits da OpenSky Network.  
+**Decisão:** Tornar o endpoint `/api/voos` dinâmico aceitando coordenadas do dispositivo (GPS) e raio configurável; implementar expansão regional automática (até raio x 2) quando o cone imediato não tem aviões; adicionar cache de resiliência em memória para proteger contra 429/interrupções; e criar fallback meteorológico transparente sem dependência de chaves de API (Open-Meteo).  
+**Consequência:** Detecção imediata de aeronaves em tráfego regional, garantia de dados de voo no radar e eliminação do bloqueio estático no painel de meteorologia.
 
 ---
 
@@ -80,4 +83,4 @@
 | 2026-09-07 | v1.0.0 | Lançamento oficial v1.0.0 com suporte completo a instalador PWA Mobile |
 | 2026-09-07 | v1.0.1 | Integração GitHub remota (Xlhoube/flight-panel) e suporte a deploy Vercel |
 | 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
-
+| 2026-09-08 | v1.0.3 | Resolução de bloqueio meteorológico: coordenadas dinâmicas, GPS, expansão de raio e cache anti-429 |
