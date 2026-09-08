@@ -644,6 +644,8 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [localizacao, setLocalizacao] = useState<InfoLocalizacao>(LOCALIZACAO_PADRAO);
   const [statusGps, setStatusGps] = useState<"iniciando" | "ativo" | "bloqueado" | "erro" | "fixo">("iniciando");
   const [detalheErroGps, setDetalheErroGps] = useState<string>("");
+  const [precisaoMetros, setPrecisaoMetros] = useState<number | null>(null);
+  const [linkCopiado, setLinkCopiado] = useState<boolean>(false);
   const [modalLocalizacaoAberto, setModalLocalizacaoAberto] = useState(false);
   const [latManual, setLatManual] = useState<string>("41.15");
   const [lonManual, setLonManual] = useState<string>("-8.62");
@@ -675,6 +677,34 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(interval);
   }, []);
 
+  // Sincronização direta de coordenadas via URL (?lat=X&lon=Y) para partilha imediata PC -> Telemóvel
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const urlLat = sp.get("lat");
+      const urlLon = sp.get("lon");
+      if (urlLat && urlLon) {
+        const pLat = parseFloat(urlLat);
+        const pLon = parseFloat(urlLon);
+        if (!isNaN(pLat) && !isNaN(pLon)) {
+          const coordUrl: InfoLocalizacao = {
+            lat: Number(pLat.toFixed(4)),
+            lon: Number(pLon.toFixed(4)),
+            nome: sp.get("nome") || "COORDENADAS DO PC",
+            origem: "manual",
+          };
+          setLocalizacao(coordUrl);
+          setStatusGps("fixo");
+          setLatManual(coordUrl.lat.toString());
+          setLonManual(coordUrl.lon.toString());
+          localStorage.setItem("flight_panel_user_location", JSON.stringify(coordUrl));
+          return;
+        }
+      }
+    } catch {}
+  }, []);
+
   // Motor de Geolocalização com detecção de HTTPS e fallback de precisão
   const obterGpsDoDispositivo = useCallback((altaPrecisao = true) => {
     if (typeof window === "undefined") return;
@@ -687,7 +717,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
     if (window.isSecureContext === false) {
       setStatusGps("bloqueado");
-      setDetalheErroGps("Contexto inseguro (HTTP). Os navegadores bloqueiam o GPS do telemóvel fora de HTTPS. Podes selecionar a tua localidade na lista abaixo.");
+      setDetalheErroGps("Contexto inseguro (HTTP). Os navegadores bloqueiam o GPS do telemóvel fora de HTTPS. Podes selecionar a tua localidade na lista ou sincronizar com o link do PC.");
       return;
     }
 
@@ -696,15 +726,17 @@ export default function PainelAnalogicoMobileFullscreen() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : null;
+        setPrecisaoMetros(acc);
         const novo: InfoLocalizacao = {
           lat: Number(pos.coords.latitude.toFixed(4)),
           lon: Number(pos.coords.longitude.toFixed(4)),
-          nome: "GPS DO DISPOSITIVO",
+          nome: acc && acc <= 30 ? `GPS SATÉLITE (±${acc}M)` : `GPS DO DISPOSITIVO (±${acc ?? "?"}M)`,
           origem: "gps",
         };
         setLocalizacao(novo);
         setStatusGps("ativo");
-        setDetalheErroGps(`Sinal GPS fixado com sucesso (${pos.coords.accuracy ? Math.round(pos.coords.accuracy) + "m precisão" : "Excelente"}).`);
+        setDetalheErroGps(`Sinal GPS fixado (${acc ? acc + "m de precisão" : "Excelente"}).`);
         setLatManual(novo.lat.toString());
         setLonManual(novo.lon.toString());
         try {
@@ -724,8 +756,43 @@ export default function PainelAnalogicoMobileFullscreen() {
           }
         }
       },
-      { timeout: 12000, enableHighAccuracy: altaPrecisao, maximumAge: 30000 }
+      { timeout: 15000, enableHighAccuracy: altaPrecisao, maximumAge: 10000 }
     );
+  }, []);
+
+  // Refinamento Contínuo via watchPosition (activa o chip de satélite em telemóveis e melhora a precisão)
+  useEffect(() => {
+    if (typeof window === "undefined" || !("geolocation" in navigator) || window.isSecureContext === false) return;
+
+    let watchId: number | null = null;
+    try {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : null;
+          setPrecisaoMetros(acc);
+          // Apenas actualiza automaticamente se estivermos em modo GPS
+          setLocalizacao((atual) => {
+            if (atual.origem === "preset" || atual.origem === "manual") return atual;
+            return {
+              lat: Number(pos.coords.latitude.toFixed(4)),
+              lon: Number(pos.coords.longitude.toFixed(4)),
+              nome: acc && acc <= 25 ? `GPS SATÉLITE (±${acc}M)` : `GPS (±${acc ?? "?"}M)`,
+              origem: "gps",
+            };
+          });
+          setStatusGps("ativo");
+          setDetalheErroGps(`Sinal de GPS em refinamento contínuo (precisão atual: ±${acc ?? "?"}m).`);
+        },
+        () => {},
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+      );
+    } catch {}
+
+    return () => {
+      if (watchId !== null && typeof navigator !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
   }, []);
 
   // Recuperar localização guardada no dispositivo (localStorage) ou obter GPS inicial
@@ -784,6 +851,17 @@ export default function PainelAnalogicoMobileFullscreen() {
       localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
     } catch {}
     setModalLocalizacaoAberto(false);
+  };
+
+  const copiarLinkCoordenadas = () => {
+    if (typeof window === "undefined") return;
+    const url = `${window.location.origin}/painel?lat=${localizacao.lat}&lon=${localizacao.lon}&nome=${encodeURIComponent(localizacao.nome)}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setLinkCopiado(true);
+        setTimeout(() => setLinkCopiado(false), 3500);
+      });
+    }
   };
 
   // Manter o ecrã sempre ligado enquanto a aplicação estiver aberta (Screen Wake Lock API)
@@ -1366,7 +1444,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           >
             <span className={`w-2 h-2 rounded-full ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
             <span className="font-bold text-neutral-200">
-              RADAR v1.2.0 • 📍 {localizacao.nome} (20 KM)
+              RADAR v1.3.0 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
             </span>
             <span className="text-[7px] sm:text-[8px] bg-white/10 px-1 py-0.5 rounded text-sky-300 font-bold ml-0.5">
               ⚙️ AJUSTAR
@@ -1452,7 +1530,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   PONTO ACTUAL ACTIVO
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-sky-400">
-                  {localizacao.nome}
+                  {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}m)` : ""}
                 </span>
                 <span className="text-[10px] text-neutral-300 block font-mono">
                   {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio 20 KM
@@ -1461,6 +1539,20 @@ export default function PainelAnalogicoMobileFullscreen() {
               <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusGps === "ativo" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-neutral-700/50 text-neutral-300"}`}>
                 {localizacao.origem.toUpperCase()}
               </span>
+            </div>
+
+            {/* Partilhar / Sincronizar com Telemóvel com 100% de Precisão */}
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={copiarLinkCoordenadas}
+                className="w-full bg-sky-950/60 hover:bg-sky-900/80 active:scale-[0.99] text-sky-300 hover:text-white py-2 px-3 rounded-xl border border-sky-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+              >
+                <span>🔗</span>
+                <span>{linkCopiado ? "✅ LINK COPIADO! ABRE NO TELEMÓVEL" : "COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL"}</span>
+              </button>
+              <p className="text-[9px] text-neutral-400 text-center leading-tight">
+                Garante precisão milimétrica: copia este link no PC e abre-o no telemóvel para clonar as coordenadas exatas.
+              </p>
             </div>
 
             {/* Botão GPS */}

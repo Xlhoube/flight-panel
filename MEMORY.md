@@ -236,4 +236,5 @@
 | 2026-09-08 | v1.1.5 | Filtro circular estrito Haversine (corte exato a 20.0 km sem cantos de rectângulo), badge de distância (📍 X.X KM) e SW v8 |
 | 2026-09-08 | v1.2.0 | Navegação multivoo por arrasto/swipe lateral, botões tácteis translúcidos, transição imediata para meteorologia e SW v9 |
 | 2026-09-08 | v1.3.0 | Sincronização estrita de coordenadas, modal analógico de localização (GPS/Cidades/Manual) e Espera Suave de 40s (SW v10) |
+| 2026-09-08 | v1.3.1 | Refinamento contínuo watchPosition (precisão satélite <10m), indicador de erro em metros (±Xm) e botão de partilha direta PC->Telemóvel (SW v11) |
 
