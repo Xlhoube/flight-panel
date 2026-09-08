@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -510,6 +510,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [horaAtual, setHoraAtual] = useState("12:00");
   const [dataAtual, setDataAtual] = useState("08 SET");
   const [rotasMap, setRotasMap] = useState<Record<string, any>>({});
+  const rotasMapRef = useRef<Record<string, any>>({});
 
   // Relógio de estação analógica em tempo real para o cabeçalho meteorológico
   useEffect(() => {
@@ -664,6 +665,7 @@ export default function PainelAnalogicoMobileFullscreen() {
       const dadosVoos = await resVoos.json();
 
       if (dadosVoos.rotas && Object.keys(dadosVoos.rotas).length > 0) {
+        rotasMapRef.current = { ...rotasMapRef.current, ...dadosVoos.rotas };
         setRotasMap((prev) => ({ ...prev, ...dadosVoos.rotas }));
       }
 
@@ -716,7 +718,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMap) : null;
+  const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMapRef.current) : null;
 
   return (
     <main
