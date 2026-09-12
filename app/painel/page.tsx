@@ -1754,7 +1754,15 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
                 <div className="flex flex-col items-start gap-1 min-w-0">
                   <LedText text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
-                  <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono">
+                  <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono whitespace-nowrap">
+                    {meteorologia?.environment?.precipitation_mm != null && (
+                      <>
+                        <span className="text-cyan-400 font-bold tracking-wider">
+                          PRECIP: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
+                        </span>
+                        <span>•</span>
+                      </>
+                    )}
                     <span className="text-amber-400/90 font-bold">
                       SENSAÇÃO: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
                     </span>
@@ -1774,11 +1782,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                     <LedText text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
                     <span className="text-2xl sm:text-4xl font-black text-white">°C</span>
                   </div>
-                  {meteorologia?.environment?.precipitation_mm != null && (
-                    <span className="text-[8px] sm:text-[9px] font-mono text-cyan-400 font-bold">
-                      PRECIP: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
