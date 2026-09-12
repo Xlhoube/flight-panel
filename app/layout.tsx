@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, VT323 } from "next/font/google";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+});
+
+const vt323 = VT323({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-vt323",
 });
 
 export const metadata: Metadata = {
@@ -43,7 +49,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className={`${geistMono.variable} font-mono antialiased bg-[#050608] text-white overflow-hidden`}>
+      <body className={`${geistMono.variable} ${vt323.variable} font-mono antialiased bg-[#050608] text-white overflow-hidden`}>
         {children}
         <script
           dangerouslySetInnerHTML={{
