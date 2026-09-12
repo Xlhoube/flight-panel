@@ -825,6 +825,37 @@ function FlapWord({ text, size = "lg" }: FlapWordProps) {
   );
 }
 
+// ─── Componente LED Display (painel de LEDs brancos alto-contraste) ────────────
+
+interface LedTextProps {
+  text: string;
+  size?: "sm" | "md" | "lg" | "xl" | "hero";
+  className?: string;
+}
+
+function LedText({ text, size = "lg", className = "" }: LedTextProps) {
+  const sizeClass = {
+    sm:   "text-[clamp(0.75rem,min(2.2vw,4vh),1.25rem)]",
+    md:   "text-[clamp(0.85rem,min(2.8vw,5vh),1.45rem)]",
+    lg:   "text-[clamp(0.95rem,min(3.3vw,6vh),1.9rem)]",
+    xl:   "text-[clamp(1.1rem,min(3.8vw,6.8vh),2.1rem)]",
+    hero: "text-[clamp(1.2rem,min(4.4vw,7.8vh),2.5rem)]",
+  }[size];
+
+  return (
+    <span
+      className={`font-black uppercase tracking-tighter leading-none select-none tabular-nums ${sizeClass} ${className}`}
+      style={{
+        color: "#ffffff",
+        textShadow:
+          "0 0 6px rgba(255,255,255,0.95), 0 0 18px rgba(255,255,255,0.5), 0 0 36px rgba(255,255,255,0.15)",
+      }}
+    >
+      {text}
+    </span>
+  );
+}
+
 // ─── Componente Principal Painel Analógico Borderless ─────────────────────────
 
 function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -1376,7 +1407,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
           <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-            <FlapWord text="A CARREGAR" size="lg" />
+            <LedText text="A CARREGAR" size="lg" />
           </div>
         )}
 
@@ -1402,7 +1433,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                       </span>
                     )}
                   </div>
-                  <FlapWord
+                  <LedText
                     text={infoVoo.numeroVoo}
                     size={infoVoo.numeroVoo.length >= 7 ? "md" : infoVoo.numeroVoo.length >= 5 ? "lg" : "xl"}
                   />
@@ -1424,7 +1455,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     AIRCRAFT
                   </span>
                 </div>
-                <FlapWord
+                <LedText
                   text={infoVoo.aeronave}
                   size={infoVoo.aeronave.length >= 12 ? "sm" : infoVoo.aeronave.length >= 9 ? "md" : "lg"}
                 />
@@ -1457,13 +1488,13 @@ export default function PainelAnalogicoMobileFullscreen() {
                 {/* ORIGEM */}
                 <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap min-w-0">
                   <FlapWord text={infoVoo.origemCode} size="hero" />
-                  <FlapWord text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "sm" : "md"} />
+                  <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "sm" : "md"} />
                 </div>
 
                 {/* DESTINO */}
                 <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap justify-end min-w-0 text-right">
                   <FlapWord text={infoVoo.destinoCode} size="hero" />
-                  <FlapWord text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "sm" : "md"} />
+                  <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "sm" : "md"} />
                 </div>
               </div>
 
@@ -1478,7 +1509,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   ALTITUDE
                 </span>
                 <div className="flex items-center gap-1">
-                  <FlapWord text={`${infoVoo.altitudePes}`} size="lg" />
+                  <LedText text={`${infoVoo.altitudePes}`} size="lg" />
                   <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">FT</span>
                 </div>
               </div>
@@ -1489,7 +1520,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   VELOCIDADE
                 </span>
                 <div className="flex items-center gap-1">
-                  <FlapWord text={`${infoVoo.velocidadeKts}`} size="lg" />
+                  <LedText text={`${infoVoo.velocidadeKts}`} size="lg" />
                   <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KTS</span>
                 </div>
               </div>
@@ -1500,7 +1531,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   RUMO / HEADING
                 </span>
                 <div className="flex items-center gap-1">
-                  <FlapWord text={`${infoVoo.rumo}`} size="lg" />
+                  <LedText text={`${infoVoo.rumo}`} size="lg" />
                   <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">°</span>
                 </div>
               </div>
@@ -1535,8 +1566,8 @@ export default function PainelAnalogicoMobileFullscreen() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <FlapWord text={horaAtual} size="lg" />
-                    <FlapWord text={dataAtual} size="md" />
+                    <LedText text={horaAtual} size="lg" />
+                    <LedText text={dataAtual} size="md" />
                   </div>
                 </div>
               </div>
@@ -1545,7 +1576,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
                   LOCALIZAÇÃO / ESTAÇÃO
                 </span>
-                <FlapWord text={localizacao.nome.length > 12 ? localizacao.nome.slice(0, 12) : localizacao.nome} size="md" />
+                <LedText text={localizacao.nome.length > 12 ? localizacao.nome.slice(0, 12) : localizacao.nome} size="md" />
                 <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
                   {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
                 </span>
@@ -1564,7 +1595,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
                 <div className="flex flex-col items-start gap-1 min-w-0">
-                  <FlapWord text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+                  <LedText text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
                   <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono">
                     <span className="text-amber-400/90 font-bold">
                       SENSAÇÃO: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
@@ -1582,7 +1613,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
                 <div className="flex flex-col items-end shrink-0">
                   <div className="flex items-center gap-1">
-                    <FlapWord text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
+                    <LedText text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
                     <span className="text-2xl sm:text-4xl font-black text-white">°C</span>
                   </div>
                   {meteorologia?.environment?.precipitation_mm != null && (
@@ -1603,7 +1634,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   VENTO / RUMO
                 </span>
                 <div className="flex items-center gap-0.5">
-                  <FlapWord text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
+                  <LedText text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">KM/H</span>
                 </div>
                 <span className="text-[8px] sm:text-[9px] text-amber-400 font-mono font-bold">
@@ -1617,7 +1648,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   PRESSÃO QNH
                 </span>
                 <div className="flex items-center gap-0.5">
-                  <FlapWord text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
+                  <LedText text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
                 </div>
                 <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">
@@ -1631,7 +1662,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   HUMIDADE
                 </span>
                 <div className="flex items-center gap-0.5">
-                  <FlapWord text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
+                  <LedText text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
                 </div>
                 <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">
