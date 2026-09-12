@@ -1719,12 +1719,8 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-emerald-400 font-mono font-bold bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      {meteorologia?.aviation?.condition || "CAVOK"} • {meteorologia?.aviation?.flight_category || "VFR"}
-                    </span>
-                    <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono font-bold hidden xs:inline">
-                      RADAR ATIVO (20 KM)
+                    <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-mono font-bold">
+                      RADAR METEOROLÓGICO ATIVO (20 KM)
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -1871,6 +1867,12 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
+            {/* Categoria Aeronáutica e Condição de Voo */}
+            <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-emerald-400 font-mono font-bold bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30 inline-flex items-center gap-1 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              {meteorologia?.aviation?.condition || "CAVOK"} • {meteorologia?.aviation?.flight_category || "VFR"}
+            </span>
+
             {listaVoos.length > 1 && (
               <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-sky-400 font-bold font-mono text-[8px] sm:text-[10px] tracking-wider shrink-0">
                 VOO {indiceVoo + 1}/{listaVoos.length}
