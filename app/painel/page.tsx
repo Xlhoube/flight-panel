@@ -101,7 +101,7 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   // Força Aérea Portuguesa / Militar
   FAP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BA8 OVAR", destino: "MISSÃO TÁTICA", origemCode: "OVR", destinoCode: "OPS", aeronave: "UH-60 BLACK HAWK" },
   AFP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BASE AÉREA", destino: "MISSÃO TÁTICA", origemCode: "FAP", destinoCode: "OPS", aeronave: "F-16M FALCON" },
-  
+
   // Principais em Portugal
   TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origem: "PORTO", destino: "LISBOA", origemCode: "OPO", destinoCode: "LIS", aeronave: "A320-251N" },
   RYR: { nome: "RYANAIR", iata: "FR", origem: "PORTO", destino: "MADRID", origemCode: "OPO", destinoCode: "MAD", aeronave: "B737-800" },
@@ -109,7 +109,7 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   EJU: { nome: "EASYJET EUROPE", iata: "U2", origem: "PORTO", destino: "PARIS", origemCode: "OPO", destinoCode: "CDG", aeronave: "A320-214" },
   EZY: { nome: "EASYJET UK", iata: "U2", origem: "LONDRES", destino: "PORTO", origemCode: "LGW", destinoCode: "OPO", aeronave: "A320-214" },
   EZS: { nome: "EASYJET SWISS", iata: "DS", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "A320-214" },
-  
+
   // Charter e Companhias UK / Europa
   AWC: { nome: "TITAN AIRWAYS", iata: "ZT", origem: "LONDRES", destino: "PORTO", origemCode: "STN", destinoCode: "OPO", aeronave: "A321NEO" },
   EXS: { nome: "JET2.COM", iata: "LS", origem: "MANCHESTER", destino: "PORTO", origemCode: "MAN", destinoCode: "OPO", aeronave: "B737-800" },
@@ -256,13 +256,13 @@ const NOMES_AERONAVES: Record<string, string> = {
   SR22: "CIRRUS SR22",
   C152: "CESSNA 152",
   C172: "CESSNA 172",
-  R22:  "ROBINSON R22",
-  R44:  "ROBINSON R44",
+  R22: "ROBINSON R22",
+  R44: "ROBINSON R44",
   // Aeronaves e Helicópteros Militares
-  H60:  "UH-60 BLACK HAWK",
+  H60: "UH-60 BLACK HAWK",
   UH60: "UH-60 BLACK HAWK",
-  S70:  "SIKORSKY S-70",
-  F16:  "F-16M FALCON",
+  S70: "SIKORSKY S-70",
+  F16: "F-16M FALCON",
   C130: "LOCKHEED C-130H",
   C390: "EMBRAER KC-390",
   C295: "AIRBUS C-295M",
@@ -316,7 +316,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const csLimpo = cs.replace(/\s+/g, "");
   const prefixo3 = csLimpo.slice(0, 3);
   const prefixo2 = csLimpo.slice(0, 2);
-  
+
   let info = COMPANHIAS[prefixo3];
   let icao = /^[A-Z]{3}$/.test(prefixo3) ? prefixo3 : "";
   let iata = info?.iata || null;
@@ -633,7 +633,7 @@ function RoundelFAP() {
         <circle cx="50" cy="50" r="44" fill="#cc141d" />
         {/* Disco Branco / Alumínio */}
         <circle cx="50" cy="50" r="40" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
-        
+
         {/* Cruz da Ordem de Cristo (Braços Vermelhos Pátios com Alargamento) */}
         {/* Braço Superior */}
         <polygon points="44,45 56,45 66,18 34,18" fill="#cc141d" />
@@ -645,7 +645,7 @@ function RoundelFAP() {
         <polygon points="55,44 55,56 82,66 82,34" fill="#cc141d" />
         {/* Centro da Cruz */}
         <rect x="44" y="44" width="12" height="12" fill="#cc141d" />
-        
+
         {/* Bordo das Extremidades da Cruz de Cristo */}
         <polygon points="34,18 66,18 64,15 36,15" fill="#a00f16" />
         <polygon points="34,82 66,82 64,85 36,85" fill="#a00f16" />
@@ -825,37 +825,6 @@ function FlapWord({ text, size = "lg" }: FlapWordProps) {
   );
 }
 
-// ─── Componente LED Display (painel de LEDs brancos alto-contraste) ────────────
-
-interface LedTextProps {
-  text: string;
-  size?: "sm" | "md" | "lg" | "xl" | "hero";
-  className?: string;
-}
-
-function LedText({ text, size = "lg", className = "" }: LedTextProps) {
-  const sizeClass = {
-    sm:   "text-[clamp(0.75rem,min(2.2vw,4vh),1.25rem)]",
-    md:   "text-[clamp(0.85rem,min(2.8vw,5vh),1.45rem)]",
-    lg:   "text-[clamp(0.95rem,min(3.3vw,6vh),1.9rem)]",
-    xl:   "text-[clamp(1.1rem,min(3.8vw,6.8vh),2.1rem)]",
-    hero: "text-[clamp(1.2rem,min(4.4vw,7.8vh),2.5rem)]",
-  }[size];
-
-  return (
-    <span
-      className={`font-black uppercase tracking-tighter leading-none select-none tabular-nums ${sizeClass} ${className}`}
-      style={{
-        color: "#ffffff",
-        textShadow:
-          "0 0 6px rgba(255,255,255,0.95), 0 0 18px rgba(255,255,255,0.5), 0 0 36px rgba(255,255,255,0.15)",
-      }}
-    >
-      {text}
-    </span>
-  );
-}
-
 // ─── Componente Principal Painel Analógico Borderless ─────────────────────────
 
 function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -865,9 +834,9 @@ function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -977,7 +946,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           return;
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Motor de Geolocalização com detecção de HTTPS e fallback de precisão
@@ -1016,7 +985,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         setLonManual(novo.lon.toString());
         try {
           localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
-        } catch {}
+        } catch { }
       },
       (err) => {
         if (altaPrecisao && err.code === err.TIMEOUT) {
@@ -1058,10 +1027,10 @@ export default function PainelAnalogicoMobileFullscreen() {
           setStatusGps("ativo");
           setDetalheErroGps(`Sinal de GPS em refinamento contínuo (precisão atual: ±${acc ?? "?"}m).`);
         },
-        () => {},
+        () => { },
         { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
       );
-    } catch {}
+    } catch { }
 
     return () => {
       if (watchId !== null && typeof navigator !== "undefined" && "geolocation" in navigator) {
@@ -1084,7 +1053,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           return;
         }
       }
-    } catch {}
+    } catch { }
 
     obterGpsDoDispositivo(true);
   }, [obterGpsDoDispositivo]);
@@ -1103,7 +1072,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     setLonManual(local.lon.toString());
     try {
       localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
-    } catch {}
+    } catch { }
     setModalLocalizacaoAberto(false);
   };
 
@@ -1122,7 +1091,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     setDetalheErroGps("");
     try {
       localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
-    } catch {}
+    } catch { }
     setModalLocalizacaoAberto(false);
   };
 
@@ -1164,7 +1133,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => {
       document.removeEventListener("visibilitychange", lidarComMudancaVisibilidade);
       if (wakeLockInstance) {
-        wakeLockInstance.release().catch(() => {});
+        wakeLockInstance.release().catch(() => { });
       }
     };
   }, []);
@@ -1192,7 +1161,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const alternarFullScreen = () => {
     // Garantir que o ecrã se mantém ligado após interacção
     if (typeof window !== "undefined" && "wakeLock" in navigator) {
-      (navigator as any).wakeLock.request("screen").catch(() => {});
+      (navigator as any).wakeLock.request("screen").catch(() => { });
     }
 
     if (!globalAudioCtx) {
@@ -1215,15 +1184,15 @@ export default function PainelAnalogicoMobileFullscreen() {
       const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
       if (!isFs) {
         if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(() => {});
+          docEl.requestFullscreen().catch(() => { });
         } else if (docEl.webkitRequestFullscreen) {
-          docEl.webkitRequestFullscreen().catch(() => {});
+          docEl.webkitRequestFullscreen().catch(() => { });
         }
       } else {
         if (doc.exitFullscreen) {
-          doc.exitFullscreen().catch(() => {});
+          doc.exitFullscreen().catch(() => { });
         } else if (doc.webkitExitFullscreen) {
-          doc.webkitExitFullscreen().catch(() => {});
+          doc.webkitExitFullscreen().catch(() => { });
         }
       }
     }
@@ -1403,7 +1372,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
       {/* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */}
       <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
-        
+
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
           <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
@@ -1414,10 +1383,10 @@ export default function PainelAnalogicoMobileFullscreen() {
         {/* ── MODO 1: VOO ACTIVO DETECTADO NO RADAR ────────────────────────── */}
         {!carregando && vooAtual && infoVoo && (
           <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
-            
+
             {/* LINHA 1: VOO & LOGÓTIPO & COMPANHIA */}
             <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
-              
+
               {/* Logótipo Oficial Garantido + Voo */}
               <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 shrink-0">
                 <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
@@ -1468,7 +1437,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* LINHA 2: SECÇÃO PRINCIPAL DE ROTA (EXPANDIDA NO CENTRO) ───────── */}
             <div className="w-full flex-1 min-h-0 bg-[#10121a] px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
-              
+
               {/* CABEÇALHO DEDICADO DE ROTA: ORIGEM | ESTADO DE VOO | DESTINO (NUNCA CORTA) */}
               <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pt-0.5">
                 <span className="text-left">ORIGEM / DEPARTURE</span>
@@ -1497,12 +1466,11 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "sm" : "md"} />
                 </div>
               </div>
-
             </div>
 
             {/* LINHA 3: TELEMETRIA EM 3 MÓDULOS ───────────────────────────────── */}
             <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-2.5 shrink-0">
-              
+
               {/* ALTITUDE */}
               <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
@@ -1541,11 +1509,11 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         )}
 
-        {/* ── MODO 2: SEM VOOS -> MODO METEOROLOGIA AERONÁUTICA AUTOMÁTICA ─── */}
+        {/* ── MODO 2: SEM VOOS → MODO METEOROLOGIA AERONÁUTICA AUTOMÁTICA ─── */}
         {!carregando && !vooAtual && (
           <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
-            
-            {/* LINHA 1: CABEÇALHO DA ESTAÇÃO METEOROLÓGICA & RADAR ────────────── */}
+
+            {/* LINHA 1: CABEÇALHO DA ESTAÇÃO METEOROLÓGICA & RADAR */}
             <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
@@ -1583,14 +1551,14 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
-            {/* LINHA 2: CONDIÇÕES CENTRAIS DE TEMPO & TEMPERATURA ─────────────── */}
+            {/* LINHA 2: CONDIÇÕES CENTRAIS DE TEMPO & TEMPERATURA */}
             <div className="w-full flex-1 min-h-0 bg-[#10121a] px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
               <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
                   CONDIÇÃO ATMOSFÉRICA
                 </span>
-                <span>TEMPERATURA & SENSAÇÃO</span>
+                <span>TEMPERATURA &amp; SENSAÇÃO</span>
               </div>
 
               <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
@@ -1625,14 +1593,12 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
-            {/* LINHA 3: TELEMETRIA METEOROLÓGICA EXPANDIDA (GRELHA DE 6 MÓDULOS) ── */}
+            {/* LINHA 3: TELEMETRIA METEOROLÓGICA (GRELHA DE 6 MÓDULOS) */}
             <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 shrink-0">
-              
-              {/* Módulo 1: Vento e Rumo */}
+
+              {/* Módulo 1: Vento */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  VENTO / RUMO
-                </span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">VENTO / RUMO</span>
                 <div className="flex items-center gap-0.5">
                   <LedText text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">KM/H</span>
@@ -1642,75 +1608,55 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </span>
               </div>
 
-              {/* Módulo 2: Pressão QNH Barométrica */}
+              {/* Módulo 2: QNH */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  PRESSÃO QNH
-                </span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PRESSÃO QNH</span>
                 <div className="flex items-center gap-0.5">
                   <LedText text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">
-                  ALTÍMETRO
-                </span>
+                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">ALTÍMETRO</span>
               </div>
 
               {/* Módulo 3: Humidade */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  HUMIDADE
-                </span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">HUMIDADE</span>
                 <div className="flex items-center gap-0.5">
                   <LedText text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">
-                  RELATIVA
-                </span>
+                <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">RELATIVA</span>
               </div>
 
               {/* Módulo 4: Nascer do Sol */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  NASCER SOL
-                </span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">NASCER SOL</span>
                 <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
                   <span className="text-amber-400">☀️</span>
                   {meteorologia?.environment?.sunrise || "07:15"}
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">
-                  AURORA
-                </span>
+                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">AURORA</span>
               </div>
 
               {/* Módulo 5: Pôr do Sol */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  PÔR DO SOL
-                </span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PÔR DO SOL</span>
                 <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
                   <span className="text-orange-400">🌙</span>
                   {meteorologia?.environment?.sunset || "19:50"}
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">
-                  CREPÚSCULO
-                </span>
+                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">CREPÚSCULO</span>
               </div>
 
-              {/* Módulo 6: Índice UV / Visibilidade */}
+              {/* Módulo 6: Índice UV */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">
-                  ÍNDICE UV
-                </span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">ÍNDICE UV</span>
                 <div className="flex items-center gap-0.5">
                   <span className="text-[10px] sm:text-xs font-mono font-black text-amber-300">
                     UV {meteorologia?.environment?.uv_index ?? 3}
                   </span>
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">
-                  MODERADO
-                </span>
+                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">MODERADO</span>
               </div>
 
             </div>
@@ -1719,7 +1665,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         )}
 
         {/* ── BARRA DE STATUS DO RADAR ADS-B NO FUNDO DO CHASSIS ─────────── */}
-        <div 
+        <div
           className="w-full h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem] flex items-center justify-between px-2 sm:px-2.5 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 transition-colors overflow-hidden whitespace-nowrap"
         >
           {/* Informação de Localização / GPS */}
@@ -1771,156 +1717,158 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         </div>
 
-      </div>
+      </div >
 
       {/* ── MODAL ANALÓGICO DE CONFIGURAÇÃO DE LOCALIZAÇÃO DO RADAR ──── */}
-      {modalLocalizacaoAberto && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
-          onClick={(e) => { e.stopPropagation(); setModalLocalizacaoAberto(false); }}
-        >
-          <div 
-            className="w-full max-w-lg bg-[#0c0e14] border border-white/20 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4 text-white font-mono max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+      {
+        modalLocalizacaoAberto && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+            onClick={(e) => { e.stopPropagation(); setModalLocalizacaoAberto(false); }}
           >
-            {/* Título e Fechar */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">📍</span>
+            <div
+              className="w-full max-w-lg bg-[#0c0e14] border border-white/20 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4 text-white font-mono max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Título e Fechar */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📍</span>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-black tracking-wider text-amber-400 uppercase">
+                      Localização do Radar
+                    </h2>
+                    <p className="text-[10px] text-neutral-400">
+                      Define o centro do raio circular de 20 km
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setModalLocalizacaoAberto(false)}
+                  className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 text-lg font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Localização Atual Ativa */}
+              <div className="bg-[#151922] p-3 rounded-xl border border-white/10 flex items-center justify-between">
                 <div>
-                  <h2 className="text-sm sm:text-base font-black tracking-wider text-amber-400 uppercase">
-                    Localização do Radar
-                  </h2>
-                  <p className="text-[10px] text-neutral-400">
-                    Define o centro do raio circular de 20 km
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">
+                    PONTO ACTUAL ACTIVO
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-sky-400">
+                    {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}m)` : ""}
+                  </span>
+                  <span className="text-[10px] text-neutral-300 block font-mono">
+                    {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio 20 KM
+                  </span>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusGps === "ativo" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-neutral-700/50 text-neutral-300"}`}>
+                  {localizacao.origem.toUpperCase()}
+                </span>
+              </div>
+
+              {/* Partilhar / Sincronizar com Telemóvel com 100% de Precisão */}
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={copiarLinkCoordenadas}
+                  className="w-full bg-sky-950/60 hover:bg-sky-900/80 active:scale-[0.99] text-sky-300 hover:text-white py-2 px-3 rounded-xl border border-sky-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                >
+                  <span>🔗</span>
+                  <span>{linkCopiado ? "✅ LINK COPIADO! ABRE NO TELEMÓVEL" : "COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL"}</span>
+                </button>
+                <p className="text-[9px] text-neutral-400 text-center leading-tight">
+                  Garante precisão milimétrica: copia este link no PC e abre-o no telemóvel para clonar as coordenadas exatas.
+                </p>
+              </div>
+
+              {/* Botão GPS */}
+              <div className="flex flex-col gap-1.5">
+                <button
+                  onClick={() => obterGpsDoDispositivo(true)}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
+                >
+                  <span>📡</span>
+                  <span>OBTER COORDENADAS POR GPS (TELEMÓVEL / PC)</span>
+                </button>
+                {detalheErroGps && (
+                  <p className="text-[10px] sm:text-xs text-amber-300 bg-amber-950/40 p-2 rounded border border-amber-500/30 leading-relaxed">
+                    {detalheErroGps}
                   </p>
+                )}
+              </div>
+
+              {/* Predefinições Rápidas (1 Toque) */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  OU SELECCIONA A TUA LOCALIDADE (1 TOQUE):
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {LOCAIS_PREDEFINIDOS.map((loc) => {
+                    const estaAtivo = Math.abs(loc.lat - localizacao.lat) < 0.005 && Math.abs(loc.lon - localizacao.lon) < 0.005;
+                    return (
+                      <button
+                        key={loc.nome}
+                        onClick={() => selecionarLocalPredefinido(loc)}
+                        className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between cursor-pointer ${estaAtivo ? "bg-sky-500/20 border-sky-400 text-white shadow-md shadow-sky-500/10" : "bg-[#141720] hover:bg-[#1a1f2c] border-white/10 text-neutral-300 hover:text-white"}`}
+                      >
+                        <span className="text-[11px] sm:text-xs font-bold font-mono tracking-wider">
+                          {loc.nome}
+                        </span>
+                        <span className="text-[9px] text-neutral-400 truncate mt-0.5">
+                          {loc.regiao}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <button
-                onClick={() => setModalLocalizacaoAberto(false)}
-                className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 text-lg font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
 
-            {/* Localização Atual Ativa */}
-            <div className="bg-[#151922] p-3 rounded-xl border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">
-                  PONTO ACTUAL ACTIVO
+              {/* Entrada Manual de Coordenadas */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  COORDENADAS PERSONALIZADAS (LATITUDE / LONGITUDE):
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-sky-400">
-                  {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}m)` : ""}
-                </span>
-                <span className="text-[10px] text-neutral-300 block font-mono">
-                  {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio 20 KM
-                </span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={latManual}
+                    onChange={(e) => setLatManual(e.target.value)}
+                    placeholder="Latitude (ex: 41.15)"
+                    className="w-1/2 bg-[#141720] border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
+                  />
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={lonManual}
+                    onChange={(e) => setLonManual(e.target.value)}
+                    placeholder="Longitude (ex: -8.62)"
+                    className="w-1/2 bg-[#141720] border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
+                  />
+                  <button
+                    onClick={guardarCoordenadasManuais}
+                    className="bg-amber-500 hover:bg-amber-400 text-black px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  >
+                    GRAVAR
+                  </button>
+                </div>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusGps === "ativo" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-neutral-700/50 text-neutral-300"}`}>
-                {localizacao.origem.toUpperCase()}
-              </span>
-            </div>
 
-            {/* Partilhar / Sincronizar com Telemóvel com 100% de Precisão */}
-            <div className="flex flex-col gap-1">
-              <button
-                onClick={copiarLinkCoordenadas}
-                className="w-full bg-sky-950/60 hover:bg-sky-900/80 active:scale-[0.99] text-sky-300 hover:text-white py-2 px-3 rounded-xl border border-sky-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
-              >
-                <span>🔗</span>
-                <span>{linkCopiado ? "✅ LINK COPIADO! ABRE NO TELEMÓVEL" : "COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL"}</span>
-              </button>
-              <p className="text-[9px] text-neutral-400 text-center leading-tight">
-                Garante precisão milimétrica: copia este link no PC e abre-o no telemóvel para clonar as coordenadas exatas.
-              </p>
-            </div>
-
-            {/* Botão GPS */}
-            <div className="flex flex-col gap-1.5">
-              <button
-                onClick={() => obterGpsDoDispositivo(true)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
-              >
-                <span>📡</span>
-                <span>OBTER COORDENADAS POR GPS (TELEMÓVEL / PC)</span>
-              </button>
-              {detalheErroGps && (
-                <p className="text-[10px] sm:text-xs text-amber-300 bg-amber-950/40 p-2 rounded border border-amber-500/30 leading-relaxed">
-                  {detalheErroGps}
-                </p>
-              )}
-            </div>
-
-            {/* Predefinições Rápidas (1 Toque) */}
-            <div className="flex flex-col gap-2">
-              <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                OU SELECCIONA A TUA LOCALIDADE (1 TOQUE):
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                {LOCAIS_PREDEFINIDOS.map((loc) => {
-                  const estaAtivo = Math.abs(loc.lat - localizacao.lat) < 0.005 && Math.abs(loc.lon - localizacao.lon) < 0.005;
-                  return (
-                    <button
-                      key={loc.nome}
-                      onClick={() => selecionarLocalPredefinido(loc)}
-                      className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between cursor-pointer ${estaAtivo ? "bg-sky-500/20 border-sky-400 text-white shadow-md shadow-sky-500/10" : "bg-[#141720] hover:bg-[#1a1f2c] border-white/10 text-neutral-300 hover:text-white"}`}
-                    >
-                      <span className="text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-                        {loc.nome}
-                      </span>
-                      <span className="text-[9px] text-neutral-400 truncate mt-0.5">
-                        {loc.regiao}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Entrada Manual de Coordenadas */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-              <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                COORDENADAS PERSONALIZADAS (LATITUDE / LONGITUDE):
-              </span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={latManual}
-                  onChange={(e) => setLatManual(e.target.value)}
-                  placeholder="Latitude (ex: 41.15)"
-                  className="w-1/2 bg-[#141720] border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
-                />
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={lonManual}
-                  onChange={(e) => setLonManual(e.target.value)}
-                  placeholder="Longitude (ex: -8.62)"
-                  className="w-1/2 bg-[#141720] border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 outline-none"
-                />
+              {/* Rodapé do Modal */}
+              <div className="flex justify-end pt-2 border-t border-white/10">
                 <button
-                  onClick={guardarCoordenadasManuais}
-                  className="bg-amber-500 hover:bg-amber-400 text-black px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  onClick={() => setModalLocalizacaoAberto(false)}
+                  className="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-lg text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer"
                 >
-                  GRAVAR
+                  CONCLUÍDO
                 </button>
               </div>
             </div>
-
-            {/* Rodapé do Modal */}
-            <div className="flex justify-end pt-2 border-t border-white/10">
-              <button
-                onClick={() => setModalLocalizacaoAberto(false)}
-                className="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-lg text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer"
-              >
-                CONCLUÍDO
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-    </main>
+        )
+      }
+    </main >
   );
 }
