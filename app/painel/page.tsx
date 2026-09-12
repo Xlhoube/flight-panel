@@ -921,10 +921,10 @@ interface LedTextProps {
 
 function LedText({ text, size = "lg", color = "#f4f9ff", className = "" }: LedTextProps) {
   const sizeClass = {
-    sm:   "h-[1.15rem] sm:h-[1.35rem]",
-    md:   "h-[1.4rem] sm:h-[1.75rem]",
-    lg:   "h-[1.75rem] sm:h-[2.35rem]",
-    xl:   "h-[2.1rem] sm:h-[2.9rem]",
+    sm: "h-[1.15rem] sm:h-[1.35rem]",
+    md: "h-[1.4rem] sm:h-[1.75rem]",
+    lg: "h-[1.75rem] sm:h-[2.35rem]",
+    xl: "h-[2.1rem] sm:h-[2.9rem]",
     hero: "h-[2.6rem] sm:h-[3.8rem]",
   }[size];
 
@@ -932,7 +932,7 @@ function LedText({ text, size = "lg", color = "#f4f9ff", className = "" }: LedTe
   const { totalWidth, activeDots, backgroundDots } = useMemo(() => {
     const raw = String(text ?? "");
     const normalized = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
+
     const DOT_STEP = 6;      // Distância entre centros dos LEDs
     const CHAR_COLS = 5;     // 5 colunas por caractere
     const CHAR_ROWS = 7;     // 7 linhas de altura
