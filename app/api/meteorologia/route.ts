@@ -24,19 +24,34 @@ function calcularRumoRosa(graus: number): string {
   return direcoes[indice];
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const lat = searchParams.get("lat") || process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.15";
-  const lon = searchParams.get("lon") || process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.62";
+  const rawLat = parseFloat(searchParams.get("lat") || process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.091");
+  const rawLon = parseFloat(searchParams.get("lon") || process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.642");
 
-  const apiKey = process.env.OPENWEATHER_API_KEY;
+  // Normalização a 2 casas decimais (~1.1 km) para garantir que telemóvel e PC no mesmo raio partilham exactamente a mesma estação meteorológica
+  const lat = (isNaN(rawLat) ? 41.09 : Number(rawLat.toFixed(2))).toString();
+  const lon = (isNaN(rawLon) ? -8.64 : Number(rawLon.toFixed(2))).toString();
+
+  const rawKey = process.env.OPENWEATHER_API_KEY || "";
+  const apiKey = rawKey.trim().replace(/^a_/, "");
+
+  const formatarHoraLisboa = (timestampSeg: number) => {
+    return new Date(timestampSeg * 1000).toLocaleTimeString("pt-PT", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Lisbon",
+    });
+  };
 
   // 1. Tentar OpenWeatherMap se a chave estiver configurada
   if (apiKey && apiKey !== "a_tua_chave_aqui") {
     try {
       const res = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt`,
-        { next: { revalidate: 600 } }
+        { next: { revalidate: 60 } }
       );
 
       if (res.ok) {
@@ -47,14 +62,14 @@ export async function GET(request: NextRequest) {
         const pressure = dados.main?.pressure ?? 1013;
         
         return NextResponse.json({
-          name: dados.name || "LOCAL",
+          name: (dados.name || "ESTAÇÃO LOCAL").toUpperCase(),
           weather: [{ description: (dados.weather?.[0]?.description || "CEU LIMPO").toUpperCase(), main: "Meteo", code: dados.weather?.[0]?.id ?? 800 }],
           main: {
             temp: dados.main?.temp ?? 18,
             humidity: dados.main?.humidity ?? 65,
             feels_like: dados.main?.feels_like ?? dados.main?.temp ?? 18,
-            temp_min: dados.main?.temp_min != null ? Math.round(dados.main.temp_min) : Math.round(dados.main?.temp - 3),
-            temp_max: dados.main?.temp_max != null ? Math.round(dados.main.temp_max) : Math.round(dados.main?.temp + 3),
+            temp_min: dados.main?.temp_min != null ? Math.round(dados.main.temp_min) : Math.round((dados.main?.temp ?? 18) - 3),
+            temp_max: dados.main?.temp_max != null ? Math.round(dados.main.temp_max) : Math.round((dados.main?.temp ?? 18) + 3),
             pressure: pressure,
           },
           wind: {
@@ -74,8 +89,12 @@ export async function GET(request: NextRequest) {
             is_day: dados.weather?.[0]?.icon ? !dados.weather[0].icon.includes("n") : true,
             precipitation_mm: dados.rain?.["1h"] ?? 0,
             uv_index: 3,
-            sunrise: dados.sys?.sunrise ? new Date(dados.sys.sunrise * 1000).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" }) : "07:15",
-            sunset: dados.sys?.sunset ? new Date(dados.sys.sunset * 1000).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" }) : "19:50",
+            sunrise: dados.sys?.sunrise ? formatarHoraLisboa(dados.sys.sunrise) : "07:18",
+            sunset: dados.sys?.sunset ? formatarHoraLisboa(dados.sys.sunset) : "19:48",
+          }
+        }, {
+          headers: {
+            "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
           }
         });
       }
@@ -86,8 +105,8 @@ export async function GET(request: NextRequest) {
 
   // 2. Fallback fiável e gratuito: Open-Meteo com telemetria avançada
   try {
-    const urlMeteo = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`;
-    const res = await fetch(urlMeteo, { next: { revalidate: 600 } });
+    const urlMeteo = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=Europe%2FLisbon`;
+    const res = await fetch(urlMeteo, { next: { revalidate: 60 } });
 
     if (res.ok) {
       const d = await res.json();
@@ -101,11 +120,11 @@ export async function GET(request: NextRequest) {
 
       const isCavok = (wCode <= 2) && (curr.precipitation ?? 0) === 0;
 
-      const sunriseStr = d.daily?.sunrise?.[0] ? d.daily.sunrise[0].split("T")[1]?.slice(0, 5) : "07:10";
-      const sunsetStr = d.daily?.sunset?.[0] ? d.daily.sunset[0].split("T")[1]?.slice(0, 5) : "19:55";
+      const sunriseStr = d.daily?.sunrise?.[0] ? d.daily.sunrise[0].split("T")[1]?.slice(0, 5) : "07:18";
+      const sunsetStr = d.daily?.sunset?.[0] ? d.daily.sunset[0].split("T")[1]?.slice(0, 5) : "19:48";
 
       const payloadFormatado = {
-        name: "AERÓDROMO LOCAL",
+        name: "ESTAÇÃO LOCAL",
         weather: [{ description: desc, main: "Meteo", code: wCode }],
         main: {
           temp: curr.temperature_2m,
@@ -136,7 +155,11 @@ export async function GET(request: NextRequest) {
           sunset: sunsetStr,
         },
       };
-      return NextResponse.json(payloadFormatado);
+      return NextResponse.json(payloadFormatado, {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        }
+      });
     }
   } catch {
     // Retornar erro apenas se falhar

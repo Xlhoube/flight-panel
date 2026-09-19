@@ -1515,9 +1515,9 @@ export interface InfoLocalizacao {
 }
 
 export const LOCALIZACAO_PADRAO: InfoLocalizacao = {
-  lat: 41.15,
-  lon: -8.62,
-  nome: "VALADARES / PORTO",
+  lat: 41.091,
+  lon: -8.642,
+  nome: "VALADARES / GAIA",
   origem: "padrao",
 };
 
@@ -1808,8 +1808,9 @@ export default function PainelAnalogicoMobileFullscreen() {
     };
   }, []);
 
-  // Recuperar localização guardada no dispositivo (localStorage) e obter SEMPRE GPS fresco imediatamente
+  // Recuperar localização guardada no dispositivo (localStorage) e obter GPS apenas se não houver escolha fixa
   useEffect(() => {
+    let devePedirGps = true;
     try {
       const salvo = localStorage.getItem("flight_panel_user_location");
       if (salvo) {
@@ -1819,12 +1820,17 @@ export default function PainelAnalogicoMobileFullscreen() {
           setStatusGps(parsed.origem === "gps" ? "ativo" : "fixo");
           setLatManual(parsed.lat.toString());
           setLonManual(parsed.lon.toString());
+          // Se o utilizador já definiu um local predefinido ou manual, manter essa escolha para garantir paridade entre dispositivos
+          if (parsed.origem === "preset" || parsed.origem === "manual") {
+            devePedirGps = false;
+          }
         }
       }
     } catch { }
 
-    // Obter automaticamente as coordenadas por GPS do dispositivo ao abrir
-    obterGpsDoDispositivo(true);
+    if (devePedirGps) {
+      obterGpsDoDispositivo(true);
+    }
   }, [obterGpsDoDispositivo]);
 
   const selecionarLocalPredefinido = (local: typeof LOCAIS_PREDEFINIDOS[0]) => {
@@ -2054,8 +2060,8 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   const carregarMeteorologia = useCallback(async (localCoords?: { lat: number; lon: number } | null) => {
     try {
-      const q = localCoords ? `?lat=${localCoords.lat}&lon=${localCoords.lon}` : "";
-      const resMeteo = await fetch(`/api/meteorologia${q}`);
+      const q = localCoords ? `?lat=${localCoords.lat.toFixed(2)}&lon=${localCoords.lon.toFixed(2)}` : "";
+      const resMeteo = await fetch(`/api/meteorologia${q}`, { cache: "no-store" });
       const dadosMeteo = await resMeteo.json();
       if (!dadosMeteo.erro) {
         setMeteorologia(dadosMeteo);
@@ -2465,7 +2471,14 @@ export default function PainelAnalogicoMobileFullscreen() {
                     LOCALIZAÇÃO / ESTAÇÃO
                   </span>
                 </div>
-                <LedText text={localizacao.nome.length > 12 ? localizacao.nome.slice(0, 12) : localizacao.nome} size="md" />
+                <LedText
+                  text={
+                    (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).length > 14
+                      ? (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).slice(0, 14)
+                      : (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome)
+                  }
+                  size="md"
+                />
                 <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
                   {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
                 </span>
