@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.3.1  
+**Versão:** v1.3.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
 **Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
@@ -49,10 +49,10 @@
 **Decisão:** Configurar o repositório remoto `origin` ligado ao GitHub oficial do utilizador, sincronizar a branch `main` e preparar a integração contínua com a Vercel.  
 **Consequência:** A aplicação passa a estar acessível globalmente a partir de qualquer dispositivo ou rede através de um endereço web seguro HTTPS com CI/CD automático.
 
-### ADR-024 — País de Origem e Destino em Todas as Vistas (2026-09-19)
-**Contexto:** O utilizador solicitou juntar a informação do país nas origens e destinos.  
-**Decisão:** Mapear os códigos IATA e prefixos ICAO aos respetivos nomes de países em português europeu na API `/api/voos`, no painel principal `/painel` e na listagem de voos `/voos`. Apresentar os países em tipografia mono com destaque visual subtil sem poluir a matriz LED nem o split-flap.  
-**Consequência:** Identificação imediata e sem ambiguidade dos países de partida e de chegada de cada aeronave em voo.
+### ADR-025 — Abertura Automática em Modo Ecrã Inteiro / Fullscreen (2026-09-19)
+**Contexto:** O utilizador solicitou que a aplicação abra automaticamente em fullscreen.  
+**Decisão:** Configurar o Web App Manifest com `"display": "fullscreen"` (para abertura nativa em ecrã inteiro total quando instalada no telemóvel ou PC). No cliente web, acionar `requestFullscreen()` e `WakeLock` imediatamente na montagem do componente e associar listeners globais de gesto passivo para que, caso o browser imponha restrições de segurança que impeçam fullscreen não solicitado, o primeiro toque em qualquer ponto do ecrã acione instantaneamente o modo ecrã inteiro.  
+**Consequência:** A aplicação arranca de imediato ou no primeiro toque em ecrã inteiro total, sem barras de navegador nem distrações.
 
 ---
 
@@ -88,5 +88,7 @@
 | 2026-09-12 | v1.2.0 | LEDs redondos individuais (SVG Dot-Matrix 5x7) com pitch espaçado e GPS 100% automático na abertura |
 | 2026-09-19 | v1.3.0 | Remoção de swipe lateral, fixação no voo mais próximo, nova página /voos e áudio Flight.mp3 ao detetar voo |
 | 2026-09-19 | v1.3.1 | Inclusão de informação do país em origens e destinos no painel principal e na lista de voos |
+| 2026-09-19 | v1.3.2 | Abertura e ativação automática em modo ecrã inteiro (fullscreen nativo e PWA) |
+
 
 

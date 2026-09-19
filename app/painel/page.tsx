@@ -1257,6 +1257,62 @@ export default function PainelAnalogicoMobileFullscreen() {
     };
   }, []);
 
+  // ── ATIVAÇÃO AUTOMÁTICA DE FULLSCREEN NA ABERTURA DA APP ───────────────────
+  useEffect(() => {
+    const acionarFs = () => {
+      if (typeof window !== "undefined" && "wakeLock" in navigator) {
+        (navigator as any).wakeLock.request("screen").catch(() => { });
+      }
+
+      if (typeof document !== "undefined") {
+        const doc = document as Document & {
+          webkitFullscreenElement?: Element;
+          mozFullScreenElement?: Element;
+          msFullscreenElement?: Element;
+        };
+        const docEl = document.documentElement as HTMLElement & {
+          webkitRequestFullscreen?: () => Promise<void>;
+          mozRequestFullScreen?: () => Promise<void>;
+          msRequestFullscreen?: () => Promise<void>;
+        };
+
+        const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+        if (!isFs) {
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(() => { });
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen().catch(() => { });
+          } else if (docEl.mozRequestFullScreen) {
+            docEl.mozRequestFullScreen().catch(() => { });
+          } else if (docEl.msRequestFullscreen) {
+            docEl.msRequestFullscreen().catch(() => { });
+          }
+        }
+      }
+    };
+
+    // 1. Tentar imediatamente ao carregar
+    acionarFs();
+
+    // 2. Garantir ativação automática no primeiro toque/clique em qualquer ponto do ecrã
+    // caso as políticas de segurança do navegador exijam um gesto inicial do utilizador
+    const onUserInteraction = () => {
+      acionarFs();
+    };
+
+    window.addEventListener("pointerdown", onUserInteraction, { passive: true });
+    window.addEventListener("click", onUserInteraction, { passive: true });
+    window.addEventListener("touchstart", onUserInteraction, { passive: true });
+    window.addEventListener("keydown", onUserInteraction, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", onUserInteraction);
+      window.removeEventListener("click", onUserInteraction);
+      window.removeEventListener("touchstart", onUserInteraction);
+      window.removeEventListener("keydown", onUserInteraction);
+    };
+  }, []);
+
   const [totalNoRadar, setTotalNoRadar] = useState(0);
   const [horaAtual, setHoraAtual] = useState("12:00");
   const [dataAtual, setDataAtual] = useState("08 SET");
@@ -1515,42 +1571,71 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Modo Ecrã Inteiro controlado exclusivamente por botão dedicado
-  const alternarFullScreen = () => {
-    // Garantir que o ecrã se mantém ligado após interacção
+  // Função para activar ecrã inteiro (utilizada automaticamente na abertura e pelo botão)
+  const solicitarFullScreen = useCallback(() => {
     if (typeof window !== "undefined" && "wakeLock" in navigator) {
       (navigator as any).wakeLock.request("screen").catch(() => { });
     }
 
-    if (!globalAudioCtx) {
+    if (!globalAudioCtx && typeof window !== "undefined") {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      globalAudioCtx = new AudioCtxClass();
+      if (AudioCtxClass) {
+        globalAudioCtx = new AudioCtxClass();
+      }
     }
-    if (globalAudioCtx.state === "suspended") {
-      globalAudioCtx.resume();
+    if (globalAudioCtx && globalAudioCtx.state === "suspended") {
+      globalAudioCtx.resume().catch(() => { });
     }
 
     if (typeof document !== "undefined") {
       const doc = document as Document & {
         webkitFullscreenElement?: Element;
-        webkitExitFullscreen?: () => Promise<void>;
+        mozFullScreenElement?: Element;
+        msFullscreenElement?: Element;
       };
       const docEl = document.documentElement as HTMLElement & {
         webkitRequestFullscreen?: () => Promise<void>;
+        mozRequestFullScreen?: () => Promise<void>;
+        msRequestFullscreen?: () => Promise<void>;
       };
 
-      const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+      const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
       if (!isFs) {
         if (docEl.requestFullscreen) {
           docEl.requestFullscreen().catch(() => { });
         } else if (docEl.webkitRequestFullscreen) {
           docEl.webkitRequestFullscreen().catch(() => { });
+        } else if (docEl.mozRequestFullScreen) {
+          docEl.mozRequestFullScreen().catch(() => { });
+        } else if (docEl.msRequestFullscreen) {
+          docEl.msRequestFullscreen().catch(() => { });
         }
+      }
+    }
+  }, []);
+
+  // Modo Ecrã Inteiro controlado manualmente por botão dedicado
+  const alternarFullScreen = () => {
+    if (typeof document !== "undefined") {
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element;
+        webkitExitFullscreen?: () => Promise<void>;
+        mozCancelFullScreen?: () => Promise<void>;
+        msExitFullscreen?: () => Promise<void>;
+      };
+
+      const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
+      if (!isFs) {
+        solicitarFullScreen();
       } else {
         if (doc.exitFullscreen) {
           doc.exitFullscreen().catch(() => { });
         } else if (doc.webkitExitFullscreen) {
           doc.webkitExitFullscreen().catch(() => { });
+        } else if (doc.mozCancelFullScreen) {
+          doc.mozCancelFullScreen().catch(() => { });
+        } else if (doc.msExitFullscreen) {
+          doc.msExitFullscreen().catch(() => { });
         }
       }
     }

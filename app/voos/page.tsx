@@ -478,6 +478,59 @@ export default function ListaVoosRestantes() {
     return () => clearInterval(timer);
   }, []);
 
+  // Activação automática de ecrã inteiro (Fullscreen)
+  useEffect(() => {
+    const acionarFs = () => {
+      if (typeof window !== "undefined" && "wakeLock" in navigator) {
+        (navigator as any).wakeLock.request("screen").catch(() => { });
+      }
+
+      if (typeof document !== "undefined") {
+        const doc = document as Document & {
+          webkitFullscreenElement?: Element;
+          mozFullScreenElement?: Element;
+          msFullscreenElement?: Element;
+        };
+        const docEl = document.documentElement as HTMLElement & {
+          webkitRequestFullscreen?: () => Promise<void>;
+          mozRequestFullScreen?: () => Promise<void>;
+          msRequestFullscreen?: () => Promise<void>;
+        };
+
+        const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+        if (!isFs) {
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(() => { });
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen().catch(() => { });
+          } else if (docEl.mozRequestFullScreen) {
+            docEl.mozRequestFullScreen().catch(() => { });
+          } else if (docEl.msRequestFullscreen) {
+            docEl.msRequestFullscreen().catch(() => { });
+          }
+        }
+      }
+    };
+
+    acionarFs();
+
+    const onUserInteraction = () => {
+      acionarFs();
+    };
+
+    window.addEventListener("pointerdown", onUserInteraction, { passive: true });
+    window.addEventListener("click", onUserInteraction, { passive: true });
+    window.addEventListener("touchstart", onUserInteraction, { passive: true });
+    window.addEventListener("keydown", onUserInteraction, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", onUserInteraction);
+      window.removeEventListener("click", onUserInteraction);
+      window.removeEventListener("touchstart", onUserInteraction);
+      window.removeEventListener("keydown", onUserInteraction);
+    };
+  }, []);
+
   // 1. Carregar de imediato os dados em cache do painel
   useEffect(() => {
     try {

@@ -4,7 +4,7 @@
   "description": "Painel mecânico analógico de partidas e radar aéreo em tempo real",
   "start_url": "/painel",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#050608",
   "theme_color": "#050608",
