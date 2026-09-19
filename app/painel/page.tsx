@@ -1792,10 +1792,25 @@ export default function PainelAnalogicoMobileFullscreen() {
                     <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
                       VOO / FLIGHT
                     </span>
+                    {distVooAtual != null && (
+                      <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20 text-[8px] sm:text-[10px] tabular-nums shrink-0">
+                        📍 {distVooAtual.toFixed(1)} KM
+                      </span>
+                    )}
                     {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
                       <span className="text-[8px] sm:text-[10px] text-sky-400 font-mono tracking-wider font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
                         {infoVoo.callsignIata}
                       </span>
+                    )}
+                    {listaVoos.length > 1 && (
+                      <Link
+                        href="/voos"
+                        title="Ver lista de voos restantes mais distantes"
+                        className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-1.5 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[9px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
+                      >
+                        <span>✈️</span>
+                        <span>+{listaVoos.length - 1} NO RADAR</span>
+                      </Link>
                     )}
                   </div>
                   <LedText
@@ -2073,56 +2088,6 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         )}
 
-        {/* ── BARRA DE STATUS DO RADAR ADS-B NO FUNDO DO CHASSIS ─────────── */}
-        <div
-          className="w-full h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem] flex items-center justify-between px-2 sm:px-2.5 text-[8px] sm:text-[10px] text-neutral-400 font-mono tracking-widest uppercase border border-white/10 shrink-0 bg-[#0c0e14] rounded-lg shadow-sm hover:border-white/30 transition-colors overflow-hidden whitespace-nowrap"
-        >
-          {/* Informação de Localização / GPS */}
-          <div className="flex items-center gap-1.5 py-0.5 px-1 min-w-0 shrink overflow-hidden whitespace-nowrap">
-            <span className={`w-2 h-2 rounded-full shrink-0 ${statusGps === "ativo" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : statusGps === "bloqueado" ? "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"} animate-pulse`} />
-            <span className="font-bold text-neutral-200 truncate">
-              RADAR v1.3.5 • 📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}M)` : ""} (20 KM)
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
-            {/* Categoria Aeronáutica e Condição de Voo */}
-            <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-emerald-400 font-mono font-bold bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30 inline-flex items-center gap-1 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              {meteorologia?.aviation?.condition || "CAVOK"} • {meteorologia?.aviation?.flight_category || "VFR"}
-            </span>
-
-            {listaVoos.length > 1 && (
-              <Link
-                href="/voos"
-                title="Ver lista de voos restantes mais distantes"
-                className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-2 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
-              >
-                <span>✈️</span>
-                <span>+{listaVoos.length - 1} NO RADAR</span>
-              </Link>
-            )}
-            {distVooAtual != null && (
-              <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20 tabular-nums shrink-0 inline-flex items-center justify-center min-w-[4.4rem]">
-                📍 {distVooAtual.toFixed(1)} KM
-              </span>
-            )}
-            <span className="shrink-0">NO AR: <strong className="text-amber-400 font-bold">{totalNoRadar}</strong></span>
-
-            {/* BOTÃO FULL SCREEN */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                alternarFullScreen();
-              }}
-              title={estaEmFullScreen ? "Sair do modo ecrã inteiro" : "Activar modo ecrã inteiro"}
-              className="flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/35 active:scale-95 text-amber-300 hover:text-white px-1.5 sm:px-2 py-0.5 rounded border border-amber-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
-            >
-              <span>{estaEmFullScreen ? "🗗" : "⛶"}</span>
-              <span>{estaEmFullScreen ? "JANELA" : "ECRÃ INTEIRO"}</span>
-            </button>
-          </div>
-        </div>
 
       </div >
 

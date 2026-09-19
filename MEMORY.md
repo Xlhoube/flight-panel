@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.3.2  
+**Versão:** v1.3.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
 **Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
@@ -54,6 +54,11 @@
 **Decisão:** Configurar o Web App Manifest com `"display": "fullscreen"` (para abertura nativa em ecrã inteiro total quando instalada no telemóvel ou PC). No cliente web, acionar `requestFullscreen()` e `WakeLock` imediatamente na montagem do componente e associar listeners globais de gesto passivo para que, caso o browser imponha restrições de segurança que impeçam fullscreen não solicitado, o primeiro toque em qualquer ponto do ecrã acione instantaneamente o modo ecrã inteiro.  
 **Consequência:** A aplicação arranca de imediato ou no primeiro toque em ecrã inteiro total, sem barras de navegador nem distrações.
 
+### ADR-026 — Remoção da Barra Inferior e Otimização do Espaço Útil (2026-09-19)
+**Contexto:** O utilizador solicitou a remoção da barra inferior do painel.  
+**Decisão:** Eliminar por completo a barra de status inferior do ecrã (`h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem]`). Reposicionar a distância do voo e o atalho para a listagem de voos restantes (`/voos`) no cabeçalho da Linha 1 (junto a `VOO / FLIGHT`). Como a app já arranca e entra automaticamente em ecrã inteiro (fullscreen), o botão redundante de ecrã inteiro foi igualmente dispensado.  
+**Consequência:** Ganho de altura vertical para os módulos centrais (Logótipo, Voo, Flaps IATA, Cidades LED e Telemetria) sem elementos a comprimir a base do ecrã.
+
 ---
 
 ## Histórico
@@ -89,6 +94,7 @@
 | 2026-09-19 | v1.3.0 | Remoção de swipe lateral, fixação no voo mais próximo, nova página /voos e áudio Flight.mp3 ao detetar voo |
 | 2026-09-19 | v1.3.1 | Inclusão de informação do país em origens e destinos no painel principal e na lista de voos |
 | 2026-09-19 | v1.3.2 | Abertura e ativação automática em modo ecrã inteiro (fullscreen nativo e PWA) |
+| 2026-09-19 | v1.3.3 | Remoção total da barra inferior de status e libertação de espaço vertical |
 
 
 
