@@ -592,7 +592,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 
   const altitudeMetros = voo[7] != null ? Math.round(voo[7]) : 0;
   const altitudePes = Math.round(altitudeMetros * 3.28084);
-  const velocidadeKts = voo[9] != null ? Math.round(voo[9] * 1.94384) : 0;
+  const velocidadeMs = voo[9] != null ? voo[9] : 0;
+  const velocidadeKts = Math.round(velocidadeMs * 1.94384);
+  const velocidadeKmh = Math.round(velocidadeMs * 3.6);
   const rumo = voo[10] != null ? Math.round(voo[10]) : 0;
 
   // Determinar nome legível e elegante para a companhia ou tipo de operação
@@ -654,7 +656,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     destinoCode,
     destinoPais,
     altitudePes,
+    altitudeMetros,
     velocidadeKts,
+    velocidadeKmh,
     rumo,
     noSolo: voo[8],
   };
@@ -663,9 +667,10 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 // ─── Sintetizador de Som Mecânico ─────────────────────────────────────────────
 
 let globalAudioCtx: AudioContext | null = null;
+let globalSomHabilitado = true;
 
 function tocarSomFlapClack() {
-  if (typeof window === "undefined") return;
+  if (!globalSomHabilitado || typeof window === "undefined") return;
   try {
     if (!globalAudioCtx) {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -708,7 +713,7 @@ function tocarSomFlapClack() {
 // ─── Reprodutor de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
 
 function tocarSomNovoVoo() {
-  if (typeof window === "undefined") return;
+  if (!globalSomHabilitado || typeof window === "undefined") return;
   try {
     const audio = new Audio("/Flight.mp3");
     audio.volume = 0.9;
@@ -1242,6 +1247,52 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [latManual, setLatManual] = useState<string>("41.15");
   const [lonManual, setLonManual] = useState<string>("-8.62");
   const [estaEmFullScreen, setEstaEmFullScreen] = useState<boolean>(false);
+  const [modalOpcoesAberto, setModalOpcoesAberto] = useState<boolean>(false);
+  const [somAtivo, setSomAtivo] = useState<boolean>(true);
+  const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
+  const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+
+  // Carregar definições do utilizador guardadas em localStorage (som e unidades de medida)
+  useEffect(() => {
+    try {
+      const configSalva = localStorage.getItem("flight_panel_user_settings");
+      if (configSalva) {
+        const parsed = JSON.parse(configSalva);
+        if (typeof parsed.somAtivo === "boolean") {
+          setSomAtivo(parsed.somAtivo);
+          globalSomHabilitado = parsed.somAtivo;
+        }
+        if (parsed.unidadeAltitude === "FT" || parsed.unidadeAltitude === "MT") {
+          setUnidadeAltitude(parsed.unidadeAltitude);
+        }
+        if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
+          setUnidadeVelocidade(parsed.unidadeVelocidade);
+        }
+      }
+    } catch { }
+  }, []);
+
+  const alternarSom = (novo: boolean) => {
+    setSomAtivo(novo);
+    globalSomHabilitado = novo;
+    guardarDefinicoes({ somAtivo: novo, unidadeAltitude, unidadeVelocidade });
+  };
+
+  const alternarAltitude = (novo: "FT" | "MT") => {
+    setUnidadeAltitude(novo);
+    guardarDefinicoes({ somAtivo, unidadeAltitude: novo, unidadeVelocidade });
+  };
+
+  const alternarVelocidade = (novo: "KTS" | "KMH") => {
+    setUnidadeVelocidade(novo);
+    guardarDefinicoes({ somAtivo, unidadeAltitude, unidadeVelocidade: novo });
+  };
+
+  const guardarDefinicoes = (defs: { somAtivo: boolean; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH" }) => {
+    try {
+      localStorage.setItem("flight_panel_user_settings", JSON.stringify(defs));
+    } catch { }
+  };
 
   // Escuta de alteração de modo ecrã inteiro nativo
   useEffect(() => {
@@ -1822,7 +1873,18 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* Aeronave, Nome da Companhia e Botão de Instalação PWA */}
               <div className="flex flex-col items-end gap-0.5 text-right min-w-0 max-w-[55%] sm:max-w-[60%] overflow-hidden">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModalOpcoesAberto(true);
+                    }}
+                    title="Definições e Opções (Som, Unidades, Localização)"
+                    className="bg-white/10 hover:bg-white/20 active:scale-95 text-neutral-200 hover:text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-sm cursor-pointer shrink-0"
+                  >
+                    <span>⚙️</span>
+                    <span>OPÇÕES</span>
+                  </button>
                   {promptInstalacao && (
                     <button
                       onClick={instalarApp}
@@ -1902,8 +1964,13 @@ export default function PainelAnalogicoMobileFullscreen() {
                   ALTITUDE
                 </span>
                 <div className="flex items-center gap-1">
-                  <LedText text={`${infoVoo.altitudePes}`} size="lg" />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">FT</span>
+                  <LedText
+                    text={`${unidadeAltitude === "FT" ? infoVoo.altitudePes : infoVoo.altitudeMetros}`}
+                    size="lg"
+                  />
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">
+                    {unidadeAltitude}
+                  </span>
                 </div>
               </div>
 
@@ -1913,8 +1980,13 @@ export default function PainelAnalogicoMobileFullscreen() {
                   VELOCIDADE
                 </span>
                 <div className="flex items-center gap-1">
-                  <LedText text={`${infoVoo.velocidadeKts}`} size="lg" />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KTS</span>
+                  <LedText
+                    text={`${unidadeVelocidade === "KTS" ? infoVoo.velocidadeKts : infoVoo.velocidadeKmh}`}
+                    size="lg"
+                  />
+                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">
+                    {unidadeVelocidade === "KTS" ? "KTS" : "KMS"}
+                  </span>
                 </div>
               </div>
 
@@ -1962,9 +2034,22 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  LOCALIZAÇÃO / ESTAÇÃO
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModalOpcoesAberto(true);
+                    }}
+                    title="Definições e Opções"
+                    className="bg-white/10 hover:bg-white/20 active:scale-95 text-neutral-200 hover:text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-sm cursor-pointer shrink-0"
+                  >
+                    <span>⚙️</span>
+                    <span>OPÇÕES</span>
+                  </button>
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                    LOCALIZAÇÃO / ESTAÇÃO
+                  </span>
+                </div>
                 <LedText text={localizacao.nome.length > 12 ? localizacao.nome.slice(0, 12) : localizacao.nome} size="md" />
                 <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
                   {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
@@ -2088,8 +2173,141 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         )}
 
-
       </div >
+
+      {/* ── MODAL DE OPÇÕES / DEFINIÇÕES (SOM, UNIDADES, LOCALIZAÇÃO) ── */}
+      {modalOpcoesAberto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 select-none"
+          onClick={(e) => { e.stopPropagation(); setModalOpcoesAberto(false); }}
+        >
+          <div
+            className="w-full max-w-md bg-[#0c0e14] border border-white/20 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4 font-mono text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabeçalho */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⚙️</span>
+                <h2 className="text-sm sm:text-base font-black tracking-wider uppercase text-amber-400">
+                  OPÇÕES DO PAINEL
+                </h2>
+              </div>
+              <button
+                onClick={() => setModalOpcoesAberto(false)}
+                className="text-neutral-400 hover:text-white text-base px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Opção 1: Som */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-300">ÁUDIO E EFEITOS SONOROS</span>
+                <span className="text-[10px] text-neutral-400">Palhetas e Alertas</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => alternarSom(true)}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${somAtivo ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                >
+                  <span>🔊</span>
+                  <span>ATIVADO</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alternarSom(false)}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${!somAtivo ? "bg-rose-500/20 border-rose-400 text-rose-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                >
+                  <span>🔇</span>
+                  <span>DESATIVADO</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Opção 2: Unidade de Altitude */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-300">UNIDADE DE ALTITUDE</span>
+                <span className="text-[10px] text-neutral-400">Telemetria vertical</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => alternarAltitude("FT")}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeAltitude === "FT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                >
+                  <span>PÉS (FT)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alternarAltitude("MT")}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeAltitude === "MT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                >
+                  <span>METROS (MT)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Opção 3: Unidade de Velocidade */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-300">UNIDADE DE VELOCIDADE</span>
+                <span className="text-[10px] text-neutral-400">Velocidade no ar</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => alternarVelocidade("KTS")}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeVelocidade === "KTS" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                >
+                  <span>NÓS (KTS)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alternarVelocidade("KMH")}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeVelocidade === "KMH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                >
+                  <span>KM/H (KMS)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Opção 4: Localização do Radar */}
+            <div className="border-t border-white/10 pt-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-300">LOCALIZAÇÃO DO RADAR</span>
+                <span className="text-[10px] text-emerald-400 font-mono">📍 {localizacao.nome}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalOpcoesAberto(false);
+                  setModalLocalizacaoAberto(true);
+                }}
+                className="w-full py-2 px-3 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>📍</span>
+                <span>ALTERAR LOCALIDADE OU COORDENADAS</span>
+              </button>
+            </div>
+
+            {/* Botão Fechar */}
+            <div className="pt-2 border-t border-white/10 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setModalOpcoesAberto(false)}
+                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 active:scale-95 text-black font-black text-xs px-5 py-2 rounded-lg transition-all cursor-pointer shadow-md"
+              >
+                GUARDAR E FECHAR
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* ── MODAL ANALÓGICO DE CONFIGURAÇÃO DE LOCALIZAÇÃO DO RADAR ──── */}
       {

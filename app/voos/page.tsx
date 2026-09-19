@@ -313,9 +313,11 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   }
 
   const altMetros = voo[7] || voo[13] || 0;
+  const altitudeMetros = Math.round(altMetros);
   const altitudePes = Math.round(altMetros * 3.28084);
   const velMs = voo[9] || 0;
   const velocidadeKts = Math.round(velMs * 1.94384);
+  const velocidadeKmh = Math.round(velMs * 3.6);
   const rumo = Math.round(voo[10] || 0);
 
   const aeronave = rotaReal?.aircraftName || rotaReal?.aircraftType || (isFap ? "AERONAVE MILITAR" : "AERONAVE COMERCIAL");
@@ -334,7 +336,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     origemPais,
     destinoPais,
     altitudePes,
+    altitudeMetros,
     velocidadeKts,
+    velocidadeKmh,
     rumo,
     aeronave,
     paisOrigem: voo[2] || "Desconhecido",
@@ -467,6 +471,24 @@ export default function ListaVoosRestantes() {
   const [localizacao, setLocalizacao] = useState<InfoLocalizacao>(LOCALIZACAO_PADRAO);
   const [carregando, setCarregando] = useState(true);
   const [horaAtual, setHoraAtual] = useState("12:00:00");
+  const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
+  const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+
+  // Ler preferências de unidades do utilizador
+  useEffect(() => {
+    try {
+      const configSalva = localStorage.getItem("flight_panel_user_settings");
+      if (configSalva) {
+        const parsed = JSON.parse(configSalva);
+        if (parsed.unidadeAltitude === "FT" || parsed.unidadeAltitude === "MT") {
+          setUnidadeAltitude(parsed.unidadeAltitude);
+        }
+        if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
+          setUnidadeVelocidade(parsed.unidadeVelocidade);
+        }
+      }
+    } catch { }
+  }, []);
 
   // Relógio em tempo real
   useEffect(() => {
@@ -714,7 +736,7 @@ export default function ListaVoosRestantes() {
                     {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">({info.destinoPais})</span>}
                   </div>
                   <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono mt-0.5">
-                    {info.altitudePes} FT • {info.velocidadeKts} KTS • {info.rumo}°
+                    {unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude} • {unidadeVelocidade === "KTS" ? info.velocidadeKts : info.velocidadeKmh} {unidadeVelocidade === "KTS" ? "KTS" : "KMS"} • {info.rumo}°
                   </div>
                 </div>
               </div>
@@ -824,9 +846,9 @@ export default function ListaVoosRestantes() {
 
                     {/* Telemetria */}
                     <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono text-right flex items-center gap-1.5">
-                      <span>{info.altitudePes} FT</span>
+                      <span>{unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude}</span>
                       <span>•</span>
-                      <span>{info.velocidadeKts} KTS</span>
+                      <span>{unidadeVelocidade === "KTS" ? info.velocidadeKts : info.velocidadeKmh} {unidadeVelocidade === "KTS" ? "KTS" : "KMS"}</span>
                       <span>•</span>
                       <span>{info.rumo}°</span>
                     </div>

@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.3.3  
+**Versão:** v1.4.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
 **Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
@@ -54,10 +54,42 @@
 **Decisão:** Configurar o Web App Manifest com `"display": "fullscreen"` (para abertura nativa em ecrã inteiro total quando instalada no telemóvel ou PC). No cliente web, acionar `requestFullscreen()` e `WakeLock` imediatamente na montagem do componente e associar listeners globais de gesto passivo para que, caso o browser imponha restrições de segurança que impeçam fullscreen não solicitado, o primeiro toque em qualquer ponto do ecrã acione instantaneamente o modo ecrã inteiro.  
 **Consequência:** A aplicação arranca de imediato ou no primeiro toque em ecrã inteiro total, sem barras de navegador nem distrações.
 
-### ADR-026 — Remoção da Barra Inferior e Otimização do Espaço Útil (2026-09-19)
-**Contexto:** O utilizador solicitou a remoção da barra inferior do painel.  
-**Decisão:** Eliminar por completo a barra de status inferior do ecrã (`h-7 sm:h-8 min-h-[1.75rem] max-h-[2rem]`). Reposicionar a distância do voo e o atalho para a listagem de voos restantes (`/voos`) no cabeçalho da Linha 1 (junto a `VOO / FLIGHT`). Como a app já arranca e entra automaticamente em ecrã inteiro (fullscreen), o botão redundante de ecrã inteiro foi igualmente dispensado.  
-**Consequência:** Ganho de altura vertical para os módulos centrais (Logótipo, Voo, Flaps IATA, Cidades LED e Telemetria) sem elementos a comprimir a base do ecrã.
+---
+
+## Histórico
+
+| Data       | Versão | Acção                                                                  |
+|------------|--------|------------------------------------------------------------------------|
+| 2026-09-06 | v0.1.0 | Projecto inicializado, estrutura base criada e segura                  |
+| 2026-09-07 | v0.2.0 | Redesign completo para painel analógico Split-Flap (Solari di Udine)   |
+| 2026-09-07 | v0.2.1 | Reformulação minimalista (Logótipo + Voo + Rota) e correcção do som    |
+| 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista      |
+| 2026-09-07 | v0.2.3 | Correcção do corte de letras e alinhamento responsivo das palhetas    |
+| 2026-09-07 | v0.3.0 | Recriação fiel do painel clássico de partidas (DEPARTURES board)       |
+| 2026-09-07 | v0.3.1 | Ajuste para exibição exclusiva de 1 único voo de cada vez              |
+| 2026-09-07 | v0.4.0 | Purificação da interface: 100% monocromático (Logo + Voo + Origem + Destino)|
+| 2026-09-07 | v0.4.1 | Conversão do logótipo da companhia para Pixel Art 8-bit monocromático  |
+| 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                    |
+| 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
+| 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis      |
+| 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)|
+| 2026-09-07 | v0.7.0 | Painel analógico aeroporto Solari Split-Flap vintage em Landscape 16:9 |
+| 2026-09-07 | v0.7.1 | Remoção de cabeçalhos/rodapés redundantes e simplificação do layout    |
+| 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas|
+| 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis    |
+| 2026-09-07 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
+| 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar |
+| 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens |
+| 2026-09-07 | v0.9.0 | Chassis preenchido sem vazios e base global de logótipos ICAO         |
+| 2026-09-07 | v0.9.1 | Remoção da moldura de fundo externa (design borderless edge-to-edge)  |
+| 2026-09-07 | v1.0.0 | Lançamento oficial v1.0.0 com suporte completo a instalador PWA Mobile |
+| 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
+| 2026-09-12 | v1.1.0 | Ecrã híbrido: Palhetas apenas nos códigos IATA (3 letras) e LED display para todo o resto |
+| 2026-09-12 | v1.2.0 | LEDs redondos individuais (SVG Dot-Matrix 5x7) com pitch espaçado e GPS 100% automático na abertura |
+### ADR-026 — Botão de Opções, Controlo de Áudio e Conversão de Unidades (2026-09-19)
+**Contexto:** O utilizador solicitou um botão para opções onde se possa desligar o som e mudar as medidas de altitude de FT (pés) para MT (metros) e de velocidade de KTS (nós) para KMS (km/h).  
+**Decisão:** Adicionar o botão `⚙️ OPÇÕES` no cabeçalho do painel principal e criar um modal de opções com alternadores táteis e persistência em `localStorage`. Suportar muting do sintetizador de palhetas e do ficheiro `/Flight.mp3`, bem como cálculo e formatação instantânea de unidades métricas e aeronáuticas (`FT`/`MT` e `KTS`/`KMS`) no painel e na lista de voos.  
+**Consequência:** Controlo absoluto do utilizador sobre o ambiente sonoro e visual da aplicação, com opções preservadas entre sessões.
 
 ---
 
@@ -95,6 +127,7 @@
 | 2026-09-19 | v1.3.1 | Inclusão de informação do país em origens e destinos no painel principal e na lista de voos |
 | 2026-09-19 | v1.3.2 | Abertura e ativação automática em modo ecrã inteiro (fullscreen nativo e PWA) |
 | 2026-09-19 | v1.3.3 | Remoção total da barra inferior de status e libertação de espaço vertical |
+| 2026-09-19 | v1.4.0 | Modal de Opções: botão de controlo de som (muting) e conversor de medidas (FT/MT e KTS/KMS) |
 
 
 
