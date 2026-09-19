@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.4.0  
+**Versão:** v1.5.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
 **Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
@@ -91,6 +91,11 @@
 **Decisão:** Adicionar o botão `⚙️ OPÇÕES` no cabeçalho do painel principal e criar um modal de opções com alternadores táteis e persistência em `localStorage`. Suportar muting do sintetizador de palhetas e do ficheiro `/Flight.mp3`, bem como cálculo e formatação instantânea de unidades métricas e aeronáuticas (`FT`/`MT` e `KTS`/`KMS`) no painel e na lista de voos.  
 **Consequência:** Controlo absoluto do utilizador sobre o ambiente sonoro e visual da aplicação, com opções preservadas entre sessões.
 
+### ADR-027 — Nome Oficial do Aeroporto em Origens e Destinos (2026-09-19)
+**Contexto:** O utilizador solicitou a inclusão do nome do aeroporto nas origens e destinos.  
+**Decisão:** Integrar dicionário exaustivo de nomes de aeroportos oficiais (`AEROPORTOS_NOMES`), enriquecer a rota com dados da API ADS-B/FlightRadar24 (`origemAeroporto` e `destinoAeroporto`), e apresentá-los com tipografia dedicada em âmbar suave no painel principal e na lista de voos restantes (`/voos`).  
+**Consequência:** Identificação transparente e inequívoca do aeroporto específico (ex: "FRANCISCO SÁ CARNEIRO", "HUMBERTO DELGADO", "CHARLES DE GAULLE", "HEATHROW", "ADOLFO SUÁREZ BARAJAS").
+
 ---
 
 ## Histórico
@@ -128,6 +133,7 @@
 | 2026-09-19 | v1.3.2 | Abertura e ativação automática em modo ecrã inteiro (fullscreen nativo e PWA) |
 | 2026-09-19 | v1.3.3 | Remoção total da barra inferior de status e libertação de espaço vertical |
 | 2026-09-19 | v1.4.0 | Modal de Opções: botão de controlo de som (muting) e conversor de medidas (FT/MT e KTS/KMS) |
+| 2026-09-19 | v1.5.0 | Exibição do nome oficial do aeroporto (origens e destinos) no painel e na lista de voos |
 
 
 

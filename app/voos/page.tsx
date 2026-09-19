@@ -217,6 +217,277 @@ function obterPaisDoAeroporto(codigo: string): string {
   return "";
 }
 
+// ─── Dicionário de Nomes Oficiais de Aeroportos ──────────────────────────────
+const AEROPORTOS_NOMES: Record<string, string> = {
+  // Portugal
+  OPO: "FRANCISCO SÁ CARNEIRO",
+  LIS: "HUMBERTO DELGADO",
+  FAO: "GAGO COUTINHO",
+  FNC: "CRISTIANO RONALDO",
+  PDL: "JOÃO PAULO II",
+  TER: "LAJES",
+  PXO: "PORTO SANTO",
+  SMA: "SANTA MARIA",
+  HOR: "HORTA",
+  FLW: "FLORES",
+  GRW: "GRACIOSA",
+  SJZ: "SÃO JORGE",
+  CVU: "CORVO",
+  VRL: "VILA REAL",
+  BGC: "BRAGANÇA",
+  CAT: "CASCAIS TIRES",
+  // Bases Militares FAP
+  OVR: "BA8 OVAR",
+  MTO: "BA6 MONTIJO",
+  MTR: "BA5 MONTE REAL",
+  BYJ: "BA11 BEJA",
+  OPS: "OPERAÇÕES MILITARES",
+  SAR: "BUSCA E SALVAMENTO",
+  CAP: "PATRULHA AÉREA",
+  // Espanha
+  MAD: "ADOLFO SUÁREZ BARAJAS",
+  BCN: "JOSEP TARRADELLAS EL PRAT",
+  VLC: "MANISES",
+  SVQ: "SAN PABLO",
+  AGP: "COSTA DEL SOL",
+  ALC: "ELCHE MIGUEL HERNÁNDEZ",
+  BIO: "LOIU",
+  SCQ: "ROSALÍA DE CASTRO",
+  VGO: "PEINADOR",
+  LCG: "ALVEDRO",
+  PMI: "SON SANT JOAN",
+  IBZ: "IBIZA",
+  MAH: "MENORCA",
+  TFS: "TENERIFE SUR (REINA SOFÍA)",
+  TFN: "TENERIFE NORTE (LOS RODEOS)",
+  LPA: "GRAN CANARIA",
+  ACE: "CÉSAR MANRIQUE",
+  FUE: "FUERTEVENTURA",
+  SPC: "LA PALMA",
+  // França
+  CDG: "CHARLES DE GAULLE",
+  ORY: "ORLY",
+  BVA: "BEAUVAIS-TILLÉ",
+  LYS: "SAINT-EXUPÉRY",
+  MRS: "MARSEILLE PROVENCE",
+  NCE: "CÔTE D'AZUR",
+  TLS: "BLAGNAC",
+  BOD: "MÉRIGNAC",
+  NTE: "ATLANTIQUE",
+  // Reino Unido e Irlanda
+  LHR: "HEATHROW",
+  LGW: "GATWICK",
+  STN: "STANSTED",
+  LTN: "LUTON",
+  LCY: "LONDON CITY",
+  SEN: "SOUTHEND",
+  MAN: "MANCHESTER",
+  BHX: "BIRMINGHAM",
+  EDI: "EDINBURGH",
+  GLA: "GLASGOW",
+  BRS: "BRISTOL",
+  LPL: "JOHN LENNON",
+  NCL: "NEWCASTLE",
+  EMA: "EAST MIDLANDS",
+  BFS: "ALDERGROVE",
+  BHD: "GEORGE BEST",
+  DUB: "DUBLIN",
+  ORK: "CORK",
+  SNN: "SHANNON",
+  // Benelux
+  AMS: "SCHIPHOL",
+  EIN: "EINDHOVEN",
+  RTM: "ROTTERDAM THE HAGUE",
+  BRU: "ZAVENTEM",
+  CRL: "CHARLEROI SOUTH",
+  LUX: "FINDEL",
+  // Alemanha, Suíça e Áustria
+  FRA: "FRANKFURT MAIN",
+  HHN: "FRANKFURT-HAHN",
+  MUC: "FRANZ JOSEF STRAUSS",
+  BER: "WILLY BRANDT",
+  HAM: "HELMUT SCHMIDT",
+  DUS: "DÜSSELDORF",
+  CGN: "KONRAD ADENAUER",
+  STR: "STUTTGART",
+  NUE: "ALBRECHT DÜRER",
+  HAJ: "HANNOVER",
+  ZRH: "KLOTEN",
+  GVA: "COINTRIN",
+  BSL: "EUROAIRPORT",
+  VIE: "SCHWECHAT",
+  SZG: "W. A. MOZART",
+  // Itália
+  FCO: "LEONARDO DA VINCI (FIUMICINO)",
+  CIA: "CIAMPINO",
+  MXP: "MALPENSA",
+  LIN: "LINATE",
+  BGY: "ORIO AL SERIO",
+  VCE: "MARCO POLO",
+  TSF: "ANTONIO CANOVA",
+  NAP: "CAPODICHINO",
+  BLQ: "GUGLIELMO MARCONI",
+  TRN: "SANDRO PERTINI",
+  PSA: "GALILEO GALILEI",
+  FLR: "AMERIGO VESPUCCI",
+  CTA: "FONTANAROSSA",
+  PMO: "FALCONE BORSELLINO",
+  // Europa Central, Norte e Leste
+  WAW: "FREDERIC CHOPIN",
+  WMI: "MODLIN",
+  KRK: "JAN PAWEŁ II",
+  GDN: "LECH WAŁĘSA",
+  WRO: "NICOLAUS COPERNICUS",
+  POZ: "ŁAWICA",
+  KTW: "KATOWICE",
+  PRG: "VÁCLAV HAVEL",
+  BUD: "FERENC LISZT",
+  BTS: "M. R. ŠTEFÁNIK",
+  OTP: "HENRI COANDĂ",
+  SOF: "VASIL LEVSKI",
+  BEG: "NIKOLA TESLA",
+  ZAG: "FRANJO TUĐMAN",
+  LJU: "JOŽE PUČNIK",
+  CPH: "KASTRUP",
+  BLL: "BILLUND",
+  OSL: "GARDERMOEN",
+  BGO: "FLESLAND",
+  SVG: "SOLA",
+  TRD: "VÆRNES",
+  ARN: "ARLANDA",
+  BMA: "BROMMA",
+  GOT: "LANDVETTER",
+  HEL: "VANTAA",
+  KEF: "KEFLAVÍK",
+  ATH: "ELEFTHERIOS VENIZELOS",
+  SKG: "MAKEDONIA",
+  HER: "NIKOS KAZANTZAKIS",
+  CHQ: "IOANNIS DASKALOGIANNIS",
+  RHO: "DIAGORAS",
+  CFU: "IOANNIS KAPODISTRIAS",
+  JTR: "SANTORINI",
+  JMK: "MYKONOS",
+  LCA: "LARNACA",
+  PFO: "PAPHOS",
+  MLA: "LUQA",
+  IST: "ISTANBUL HAVALIMANI",
+  SAW: "SABIHA GÖKÇEN",
+  AYT: "ANTALYA",
+  ADB: "ADNAN MENDERES",
+  // Médio Oriente e África
+  DXB: "DUBAI INTL",
+  DWC: "AL MAKTOUM",
+  DOH: "HAMAD INTL",
+  AUH: "ZAYED INTL",
+  RUH: "KING KHALID",
+  JED: "KING ABDULAZIZ",
+  TLV: "BEN GURION",
+  AMM: "QUEEN ALIA",
+  BEY: "RAFIC HARIRI",
+  CAI: "CAIRO INTL",
+  HRG: "HURGHADA INTL",
+  SSH: "SHARM EL SHEIKH",
+  RAK: "MENARA",
+  CMN: "MOHAMMED V",
+  AGA: "AL MASSIRA",
+  FEZ: "SAÏSS",
+  TNG: "IBN BATTOUTA",
+  TUN: "CARTHAGE",
+  NBE: "ENFIDHA-HAMMAMET",
+  DJE: "DJERBA-ZARZIS",
+  ALG: "HOUARI BOUMEDIENE",
+  DKR: "LÉOPOLD SÉDAR SENGHOR",
+  DSS: "BLAISE DIAGNE",
+  BKO: "MODIBO KEITA",
+  OXB: "OSVALDO VIEIRA",
+  RAI: "NELSON MANDELA",
+  SID: "AMÍLCAR CABRAL",
+  BVC: "ARÍSTIDES PEREIRA",
+  VXE: "CESÁRIA ÉVORA",
+  TMS: "SÃO TOMÉ INTL",
+  LAD: "4 DE FEVEREIRO",
+  MPM: "MAPUTO INTL",
+  JNB: "O. R. TAMBO",
+  CPT: "CAPE TOWN INTL",
+  // Américas
+  JFK: "JOHN F. KENNEDY",
+  EWR: "NEWARK LIBERTY",
+  LGA: "LA GUARDIA",
+  BOS: "LOGAN INTL",
+  IAD: "DULLES INTL",
+  DCA: "RONALD REAGAN",
+  BWI: "BALTIMORE/WASHINGTON",
+  ORD: "O'HARE INTL",
+  MDW: "MIDWAY",
+  MIA: "MIAMI INTL",
+  FLL: "FORT LAUDERDALE",
+  MCO: "ORLANDO INTL",
+  TPA: "TAMPA INTL",
+  ATL: "HARTSFIELD-JACKSON",
+  DFW: "DALLAS/FORT WORTH",
+  IAH: "GEORGE BUSH",
+  LAX: "LOS ANGELES INTL",
+  SFO: "SAN FRANCISCO INTL",
+  SEA: "SEATTLE-TACOMA",
+  DEN: "DENVER INTL",
+  LAS: "HARRY REID",
+  PHX: "SKY HARBOR",
+  YYZ: "LESTER B. PEARSON",
+  YUL: "PIERRE ELLIOTT TRUDEAU",
+  YVR: "VANCOUVER INTL",
+  YYC: "CALGARY INTL",
+  GIG: "ANTÔNIO CARLOS JOBIM (GALEÃO)",
+  SDU: "SANTOS DUMONT",
+  GRU: "GUARULHOS",
+  CGH: "CONGONHAS",
+  VCP: "VIRACOPOS",
+  BSB: "JUSCELINO KUBITSCHEK",
+  SSA: "LUÍS EDUARDO MAGALHÃES",
+  REC: "GILBERTO FREYRE (GUARARAPES)",
+  FOR: "PINTO MARTINS",
+  CNF: "CONFINS (TANCREDO NEVES)",
+  POA: "SALGADO FILHO",
+  CWB: "AFONSO PENA",
+  FLN: "HERCÍLIO LUZ",
+  NAT: "ALUÍZIO ALVES",
+  MCZ: "ZUMBI DOS PALMARES",
+  BPS: "PORTO SEGURO",
+  EZE: "MINISTRO PISTARINI (EZEIZA)",
+  AEP: "JORGE NEWBERY",
+  SCL: "ARTURO MERINO BENÍTEZ",
+  LIM: "JORGE CHÁVEZ",
+  BOG: "EL DORADO",
+  MDE: "JOSÉ MARÍA CÓRDOVA",
+  PTY: "TOCUMEN",
+  MEX: "BENITO JUÁREZ",
+  CUN: "CANCÚN INTL",
+};
+
+function obterNomeAeroporto(codigo?: string, nomeRecebido?: string): string {
+  const cod = (codigo || "").trim().toUpperCase();
+  if (AEROPORTOS_NOMES[cod]) return AEROPORTOS_NOMES[cod];
+
+  if (nomeRecebido) {
+    const limpo = nomeRecebido
+      .replace(/\s+international\s+airport/i, "")
+      .replace(/\s+intl\s+airport/i, "")
+      .replace(/\s+airport/i, "")
+      .replace(/^aeropuerto\s+de\s+/i, "")
+      .replace(/^aeropuerto\s+/i, "")
+      .replace(/^a[eé]roport\s+de\s+/i, "")
+      .replace(/^a[eé]roport\s+/i, "")
+      .replace(/\s+flughafen/i, "")
+      .replace(/^aeroporto\s+de\s+/i, "")
+      .replace(/^aeroporto\s+internacional\s+de\s+/i, "")
+      .replace(/^aeroporto\s+/i, "")
+      .trim()
+      .toUpperCase();
+    if (limpo && limpo.length > 2) return limpo;
+  }
+
+  return "";
+}
+
 function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const cs = (voo[1] || "").trim().toUpperCase();
   const csLimpo = cs.replace(/\s+/g, "");
@@ -312,6 +583,30 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     }
   }
 
+  let origemAeroporto = rotaReal?.origemAeroporto || "";
+  let destinoAeroporto = rotaReal?.destinoAeroporto || "";
+
+  if (isFap) {
+    if (origemCode === "OVR") origemAeroporto = "BA8 OVAR";
+    else if (origemCode === "MTO") origemAeroporto = "BA6 MONTIJO";
+    else if (origemCode === "MTR") origemAeroporto = "BA5 MONTE REAL";
+    else if (origemCode === "BYJ") origemAeroporto = "BA11 BEJA";
+    else origemAeroporto = "BASE AÉREA";
+
+    if (destinoCode === "OPS") destinoAeroporto = "MISSÃO TÁTICA";
+    else if (destinoCode === "SAR") destinoAeroporto = "BUSCA E SALVAMENTO";
+    else if (destinoCode === "CAP") destinoAeroporto = "PATRULHA AÉREA";
+    else destinoAeroporto = "OPERAÇÕES";
+  } else {
+    if (!origemAeroporto && origemCode && origemCode !== "---" && origemCode !== "N/D") {
+      origemAeroporto = obterNomeAeroporto(origemCode);
+    }
+
+    if (!destinoAeroporto && destinoCode && destinoCode !== "---" && destinoCode !== "N/D") {
+      destinoAeroporto = obterNomeAeroporto(destinoCode);
+    }
+  }
+
   const altMetros = voo[7] || voo[13] || 0;
   const altitudeMetros = Math.round(altMetros);
   const altitudePes = Math.round(altMetros * 3.28084);
@@ -334,7 +629,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     origemCode,
     destinoCode,
     origemPais,
+    origemAeroporto,
     destinoPais,
+    destinoAeroporto,
     altitudePes,
     altitudeMetros,
     velocidadeKts,
@@ -730,10 +1027,12 @@ export default function ListaVoosRestantes() {
                   </div>
                   <div className="text-[10px] sm:text-xs text-neutral-200 font-bold">
                     <span>{info.origem}</span>
-                    {info.origemPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">({info.origemPais})</span>}
+                    {info.origemAeroporto && <span className="text-amber-300/90 font-mono ml-1 font-semibold">({info.origemAeroporto})</span>}
+                    {info.origemPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{info.origemPais}]</span>}
                     <span className="text-amber-400 mx-1.5">➔</span>
                     <span>{info.destino}</span>
-                    {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">({info.destinoPais})</span>}
+                    {info.destinoAeroporto && <span className="text-amber-300/90 font-mono ml-1 font-semibold">({info.destinoAeroporto})</span>}
+                    {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{info.destinoPais}]</span>}
                   </div>
                   <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono mt-0.5">
                     {unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude} • {unidadeVelocidade === "KTS" ? info.velocidadeKts : info.velocidadeKmh} {unidadeVelocidade === "KTS" ? "KTS" : "KMS"} • {info.rumo}°
@@ -835,12 +1134,14 @@ export default function ListaVoosRestantes() {
                       <div className="text-xs sm:text-sm font-black text-amber-400">
                         {info.origemCode} ➔ {info.destinoCode}
                       </div>
-                      <div className="text-[9px] sm:text-[10px] text-neutral-300 font-bold truncate max-w-[260px]">
+                      <div className="text-[9px] sm:text-[10px] text-neutral-300 font-bold truncate max-w-[280px]">
                         <span>{info.origem}</span>
-                        {info.origemPais && <span className="text-sky-400 font-mono ml-0.5">({info.origemPais})</span>}
+                        {info.origemAeroporto && <span className="text-amber-300/90 font-mono ml-0.5">({info.origemAeroporto})</span>}
+                        {info.origemPais && <span className="text-sky-400 font-mono ml-0.5">[{info.origemPais}]</span>}
                         <span className="text-amber-400 mx-1">➔</span>
                         <span>{info.destino}</span>
-                        {info.destinoPais && <span className="text-sky-400 font-mono ml-0.5">({info.destinoPais})</span>}
+                        {info.destinoAeroporto && <span className="text-amber-300/90 font-mono ml-0.5">({info.destinoAeroporto})</span>}
+                        {info.destinoPais && <span className="text-sky-400 font-mono ml-0.5">[{info.destinoPais}]</span>}
                       </div>
                     </div>
 
