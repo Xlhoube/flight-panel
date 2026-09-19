@@ -2231,39 +2231,42 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              {/* Aeronave, Nome da Companhia e Botão de Instalação PWA */}
-              <div className="flex flex-col items-end gap-0.5 text-right min-w-0 max-w-[55%] sm:max-w-[60%] overflow-hidden">
-                <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Aeronave, Nome da Companhia e Botão de Opções */}
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0 max-w-[60%]">
+                <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-hidden">
+                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                    AIRCRAFT
+                  </span>
+                  <LedText
+                    text={infoVoo.aeronave}
+                    size={infoVoo.aeronave.length >= 12 ? "sm" : infoVoo.aeronave.length >= 9 ? "md" : "lg"}
+                  />
+                  <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
+                    {infoVoo.nomeCompanhia}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {promptInstalacao && (
+                    <button
+                      onClick={instalarApp}
+                      className="bg-white/10 hover:bg-white/20 text-white text-[9px] sm:text-[11px] font-bold px-2 py-1 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse cursor-pointer"
+                    >
+                      📲 INSTALAR
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setModalOpcoesAberto(true);
                     }}
-                    title="Definições e Opções (Som, Unidades, Localização)"
-                    className="bg-white/10 hover:bg-white/20 active:scale-95 text-neutral-200 hover:text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-sm cursor-pointer shrink-0"
+                    title="Definições e Opções"
+                    aria-label="Opções"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
                   >
-                    <span>⚙️</span>
-                    <span>OPÇÕES</span>
+                    ⚙️
                   </button>
-                  {promptInstalacao && (
-                    <button
-                      onClick={instalarApp}
-                      className="bg-white/10 hover:bg-white/20 text-white text-[9px] sm:text-[11px] font-bold px-2 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse"
-                    >
-                      📲 INSTALAR
-                    </button>
-                  )}
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    AIRCRAFT
-                  </span>
                 </div>
-                <LedText
-                  text={infoVoo.aeronave}
-                  size={infoVoo.aeronave.length >= 12 ? "sm" : infoVoo.aeronave.length >= 9 ? "md" : "lg"}
-                />
-                <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
-                  {infoVoo.nomeCompanhia}
-                </span>
               </div>
 
             </div>
@@ -2403,34 +2406,35 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setModalOpcoesAberto(true);
-                    }}
-                    title="Definições e Opções"
-                    className="bg-white/10 hover:bg-white/20 active:scale-95 text-neutral-200 hover:text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-sm cursor-pointer shrink-0"
-                  >
-                    <span>⚙️</span>
-                    <span>OPÇÕES</span>
-                  </button>
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
                   <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
                     LOCALIZAÇÃO / ESTAÇÃO
                   </span>
+                  <LedText
+                    text={
+                      (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).length > 14
+                        ? (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).slice(0, 14)
+                        : (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome)
+                    }
+                    size="md"
+                  />
+                  <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
+                    {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
+                  </span>
                 </div>
-                <LedText
-                  text={
-                    (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).length > 14
-                      ? (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).slice(0, 14)
-                      : (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome)
-                  }
-                  size="md"
-                />
-                <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
-                  {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
-                </span>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModalOpcoesAberto(true);
+                  }}
+                  title="Definições e Opções"
+                  aria-label="Opções"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
+                >
+                  ⚙️
+                </button>
               </div>
             </div>
 
@@ -2555,40 +2559,40 @@ export default function PainelAnalogicoMobileFullscreen() {
       {/* ── MODAL DE OPÇÕES / DEFINIÇÕES (SOM, UNIDADES, LOCALIZAÇÃO) ── */}
       {modalOpcoesAberto && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 select-none"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 select-none"
           onClick={(e) => { e.stopPropagation(); setModalOpcoesAberto(false); }}
         >
           <div
-            className="w-full max-w-md bg-[#0c0e14] border border-white/20 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4 font-mono text-white"
+            className="w-full max-w-lg bg-[#0c0e14] border border-white/20 rounded-2xl p-3 sm:p-5 shadow-2xl flex flex-col gap-2.5 sm:gap-3.5 font-mono text-white max-h-[92dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cabeçalho */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2 shrink-0">
               <div className="flex items-center gap-2">
-                <span className="text-lg">⚙️</span>
-                <h2 className="text-sm sm:text-base font-black tracking-wider uppercase text-amber-400">
+                <span className="text-base sm:text-lg">⚙️</span>
+                <h2 className="text-xs sm:text-sm font-black tracking-wider uppercase text-amber-400">
                   OPÇÕES DO PAINEL
                 </h2>
               </div>
               <button
                 onClick={() => setModalOpcoesAberto(false)}
-                className="text-neutral-400 hover:text-white text-base px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                className="text-neutral-400 hover:text-white text-sm px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Opção 1: Som */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-xs">
+            <div className="flex flex-col gap-1 shrink-0">
+              <div className="flex items-center justify-between text-[11px]">
                 <span className="font-bold text-neutral-300">ÁUDIO E EFEITOS SONOROS</span>
-                <span className="text-[10px] text-neutral-400">Palhetas e Alertas</span>
+                <span className="text-[9px] text-neutral-400">Palhetas e Alertas</span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
                   onClick={() => alternarSom(true)}
-                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${somAtivo ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  className={`py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${somAtivo ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                 >
                   <span>🔊</span>
                   <span>ATIVADO</span>
@@ -2596,7 +2600,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <button
                   type="button"
                   onClick={() => alternarSom(false)}
-                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${!somAtivo ? "bg-rose-500/20 border-rose-400 text-rose-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  className={`py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${!somAtivo ? "bg-rose-500/20 border-rose-400 text-rose-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                 >
                   <span>🔇</span>
                   <span>DESATIVADO</span>
@@ -2604,59 +2608,62 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
-            {/* Opção 2: Unidade de Altitude */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-neutral-300">UNIDADE DE ALTITUDE</span>
-                <span className="text-[10px] text-neutral-400">Telemetria vertical</span>
+            {/* Opções 2 e 3: Unidades lado a lado (Altitude e Velocidade) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
+              {/* Opção 2: Unidade de Altitude */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-neutral-300">ALTITUDE</span>
+                  <span className="text-[9px] text-neutral-400">Telemetria</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => alternarAltitude("FT")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeAltitude === "FT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>PÉS (FT)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => alternarAltitude("MT")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeAltitude === "MT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>METROS (MT)</span>
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => alternarAltitude("FT")}
-                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeAltitude === "FT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
-                >
-                  <span>PÉS (FT)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => alternarAltitude("MT")}
-                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeAltitude === "MT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
-                >
-                  <span>METROS (MT)</span>
-                </button>
-              </div>
-            </div>
 
-            {/* Opção 3: Unidade de Velocidade */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-neutral-300">UNIDADE DE VELOCIDADE</span>
-                <span className="text-[10px] text-neutral-400">Velocidade no ar</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => alternarVelocidade("KTS")}
-                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeVelocidade === "KTS" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
-                >
-                  <span>NÓS (KTS)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => alternarVelocidade("KMH")}
-                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${unidadeVelocidade === "KMH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
-                >
-                  <span>KM/H (KMS)</span>
-                </button>
+              {/* Opção 3: Unidade de Velocidade */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-neutral-300">VELOCIDADE</span>
+                  <span className="text-[9px] text-neutral-400">Ar</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => alternarVelocidade("KTS")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "KTS" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>NÓS (KTS)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => alternarVelocidade("KMH")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "KMH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>KM/H (KMS)</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Opção 4: Localização do Radar */}
-            <div className="border-t border-white/10 pt-3 flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs">
+            <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
+              <div className="flex items-center justify-between text-[11px]">
                 <span className="font-bold text-neutral-300">LOCALIZAÇÃO DO RADAR</span>
-                <span className="text-[10px] text-emerald-400 font-mono">📍 {localizacao.nome}</span>
+                <span className="text-[9px] text-emerald-400 font-mono">📍 {localizacao.nome}</span>
               </div>
               <button
                 type="button"
@@ -2664,7 +2671,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   setModalOpcoesAberto(false);
                   setModalLocalizacaoAberto(true);
                 }}
-                className="w-full py-2 px-3 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-1.5 px-3 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>📍</span>
                 <span>ALTERAR LOCALIDADE OU COORDENADAS</span>
@@ -2673,15 +2680,15 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* Opção 5: Tabela de Todos os Voos */}
             {listaVoos.length > 0 && (
-              <div className="border-t border-white/10 pt-3 flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs">
+              <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
+                <div className="flex items-center justify-between text-[11px]">
                   <span className="font-bold text-neutral-300">TABELA DE TODOS OS VOOS</span>
-                  <span className="text-[10px] text-sky-400 font-mono">{listaVoos.length} no radar</span>
+                  <span className="text-[9px] text-sky-400 font-mono">{listaVoos.length} no radar</span>
                 </div>
                 <Link
                   href="/voos"
                   onClick={() => setModalOpcoesAberto(false)}
-                  className="w-full py-2 px-3 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-1.5 px-3 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>📋</span>
                   <span>VER LISTA TABULAR DETALHADA</span>
@@ -2690,11 +2697,11 @@ export default function PainelAnalogicoMobileFullscreen() {
             )}
 
             {/* Botão Fechar */}
-            <div className="pt-2 border-t border-white/10 flex justify-end">
+            <div className="pt-2 border-t border-white/10 flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setModalOpcoesAberto(false)}
-                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 active:scale-95 text-black font-black text-xs px-5 py-2 rounded-lg transition-all cursor-pointer shadow-md"
+                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 active:scale-95 text-black font-black text-xs px-5 py-1.5 rounded-lg transition-all cursor-pointer shadow-md"
               >
                 GUARDAR E FECHAR
               </button>

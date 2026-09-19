@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.6.2  
+**Versão:** v1.6.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
-**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados e interface minimalista limpa sem badges redundantes.
+**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados e interface minimalista com botão de opções de ícone limpo ⚙️ à direita.
 
 ---
 
@@ -79,6 +79,16 @@
 **Decisão:** Eliminar os elementos de telemetria secundária da Linha 1, mantendo apenas a etiqueta pura `VOO / FLIGHT` e o número do voo em matriz LED de grandes dimensões. A navegação entre voos continua 100% ativa através do arrasto lateral do ecrã (swipe) e a tabela completa de voos fica acessível de forma discreta dentro do menu `⚙️ OPÇÕES`.  
 **Consequência:** Design purificado, foco absoluto na identidade visual do voo e eliminação de distrações visuais no cabeçalho.
 
+### ADR-031 — Redesign e Reposicionamento do Botão de Opções (2026-09-19)
+**Contexto:** O utilizador solicitou a melhoria do posicionamento do botão de opções e a simplificação para exibir apenas o ícone, sem texto.  
+**Decisão:** Retirar o botão com texto da etiqueta `AIRCRAFT` e `LOCALIZAÇÃO / ESTAÇÃO`. Criar um botão quadrado arredondado exclusivo (`w-7 h-7 sm:w-8 sm:h-8`), com fundo translúcido e rebordo subtil, contendo exclusivamente o ícone `⚙️`, perfeitamente alinhado na extremidade direita do cabeçalho da Linha 1 tanto no modo de voo como no modo meteorológico.  
+**Consequência:** Layout desafogado, eliminação de sobreposição com as legendas de aeronave e localização, e posicionamento consistente e ergonómico em todos os ecrãs.
+
+### ADR-032 — Design Compacto e Responsivo do Modal de Opções para Telemóveis em Modo Paisagem (2026-09-19)
+**Contexto:** O utilizador reportou que o quadro de opções ultrapassava a altura do ecrã do telemóvel ("o quadro das opções é maior que o ecra do telemovel"), especialmente no modo horizontal/paisagem.  
+**Decisão:** Reestruturar o modal de opções para altura máxima dinâmica (`max-h-[92dvh]`) com barra de desfasamento vertical interna (`overflow-y-auto`), fundir as opções de unidades de altitude e velocidade numa grelha responsiva de 2 colunas (`grid-cols-1 sm:grid-cols-2`), compactar os espaçamentos e preenchimentos (`p-3 sm:p-5`, `gap-2.5 sm:gap-3.5`) e garantir que todos os botões e títulos cabem confortavelmente em qualquer dispositivo móvel.  
+**Consequência:** Encaixe perfeito no ecrã do telemóvel em modo horizontal e vertical, sem cortes nem botões inacessíveis.
+
 ---
 
 ## Histórico
@@ -120,3 +130,5 @@
 | 2026-09-19 | v1.6.0 | Navegação entre todos os voos restantes por arrasto lateral (ecrã tátil e rato) e botões dedicados |
 | 2026-09-19 | v1.6.1 | Correção e sincronização da telemetria meteorológica entre telemóvel e computador |
 | 2026-09-19 | v1.6.2 | Remoção dos emblemas de telemetria da Linha 1 para design minimalista limpo |
+| 2026-09-19 | v1.6.3 | Reposicionamento do botão de opções com ícone ⚙️ minimalista à direita |
+| 2026-09-19 | v1.6.4 | Design compacto do modal de opções com scroll interno e grelha 2-col para telemóveis em modo paisagem |
