@@ -8,9 +8,9 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.0.2  
+**Versão:** v1.3.0  
 **Data de início:** 2026-09-06  
-**Última sessão:** 2026-09-07  
+**Última sessão:** 2026-09-19  
 **Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape) e ecrã inteiro.
 
 ---
@@ -81,4 +81,5 @@
 | 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
 | 2026-09-12 | v1.1.0 | Ecrã híbrido: Palhetas apenas nos códigos IATA (3 letras) e LED display para todo o resto |
 | 2026-09-12 | v1.2.0 | LEDs redondos individuais (SVG Dot-Matrix 5x7) com pitch espaçado e GPS 100% automático na abertura |
+| 2026-09-19 | v1.3.0 | Remoção de swipe lateral, fixação no voo mais próximo, nova página /voos e áudio Flight.mp3 ao detetar voo |
 

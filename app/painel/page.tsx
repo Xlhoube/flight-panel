@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -556,6 +557,22 @@ function tocarSomFlapClack() {
   }
 }
 
+// ─── Reprodutor de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
+
+function tocarSomNovoVoo() {
+  if (typeof window === "undefined") return;
+  try {
+    const audio = new Audio("/Flight.mp3");
+    audio.volume = 0.9;
+    audio.play().catch(() => {
+      // Fallback para sintetizador mecânico caso o browser bloqueie o ficheiro de áudio por autoplay
+      tocarSomFlapClack();
+    });
+  } catch {
+    tocarSomFlapClack();
+  }
+}
+
 // ─── Componente de Ícones Meteorológicos Dinâmicos (SVG Cockpit Style) ────────
 
 function WeatherIconSVG({ code, isDay = true, className = "w-10 h-10" }: { code?: number; isDay?: boolean; className?: string }) {
@@ -1065,7 +1082,6 @@ export const LOCAIS_PREDEFINIDOS = [
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
   const listaVoosRef = useRef<EstadoVoo[]>([]);
-  const [indiceVoo, setIndiceVoo] = useState(0);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
@@ -1392,62 +1408,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Navegação entre múltiplos voos em sobrevoo (exclusivamente por arrasto lateral)
-  const avancarVoo = useCallback(() => {
-    setListaVoos((lista) => {
-      if (lista.length <= 1) return lista;
-      tocarSomFlapClack();
-      setIndiceVoo((prev) => (prev + 1) % lista.length);
-      return lista;
-    });
-  }, []);
 
-  const recuarVoo = useCallback(() => {
-    setListaVoos((lista) => {
-      if (lista.length <= 1) return lista;
-      tocarSomFlapClack();
-      setIndiceVoo((prev) => (prev - 1 + lista.length) % lista.length);
-      return lista;
-    });
-  }, []);
-
-  // Gestos de Swipe & Arrastar (Ecrã táctil móvel + Rato desktop)
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const touchStartTime = useRef<number>(0);
-
-  const lidarComInicioArrasto = (e: React.TouchEvent | React.MouseEvent) => {
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    touchStartX.current = clientX;
-    touchStartY.current = clientY;
-    touchStartTime.current = Date.now();
-  };
-
-  const lidarComFimArrasto = (e: React.TouchEvent | React.MouseEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-
-    const clientX = "changedTouches" in e ? e.changedTouches[0].clientX : e.clientX;
-    const clientY = "changedTouches" in e ? e.changedTouches[0].clientY : e.clientY;
-
-    const deltaX = clientX - touchStartX.current;
-    const deltaY = clientY - touchStartY.current;
-
-    touchStartX.current = null;
-    touchStartY.current = null;
-
-    // Se foi um arrasto horizontal nítido (> 40px e predominantemente horizontal)
-    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-      if (deltaX < 0) {
-        // Arrastar para a esquerda -> Próximo voo
-        avancarVoo();
-      } else {
-        // Arrastar para a direita -> Voo anterior
-        recuarVoo();
-      }
-    }
-    // Toque simples já não ativa fullscreen, garantindo total estabilidade do ecrã
-  };
 
   const carregarMeteorologia = useCallback(async (localCoords?: { lat: number; lon: number } | null) => {
     try {
@@ -1514,8 +1475,20 @@ export default function PainelAnalogicoMobileFullscreen() {
           listaVoosRef.current = voosEmAr;
           setListaVoos(voosEmAr);
           setTotalNoRadar(voosEmAr.length);
-          setIndiceVoo((prev) => (prev >= voosEmAr.length ? 0 : prev));
           setMeteorologia(null);
+
+          // Partilha de dados em cache para a nova página de lista de voos restantes (/voos)
+          try {
+            sessionStorage.setItem(
+              "flight_panel_radar_data",
+              JSON.stringify({
+                voos: voosEmAr,
+                rotas: rotasMapRef.current,
+                localizacao: { lat: refLat, lon: refLon, nome: localizacao.nome },
+                atualizadoEm: Date.now(),
+              })
+            );
+          } catch { }
         } else {
           await tratarZeroVoos(refLat, refLon);
         }
@@ -1535,14 +1508,15 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  const vooAtual = listaVoos.length > 0 ? listaVoos[Math.min(indiceVoo, listaVoos.length - 1)] : null;
+  // O painel principal apresenta sempre o voo mais próximo (mais relevante)
+  const vooAtual = listaVoos.length > 0 ? listaVoos[0] : null;
 
-  // Áudio mecânico Solari acionado exclusivamente quando muda de aeronave
+  // Áudio reproduzido (/Flight.mp3) exclusivamente quando um novo voo é detetado ou entra no radar
   const ultimoVooIdRef = useRef<string | null>(null);
   useEffect(() => {
     const idAtual = vooAtual ? (vooAtual[0] || vooAtual[1] || null) : null;
     if (idAtual && ultimoVooIdRef.current !== null && idAtual !== ultimoVooIdRef.current) {
-      tocarSomFlapClack();
+      tocarSomNovoVoo();
     }
     ultimoVooIdRef.current = idAtual;
   }, [vooAtual]);
@@ -1557,10 +1531,6 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   return (
     <main
-      onTouchStart={lidarComInicioArrasto}
-      onTouchEnd={lidarComFimArrasto}
-      onMouseDown={lidarComInicioArrasto}
-      onMouseUp={lidarComFimArrasto}
       className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
     >
 
@@ -1877,9 +1847,14 @@ export default function PainelAnalogicoMobileFullscreen() {
             </span>
 
             {listaVoos.length > 1 && (
-              <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-sky-400 font-bold font-mono text-[8px] sm:text-[10px] tracking-wider shrink-0">
-                VOO {indiceVoo + 1}/{listaVoos.length}
-              </span>
+              <Link
+                href="/voos"
+                title="Ver lista de voos restantes mais distantes"
+                className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-2 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[10px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
+              >
+                <span>✈️</span>
+                <span>+{listaVoos.length - 1} NO RADAR</span>
+              </Link>
             )}
             {distVooAtual != null && (
               <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20 tabular-nums shrink-0 inline-flex items-center justify-center min-w-[4.4rem]">
