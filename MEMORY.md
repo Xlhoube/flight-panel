@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.8.0  
+**Versão:** v1.9.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
-**Estado:** PWA (Progressive Web App) completa com alternância por arrasto lateral (*swipe*) entre o painel principal (voo mais próximo fixo) e o segundo ecrã dedicado com a lista dos restantes voos exibindo exclusivamente Origem e Destino com layout dos LEDs redondos físicos, controlo de volume independente e arranque automático em ecrã inteiro.
+**Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia se não existirem voos; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), indicadores táteis de ecrã e atalhos rápidos nas opções.
 
 ---
 
@@ -99,6 +99,11 @@
 **Decisão:** Fixar o painel principal em `listaVoos[0]`. Configurar os gestos de arrasto lateral horizontal: arrastar para a esquerda no painel principal transita para o segundo ecrã de restantes voos com som de flap, e arrastar para a direita no segundo ecrã regressa ao painel principal. No segundo ecrã (`RestantesVoos`), iterar sobre `listaVoos.slice(1)` e apresentar apenas os códigos IATA e cidades de Origem e Destino com o componente de LEDs redondos (`LedText` com diodos circulares SVG Dot-Matrix), sem qualquer elemento secundário ou telemetria dispersiva. Disponibilizar também botão táctil na Linha 1 do painel e no menu de opções.  
 **Consequência:** Navegação fluida de ecrã duplo sem sair da aplicação, foco puro no voo mais próximo no ecrã principal e catálogo ultra-legível em matriz LED analógica para os restantes voos no segundo ecrã.
 
+### ADR-035 — Preservação do Fallback Automático e Adição do 3º Ecrã de Meteorologia Dedicada (2026-09-19)
+**Contexto:** O utilizador solicitou que se mantenha ativa a funcionalidade de alternar automaticamente para a meteorologia quando não houver voos no radar e que se adicione um 3º ecrã dedicado à meteorologia.  
+**Decisão:** Preservar a transição automática no ecrã principal (`principal`): quando `listaVoos.length === 0` (ou `!vooAtual`), o painel comuta automaticamente para o modo meteorológico com relógio LED, estação e condições atmosféricas. Criar o 3º ecrã dedicado (`meteo`), acessível a qualquer momento através de swipe (arrasto para a esquerda a partir do 2º ecrã ou a partir do 1º se não houver outros voos), botões táteis no cabeçalho/rodapé e atalho direto no menu de opções (`⚙️`). No 3º ecrã, disponibilizar a estação meteorológica completa com telemetria (vento, altímetro QNH, humidade, nascer/pôr do sol e índice UV) e radar integrado com contagem de voos no ar.  
+**Consequência:** Arquitetura trilateral perfeita de 3 ecrãs: o utilizador pode consultar a meteorologia sempre que desejar sem perder o conforto da transição automática quando o espaço aéreo fica sem voos.
+
 ---
 
 ## Histórico
@@ -144,3 +149,4 @@
 | 2026-09-19 | v1.6.4 | Design compacto do modal de opções com scroll interno e grelha 2-col para telemóveis em modo paisagem |
 | 2026-09-19 | v1.7.0 | Controlo de volume de áudio independente (0 a 100%) nas opções com slider e atalhos rápidos |
 | 2026-09-19 | v1.8.0 | Alternância por swipe entre painel principal e segundo ecrã de restantes voos em LEDs redondos |
+| 2026-09-19 | v1.9.0 | Preservação do fallback automático de meteorologia e adição do 3º ecrã de meteorologia dedicada |

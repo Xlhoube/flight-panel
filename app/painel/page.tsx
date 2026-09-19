@@ -1546,7 +1546,7 @@ export const LOCAIS_PREDEFINIDOS = [
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
   const listaVoosRef = useRef<EstadoVoo[]>([]);
-  const [ecraAtivo, setEcraAtivo] = useState<"principal" | "restantes">("principal");
+  const [ecraAtivo, setEcraAtivo] = useState<"principal" | "restantes" | "meteo">("principal");
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
@@ -1957,7 +1957,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Alternância entre Painel Principal (voo mais próximo) e Segundo Ecrã (restantes voos)
+  // Alternância entre os 3 Ecrãs: 1. Principal | 2. Restantes Voos | 3. Meteorologia Dedicada
   const irParaRestantes = useCallback(() => {
     tocarSomFlapClack();
     setEcraAtivo("restantes");
@@ -1966,6 +1966,11 @@ export default function PainelAnalogicoMobileFullscreen() {
   const irParaPrincipal = useCallback(() => {
     tocarSomFlapClack();
     setEcraAtivo("principal");
+  }, []);
+
+  const irParaMeteo = useCallback(() => {
+    tocarSomFlapClack();
+    setEcraAtivo("meteo");
   }, []);
 
   // Gestos de Swipe & Arrastar para os lados do ecrã (Ecrã táctil móvel + Rato desktop)
@@ -1994,13 +1999,25 @@ export default function PainelAnalogicoMobileFullscreen() {
     // Arrasto horizontal nítido (> 35px e mais horizontal do que vertical)
     if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
       if (deltaX < 0) {
-        // Arrastar para a esquerda: Painel Principal -> Restantes Voos
+        // Arrastar para a esquerda: avança para o ecrã seguinte
         if (ecraAtivo === "principal") {
-          irParaRestantes();
+          if (listaVoos.length > 1) {
+            irParaRestantes();
+          } else {
+            irParaMeteo();
+          }
+        } else if (ecraAtivo === "restantes") {
+          irParaMeteo();
         }
       } else {
-        // Arrastar para a direita: Restantes Voos -> Painel Principal
-        if (ecraAtivo === "restantes") {
+        // Arrastar para a direita: recua para o ecrã anterior
+        if (ecraAtivo === "meteo") {
+          if (listaVoos.length > 1) {
+            irParaRestantes();
+          } else {
+            irParaPrincipal();
+          }
+        } else if (ecraAtivo === "restantes") {
           irParaPrincipal();
         }
       }
@@ -2291,6 +2308,17 @@ export default function PainelAnalogicoMobileFullscreen() {
                       <span className="text-xs">➔</span>
                     </button>
                   )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      irParaMeteo();
+                    }}
+                    title="Ver 3º Ecrã (Meteorologia Dedicada)"
+                    className="h-7 sm:h-8 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 active:scale-95 text-sky-300 border border-sky-400/30 transition-all flex items-center gap-1 text-[10px] sm:text-xs font-bold font-mono shadow-sm cursor-pointer shrink-0"
+                  >
+                    <span>⛅</span>
+                    <span className="hidden sm:inline">METEO</span>
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -2591,7 +2619,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         )}
 
       </div >
-      ) : (
+      ) : ecraAtivo === "restantes" ? (
         /* ── SEGUNDO ECRÃ: LISTA DOS RESTANTES VOOS (APENAS ORIGEM E DESTINO EM LEDS REDONDOS) ── */
         <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-2 sm:gap-3 overflow-hidden">
           {/* CABEÇALHO DO SEGUNDO ECRÃ */}
@@ -2622,9 +2650,18 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[9px] text-neutral-400 hidden md:inline font-mono">
-                DESLIZA (SWIPE ➔) PARA VOLTAR
-              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  irParaMeteo();
+                }}
+                title="Ver Meteorologia (Ecrã 3)"
+                className="h-7 sm:h-8 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 active:scale-95 text-sky-300 border border-sky-400/30 transition-all flex items-center gap-1 text-[10px] sm:text-xs font-bold font-mono shadow-sm cursor-pointer shrink-0"
+              >
+                <span>⛅</span>
+                <span className="hidden xs:inline">METEO</span>
+                <span className="text-xs">➔</span>
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -2706,11 +2743,239 @@ export default function PainelAnalogicoMobileFullscreen() {
               <span>⟵</span>
               <span>VOO PRINCIPAL</span>
             </button>
+
+            {/* Indicadores de Ecrã 1, 2, 3 */}
+            <div className="flex items-center gap-1.5 font-mono text-[9px]">
+              <button onClick={irParaPrincipal} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">1: VOO</button>
+              <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/40">2: RESTANTES</span>
+              <button onClick={irParaMeteo} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">3: METEO</button>
+            </div>
+
+            <button
+              onClick={irParaMeteo}
+              className="text-sky-300 hover:text-sky-200 font-bold flex items-center gap-1 cursor-pointer"
+            >
+              <span>METEOROLOGIA</span>
+              <span>➔</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ── TERCEIRO ECRÃ: METEOROLOGIA DEDICADA ────────────────────────────── */
+        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
+          {/* CABEÇALHO DO 3º ECRÃ: ESTAÇÃO METEOROLÓGICA & RADAR */}
+          <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <button
+                onClick={irParaPrincipal}
+                className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-amber-400 hover:text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                title="Voltar ao Voo Principal"
+              >
+                <span>⟵</span>
+                <span className="hidden xs:inline">VOO</span>
+              </button>
+
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
+                <WeatherIconSVG
+                  code={meteorologia?.weather?.[0]?.code}
+                  isDay={meteorologia?.environment?.is_day ?? true}
+                  className="w-6 h-6 sm:w-8 sm:h-8"
+                />
+              </div>
+
+              <div className="flex flex-col items-start gap-0.5 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-sky-400 font-mono font-bold">
+                    3º ECRÃ • METEOROLOGIA DEDICADA (20 KM)
+                  </span>
+                  <span className="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 font-bold">
+                    {listaVoos.length > 0 ? `${listaVoos.length} VOOS NO RADAR` : "SEM TRÁFEGO"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <LedText text={horaAtual} size="lg" />
+                  <LedText text={dataAtual} size="md" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  ESTAÇÃO
+                </span>
+                <LedText
+                  text={
+                    (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).length > 14
+                      ? (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).slice(0, 14)
+                      : (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome)
+                  }
+                  size="md"
+                />
+                <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
+                  {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
+                </span>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalOpcoesAberto(true);
+                }}
+                title="Definições e Opções"
+                aria-label="Opções"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
+              >
+                ⚙️
+              </button>
+            </div>
+          </div>
+
+          {/* LINHA 2: CONDIÇÕES CENTRAIS DE TEMPO & TEMPERATURA */}
+          <div className="w-full flex-1 min-h-0 bg-[#10121a] px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
+            <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                CONDIÇÃO ATMOSFÉRICA LOCAL
+              </span>
+              <span>TEMPERATURA &amp; SENSAÇÃO</span>
+            </div>
+
+            <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
+              <div className="flex flex-col items-start gap-1 min-w-0">
+                <LedText text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+                <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono whitespace-nowrap">
+                  {meteorologia?.environment?.precipitation_mm != null && (
+                    <>
+                      <span className="text-cyan-400 font-bold tracking-wider">
+                        PRECIP: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
+                      </span>
+                      <span>•</span>
+                    </>
+                  )}
+                  <span className="text-amber-400/90 font-bold">
+                    SENSAÇÃO: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
+                  </span>
+                  <span>•</span>
+                  <span className="text-sky-300">
+                    MIN {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
+                  </span>
+                  <span>/</span>
+                  <span className="text-orange-400">
+                    MAX {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end shrink-0">
+                <div className="flex items-center gap-1">
+                  <LedText text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
+                  <span className="text-2xl sm:text-4xl font-black text-white">°C</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* LINHA 3: TELEMETRIA METEOROLÓGICA (GRELHA DE 6 MÓDULOS) */}
+          <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 shrink-0">
+            {/* Módulo 1: Vento */}
+            <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">VENTO / RUMO</span>
+              <div className="flex items-center gap-0.5">
+                <LedText text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
+                <span className="text-[8px] text-neutral-400 font-bold font-mono">KM/H</span>
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-amber-400 font-mono font-bold">
+                {meteorologia?.wind?.direction_cardinal || "N"} ({meteorologia?.wind?.speed_kts ?? 7} KT)
+              </span>
+            </div>
+
+            {/* Módulo 2: QNH */}
+            <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PRESSÃO QNH</span>
+              <div className="flex items-center gap-0.5">
+                <LedText text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
+                <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">ALTÍMETRO</span>
+            </div>
+
+            {/* Módulo 3: Humidade */}
+            <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">HUMIDADE</span>
+              <div className="flex items-center gap-0.5">
+                <LedText text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
+                <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">RELATIVA</span>
+            </div>
+
+            {/* Módulo 4: Nascer do Sol */}
+            <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">NASCER SOL</span>
+              <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
+                <span className="text-amber-400">☀️</span>
+                {meteorologia?.environment?.sunrise || "07:15"}
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">AURORA</span>
+            </div>
+
+            {/* Módulo 5: Pôr do Sol */}
+            <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PÔR DO SOL</span>
+              <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
+                <span className="text-orange-400">🌙</span>
+                {meteorologia?.environment?.sunset || "19:50"}
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">CREPÚSCULO</span>
+            </div>
+
+            {/* Módulo 6: Índice UV */}
+            <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">ÍNDICE UV</span>
+              <div className="flex items-center gap-0.5">
+                <span className="text-[10px] sm:text-xs font-mono font-black text-amber-300">
+                  UV {meteorologia?.environment?.uv_index ?? 3}
+                </span>
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">MODERADO</span>
+            </div>
+          </div>
+
+          {/* RODAPÉ DO 3º ECRÃ COM NAVEGAÇÃO COMPLETA */}
+          <div className="w-full py-1.5 px-3 bg-[#10121a]/80 border border-white/10 rounded-lg flex items-center justify-between text-[9px] sm:text-[10px] text-neutral-400 shrink-0">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={irParaPrincipal}
+                className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer"
+              >
+                <span>⟵</span>
+                <span>VOO PRINCIPAL</span>
+              </button>
+              {listaVoos.length > 1 && (
+                <button
+                  onClick={irParaRestantes}
+                  className="text-neutral-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer ml-1"
+                >
+                  <span>⟵</span>
+                  <span>RESTANTES</span>
+                </button>
+              )}
+            </div>
+
+            {/* Indicadores de Ecrã 1, 2, 3 */}
+            <div className="flex items-center gap-1.5 font-mono text-[9px]">
+              <button onClick={irParaPrincipal} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">1: VOO</button>
+              {listaVoos.length > 1 ? (
+                <button onClick={irParaRestantes} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">2: RESTANTES</button>
+              ) : (
+                <span className="px-1.5 py-0.5 rounded bg-white/5 text-neutral-600">2: RESTANTES</span>
+              )}
+              <span className="px-1.5 py-0.5 rounded bg-sky-400/20 text-sky-300 font-bold border border-sky-400/40">3: METEO</span>
+            </div>
+
             <span className="text-neutral-500 hidden sm:inline font-mono">
-              DESLIZA PARA A DIREITA (SWIPE ➔) PARA VOLTAR
-            </span>
-            <span className="font-mono text-emerald-400">
-              RADAR ATIVO
+              DESLIZA (SWIPE ➔) PARA VOLTAR
             </span>
           </div>
         </div>
@@ -2894,36 +3159,65 @@ export default function PainelAnalogicoMobileFullscreen() {
               </button>
             </div>
 
-            {/* Opção 5: Restantes Voos e Tabela */}
-            {listaVoos.length > 0 && (
-              <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-neutral-300">RESTANTES VOOS NO RADAR</span>
-                  <span className="text-[9px] text-amber-400 font-mono">{listaVoos.length} no radar</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setModalOpcoesAberto(false);
-                      irParaRestantes();
-                    }}
-                    className="w-full py-1.5 px-2.5 rounded-lg border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>✈️</span>
-                    <span>RESTANTES VOOS (LEDS)</span>
-                  </button>
-                  <Link
-                    href="/voos"
-                    onClick={() => setModalOpcoesAberto(false)}
-                    className="w-full py-1.5 px-2.5 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>📋</span>
-                    <span>TABELA DETALHADA</span>
-                  </Link>
-                </div>
+            {/* Opção 5: Navegação entre os 3 Ecrãs */}
+            <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-bold text-neutral-300">NAVEGAÇÃO ENTRE ECRÃS (3 ECRÃS)</span>
+                <span className="text-[9px] text-sky-400 font-mono">
+                  {ecraAtivo === "principal" ? "Ecrã 1 Ativo" : ecraAtivo === "restantes" ? "Ecrã 2 Ativo" : "Ecrã 3 Ativo"}
+                </span>
               </div>
-            )}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalOpcoesAberto(false);
+                    irParaPrincipal();
+                  }}
+                  className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ecraAtivo === "principal" ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"}`}
+                >
+                  <span>✈️</span>
+                  <span>1. VOO PRINCIPAL</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={listaVoos.length <= 1}
+                  onClick={() => {
+                    setModalOpcoesAberto(false);
+                    irParaRestantes();
+                  }}
+                  className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${listaVoos.length <= 1 ? "opacity-40 cursor-not-allowed border-white/5 bg-white/5 text-neutral-500" : ecraAtivo === "restantes" ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm cursor-pointer" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 cursor-pointer"}`}
+                  title={listaVoos.length <= 1 ? "Apenas existe 1 ou nenhum voo no radar" : "Ver restantes voos em LEDs"}
+                >
+                  <span>🛫</span>
+                  <span>2. RESTANTES ({Math.max(0, listaVoos.length - 1)})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalOpcoesAberto(false);
+                    irParaMeteo();
+                  }}
+                  className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ecraAtivo === "meteo" ? "bg-sky-500/25 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"}`}
+                >
+                  <span>⛅</span>
+                  <span>3. METEOROLOGIA</span>
+                </button>
+              </div>
+
+              {listaVoos.length > 0 && (
+                <Link
+                  href="/voos"
+                  onClick={() => setModalOpcoesAberto(false)}
+                  className="w-full py-1.5 px-2.5 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-0.5"
+                >
+                  <span>📋</span>
+                  <span>VER TABELA COMPLETA DE VOOS ({listaVoos.length})</span>
+                </Link>
+              )}
+            </div>
 
             {/* Botão Fechar */}
             <div className="pt-2 border-t border-white/10 flex justify-end shrink-0">
