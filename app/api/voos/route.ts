@@ -3,8 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 export interface RotaAdsb {
   origem: string;
   origemCode: string;
+  origemPais?: string;
   destino: string;
   destinoCode: string;
+  destinoPais?: string;
   airline?: string;
   callsignIata?: string;
   callsignIcao?: string;
@@ -259,6 +261,128 @@ const TRADUCOES_CIDADES: Record<string, string> = {
   DUBLIN: "DUBLIN",
 };
 
+const AEROPORTOS_PAISES: Record<string, string> = {
+  OPO: "PORTUGAL", LIS: "PORTUGAL", FAO: "PORTUGAL", FNC: "PORTUGAL", PDL: "PORTUGAL",
+  TER: "PORTUGAL", PXO: "PORTUGAL", SMA: "PORTUGAL", HOR: "PORTUGAL", FLW: "PORTUGAL",
+  GRW: "PORTUGAL", SJZ: "PORTUGAL", CVU: "PORTUGAL", VRL: "PORTUGAL", BGC: "PORTUGAL",
+  MAD: "ESPANHA", BCN: "ESPANHA", VLC: "ESPANHA", SVQ: "ESPANHA", AGP: "ESPANHA",
+  ALC: "ESPANHA", BIO: "ESPANHA", SCQ: "ESPANHA", VGO: "ESPANHA", LCG: "ESPANHA",
+  PMI: "ESPANHA", IBZ: "ESPANHA", MAH: "ESPANHA", TFS: "ESPANHA", TFN: "ESPANHA",
+  LPA: "ESPANHA", ACE: "ESPANHA", FUE: "ESPANHA", SPC: "ESPANHA",
+  CDG: "FRANÇA", ORY: "FRANÇA", BVA: "FRANÇA", LYS: "FRANÇA", MRS: "FRANÇA",
+  NCE: "FRANÇA", TLS: "FRANÇA", BOD: "FRANÇA", NTE: "FRANÇA",
+  LHR: "REINO UNIDO", LGW: "REINO UNIDO", STN: "REINO UNIDO", LTN: "REINO UNIDO",
+  LCY: "REINO UNIDO", SEN: "REINO UNIDO", MAN: "REINO UNIDO", BHX: "REINO UNIDO",
+  EDI: "REINO UNIDO", GLA: "REINO UNIDO", BRS: "REINO UNIDO", LPL: "REINO UNIDO",
+  NCL: "REINO UNIDO", EMA: "REINO UNIDO", BFS: "REINO UNIDO", BHD: "REINO UNIDO",
+  DUB: "IRLANDA", ORK: "IRLANDA", SNN: "IRLANDA",
+  AMS: "PAÍSES BAIXOS", EIN: "PAÍSES BAIXOS", RTM: "PAÍSES BAIXOS",
+  BRU: "BÉLGICA", CRL: "BÉLGICA", LUX: "LUXEMBURGO",
+  FRA: "ALEMANHA", HHN: "ALEMANHA", MUC: "ALEMANHA", BER: "ALEMANHA", HAM: "ALEMANHA",
+  DUS: "ALEMANHA", CGN: "ALEMANHA", STR: "ALEMANHA", NUE: "ALEMANHA", HAJ: "ALEMANHA",
+  ZRH: "SUÍÇA", GVA: "SUÍÇA", BSL: "SUÍÇA", VIE: "ÁUSTRIA", SZG: "ÁUSTRIA",
+  FCO: "ITÁLIA", CIA: "ITÁLIA", MXP: "ITÁLIA", LIN: "ITÁLIA", BGY: "ITÁLIA",
+  VCE: "ITÁLIA", TSF: "ITÁLIA", NAP: "ITÁLIA", BLQ: "ITÁLIA", TRN: "ITÁLIA",
+  PSA: "ITÁLIA", FLR: "ITÁLIA", CTA: "ITÁLIA", PMO: "ITÁLIA",
+  WAW: "POLÓNIA", WMI: "POLÓNIA", KRK: "POLÓNIA", GDN: "POLÓNIA", WRO: "POLÓNIA",
+  POZ: "POLÓNIA", KTW: "POLÓNIA", PRG: "CHÉQUIA", BUD: "HUNGRIA", BTS: "ESLOVÁQUIA",
+  OTP: "ROMÉNIA", SOF: "BULGÁRIA", BEG: "SÉRVIA", ZAG: "CROÁCIA", LJU: "ESLOVÉNIA",
+  CPH: "DINAMARCA", BLL: "DINAMARCA", OSL: "NORUEGA", BGO: "NORUEGA", SVG: "NORUEGA",
+  TRD: "NORUEGA", ARN: "SUÉCIA", BMA: "SUÉCIA", GOT: "SUÉCIA", HEL: "FINLÂNDIA",
+  KEF: "ISLÂNDIA", ATH: "GRÉCIA", SKG: "GRÉCIA", HER: "GRÉCIA", CHQ: "GRÉCIA",
+  RHO: "GRÉCIA", CFU: "GRÉCIA", JTR: "GRÉCIA", JMK: "GRÉCIA", LCA: "CHIPRE",
+  PFO: "CHIPRE", MLA: "MALTA", IST: "TURQUIA", SAW: "TURQUIA", AYT: "TURQUIA",
+  ADB: "TURQUIA", DXB: "EAU", DWC: "EAU", DOH: "CATAR", AUH: "EAU",
+  RUH: "ARÁBIA SAUDITA", JED: "ARÁBIA SAUDITA", TLV: "ISRAEL", AMM: "JORDÂNIA",
+  BEY: "LÍBANO", CAI: "EGITO", HRG: "EGITO", SSH: "EGITO", RAK: "MARROCOS",
+  CMN: "MARROCOS", AGA: "MARROCOS", FEZ: "MARROCOS", TNG: "MARROCOS", TUN: "TUNÍSIA",
+  NBE: "TUNÍSIA", DJE: "TUNÍSIA", ALG: "ARGÉLIA", DKR: "SENEGAL", DSS: "SENEGAL",
+  BKO: "MALI", OXB: "GUINÉ-BISSAU", RAI: "CABO VERDE", SID: "CABO VERDE",
+  BVC: "CABO VERDE", VXE: "CABO VERDE", TMS: "SÃO TOMÉ", LAD: "ANGOLA",
+  MPM: "MOÇAMBIQUE", JNB: "ÁFRICA DO SUL", CPT: "ÁFRICA DO SUL",
+  JFK: "ESTADOS UNIDOS", EWR: "ESTADOS UNIDOS", LGA: "ESTADOS UNIDOS",
+  BOS: "ESTADOS UNIDOS", IAD: "ESTADOS UNIDOS", DCA: "ESTADOS UNIDOS",
+  BWI: "ESTADOS UNIDOS", ORD: "ESTADOS UNIDOS", MDW: "ESTADOS UNIDOS",
+  MIA: "ESTADOS UNIDOS", FLL: "ESTADOS UNIDOS", MCO: "ESTADOS UNIDOS",
+  TPA: "ESTADOS UNIDOS", ATL: "ESTADOS UNIDOS", DFW: "ESTADOS UNIDOS",
+  IAH: "ESTADOS UNIDOS", LAX: "ESTADOS UNIDOS", SFO: "ESTADOS UNIDOS",
+  SEA: "ESTADOS UNIDOS", DEN: "ESTADOS UNIDOS", LAS: "ESTADOS UNIDOS",
+  PHX: "ESTADOS UNIDOS", YYZ: "CANADÁ", YUL: "CANADÁ", YVR: "CANADÁ",
+  YYC: "CANADÁ", GIG: "BRASIL", SDU: "BRASIL", GRU: "BRASIL", CGH: "BRASIL",
+  VCP: "BRASIL", BSB: "BRASIL", SSA: "BRASIL", REC: "BRASIL", FOR: "BRASIL",
+  CNF: "BRASIL", POA: "BRASIL", CWB: "BRASIL", FLN: "BRASIL", NAT: "BRASIL",
+  MCZ: "BRASIL", BPS: "BRASIL", EZE: "ARGENTINA", AEP: "ARGENTINA",
+  SCL: "CHILE", LIM: "PERU", BOG: "COLÔMBIA", MDE: "COLÔMBIA",
+  PTY: "PANAMÁ", MEX: "MÉXICO", CUN: "MÉXICO",
+};
+
+export function obterPaisDoAeroporto(codigo?: string, paisIsoOuNome?: string): string {
+  const cod = (codigo || "").trim().toUpperCase();
+  if (AEROPORTOS_PAISES[cod]) return AEROPORTOS_PAISES[cod];
+
+  if (cod.length === 4) {
+    if (cod.startsWith("LP")) return "PORTUGAL";
+    if (cod.startsWith("LE")) return "ESPANHA";
+    if (cod.startsWith("LF")) return "FRANÇA";
+    if (cod.startsWith("EG")) return "REINO UNIDO";
+    if (cod.startsWith("EI")) return "IRLANDA";
+    if (cod.startsWith("ED") || cod.startsWith("ET")) return "ALEMANHA";
+    if (cod.startsWith("EH")) return "PAÍSES BAIXOS";
+    if (cod.startsWith("EB") || cod.startsWith("EL")) return "BÉLGICA";
+    if (cod.startsWith("LS")) return "SUÍÇA";
+    if (cod.startsWith("LOW")) return "ÁUSTRIA";
+    if (cod.startsWith("LI")) return "ITÁLIA";
+    if (cod.startsWith("EP")) return "POLÓNIA";
+    if (cod.startsWith("LK")) return "CHÉQUIA";
+    if (cod.startsWith("LH")) return "HUNGRIA";
+    if (cod.startsWith("LR")) return "ROMÉNIA";
+    if (cod.startsWith("LG")) return "GRÉCIA";
+    if (cod.startsWith("LT")) return "TURQUIA";
+    if (cod.startsWith("EK")) return "DINAMARCA";
+    if (cod.startsWith("EN")) return "NORUEGA";
+    if (cod.startsWith("ES")) return "SUÉCIA";
+    if (cod.startsWith("EF")) return "FINLÂNDIA";
+    if (cod.startsWith("BI")) return "ISLÂNDIA";
+    if (cod.startsWith("OM")) return "EAU";
+    if (cod.startsWith("GM")) return "MARROCOS";
+    if (cod.startsWith("GV")) return "CABO VERDE";
+    if (cod.startsWith("FN")) return "ANGOLA";
+    if (cod.startsWith("SB") || cod.startsWith("SD")) return "BRASIL";
+    if (cod.startsWith("K")) return "ESTADOS UNIDOS";
+    if (cod.startsWith("C")) return "CANADÁ";
+  }
+
+  if (paisIsoOuNome) {
+    const p = paisIsoOuNome.trim().toUpperCase();
+    const mapa: Record<string, string> = {
+      PORTUGAL: "PORTUGAL", PT: "PORTUGAL",
+      SPAIN: "ESPANHA", ES: "ESPANHA", ESPANHA: "ESPANHA",
+      FRANCE: "FRANÇA", FR: "FRANÇA",
+      "UNITED KINGDOM": "REINO UNIDO", GB: "REINO UNIDO", UK: "REINO UNIDO",
+      GERMANY: "ALEMANHA", DE: "ALEMANHA",
+      NETHERLANDS: "PAÍSES BAIXOS", NL: "PAÍSES BAIXOS",
+      BELGIUM: "BÉLGICA", BE: "BÉLGICA",
+      SWITZERLAND: "SUÍÇA", CH: "SUÍÇA",
+      ITALY: "ITÁLIA", IT: "ITÁLIA",
+      IRELAND: "IRLANDA", IE: "IRLANDA",
+      POLAND: "POLÓNIA", PL: "POLÓNIA",
+      AUSTRIA: "ÁUSTRIA", AT: "ÁUSTRIA",
+      GREECE: "GRÉCIA", GR: "GRÉCIA",
+      TURKEY: "TURQUIA", TR: "TURQUIA",
+      BRAZIL: "BRASIL", BR: "BRASIL",
+      "UNITED STATES": "ESTADOS UNIDOS", US: "ESTADOS UNIDOS", USA: "ESTADOS UNIDOS",
+      CANADA: "CANADÁ", CA: "CANADÁ",
+      MOROCCO: "MARROCOS", MA: "MARROCOS",
+      "CAPE VERDE": "CABO VERDE", CV: "CABO VERDE",
+      ANGOLA: "ANGOLA", AO: "ANGOLA",
+    };
+    if (mapa[p]) return mapa[p];
+    return p;
+  }
+
+  return "";
+}
+
 const cacheRotasMemoria: Map<string, { rota: RotaAdsb | null; expiraEm: number }> = new Map();
 
 // Consulta com validação geográfica de plausibilidade para bases estáticas (adsbdb)
@@ -296,7 +420,7 @@ async function obterRotaPorCallsign(callsign: string, curLat?: number, curLon?: 
           const distDest = Math.hypot(destLat - curLat, destLon - curLon);
 
           // Se ambos os aeroportos estiverem a mais de 12 graus (~1.300 km) da posição actual,
-          // o registo na base de dados é um callsign reutilizado/obsoleto (ex: Veneza -> Helsínquia sobrevoando o Porto)
+          // o registo na base de dados é um callsign reutilizado/obsoleto
           if (distOrig > 12 && distDest > 12) {
             cacheRotasMemoria.set(cs, { rota: null, expiraEm: agora + 3600_000 });
             return null;
@@ -311,8 +435,10 @@ async function obterRotaPorCallsign(callsign: string, curLat?: number, curLon?: 
         const rota: RotaAdsb = {
           origem: AEROPORTOS_CIDADES[origIata] || TRADUCOES_CIDADES[rawOrigem] || rawOrigem,
           origemCode: origIata,
+          origemPais: obterPaisDoAeroporto(origIata, r.origin.country_name || r.origin.iso_country),
           destino: AEROPORTOS_CIDADES[destIata] || TRADUCOES_CIDADES[rawDestino] || rawDestino,
           destinoCode: destIata,
+          destinoPais: obterPaisDoAeroporto(destIata, r.destination.country_name || r.destination.iso_country),
           airline: r.airline?.name,
           callsignIata: r.callsign_iata,
           callsignIcao: r.callsign_icao,
