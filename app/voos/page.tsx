@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -763,6 +764,7 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
 // ─── Página Principal de Lista de Voos Restantes (/voos) ──────────────────────
 
 export default function ListaVoosRestantes() {
+  const router = useRouter();
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
   const [rotasMap, setRotasMap] = useState<Record<string, any>>({});
   const [localizacao, setLocalizacao] = useState<InfoLocalizacao>(LOCALIZACAO_PADRAO);
@@ -770,6 +772,32 @@ export default function ListaVoosRestantes() {
   const [horaAtual, setHoraAtual] = useState("12:00:00");
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+
+  // Gestos de Swipe lateral (arrastar para a direita volta ao painel)
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const lidarComInicioArrasto = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    touchStartX.current = clientX;
+    touchStartY.current = clientY;
+  };
+
+  const lidarComFimArrasto = (e: React.TouchEvent | React.MouseEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const clientX = "changedTouches" in e ? e.changedTouches[0].clientX : e.clientX;
+    const clientY = "changedTouches" in e ? e.changedTouches[0].clientY : e.clientY;
+    const deltaX = clientX - touchStartX.current;
+    const deltaY = clientY - touchStartY.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    // Arrastar nítido para a direita -> Voltar ao painel principal
+    if (deltaX > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      router.push("/painel");
+    }
+  };
 
   // Ler preferências de unidades do utilizador
   useEffect(() => {
@@ -945,7 +973,13 @@ export default function ListaVoosRestantes() {
   const voosRestantes = listaVoos.length > 1 ? listaVoos.slice(1) : [];
 
   return (
-    <main className="min-h-screen w-full bg-[#050608] text-white p-3 sm:p-6 font-mono select-none overflow-y-auto">
+    <main
+      onTouchStart={lidarComInicioArrasto}
+      onTouchEnd={lidarComFimArrasto}
+      onMouseDown={lidarComInicioArrasto}
+      onMouseUp={lidarComFimArrasto}
+      className="min-h-screen w-full bg-[#050608] text-white p-3 sm:p-6 font-mono select-none overflow-y-auto"
+    >
       <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 pb-8">
 
         {/* ── CABEÇALHO COM BOTÃO DE REGRESSO E INFORMAÇÃO DA ESTAÇÃO ── */}

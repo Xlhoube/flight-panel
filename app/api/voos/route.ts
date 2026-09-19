@@ -748,8 +748,8 @@ function converterAdsbParaEstado(ac: any): any[] {
     ac.alt_baro === "ground"
       ? null
       : typeof ac.alt_baro === "number"
-      ? Math.round(ac.alt_baro * 0.3048)
-      : null;
+        ? Math.round(ac.alt_baro * 0.3048)
+        : null;
   const noSolo = ac.alt_baro === "ground";
   const velMs = typeof ac.gs === "number" ? Math.round(ac.gs * 0.514444) : null;
   const rumo = typeof ac.track === "number" ? Math.round(ac.track) : null;
@@ -783,9 +783,9 @@ function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 

@@ -1538,6 +1538,7 @@ export const LOCAIS_PREDEFINIDOS = [
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
   const listaVoosRef = useRef<EstadoVoo[]>([]);
+  const [indiceVoo, setIndiceVoo] = useState<number>(0);
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
@@ -1925,6 +1926,60 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
+  // Navegação entre múltiplos voos em sobrevoo (arrasto lateral no ecrã ou controlos táteis)
+  const avancarVoo = useCallback(() => {
+    setListaVoos((lista) => {
+      if (lista.length <= 1) return lista;
+      tocarSomFlapClack();
+      setIndiceVoo((prev) => (prev + 1) % lista.length);
+      return lista;
+    });
+  }, []);
+
+  const recuarVoo = useCallback(() => {
+    setListaVoos((lista) => {
+      if (lista.length <= 1) return lista;
+      tocarSomFlapClack();
+      setIndiceVoo((prev) => (prev - 1 + lista.length) % lista.length);
+      return lista;
+    });
+  }, []);
+
+  // Gestos de Swipe & Arrastar para os lados do ecrã (Ecrã táctil móvel + Rato desktop)
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const lidarComInicioArrasto = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    touchStartX.current = clientX;
+    touchStartY.current = clientY;
+  };
+
+  const lidarComFimArrasto = (e: React.TouchEvent | React.MouseEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const clientX = "changedTouches" in e ? e.changedTouches[0].clientX : e.clientX;
+    const clientY = "changedTouches" in e ? e.changedTouches[0].clientY : e.clientY;
+
+    const deltaX = clientX - touchStartX.current;
+    const deltaY = clientY - touchStartY.current;
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    // Arrasto horizontal nítido (> 35px e mais horizontal do que vertical)
+    if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      if (deltaX < 0) {
+        // Arrastar para a esquerda -> Próximo voo
+        avancarVoo();
+      } else {
+        // Arrastar para a direita -> Voo anterior
+        recuarVoo();
+      }
+    }
+  };
+
   // Função para activar ecrã inteiro (utilizada automaticamente na abertura e pelo botão)
   const solicitarFullScreen = useCallback(() => {
     if (typeof window !== "undefined" && "wakeLock" in navigator) {
@@ -2014,6 +2069,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     // Remoção imediata: espaço aéreo livre transita de imediato para a meteorologia
     listaVoosRef.current = [];
     setListaVoos([]);
+    setIndiceVoo(0);
     setTotalNoRadar(0);
     await carregarMeteorologia({ lat: refLat, lon: refLon });
   }, [carregarMeteorologia]);
@@ -2061,6 +2117,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           listaVoosRef.current = voosEmAr;
           setListaVoos(voosEmAr);
           setTotalNoRadar(voosEmAr.length);
+          setIndiceVoo((prev) => (prev >= voosEmAr.length ? 0 : prev));
           setMeteorologia(null);
 
           // Partilha de dados em cache para a nova página de lista de voos restantes (/voos)
@@ -2094,18 +2151,30 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  // O painel principal apresenta sempre o voo mais próximo (mais relevante)
-  const vooAtual = listaVoos.length > 0 ? listaVoos[0] : null;
+  // O painel principal exibe o voo selecionado (o mais próximo por defeito, ou os restantes por arrasto lateral)
+  const vooAtual = listaVoos.length > 0 ? listaVoos[Math.min(indiceVoo, listaVoos.length - 1)] : null;
 
   // Áudio reproduzido (/Flight.mp3) exclusivamente quando um novo voo é detetado ou entra no radar
-  const ultimoVooIdRef = useRef<string | null>(null);
+  const voosConhecidosRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    const idAtual = vooAtual ? (vooAtual[0] || vooAtual[1] || null) : null;
-    if (idAtual && ultimoVooIdRef.current !== null && idAtual !== ultimoVooIdRef.current) {
-      tocarSomNovoVoo();
+    if (listaVoos.length > 0) {
+      const novosVoos = listaVoos.filter((v) => {
+        const id = v[0] || v[1];
+        return id && !voosConhecidosRef.current.has(id);
+      });
+      if (novosVoos.length > 0 && voosConhecidosRef.current.size > 0) {
+        tocarSomNovoVoo();
+      }
+      const novoConjunto = new Set<string>();
+      listaVoos.forEach((v) => {
+        const id = v[0] || v[1];
+        if (id) novoConjunto.add(id);
+      });
+      voosConhecidosRef.current = novoConjunto;
+    } else {
+      voosConhecidosRef.current.clear();
     }
-    ultimoVooIdRef.current = idAtual;
-  }, [vooAtual]);
+  }, [listaVoos]);
 
   const refLatAtual = localizacao.lat;
   const refLonAtual = localizacao.lon;
@@ -2117,6 +2186,10 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   return (
     <main
+      onTouchStart={lidarComInicioArrasto}
+      onTouchEnd={lidarComFimArrasto}
+      onMouseDown={lidarComInicioArrasto}
+      onMouseUp={lidarComFimArrasto}
       className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
     >
 
@@ -2157,13 +2230,42 @@ export default function PainelAnalogicoMobileFullscreen() {
                       </span>
                     )}
                     {listaVoos.length > 1 && (
+                      <div className="flex items-center gap-1 bg-sky-500/20 px-1.5 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[9px] font-bold font-mono tracking-wider shrink-0 text-sky-300">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); recuarVoo(); }}
+                          title="Voo anterior (ou arrasta para a direita no ecrã)"
+                          className="hover:text-white px-0.5 cursor-pointer active:scale-75 transition-transform"
+                        >
+                          ◀
+                        </button>
+                        <span>
+                          VOO {indiceVoo + 1}/{listaVoos.length}
+                          {indiceVoo === 0 ? " (MAIS PRÓXIMO)" : " (RESTANTE)"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); avancarVoo(); }}
+                          title="Próximo voo (ou arrasta para a esquerda no ecrã)"
+                          className="hover:text-white px-0.5 cursor-pointer active:scale-75 transition-transform"
+                        >
+                          ▶
+                        </button>
+                      </div>
+                    )}
+                    {listaVoos.length > 1 && (
+                      <span className="hidden md:inline-flex items-center gap-1 text-[8px] sm:text-[9px] text-neutral-400 font-mono">
+                        ↔ ARRASTA O ECRÃ
+                      </span>
+                    )}
+                    {listaVoos.length > 1 && (
                       <Link
                         href="/voos"
-                        title="Ver lista de voos restantes mais distantes"
-                        className="flex items-center gap-1 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-1.5 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[9px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
+                        title="Ver lista de todos os voos restantes"
+                        className="flex items-center gap-1 bg-white/10 hover:bg-white/20 active:scale-95 text-neutral-300 hover:text-white px-1.5 py-0.5 rounded border border-white/20 text-[8px] sm:text-[9px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
                       >
-                        <span>✈️</span>
-                        <span>+{listaVoos.length - 1} NO RADAR</span>
+                        <span>📋</span>
+                        <span>LISTA</span>
                       </Link>
                     )}
                   </div>
