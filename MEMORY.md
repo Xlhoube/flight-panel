@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.6.1  
+**Versão:** v1.6.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
-**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados e sincronização meteorológica consistente entre PC e telemóvel.
+**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados e interface minimalista limpa sem badges redundantes.
 
 ---
 
@@ -66,18 +66,18 @@
 
 ### ADR-028 — Navegação entre Voos Restantes por Arrasto Lateral / Swipe (2026-09-19)
 **Contexto:** O utilizador solicitou que a lista dos restantes voos seja apresentada através do arrasto para os lados do ecrã.  
-**Decisão:** Implementar sistema de gestos táteis e de rato com deteção de arrasto horizontal (`deltaX > 35px` com tolerância angular vertical). No painel principal (`/painel`), arrastar para a esquerda avança para os voos restantes mais distantes, e arrastar para a direita recua em direção ao voo mais próximo. Ao navegar entre voos, acionar o som mecânico de palhetas Solari (`tocarSomFlapClack`), mantendo o jingle de cabine (`/Flight.mp3`) reservado para novos voos detetados no espaço aéreo. Na página `/voos`, arrastar para a direita transita de volta para o painel principal. Exibir badge interativo `◀ VOO X/Y (MAIS PRÓXIMO / RESTANTE) ▶` na Linha 1 com atalhos de clique e aviso `↔ ARRASTA O ECRÃ`.  
+**Decisão:** Implementar sistema de gestos táteis e de rato com deteção de arrasto horizontal (`deltaX > 35px` com tolerância angular vertical). No painel principal (`/painel`), arrastar para a esquerda avança para os voos restantes mais distantes, e arrastar para a direita recua em direção ao voo mais próximo. Ao navegar entre voos, acionar o som mecânico de palhetas Solari (`tocarSomFlapClack`), mantendo o jingle de cabine (`/Flight.mp3`) reservado para novos voos detetados no espaço aéreo. Na página `/voos`, arrastar para a direita transita de volta para o painel principal.  
 **Consequência:** Navegação fluida, tátil e intuitiva entre todos os voos captados, sem perder o acesso direto à tabela completa.
 
 ### ADR-029 — Paridade Meteorológica entre Telemóvel e PC (2026-09-19)
 **Contexto:** O utilizador reportou que o painel meteorológico apresentava informações divergentes entre o telemóvel e o computador.  
-**Decisão:**
-1. **Normalização de Coordenadas:** Arredondar as coordenadas enviadas para 2 casas decimais (~1.1 km) para garantir que ligeiras variações de GPS entre o telemóvel e o PC mapeiem para a mesma célula e estação meteorológica.
-2. **Correção de Chave OpenWeatherMap:** Sanitizar o prefixo `a_` da chave em `.env.local` e tratar programaticamente qualquer prefixo em `app/api/meteorologia/route.ts`.
-3. **Fuso Horário Europe/Lisbon:** Garantir que o cálculo da hora do nascer e do pôr do sol utiliza expressamente `timeZone: "Europe/Lisbon"`, eliminando desfasamentos de fuso horário entre o servidor (UTC no Vercel) e os dispositivos locais.
-4. **Respeito pelas Preferências de Localização:** Não sobrepor escolhas manuais ou predefinidas do utilizador com GPS automático quando uma preferência fixa estiver registada em `localStorage`.
-5. **Prevenção de Cache Obsoleta:** Adicionar `cache: "no-store"` na chamada do cliente e `export const dynamic = "force-dynamic"` no Route Handler do Next.js.  
-**Consequência:** Dados meteorológicos 100% idênticos, síncronos e estáveis em todos os ecrãs (telemóvel, tablet e PC).
+**Decisão:** Normalização de coordenadas a 2 casas decimais (~1 km), fuso horário explícito `Europe/Lisbon` para horas solares, correção de chave OpenWeatherMap, desativação de cache e respeito rigoroso pelas preferências de localização do utilizador.  
+**Consequência:** Dados meteorológicos sincronizados e consistentes entre dispositivos.
+
+### ADR-030 — Remoção dos Emblemas de Telemetria da Linha 1 (2026-09-19)
+**Contexto:** O utilizador solicitou a remoção da informação secundária (emblemas de distância em km, número de callsign e contador no radar) exibida junto ao rótulo `VOO / FLIGHT`.  
+**Decisão:** Eliminar os elementos de telemetria secundária da Linha 1, mantendo apenas a etiqueta pura `VOO / FLIGHT` e o número do voo em matriz LED de grandes dimensões. A navegação entre voos continua 100% ativa através do arrasto lateral do ecrã (swipe) e a tabela completa de voos fica acessível de forma discreta dentro do menu `⚙️ OPÇÕES`.  
+**Consequência:** Design purificado, foco absoluto na identidade visual do voo e eliminação de distrações visuais no cabeçalho.
 
 ---
 
@@ -119,3 +119,4 @@
 | 2026-09-19 | v1.5.0 | Exibição do nome oficial do aeroporto (origens e destinos) no painel e na lista de voos |
 | 2026-09-19 | v1.6.0 | Navegação entre todos os voos restantes por arrasto lateral (ecrã tátil e rato) e botões dedicados |
 | 2026-09-19 | v1.6.1 | Correção e sincronização da telemetria meteorológica entre telemóvel e computador |
+| 2026-09-19 | v1.6.2 | Remoção dos emblemas de telemetria da Linha 1 para design minimalista limpo |

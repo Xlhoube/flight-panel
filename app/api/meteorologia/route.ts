@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         const windKts = Math.round((dados.wind?.speed ?? 0) * 1.94384);
         const windDeg = dados.wind?.deg ?? 0;
         const pressure = dados.main?.pressure ?? 1013;
-        
+
         return NextResponse.json({
           name: (dados.name || "ESTAÇÃO LOCAL").toUpperCase(),
           weather: [{ description: (dados.weather?.[0]?.description || "CEU LIMPO").toUpperCase(), main: "Meteo", code: dados.weather?.[0]?.id ?? 800 }],

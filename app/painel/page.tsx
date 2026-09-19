@@ -2221,60 +2221,9 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
 
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                      VOO / FLIGHT
-                    </span>
-                    {distVooAtual != null && (
-                      <span className="text-sky-400 font-mono font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20 text-[8px] sm:text-[10px] tabular-nums shrink-0">
-                        📍 {distVooAtual.toFixed(1)} KM
-                      </span>
-                    )}
-                    {infoVoo.callsignIata && infoVoo.callsignIata !== infoVoo.numeroVoo && (
-                      <span className="text-[8px] sm:text-[10px] text-sky-400 font-mono tracking-wider font-bold bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20">
-                        {infoVoo.callsignIata}
-                      </span>
-                    )}
-                    {listaVoos.length > 1 && (
-                      <div className="flex items-center gap-1 bg-sky-500/20 px-1.5 py-0.5 rounded border border-sky-400/40 text-[8px] sm:text-[9px] font-bold font-mono tracking-wider shrink-0 text-sky-300">
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); recuarVoo(); }}
-                          title="Voo anterior (ou arrasta para a direita no ecrã)"
-                          className="hover:text-white px-0.5 cursor-pointer active:scale-75 transition-transform"
-                        >
-                          ◀
-                        </button>
-                        <span>
-                          VOO {indiceVoo + 1}/{listaVoos.length}
-                          {indiceVoo === 0 ? " (MAIS PRÓXIMO)" : " (RESTANTE)"}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); avancarVoo(); }}
-                          title="Próximo voo (ou arrasta para a esquerda no ecrã)"
-                          className="hover:text-white px-0.5 cursor-pointer active:scale-75 transition-transform"
-                        >
-                          ▶
-                        </button>
-                      </div>
-                    )}
-                    {listaVoos.length > 1 && (
-                      <span className="hidden md:inline-flex items-center gap-1 text-[8px] sm:text-[9px] text-neutral-400 font-mono">
-                        ↔ ARRASTA O ECRÃ
-                      </span>
-                    )}
-                    {listaVoos.length > 1 && (
-                      <Link
-                        href="/voos"
-                        title="Ver lista de todos os voos restantes"
-                        className="flex items-center gap-1 bg-white/10 hover:bg-white/20 active:scale-95 text-neutral-300 hover:text-white px-1.5 py-0.5 rounded border border-white/20 text-[8px] sm:text-[9px] font-bold font-mono transition-all cursor-pointer shadow-sm shrink-0"
-                      >
-                        <span>📋</span>
-                        <span>LISTA</span>
-                      </Link>
-                    )}
-                  </div>
+                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                    VOO / FLIGHT
+                  </span>
                   <LedText
                     text={infoVoo.numeroVoo}
                     size={infoVoo.numeroVoo.length >= 7 ? "md" : infoVoo.numeroVoo.length >= 5 ? "lg" : "xl"}
@@ -2721,6 +2670,24 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span>ALTERAR LOCALIDADE OU COORDENADAS</span>
               </button>
             </div>
+
+            {/* Opção 5: Tabela de Todos os Voos */}
+            {listaVoos.length > 0 && (
+              <div className="border-t border-white/10 pt-3 flex flex-col gap-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-neutral-300">TABELA DE TODOS OS VOOS</span>
+                  <span className="text-[10px] text-sky-400 font-mono">{listaVoos.length} no radar</span>
+                </div>
+                <Link
+                  href="/voos"
+                  onClick={() => setModalOpcoesAberto(false)}
+                  className="w-full py-2 px-3 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>📋</span>
+                  <span>VER LISTA TABULAR DETALHADA</span>
+                </Link>
+              </div>
+            )}
 
             {/* Botão Fechar */}
             <div className="pt-2 border-t border-white/10 flex justify-end">
