@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.9.0  
+**Versão:** v1.9.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia se não existirem voos; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), indicadores táteis de ecrã e atalhos rápidos nas opções.
@@ -150,3 +150,4 @@
 | 2026-09-19 | v1.7.0 | Controlo de volume de áudio independente (0 a 100%) nas opções com slider e atalhos rápidos |
 | 2026-09-19 | v1.8.0 | Alternância por swipe entre painel principal e segundo ecrã de restantes voos em LEDs redondos |
 | 2026-09-19 | v1.9.0 | Preservação do fallback automático de meteorologia e adição do 3º ecrã de meteorologia dedicada |
+| 2026-09-19 | v1.9.1 | Remoção do botão de restantes voos (+X RESTANTES ➔) do cabeçalho da Linha 1 |

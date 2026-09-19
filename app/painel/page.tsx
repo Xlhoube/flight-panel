@@ -2294,20 +2294,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                       📲 INSTALAR
                     </button>
                   )}
-                  {listaVoos.length > 1 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        irParaRestantes();
-                      }}
-                      title={`Ver ${listaVoos.length - 1} restantes voos (ou desliza para a esquerda)`}
-                      className="h-7 sm:h-8 px-2 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 active:scale-95 text-amber-300 border border-amber-400/30 transition-all flex items-center gap-1 text-[10px] sm:text-xs font-bold font-mono shadow-sm cursor-pointer shrink-0"
-                    >
-                      <span>+{listaVoos.length - 1}</span>
-                      <span className="hidden sm:inline">RESTANTES</span>
-                      <span className="text-xs">➔</span>
-                    </button>
-                  )}
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
