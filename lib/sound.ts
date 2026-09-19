@@ -2,6 +2,7 @@
 class SplitFlapAudioEngine {
   private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
+  private volume: number = 0.8;
   private lastSoundTime: number = 0;
 
   constructor() {
@@ -32,6 +33,14 @@ class SplitFlapAudioEngine {
     return this.isMuted;
   }
 
+  public setVolume(vol: number) {
+    this.volume = Math.max(0, Math.min(1, vol));
+  }
+
+  public getVolume(): number {
+    return this.volume;
+  }
+
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     return this.isMuted;
@@ -39,7 +48,7 @@ class SplitFlapAudioEngine {
 
   // Som mecânico de palheta analógica a bater
   public playMechanicalClick(intensity = 1.0) {
-    if (this.isMuted || typeof window === "undefined") return;
+    if (this.isMuted || this.volume <= 0 || typeof window === "undefined") return;
 
     const now = performance.now();
     // Limite de taxa para não saturar quando muitas palhetas viram simultaneamente
@@ -70,7 +79,7 @@ class SplitFlapAudioEngine {
       filter.Q.setValueAtTime(3.5, t);
 
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.35 * intensity, t);
+      gain.gain.setValueAtTime(0.35 * intensity * this.volume, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.032);
 
       noiseSource.connect(filter);
@@ -85,7 +94,7 @@ class SplitFlapAudioEngine {
       const oscGain = ctx.createGain();
       osc.type = "triangle";
       osc.frequency.setValueAtTime(380 + Math.random() * 60, t);
-      oscGain.gain.setValueAtTime(0.12 * intensity, t);
+      oscGain.gain.setValueAtTime(0.12 * intensity * this.volume, t);
       oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.025);
 
       osc.connect(oscGain);

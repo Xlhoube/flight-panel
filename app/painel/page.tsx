@@ -971,9 +971,13 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 
 let globalAudioCtx: AudioContext | null = null;
 let globalSomHabilitado = true;
+let globalVolume = 0.8; // Nível de ganho sonoro independente (0.0 a 1.0)
 
-function tocarSomFlapClack() {
+function tocarSomFlapClack(volumeOverride?: number) {
   if (!globalSomHabilitado || typeof window === "undefined") return;
+  const vol = volumeOverride !== undefined ? volumeOverride : globalVolume;
+  if (vol <= 0) return;
+
   try {
     if (!globalAudioCtx) {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -1000,8 +1004,9 @@ function tocarSomFlapClack() {
     filter.Q.setValueAtTime(3.0, now);
 
     const gain = globalAudioCtx.createGain();
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+    const gainMax = 0.15 * vol;
+    gain.gain.setValueAtTime(gainMax, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
 
     noise.connect(filter);
     filter.connect(gain);
@@ -1015,17 +1020,20 @@ function tocarSomFlapClack() {
 
 // ─── Reprodutor de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
 
-function tocarSomNovoVoo() {
+function tocarSomNovoVoo(volumeOverride?: number) {
   if (!globalSomHabilitado || typeof window === "undefined") return;
+  const vol = volumeOverride !== undefined ? volumeOverride : globalVolume;
+  if (vol <= 0) return;
+
   try {
     const audio = new Audio("/Flight.mp3");
-    audio.volume = 0.9;
+    audio.volume = Math.max(0, Math.min(1, vol));
     audio.play().catch(() => {
       // Fallback para sintetizador mecânico caso o browser bloqueie o ficheiro de áudio por autoplay
-      tocarSomFlapClack();
+      tocarSomFlapClack(vol);
     });
   } catch {
-    tocarSomFlapClack();
+    tocarSomFlapClack(vol);
   }
 }
 
@@ -1553,10 +1561,11 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [estaEmFullScreen, setEstaEmFullScreen] = useState<boolean>(false);
   const [modalOpcoesAberto, setModalOpcoesAberto] = useState<boolean>(false);
   const [somAtivo, setSomAtivo] = useState<boolean>(true);
+  const [volumeSom, setVolumeSom] = useState<number>(80);
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
 
-  // Carregar definições do utilizador guardadas em localStorage (som e unidades de medida)
+  // Carregar definições do utilizador guardadas em localStorage (som, volume e unidades de medida)
   useEffect(() => {
     try {
       const configSalva = localStorage.getItem("flight_panel_user_settings");
@@ -1565,6 +1574,11 @@ export default function PainelAnalogicoMobileFullscreen() {
         if (typeof parsed.somAtivo === "boolean") {
           setSomAtivo(parsed.somAtivo);
           globalSomHabilitado = parsed.somAtivo;
+        }
+        if (typeof parsed.volumeSom === "number" && !isNaN(parsed.volumeSom)) {
+          const volClamp = Math.max(0, Math.min(100, Math.round(parsed.volumeSom)));
+          setVolumeSom(volClamp);
+          globalVolume = volClamp / 100;
         }
         if (parsed.unidadeAltitude === "FT" || parsed.unidadeAltitude === "MT") {
           setUnidadeAltitude(parsed.unidadeAltitude);
@@ -1579,20 +1593,31 @@ export default function PainelAnalogicoMobileFullscreen() {
   const alternarSom = (novo: boolean) => {
     setSomAtivo(novo);
     globalSomHabilitado = novo;
-    guardarDefinicoes({ somAtivo: novo, unidadeAltitude, unidadeVelocidade });
+    guardarDefinicoes({ somAtivo: novo, volumeSom, unidadeAltitude, unidadeVelocidade });
+  };
+
+  const alternarVolume = (novoVolume: number) => {
+    const volClamp = Math.max(0, Math.min(100, Math.round(novoVolume)));
+    setVolumeSom(volClamp);
+    globalVolume = volClamp / 100;
+    if (volClamp > 0 && !somAtivo) {
+      setSomAtivo(true);
+      globalSomHabilitado = true;
+    }
+    guardarDefinicoes({ somAtivo: volClamp > 0 ? (somAtivo ? true : true) : somAtivo, volumeSom: volClamp, unidadeAltitude, unidadeVelocidade });
   };
 
   const alternarAltitude = (novo: "FT" | "MT") => {
     setUnidadeAltitude(novo);
-    guardarDefinicoes({ somAtivo, unidadeAltitude: novo, unidadeVelocidade });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade });
   };
 
   const alternarVelocidade = (novo: "KTS" | "KMH") => {
     setUnidadeVelocidade(novo);
-    guardarDefinicoes({ somAtivo, unidadeAltitude, unidadeVelocidade: novo });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo });
   };
 
-  const guardarDefinicoes = (defs: { somAtivo: boolean; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH" }) => {
+  const guardarDefinicoes = (defs: { somAtivo: boolean; volumeSom: number; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH" }) => {
     try {
       localStorage.setItem("flight_panel_user_settings", JSON.stringify(defs));
     } catch { }
@@ -2582,8 +2607,8 @@ export default function PainelAnalogicoMobileFullscreen() {
               </button>
             </div>
 
-            {/* Opção 1: Som */}
-            <div className="flex flex-col gap-1 shrink-0">
+            {/* Opção 1: Som e Controlo de Volume Independente */}
+            <div className="flex flex-col gap-2 shrink-0 bg-white/[0.02] border border-white/5 p-2 sm:p-2.5 rounded-xl">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-bold text-neutral-300">ÁUDIO E EFEITOS SONOROS</span>
                 <span className="text-[9px] text-neutral-400">Palhetas e Alertas</span>
@@ -2605,6 +2630,62 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <span>🔇</span>
                   <span>DESATIVADO</span>
                 </button>
+              </div>
+
+              {/* Controlo Deslizante de Volume (Independente do Som do Sistema) */}
+              <div className="flex flex-col gap-1.5 pt-1 border-t border-white/5">
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-neutral-400 font-mono flex items-center gap-1">
+                    <span>{volumeSom === 0 || !somAtivo ? "🔇" : volumeSom < 50 ? "🔉" : "🔊"}</span>
+                    <span>VOLUME INDEPENDENTE</span>
+                  </span>
+                  <span className={`font-mono font-bold ${!somAtivo || volumeSom === 0 ? "text-neutral-500" : "text-amber-400"}`}>
+                    {!somAtivo ? "SILENCIADO" : `${volumeSom}%`}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={somAtivo ? volumeSom : 0}
+                    disabled={!somAtivo}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      alternarVolume(val);
+                    }}
+                    onPointerUp={() => {
+                      if (somAtivo && volumeSom > 0) {
+                        tocarSomFlapClack(volumeSom / 100);
+                      }
+                    }}
+                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Predefinições Rápidas de Volume */}
+                <div className="grid grid-cols-4 gap-1 pt-0.5">
+                  {[25, 50, 75, 100].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      disabled={!somAtivo}
+                      onClick={() => {
+                        alternarVolume(preset);
+                        tocarSomFlapClack(preset / 100);
+                      }}
+                      className={`py-0.5 text-[9px] font-mono rounded border transition-colors cursor-pointer ${
+                        somAtivo && volumeSom === preset
+                          ? "bg-amber-400/20 border-amber-400 text-amber-300 font-bold"
+                          : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                      }`}
+                    >
+                      {preset}%
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

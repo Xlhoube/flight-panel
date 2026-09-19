@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.6.4  
+**Versão:** v1.7.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
-**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados e interface minimalista com botão de opções de ícone limpo ⚙️ à direita.
+**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados, botão de opções minimalista ⚙️ e controlo de volume sonoro independente (0 a 100%) com predefinições táteis.
 
 ---
 
@@ -89,6 +89,11 @@
 **Decisão:** Reestruturar o modal de opções para altura máxima dinâmica (`max-h-[92dvh]`) com barra de desfasamento vertical interna (`overflow-y-auto`), fundir as opções de unidades de altitude e velocidade numa grelha responsiva de 2 colunas (`grid-cols-1 sm:grid-cols-2`), compactar os espaçamentos e preenchimentos (`p-3 sm:p-5`, `gap-2.5 sm:gap-3.5`) e garantir que todos os botões e títulos cabem confortavelmente em qualquer dispositivo móvel.  
 **Consequência:** Encaixe perfeito no ecrã do telemóvel em modo horizontal e vertical, sem cortes nem botões inacessíveis.
 
+### ADR-033 — Controlo de Volume Independente de Áudio nas Opções (2026-09-19)
+**Contexto:** O utilizador solicitou a adição de um controlo de volume nas opções para que o som da aplicação seja regulado independentemente do som do sistema operativo.  
+**Decisão:** Implementar controlo de ganho independente (`globalVolume`) no sintetizador de palhetas mecânicas Solari (`tocarSomFlapClack`), no reprodutor de áudio (`/Flight.mp3`) e no motor `SplitFlapAudioEngine`. No modal de opções, disponibilizar um controlo deslizante (*slider range*) com percentagem em tempo real (0% a 100%), ícones sonoros dinâmicos (`🔇`, `🔉`, `🔊`), quatro atalhos tácteis predefinidos (`25%`, `50%`, `75%`, `100%`), feedback sonoro imediato de calibração e persistência em `localStorage`.  
+**Consequência:** Ajuste preciso do volume sonoro na aplicação sem necessidade de alterar o volume principal do telemóvel ou do computador.
+
 ---
 
 ## Histórico
@@ -132,3 +137,4 @@
 | 2026-09-19 | v1.6.2 | Remoção dos emblemas de telemetria da Linha 1 para design minimalista limpo |
 | 2026-09-19 | v1.6.3 | Reposicionamento do botão de opções com ícone ⚙️ minimalista à direita |
 | 2026-09-19 | v1.6.4 | Design compacto do modal de opções com scroll interno e grelha 2-col para telemóveis em modo paisagem |
+| 2026-09-19 | v1.7.0 | Controlo de volume de áudio independente (0 a 100%) nas opções com slider e atalhos rápidos |
