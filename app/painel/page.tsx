@@ -2295,17 +2295,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     </button>
                   )}
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      irParaMeteo();
-                    }}
-                    title="Ver 3º Ecrã (Meteorologia Dedicada)"
-                    className="h-7 sm:h-8 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 active:scale-95 text-sky-300 border border-sky-400/30 transition-all flex items-center gap-1 text-[10px] sm:text-xs font-bold font-mono shadow-sm cursor-pointer shrink-0"
-                  >
-                    <span>⛅</span>
-                    <span className="hidden sm:inline">METEO</span>
-                  </button>
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -2640,18 +2630,6 @@ export default function PainelAnalogicoMobileFullscreen() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  irParaMeteo();
-                }}
-                title="Ver Meteorologia (Ecrã 3)"
-                className="h-7 sm:h-8 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 active:scale-95 text-sky-300 border border-sky-400/30 transition-all flex items-center gap-1 text-[10px] sm:text-xs font-bold font-mono shadow-sm cursor-pointer shrink-0"
-              >
-                <span>⛅</span>
-                <span className="hidden xs:inline">METEO</span>
-                <span className="text-xs">➔</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
                   setModalOpcoesAberto(true);
                 }}
                 title="Definições e Opções"
@@ -2721,31 +2699,6 @@ export default function PainelAnalogicoMobileFullscreen() {
             )}
           </div>
 
-          {/* RODAPÉ DO SEGUNDO ECRÃ */}
-          <div className="w-full py-1.5 px-3 bg-[#10121a]/80 border border-white/10 rounded-lg flex items-center justify-between text-[9px] sm:text-[10px] text-neutral-400 shrink-0">
-            <button
-              onClick={irParaPrincipal}
-              className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer"
-            >
-              <span>⟵</span>
-              <span>VOO PRINCIPAL</span>
-            </button>
-
-            {/* Indicadores de Ecrã 1, 2, 3 */}
-            <div className="flex items-center gap-1.5 font-mono text-[9px]">
-              <button onClick={irParaPrincipal} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">1: VOO</button>
-              <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/40">2: RESTANTES</span>
-              <button onClick={irParaMeteo} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">3: METEO</button>
-            </div>
-
-            <button
-              onClick={irParaMeteo}
-              className="text-sky-300 hover:text-sky-200 font-bold flex items-center gap-1 cursor-pointer"
-            >
-              <span>METEOROLOGIA</span>
-              <span>➔</span>
-            </button>
-          </div>
         </div>
       ) : (
         /* ── TERCEIRO ECRÃ: METEOROLOGIA DEDICADA ────────────────────────────── */
@@ -2929,42 +2882,6 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
           </div>
 
-          {/* RODAPÉ DO 3º ECRÃ COM NAVEGAÇÃO COMPLETA */}
-          <div className="w-full py-1.5 px-3 bg-[#10121a]/80 border border-white/10 rounded-lg flex items-center justify-between text-[9px] sm:text-[10px] text-neutral-400 shrink-0">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={irParaPrincipal}
-                className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer"
-              >
-                <span>⟵</span>
-                <span>VOO PRINCIPAL</span>
-              </button>
-              {listaVoos.length > 1 && (
-                <button
-                  onClick={irParaRestantes}
-                  className="text-neutral-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer ml-1"
-                >
-                  <span>⟵</span>
-                  <span>RESTANTES</span>
-                </button>
-              )}
-            </div>
-
-            {/* Indicadores de Ecrã 1, 2, 3 */}
-            <div className="flex items-center gap-1.5 font-mono text-[9px]">
-              <button onClick={irParaPrincipal} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">1: VOO</button>
-              {listaVoos.length > 1 ? (
-                <button onClick={irParaRestantes} className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-400 cursor-pointer">2: RESTANTES</button>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded bg-white/5 text-neutral-600">2: RESTANTES</span>
-              )}
-              <span className="px-1.5 py-0.5 rounded bg-sky-400/20 text-sky-300 font-bold border border-sky-400/40">3: METEO</span>
-            </div>
-
-            <span className="text-neutral-500 hidden sm:inline font-mono">
-              DESLIZA (SWIPE ➔) PARA VOLTAR
-            </span>
-          </div>
         </div>
       )}
 

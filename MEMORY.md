@@ -151,3 +151,4 @@
 | 2026-09-19 | v1.8.0 | Alternância por swipe entre painel principal e segundo ecrã de restantes voos em LEDs redondos |
 | 2026-09-19 | v1.9.0 | Preservação do fallback automático de meteorologia e adição do 3º ecrã de meteorologia dedicada |
 | 2026-09-19 | v1.9.1 | Remoção do botão de restantes voos (+X RESTANTES ➔) do cabeçalho da Linha 1 |
+| 2026-09-19 | v1.9.2 | Remoção do botão METEO dos cabeçalhos e eliminação total das barras inferiores de navegação (Rodapés) |
