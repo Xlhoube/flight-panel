@@ -1546,7 +1546,7 @@ export const LOCAIS_PREDEFINIDOS = [
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
   const listaVoosRef = useRef<EstadoVoo[]>([]);
-  const [indiceVoo, setIndiceVoo] = useState<number>(0);
+  const [ecraAtivo, setEcraAtivo] = useState<"principal" | "restantes">("principal");
   const [meteorologia, setMeteorologia] = useState<DadosMeteo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [promptInstalacao, setPromptInstalacao] = useState<any>(null);
@@ -1957,23 +1957,15 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
   };
 
-  // Navegação entre múltiplos voos em sobrevoo (arrasto lateral no ecrã ou controlos táteis)
-  const avancarVoo = useCallback(() => {
-    setListaVoos((lista) => {
-      if (lista.length <= 1) return lista;
-      tocarSomFlapClack();
-      setIndiceVoo((prev) => (prev + 1) % lista.length);
-      return lista;
-    });
+  // Alternância entre Painel Principal (voo mais próximo) e Segundo Ecrã (restantes voos)
+  const irParaRestantes = useCallback(() => {
+    tocarSomFlapClack();
+    setEcraAtivo("restantes");
   }, []);
 
-  const recuarVoo = useCallback(() => {
-    setListaVoos((lista) => {
-      if (lista.length <= 1) return lista;
-      tocarSomFlapClack();
-      setIndiceVoo((prev) => (prev - 1 + lista.length) % lista.length);
-      return lista;
-    });
+  const irParaPrincipal = useCallback(() => {
+    tocarSomFlapClack();
+    setEcraAtivo("principal");
   }, []);
 
   // Gestos de Swipe & Arrastar para os lados do ecrã (Ecrã táctil móvel + Rato desktop)
@@ -2002,11 +1994,15 @@ export default function PainelAnalogicoMobileFullscreen() {
     // Arrasto horizontal nítido (> 35px e mais horizontal do que vertical)
     if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
       if (deltaX < 0) {
-        // Arrastar para a esquerda -> Próximo voo
-        avancarVoo();
+        // Arrastar para a esquerda: Painel Principal -> Restantes Voos
+        if (ecraAtivo === "principal") {
+          irParaRestantes();
+        }
       } else {
-        // Arrastar para a direita -> Voo anterior
-        recuarVoo();
+        // Arrastar para a direita: Restantes Voos -> Painel Principal
+        if (ecraAtivo === "restantes") {
+          irParaPrincipal();
+        }
       }
     }
   };
@@ -2100,7 +2096,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     // Remoção imediata: espaço aéreo livre transita de imediato para a meteorologia
     listaVoosRef.current = [];
     setListaVoos([]);
-    setIndiceVoo(0);
+    setEcraAtivo("principal");
     setTotalNoRadar(0);
     await carregarMeteorologia({ lat: refLat, lon: refLon });
   }, [carregarMeteorologia]);
@@ -2148,7 +2144,6 @@ export default function PainelAnalogicoMobileFullscreen() {
           listaVoosRef.current = voosEmAr;
           setListaVoos(voosEmAr);
           setTotalNoRadar(voosEmAr.length);
-          setIndiceVoo((prev) => (prev >= voosEmAr.length ? 0 : prev));
           setMeteorologia(null);
 
           // Partilha de dados em cache para a nova página de lista de voos restantes (/voos)
@@ -2182,8 +2177,8 @@ export default function PainelAnalogicoMobileFullscreen() {
     return () => clearInterval(int);
   }, [buscarDados]);
 
-  // O painel principal exibe o voo selecionado (o mais próximo por defeito, ou os restantes por arrasto lateral)
-  const vooAtual = listaVoos.length > 0 ? listaVoos[Math.min(indiceVoo, listaVoos.length - 1)] : null;
+  // O painel principal exibe exclusivamente o voo mais próximo detetado no radar (#1)
+  const vooAtual = listaVoos.length > 0 ? listaVoos[0] : null;
 
   // Áudio reproduzido (/Flight.mp3) exclusivamente quando um novo voo é detetado ou entra no radar
   const voosConhecidosRef = useRef<Set<string>>(new Set());
@@ -2224,8 +2219,10 @@ export default function PainelAnalogicoMobileFullscreen() {
       className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
     >
 
-      {/* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */}
-      <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
+      {/* ── SELETOR DE ECRÃ: PAINEL PRINCIPAL (VOO MAIS PRÓXIMO) vs SEGUNDO ECRÃ (RESTANTES VOOS) ── */}
+      {ecraAtivo === "principal" ? (
+        /* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */
+        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
 
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
@@ -2278,6 +2275,20 @@ export default function PainelAnalogicoMobileFullscreen() {
                       className="bg-white/10 hover:bg-white/20 text-white text-[9px] sm:text-[11px] font-bold px-2 py-1 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse cursor-pointer"
                     >
                       📲 INSTALAR
+                    </button>
+                  )}
+                  {listaVoos.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        irParaRestantes();
+                      }}
+                      title={`Ver ${listaVoos.length - 1} restantes voos (ou desliza para a esquerda)`}
+                      className="h-7 sm:h-8 px-2 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 active:scale-95 text-amber-300 border border-amber-400/30 transition-all flex items-center gap-1 text-[10px] sm:text-xs font-bold font-mono shadow-sm cursor-pointer shrink-0"
+                    >
+                      <span>+{listaVoos.length - 1}</span>
+                      <span className="hidden sm:inline">RESTANTES</span>
+                      <span className="text-xs">➔</span>
                     </button>
                   )}
                   <button
@@ -2580,6 +2591,130 @@ export default function PainelAnalogicoMobileFullscreen() {
         )}
 
       </div >
+      ) : (
+        /* ── SEGUNDO ECRÃ: LISTA DOS RESTANTES VOOS (APENAS ORIGEM E DESTINO EM LEDS REDONDOS) ── */
+        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-2 sm:gap-3 overflow-hidden">
+          {/* CABEÇALHO DO SEGUNDO ECRÃ */}
+          <div className="w-full bg-[#10121a] p-2 sm:p-3 rounded-xl border border-white/10 flex items-center justify-between shadow-lg shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={irParaPrincipal}
+                className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-amber-400 hover:text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Voltar ao Voo Principal"
+              >
+                <span>⟵</span>
+                <span className="hidden xs:inline">VOO PRINCIPAL</span>
+              </button>
+
+              <div className="flex flex-col">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  RADAR DE TRÁFEGO AÉREO
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs sm:text-sm font-black text-white tracking-wider">
+                    RESTANTES VOOS
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-mono px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/30 text-amber-300 font-bold">
+                    {Math.max(0, listaVoos.length - 1)} NO RADAR
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-neutral-400 hidden md:inline font-mono">
+                DESLIZA (SWIPE ➔) PARA VOLTAR
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalOpcoesAberto(true);
+                }}
+                title="Definições e Opções"
+                aria-label="Opções"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
+              >
+                ⚙️
+              </button>
+            </div>
+          </div>
+
+          {/* LISTA DOS RESTANTES VOOS: APENAS ORIGEM E DESTINO COM LEDS REDONDOS */}
+          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-2.5 sm:gap-3.5">
+            {listaVoos.length <= 1 ? (
+              <div className="h-full flex flex-col items-center justify-center gap-2 text-center p-6 bg-[#10121a]/50 rounded-xl border border-white/5">
+                <LedText text="SEM OUTROS VOOS" size="lg" color="#94a3b8" />
+                <span className="text-xs text-neutral-400 mt-2">
+                  Apenas o voo principal está a sobrevoar a região no momento.
+                </span>
+                <button
+                  onClick={irParaPrincipal}
+                  className="mt-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-amber-400 border border-white/20 transition-all cursor-pointer"
+                >
+                  ⟵ VOLTAR AO VOO PRINCIPAL
+                </button>
+              </div>
+            ) : (
+              listaVoos.slice(1).map((voo, idx) => {
+                const info = resolverVooInfo(voo, rotasMapRef.current);
+                return (
+                  <div
+                    key={voo[0] || idx}
+                    className="w-full bg-[#10121a] px-3 py-3 sm:py-4 rounded-xl border border-white/10 flex flex-col items-center justify-center gap-1.5 sm:gap-2 shadow-lg hover:border-white/25 transition-all"
+                  >
+                    {/* ORIGEM E DESTINO EM LEDS REDONDOS (CÓDIGOS IATA PRINCIPAIS) */}
+                    <div className="flex items-center justify-center gap-3 sm:gap-8 flex-wrap">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                          ORIGEM
+                        </span>
+                        <LedText text={info.origemCode || "---"} size="xl" color="#f4f9ff" />
+                      </div>
+
+                      <div className="flex flex-col items-center justify-center pt-2">
+                        <span className="text-amber-400 text-xl sm:text-2xl font-black">➔</span>
+                      </div>
+
+                      <div className="flex flex-col items-center">
+                        <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                          DESTINO
+                        </span>
+                        <LedText text={info.destinoCode || "---"} size="xl" color="#f4f9ff" />
+                      </div>
+                    </div>
+
+                    {/* NOMES DAS CIDADES OU AEROPORTOS EM LEDS REDONDOS COMPLEMENTARES */}
+                    {(info.origem || info.destino) && (
+                      <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap pt-1.5 border-t border-white/5 w-full">
+                        <LedText text={info.origem || info.origemCode} size="sm" color="#fbbf24" />
+                        <span className="text-amber-400 text-xs font-bold">➔</span>
+                        <LedText text={info.destino || info.destinoCode} size="sm" color="#fbbf24" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* RODAPÉ DO SEGUNDO ECRÃ */}
+          <div className="w-full py-1.5 px-3 bg-[#10121a]/80 border border-white/10 rounded-lg flex items-center justify-between text-[9px] sm:text-[10px] text-neutral-400 shrink-0">
+            <button
+              onClick={irParaPrincipal}
+              className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer"
+            >
+              <span>⟵</span>
+              <span>VOO PRINCIPAL</span>
+            </button>
+            <span className="text-neutral-500 hidden sm:inline font-mono">
+              DESLIZA PARA A DIREITA (SWIPE ➔) PARA VOLTAR
+            </span>
+            <span className="font-mono text-emerald-400">
+              RADAR ATIVO
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* ── MODAL DE OPÇÕES / DEFINIÇÕES (SOM, UNIDADES, LOCALIZAÇÃO) ── */}
       {modalOpcoesAberto && (
@@ -2759,21 +2894,34 @@ export default function PainelAnalogicoMobileFullscreen() {
               </button>
             </div>
 
-            {/* Opção 5: Tabela de Todos os Voos */}
+            {/* Opção 5: Restantes Voos e Tabela */}
             {listaVoos.length > 0 && (
               <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-neutral-300">TABELA DE TODOS OS VOOS</span>
-                  <span className="text-[9px] text-sky-400 font-mono">{listaVoos.length} no radar</span>
+                  <span className="font-bold text-neutral-300">RESTANTES VOOS NO RADAR</span>
+                  <span className="text-[9px] text-amber-400 font-mono">{listaVoos.length} no radar</span>
                 </div>
-                <Link
-                  href="/voos"
-                  onClick={() => setModalOpcoesAberto(false)}
-                  className="w-full py-1.5 px-3 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>📋</span>
-                  <span>VER LISTA TABULAR DETALHADA</span>
-                </Link>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalOpcoesAberto(false);
+                      irParaRestantes();
+                    }}
+                    className="w-full py-1.5 px-2.5 rounded-lg border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>✈️</span>
+                    <span>RESTANTES VOOS (LEDS)</span>
+                  </button>
+                  <Link
+                    href="/voos"
+                    onClick={() => setModalOpcoesAberto(false)}
+                    className="w-full py-1.5 px-2.5 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📋</span>
+                    <span>TABELA DETALHADA</span>
+                  </Link>
+                </div>
               </div>
             )}
 

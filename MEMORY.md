@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.7.0  
+**Versão:** v1.8.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-09-19  
-**Estado:** PWA (Progressive Web App) completa e instalável directamente no telemóvel (Android / iPhone), com ícones próprios, Service Worker, arranque automático em modo autónomo (standalone landscape), ecrã inteiro, navegação por arrasto lateral entre todos os voos detectados, botão de opções minimalista ⚙️ e controlo de volume sonoro independente (0 a 100%) com predefinições táteis.
+**Estado:** PWA (Progressive Web App) completa com alternância por arrasto lateral (*swipe*) entre o painel principal (voo mais próximo fixo) e o segundo ecrã dedicado com a lista dos restantes voos exibindo exclusivamente Origem e Destino com layout dos LEDs redondos físicos, controlo de volume independente e arranque automático em ecrã inteiro.
 
 ---
 
@@ -94,6 +94,11 @@
 **Decisão:** Implementar controlo de ganho independente (`globalVolume`) no sintetizador de palhetas mecânicas Solari (`tocarSomFlapClack`), no reprodutor de áudio (`/Flight.mp3`) e no motor `SplitFlapAudioEngine`. No modal de opções, disponibilizar um controlo deslizante (*slider range*) com percentagem em tempo real (0% a 100%), ícones sonoros dinâmicos (`🔇`, `🔉`, `🔊`), quatro atalhos tácteis predefinidos (`25%`, `50%`, `75%`, `100%`), feedback sonoro imediato de calibração e persistência em `localStorage`.  
 **Consequência:** Ajuste preciso do volume sonoro na aplicação sem necessidade de alterar o volume principal do telemóvel ou do computador.
 
+### ADR-034 — Alternância por Swipe entre Painel Principal e Segundo Ecrã de Restantes Voos em LEDs Redondos (2026-09-19)
+**Contexto:** O utilizador solicitou que o painel principal exiba fixamente o voo mais próximo (sem alternar voo a voo por swipe) e que o gesto de swipe seja utilizado para alternar entre o painel principal e um segundo ecrã contendo a lista dos restantes voos, onde cada voo exibe exclusivamente a Origem e o Destino com o layout dos LEDs redondos físicos.  
+**Decisão:** Fixar o painel principal em `listaVoos[0]`. Configurar os gestos de arrasto lateral horizontal: arrastar para a esquerda no painel principal transita para o segundo ecrã de restantes voos com som de flap, e arrastar para a direita no segundo ecrã regressa ao painel principal. No segundo ecrã (`RestantesVoos`), iterar sobre `listaVoos.slice(1)` e apresentar apenas os códigos IATA e cidades de Origem e Destino com o componente de LEDs redondos (`LedText` com diodos circulares SVG Dot-Matrix), sem qualquer elemento secundário ou telemetria dispersiva. Disponibilizar também botão táctil na Linha 1 do painel e no menu de opções.  
+**Consequência:** Navegação fluida de ecrã duplo sem sair da aplicação, foco puro no voo mais próximo no ecrã principal e catálogo ultra-legível em matriz LED analógica para os restantes voos no segundo ecrã.
+
 ---
 
 ## Histórico
@@ -138,3 +143,4 @@
 | 2026-09-19 | v1.6.3 | Reposicionamento do botão de opções com ícone ⚙️ minimalista à direita |
 | 2026-09-19 | v1.6.4 | Design compacto do modal de opções com scroll interno e grelha 2-col para telemóveis em modo paisagem |
 | 2026-09-19 | v1.7.0 | Controlo de volume de áudio independente (0 a 100%) nas opções com slider e atalhos rápidos |
+| 2026-09-19 | v1.8.0 | Alternância por swipe entre painel principal e segundo ecrã de restantes voos em LEDs redondos |
