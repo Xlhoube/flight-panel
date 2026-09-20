@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Idioma, TRADUCOES, traduzirPais } from "@/lib/i18n";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -772,6 +773,10 @@ export default function ListaVoosRestantes() {
   const [horaAtual, setHoraAtual] = useState("12:00:00");
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+  const [idioma, setIdioma] = useState<Idioma>("pt");
+
+  // Dicionário de traduções
+  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
 
   // Gestos de Swipe lateral (arrastar para a direita volta ao painel)
   const touchStartX = useRef<number | null>(null);
@@ -799,9 +804,14 @@ export default function ListaVoosRestantes() {
     }
   };
 
-  // Ler preferências de unidades do utilizador
+  // Ler preferências de unidades e idioma do utilizador
   useEffect(() => {
     try {
+      const idiomaSalvo = localStorage.getItem("flightpanel_idioma");
+      if (idiomaSalvo && (idiomaSalvo === "pt" || idiomaSalvo === "en" || idiomaSalvo === "fr" || idiomaSalvo === "es")) {
+        setIdioma(idiomaSalvo as Idioma);
+      }
+
       const configSalva = localStorage.getItem("flight_panel_user_settings");
       if (configSalva) {
         const parsed = JSON.parse(configSalva);
@@ -810,6 +820,9 @@ export default function ListaVoosRestantes() {
         }
         if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
+        }
+        if (!idiomaSalvo && parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
+          setIdioma(parsed.idioma as Idioma);
         }
       }
     } catch { }
@@ -990,7 +1003,7 @@ export default function ListaVoosRestantes() {
               className="flex items-center gap-2 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-3 py-1.5 rounded-lg border border-sky-400/40 text-xs sm:text-sm font-bold font-mono transition-all cursor-pointer shadow-md"
             >
               <span>←</span>
-              <span>VOLTAR AO PAINEL</span>
+              <span>{t.tab_voltar}</span>
             </Link>
             <div>
               <h1 className="text-sm sm:text-base font-black tracking-wider text-white uppercase flex items-center gap-2">
@@ -1007,10 +1020,10 @@ export default function ListaVoosRestantes() {
 
           <div className="flex items-center gap-2 text-xs">
             <span className="bg-white/10 px-2.5 py-1 rounded-lg border border-white/15 text-neutral-300 font-bold">
-              NO AR: <strong className="text-amber-400">{listaVoos.length}</strong>
+              {t.estado_em_voo}: <strong className="text-amber-400">{listaVoos.length}</strong>
             </span>
             <span className="bg-sky-500/15 px-2.5 py-1 rounded-lg border border-sky-500/30 text-sky-300 font-bold">
-              RESTANTES: <strong className="text-white">{voosRestantes.length}</strong>
+              {t.tab_voo}: <strong className="text-white">{voosRestantes.length}</strong>
             </span>
           </div>
         </header>
@@ -1028,10 +1041,10 @@ export default function ListaVoosRestantes() {
               <div className="flex items-center justify-between">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  VOO PRINCIPAL EM DESTAQUE NO PAINEL
+                  {t.tab_voo_principal}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">
-                  📍 {distKm} KM (MAIS PRÓXIMO)
+                  📍 {distKm} KM
                 </span>
               </div>
 
@@ -1062,11 +1075,11 @@ export default function ListaVoosRestantes() {
                   <div className="text-[10px] sm:text-xs text-neutral-200 font-bold">
                     <span>{info.origem}</span>
                     {info.origemAeroporto && <span className="text-amber-300/90 font-mono ml-1 font-semibold">({info.origemAeroporto})</span>}
-                    {info.origemPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{info.origemPais}]</span>}
+                    {info.origemPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{traduzirPais(info.origemPais, idioma)}]</span>}
                     <span className="text-amber-400 mx-1.5">➔</span>
                     <span>{info.destino}</span>
                     {info.destinoAeroporto && <span className="text-amber-300/90 font-mono ml-1 font-semibold">({info.destinoAeroporto})</span>}
-                    {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{info.destinoPais}]</span>}
+                    {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{traduzirPais(info.destinoPais, idioma)}]</span>}
                   </div>
                   <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono mt-0.5">
                     {unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude} • {unidadeVelocidade === "KTS" ? info.velocidadeKts : info.velocidadeKmh} {unidadeVelocidade === "KTS" ? "KTS" : "KMS"} • {info.rumo}°
@@ -1081,9 +1094,9 @@ export default function ListaVoosRestantes() {
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xs sm:text-sm font-black tracking-widest uppercase text-neutral-300 flex items-center gap-2">
-              <span>✈️ VOOS RESTANTES NO ESPAÇO AÉREO</span>
+              <span>✈️ {t.ecra2_titulo}</span>
               <span className="text-[10px] text-neutral-400 font-normal">
-                (ORDENADOS POR DISTÂNCIA)
+                ({t.tab_distancia})
               </span>
             </h2>
             <span className="text-[10px] text-neutral-400 font-mono">
@@ -1094,7 +1107,7 @@ export default function ListaVoosRestantes() {
           {carregando && voosRestantes.length === 0 && (
             <div className="bg-[#10121a] p-8 rounded-xl border border-white/10 text-center text-neutral-400 text-xs sm:text-sm font-mono flex flex-col items-center justify-center gap-2">
               <span className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
-              <span>A CARREGAR DADOS DO RADAR...</span>
+              <span>{t.meteo_procurando_voos}</span>
             </div>
           )}
 

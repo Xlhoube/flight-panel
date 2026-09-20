@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ✈️ Flight Panel — Smart Airport Departure & Weather Display
 
-## Getting Started
+**Flight Panel** is a lightweight, edge-to-edge web application and Progressive Web App (PWA) designed to give a second life to old or unused smartphones, transforming them into dedicated, elegant aviation and weather smart gadgets.
 
-First, run the development server:
+Built specifically to run **full-screen in landscape orientation**, it repurposes any smartphone or tablet into a stylish bedside or desk gadget that replicates the mechanical charm of vintage **Solari di Udine split-flap boards** combined with modern, high-definition aviation telemetry.
 
+---
+
+### 🌟 Key Highlights
+
+* **📱 Upcycle Old Smartphones:** Give new purpose to an old mobile device by turning it into an ambient, decorative, and informative desk dashboard.
+* **📐 Native Landscape & Borderless:** Engineered pixel-by-pixel for horizontal mobile screens with automatic fullscreen activation, zero margins, and no browser UI clutter.
+* **✈️ Live Flight Tracking:** Captures real-time overhead aircraft via ADS-B telemetry, showing callsigns, airline liveries, official logos, origin/destination airports, altitude, airspeed, and compass heading.
+* **☀️ Automatic Weather Station & Fallback:** Seamlessly transitions into a dedicated weather station when no aircraft are in the immediate airspace, displaying temperature, wind, barometric pressure, UV index, and sunrise/sunset times.
+* **🔊 Physical Split-Flap Audio Synthesis:** Built-in Web Audio API engine that synthesizes the tactile *flap-clack* acoustic feedback whenever digits flip, with custom volume controls.
+* **💡 Dot-Matrix LED Display:** Secondary screen with analog 5x7 circular LED diodes to browse remaining overhead flights with high contrast and legibility.
+* **🌍 4-Language Internationalization (i18n):** Instant on-the-fly language switching (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) with multi-language country and city names.
+* **📲 Standalone PWA:** Installs directly to the home screen with 1 tap, running autonomously with touch/swipe gesture navigation.
+
+---
+
+### 🚀 Getting Started
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Xlhoube/flight-panel.git
+cd flight-panel
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Build for production:
+```bash
+npm run build
+```

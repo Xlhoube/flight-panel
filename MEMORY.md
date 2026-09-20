@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v1.9.1  
+**Versão:** v2.0.0  
 **Data de início:** 2026-09-06  
-**Última sessão:** 2026-09-19  
-**Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia se não existirem voos; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), indicadores táteis de ecrã e atalhos rápidos nas opções.
+**Última sessão:** 2026-09-20  
+**Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização completa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea sem recarregar a página, tradução de países e persistência local.
 
 ---
 
@@ -104,6 +104,11 @@
 **Decisão:** Preservar a transição automática no ecrã principal (`principal`): quando `listaVoos.length === 0` (ou `!vooAtual`), o painel comuta automaticamente para o modo meteorológico com relógio LED, estação e condições atmosféricas. Criar o 3º ecrã dedicado (`meteo`), acessível a qualquer momento através de swipe (arrasto para a esquerda a partir do 2º ecrã ou a partir do 1º se não houver outros voos), botões táteis no cabeçalho/rodapé e atalho direto no menu de opções (`⚙️`). No 3º ecrã, disponibilizar a estação meteorológica completa com telemetria (vento, altímetro QNH, humidade, nascer/pôr do sol e índice UV) e radar integrado com contagem de voos no ar.  
 **Consequência:** Arquitetura trilateral perfeita de 3 ecrãs: o utilizador pode consultar a meteorologia sempre que desejar sem perder o conforto da transição automática quando o espaço aéreo fica sem voos.
 
+### ADR-036 — Internacionalização Multilíngue (i18n) em 4 Idiomas com Alternância Instantânea (2026-09-20)
+**Contexto:** O utilizador solicitou a funcionalidade: "Internacionalização & Design: 4 Idiomas suportados com alternância instantânea (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES)".  
+**Decisão:** Criar módulo central de internacionalização (`lib/i18n.ts`) com tipos fortes `Idioma = "pt" | "en" | "fr" | "es"` e dicionários completos para as quatro línguas, abrangendo todos os ecrãs (Painel principal de voo, Ecrã 2 de Restantes Voos, Ecrã 3 de Meteorologia Dedicada, Fallback meteorológico automático, Modal de Opções, Modal de Localização e Tabela de Voos `/voos`). Adicionar dicionário multilíngue de nomes de países (`traduzirPais`). Integrar botão de alternância rápida de idioma diretamente no cabeçalho ao lado de `⚙️` (`🇵🇹 PT` / `🇬🇧 EN` / `🇫🇷 FR` / `🇪🇸 ES`) e um seletor visual com 4 botões e bandeiras no modal de opções. Implementar persistência local instantânea em `localStorage` sob as chaves `flightpanel_idioma` e `flight_panel_user_settings.idioma`, sincronização reativa imediata sem recarregar o ecrã e feedback sonoro Flap-Clack Solari ao trocar de língua.  
+**Consequência:** Experiência global nativa em 4 idiomas, com mudança a quente instantânea com 1 toque, garantindo total clareza internacional e fidelidade estética.
+
 ---
 
 ## Histórico
@@ -152,3 +157,4 @@
 | 2026-09-19 | v1.9.0 | Preservação do fallback automático de meteorologia e adição do 3º ecrã de meteorologia dedicada |
 | 2026-09-19 | v1.9.1 | Remoção do botão de restantes voos (+X RESTANTES ➔) do cabeçalho da Linha 1 |
 | 2026-09-19 | v1.9.2 | Remoção do botão METEO dos cabeçalhos e eliminação total das barras inferiores de navegação (Rodapés) |
+| 2026-09-20 | v2.0.0 | Internacionalização completa (i18n): 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea |

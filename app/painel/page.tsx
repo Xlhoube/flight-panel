@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Idioma, IDIOMAS_DISPONIVEIS, TRADUCOES, traduzirPais } from "@/lib/i18n";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -1564,10 +1565,21 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [volumeSom, setVolumeSom] = useState<number>(80);
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+  const [idioma, setIdioma] = useState<Idioma>("pt");
 
-  // Carregar definições do utilizador guardadas em localStorage (som, volume e unidades de medida)
+  // Dicionário de traduções reactivo ao idioma ativo
+  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
+
+  // Carregar definições do utilizador guardadas em localStorage (som, volume, unidades e idioma)
   useEffect(() => {
     try {
+      // 1. Idioma
+      const idiomaSalvo = localStorage.getItem("flightpanel_idioma");
+      if (idiomaSalvo && (idiomaSalvo === "pt" || idiomaSalvo === "en" || idiomaSalvo === "fr" || idiomaSalvo === "es")) {
+        setIdioma(idiomaSalvo as Idioma);
+      }
+
+      // 2. Outras definições
       const configSalva = localStorage.getItem("flight_panel_user_settings");
       if (configSalva) {
         const parsed = JSON.parse(configSalva);
@@ -1586,14 +1598,37 @@ export default function PainelAnalogicoMobileFullscreen() {
         if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
         }
+        if (!idiomaSalvo && parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
+          setIdioma(parsed.idioma as Idioma);
+        }
       }
     } catch { }
   }, []);
 
+  const alternarIdioma = (novo: Idioma) => {
+    setIdioma(novo);
+    try {
+      localStorage.setItem("flightpanel_idioma", novo);
+      const configSalva = localStorage.getItem("flight_panel_user_settings");
+      const parsed = configSalva ? JSON.parse(configSalva) : {};
+      localStorage.setItem("flight_panel_user_settings", JSON.stringify({ ...parsed, idioma: novo }));
+    } catch { }
+    if (somAtivo) {
+      tocarSomFlapClack(0.2);
+    }
+  };
+
+  const ciclarIdioma = () => {
+    const codigos: Idioma[] = ["pt", "en", "fr", "es"];
+    const idx = codigos.indexOf(idioma);
+    const proximo = codigos[(idx + 1) % codigos.length];
+    alternarIdioma(proximo);
+  };
+
   const alternarSom = (novo: boolean) => {
     setSomAtivo(novo);
     globalSomHabilitado = novo;
-    guardarDefinicoes({ somAtivo: novo, volumeSom, unidadeAltitude, unidadeVelocidade });
+    guardarDefinicoes({ somAtivo: novo, volumeSom, unidadeAltitude, unidadeVelocidade, idioma });
   };
 
   const alternarVolume = (novoVolume: number) => {
@@ -1604,22 +1639,23 @@ export default function PainelAnalogicoMobileFullscreen() {
       setSomAtivo(true);
       globalSomHabilitado = true;
     }
-    guardarDefinicoes({ somAtivo: volClamp > 0 ? (somAtivo ? true : true) : somAtivo, volumeSom: volClamp, unidadeAltitude, unidadeVelocidade });
+    guardarDefinicoes({ somAtivo: volClamp > 0 ? (somAtivo ? true : true) : somAtivo, volumeSom: volClamp, unidadeAltitude, unidadeVelocidade, idioma });
   };
 
   const alternarAltitude = (novo: "FT" | "MT") => {
     setUnidadeAltitude(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade, idioma });
   };
 
   const alternarVelocidade = (novo: "KTS" | "KMH") => {
     setUnidadeVelocidade(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo, idioma });
   };
 
-  const guardarDefinicoes = (defs: { somAtivo: boolean; volumeSom: number; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH" }) => {
+  const guardarDefinicoes = (defs: { somAtivo: boolean; volumeSom: number; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH"; idioma: Idioma }) => {
     try {
       localStorage.setItem("flight_panel_user_settings", JSON.stringify(defs));
+      localStorage.setItem("flightpanel_idioma", defs.idioma);
     } catch { }
   };
 
@@ -2261,7 +2297,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
                   <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    VOO / FLIGHT
+                    {t.rotulo_voo}
                   </span>
                   <LedText
                     text={infoVoo.numeroVoo}
@@ -2270,11 +2306,11 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              {/* Aeronave, Nome da Companhia e Botão de Opções */}
+              {/* Aeronave, Nome da Companhia e Botões de Ação */}
               <div className="flex items-center gap-2 sm:gap-3 shrink-0 max-w-[60%]">
                 <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-hidden">
                   <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
-                    AIRCRAFT
+                    {t.rotulo_aeronave}
                   </span>
                   <LedText
                     text={infoVoo.aeronave}
@@ -2291,18 +2327,35 @@ export default function PainelAnalogicoMobileFullscreen() {
                       onClick={instalarApp}
                       className="bg-white/10 hover:bg-white/20 text-white text-[9px] sm:text-[11px] font-bold px-2 py-1 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse cursor-pointer"
                     >
-                      📲 INSTALAR
+                      {t.btn_instalar}
                     </button>
                   )}
 
+                  {/* Botão de Alternância Rápida de Idioma */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ciclarIdioma();
+                    }}
+                    title="Idioma / Language (PT, EN, FR, ES)"
+                    aria-label="Idioma"
+                    className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
+                  >
+                    <span className="text-xs sm:text-sm">
+                      {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
+                      {idioma.toUpperCase()}
+                    </span>
+                  </button>
 
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setModalOpcoesAberto(true);
                     }}
-                    title="Definições e Opções"
-                    aria-label="Opções"
+                    title={t.btn_opcoes}
+                    aria-label={t.btn_opcoes}
                     className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
                   >
                     ⚙️
@@ -2317,16 +2370,16 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* CABEÇALHO DEDICADO DE ROTA: ORIGEM | ESTADO DE VOO | DESTINO (NUNCA CORTA) */}
               <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pt-0.5">
-                <span className="text-left">ORIGEM / DEPARTURE</span>
+                <span className="text-left">{t.rotulo_origem}</span>
                 <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
                   <div className="w-4 sm:w-8 h-px bg-white/30" />
                   <span className="text-[8px] sm:text-[9px] text-amber-400 font-bold tracking-wider">
-                    {infoVoo.noSolo ? "NO SOLO" : "EM VOO"}
+                    {infoVoo.noSolo ? t.estado_no_solo : t.estado_em_voo}
                   </span>
                   <span className="text-white text-xs sm:text-base">✈</span>
                   <div className="w-4 sm:w-8 h-px bg-white/30" />
                 </div>
-                <span className="text-right">DESTINO / DESTINATION</span>
+                <span className="text-right">{t.rotulo_destino}</span>
               </div>
 
               {/* CORPO DE FLAPS: CÓDIGOS IATA + CIDADES COM AUTO-FIT */}
@@ -2343,7 +2396,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     )}
                     {infoVoo.origemPais && (
                       <span className="text-[8px] sm:text-[10px] font-mono font-bold text-sky-400 tracking-wider uppercase">
-                        {infoVoo.origemPais}
+                        {traduzirPais(infoVoo.origemPais, idioma)}
                       </span>
                     )}
                   </div>
@@ -2360,7 +2413,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     )}
                     {infoVoo.destinoPais && (
                       <span className="text-[8px] sm:text-[10px] font-mono font-bold text-sky-400 tracking-wider uppercase">
-                        {infoVoo.destinoPais}
+                        {traduzirPais(infoVoo.destinoPais, idioma)}
                       </span>
                     )}
                   </div>
@@ -2375,7 +2428,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               {/* ALTITUDE */}
               <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
-                  ALTITUDE
+                  {t.rotulo_altitude}
                 </span>
                 <div className="flex items-center gap-1">
                   <LedText
@@ -2391,7 +2444,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               {/* VELOCIDADE */}
               <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
-                  VELOCIDADE
+                  {t.rotulo_velocidade}
                 </span>
                 <div className="flex items-center gap-1">
                   <LedText
@@ -2407,7 +2460,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               {/* RUMO */}
               <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
-                  RUMO / HEADING
+                  {t.rotulo_rumo}
                 </span>
                 <div className="flex items-center gap-1">
                   <LedText text={`${infoVoo.rumo}`} size="lg" />
@@ -2450,7 +2503,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
                   <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                    LOCALIZAÇÃO / ESTAÇÃO
+                    {t.meteo_estacao}
                   </span>
                   <LedText
                     text={
@@ -2465,13 +2518,31 @@ export default function PainelAnalogicoMobileFullscreen() {
                   </span>
                 </div>
 
+                {/* Botão de Alternância Rápida de Idioma */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    ciclarIdioma();
+                  }}
+                  title="Idioma / Language (PT, EN, FR, ES)"
+                  aria-label="Idioma"
+                  className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
+                >
+                  <span className="text-xs sm:text-sm">
+                    {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
+                  </span>
+                  <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
+                    {idioma.toUpperCase()}
+                  </span>
+                </button>
+
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setModalOpcoesAberto(true);
                   }}
-                  title="Definições e Opções"
-                  aria-label="Opções"
+                  title={t.btn_opcoes}
+                  aria-label={t.btn_opcoes}
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
                 >
                   ⚙️
@@ -2608,32 +2679,50 @@ export default function PainelAnalogicoMobileFullscreen() {
                 title="Voltar ao Voo Principal"
               >
                 <span>⟵</span>
-                <span className="hidden xs:inline">VOO PRINCIPAL</span>
+                <span className="hidden xs:inline">{t.opcoes_ecra_principal}</span>
               </button>
 
               <div className="flex flex-col">
                 <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  RADAR DE TRÁFEGO AÉREO
+                  {t.rotulo_radar}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs sm:text-sm font-black text-white tracking-wider">
-                    RESTANTES VOOS
+                    {t.ecra2_titulo}
                   </span>
                   <span className="text-[10px] sm:text-xs font-mono px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/30 text-amber-300 font-bold">
-                    {Math.max(0, listaVoos.length - 1)} NO RADAR
+                    {Math.max(0, listaVoos.length - 1)} {t.no_radar.toUpperCase()}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Botão de Alternância Rápida de Idioma */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  ciclarIdioma();
+                }}
+                title="Idioma / Language (PT, EN, FR, ES)"
+                aria-label="Idioma"
+                className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
+              >
+                <span className="text-xs sm:text-sm">
+                  {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
+                </span>
+                <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
+                  {idioma.toUpperCase()}
+                </span>
+              </button>
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setModalOpcoesAberto(true);
                 }}
-                title="Definições e Opções"
-                aria-label="Opções"
+                title={t.btn_opcoes}
+                aria-label={t.btn_opcoes}
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
               >
                 ⚙️
@@ -2645,15 +2734,15 @@ export default function PainelAnalogicoMobileFullscreen() {
           <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-2.5 sm:gap-3.5">
             {listaVoos.length <= 1 ? (
               <div className="h-full flex flex-col items-center justify-center gap-2 text-center p-6 bg-[#10121a]/50 rounded-xl border border-white/5">
-                <LedText text="SEM OUTROS VOOS" size="lg" color="#94a3b8" />
+                <LedText text={t.ecra2_sem_outros} size="lg" color="#94a3b8" />
                 <span className="text-xs text-neutral-400 mt-2">
-                  Apenas o voo principal está a sobrevoar a região no momento.
+                  {t.ecra2_voo_principal_aviso}
                 </span>
                 <button
                   onClick={irParaPrincipal}
                   className="mt-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-amber-400 border border-white/20 transition-all cursor-pointer"
                 >
-                  ⟵ VOLTAR AO VOO PRINCIPAL
+                  ⟵ {t.opcoes_ecra_principal}
                 </button>
               </div>
             ) : (
@@ -2668,7 +2757,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     <div className="flex items-center justify-center gap-3 sm:gap-8 flex-wrap">
                       <div className="flex flex-col items-center">
                         <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                          ORIGEM
+                          {t.ecra2_origem}
                         </span>
                         <LedText text={info.origemCode || "---"} size="xl" color="#f4f9ff" />
                       </div>
@@ -2679,7 +2768,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
                       <div className="flex flex-col items-center">
                         <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                          DESTINO
+                          {t.ecra2_destino}
                         </span>
                         <LedText text={info.destinoCode || "---"} size="xl" color="#f4f9ff" />
                       </div>
@@ -2712,7 +2801,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 title="Voltar ao Voo Principal"
               >
                 <span>⟵</span>
-                <span className="hidden xs:inline">VOO</span>
+                <span className="hidden xs:inline">{t.opcoes_ecra_principal}</span>
               </button>
 
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
@@ -2726,10 +2815,10 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="flex flex-col items-start gap-0.5 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-sky-400 font-mono font-bold">
-                    3º ECRÃ • METEOROLOGIA DEDICADA (20 KM)
+                    3º ECRÃ • {t.meteo_estacao_local} (20 KM)
                   </span>
                   <span className="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 font-bold">
-                    {listaVoos.length > 0 ? `${listaVoos.length} VOOS NO RADAR` : "SEM TRÁFEGO"}
+                    {listaVoos.length > 0 ? `${listaVoos.length} ${t.meteo_voos_detectados}` : t.meteo_aguardando}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -2742,7 +2831,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
                 <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  ESTAÇÃO
+                  {t.meteo_estacao}
                 </span>
                 <LedText
                   text={
@@ -2757,13 +2846,31 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </span>
               </div>
 
+              {/* Botão de Alternância Rápida de Idioma */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  ciclarIdioma();
+                }}
+                title="Idioma / Language (PT, EN, FR, ES)"
+                aria-label="Idioma"
+                className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
+              >
+                <span className="text-xs sm:text-sm">
+                  {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
+                </span>
+                <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
+                  {idioma.toUpperCase()}
+                </span>
+              </button>
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setModalOpcoesAberto(true);
                 }}
-                title="Definições e Opções"
-                aria-label="Opções"
+                title={t.btn_opcoes}
+                aria-label={t.btn_opcoes}
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
               >
                 ⚙️
@@ -2776,9 +2883,9 @@ export default function PainelAnalogicoMobileFullscreen() {
             <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                CONDIÇÃO ATMOSFÉRICA LOCAL
+                {t.meteo_condicoes}
               </span>
-              <span>TEMPERATURA &amp; SENSAÇÃO</span>
+              <span>{t.meteo_temperatura} &amp; {t.meteo_sensacao}</span>
             </div>
 
             <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
@@ -2794,7 +2901,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     </>
                   )}
                   <span className="text-amber-400/90 font-bold">
-                    SENSAÇÃO: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
+                    {t.meteo_sensacao}: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
                   </span>
                   <span>•</span>
                   <span className="text-sky-300">
@@ -2820,7 +2927,7 @@ export default function PainelAnalogicoMobileFullscreen() {
           <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 shrink-0">
             {/* Módulo 1: Vento */}
             <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">VENTO / RUMO</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_vento}</span>
               <div className="flex items-center gap-0.5">
                 <LedText text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
                 <span className="text-[8px] text-neutral-400 font-bold font-mono">KM/H</span>
@@ -2832,7 +2939,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* Módulo 2: QNH */}
             <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PRESSÃO QNH</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_pressao}</span>
               <div className="flex items-center gap-0.5">
                 <LedText text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
                 <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
@@ -2842,7 +2949,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* Módulo 3: Humidade */}
             <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">HUMIDADE</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_humidade}</span>
               <div className="flex items-center gap-0.5">
                 <LedText text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
                 <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
@@ -2852,7 +2959,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* Módulo 4: Nascer do Sol */}
             <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">NASCER SOL</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_nascer_sol}</span>
               <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
                 <span className="text-amber-400">☀️</span>
                 {meteorologia?.environment?.sunrise || "07:15"}
@@ -2862,7 +2969,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* Módulo 5: Pôr do Sol */}
             <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PÔR DO SOL</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_por_sol}</span>
               <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
                 <span className="text-orange-400">🌙</span>
                 {meteorologia?.environment?.sunset || "19:50"}
@@ -2872,7 +2979,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
             {/* Módulo 6: Índice UV */}
             <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">ÍNDICE UV</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_uv}</span>
               <div className="flex items-center gap-0.5">
                 <span className="text-[10px] sm:text-xs font-mono font-black text-amber-300">
                   UV {meteorologia?.environment?.uv_index ?? 3}
@@ -2900,7 +3007,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="flex items-center gap-2">
                 <span className="text-base sm:text-lg">⚙️</span>
                 <h2 className="text-xs sm:text-sm font-black tracking-wider uppercase text-amber-400">
-                  OPÇÕES DO PAINEL
+                  {t.opcoes_titulo}
                 </h2>
               </div>
               <button
@@ -2911,11 +3018,41 @@ export default function PainelAnalogicoMobileFullscreen() {
               </button>
             </div>
 
+            {/* Opção 0: Idioma / Language (4 Idiomas: PT, EN, FR, ES) */}
+            <div className="flex flex-col gap-1.5 shrink-0 bg-white/[0.02] border border-white/5 p-2 sm:p-2.5 rounded-xl">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-bold text-neutral-300 flex items-center gap-1.5">
+                  <span>🌐</span>
+                  <span>{t.opcoes_idioma_titulo}</span>
+                </span>
+                <span className="text-[9px] text-amber-400 font-mono font-bold">
+                  {IDIOMAS_DISPONIVEIS.find(i => i.codigo === idioma)?.bandeira} {IDIOMAS_DISPONIVEIS.find(i => i.codigo === idioma)?.nomeNativo}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {IDIOMAS_DISPONIVEIS.map((item) => (
+                  <button
+                    key={item.codigo}
+                    type="button"
+                    onClick={() => alternarIdioma(item.codigo)}
+                    className={`py-1.5 px-1 rounded-lg border text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 cursor-pointer ${
+                      idioma === item.codigo
+                        ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm"
+                        : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <span className="text-sm">{item.bandeira}</span>
+                    <span className="text-[10px] font-mono">{item.rotulo}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Opção 1: Som e Controlo de Volume Independente */}
             <div className="flex flex-col gap-2 shrink-0 bg-white/[0.02] border border-white/5 p-2 sm:p-2.5 rounded-xl">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-bold text-neutral-300">ÁUDIO E EFEITOS SONOROS</span>
-                <span className="text-[9px] text-neutral-400">Palhetas e Alertas</span>
+                <span className="font-bold text-neutral-300">{t.opcoes_audio_titulo}</span>
+                <span className="text-[9px] text-neutral-400">{t.opcoes_audio_subtitulo}</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
@@ -2924,7 +3061,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   className={`py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${somAtivo ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                 >
                   <span>🔊</span>
-                  <span>ATIVADO</span>
+                  <span>{t.opcoes_audio_ativado}</span>
                 </button>
                 <button
                   type="button"
@@ -2932,7 +3069,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   className={`py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${!somAtivo ? "bg-rose-500/20 border-rose-400 text-rose-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                 >
                   <span>🔇</span>
-                  <span>DESATIVADO</span>
+                  <span>{t.opcoes_audio_desativado}</span>
                 </button>
               </div>
 
@@ -2941,10 +3078,10 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <div className="flex items-center justify-between text-[10px]">
                   <span className="text-neutral-400 font-mono flex items-center gap-1">
                     <span>{volumeSom === 0 || !somAtivo ? "🔇" : volumeSom < 50 ? "🔉" : "🔊"}</span>
-                    <span>VOLUME INDEPENDENTE</span>
+                    <span>{t.opcoes_volume_titulo}</span>
                   </span>
                   <span className={`font-mono font-bold ${!somAtivo || volumeSom === 0 ? "text-neutral-500" : "text-amber-400"}`}>
-                    {!somAtivo ? "SILENCIADO" : `${volumeSom}%`}
+                    {!somAtivo ? t.opcoes_volume_silenciado : `${volumeSom}%`}
                   </span>
                 </div>
 
@@ -2998,8 +3135,8 @@ export default function PainelAnalogicoMobileFullscreen() {
               {/* Opção 2: Unidade de Altitude */}
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-neutral-300">ALTITUDE</span>
-                  <span className="text-[9px] text-neutral-400">Telemetria</span>
+                  <span className="font-bold text-neutral-300">{t.opcoes_altitude_titulo}</span>
+                  <span className="text-[9px] text-neutral-400">{t.opcoes_altitude_subtitulo}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
@@ -3007,14 +3144,14 @@ export default function PainelAnalogicoMobileFullscreen() {
                     onClick={() => alternarAltitude("FT")}
                     className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeAltitude === "FT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                   >
-                    <span>PÉS (FT)</span>
+                    <span>{t.opcoes_unidade_pes}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => alternarAltitude("MT")}
                     className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeAltitude === "MT" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                   >
-                    <span>METROS (MT)</span>
+                    <span>{t.opcoes_unidade_metros}</span>
                   </button>
                 </div>
               </div>
@@ -3022,8 +3159,8 @@ export default function PainelAnalogicoMobileFullscreen() {
               {/* Opção 3: Unidade de Velocidade */}
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-neutral-300">VELOCIDADE</span>
-                  <span className="text-[9px] text-neutral-400">Ar</span>
+                  <span className="font-bold text-neutral-300">{t.opcoes_velocidade_titulo}</span>
+                  <span className="text-[9px] text-neutral-400">{t.opcoes_velocidade_subtitulo}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
@@ -3031,14 +3168,14 @@ export default function PainelAnalogicoMobileFullscreen() {
                     onClick={() => alternarVelocidade("KTS")}
                     className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "KTS" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                   >
-                    <span>NÓS (KTS)</span>
+                    <span>{t.opcoes_unidade_nos}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => alternarVelocidade("KMH")}
                     className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "KMH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                   >
-                    <span>KM/H (KMS)</span>
+                    <span>{t.opcoes_unidade_kmh}</span>
                   </button>
                 </div>
               </div>
@@ -3047,7 +3184,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             {/* Opção 4: Localização do Radar */}
             <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-bold text-neutral-300">LOCALIZAÇÃO DO RADAR</span>
+                <span className="font-bold text-neutral-300">{t.opcoes_localizacao_titulo}</span>
                 <span className="text-[9px] text-emerald-400 font-mono">📍 {localizacao.nome}</span>
               </div>
               <button
@@ -3059,16 +3196,16 @@ export default function PainelAnalogicoMobileFullscreen() {
                 className="w-full py-1.5 px-3 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>📍</span>
-                <span>ALTERAR LOCALIDADE OU COORDENADAS</span>
+                <span>{t.opcoes_localizacao_btn}</span>
               </button>
             </div>
 
             {/* Opção 5: Navegação entre os 3 Ecrãs */}
             <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-bold text-neutral-300">NAVEGAÇÃO ENTRE ECRÃS (3 ECRÃS)</span>
+                <span className="font-bold text-neutral-300">{t.opcoes_navegacao_titulo}</span>
                 <span className="text-[9px] text-sky-400 font-mono">
-                  {ecraAtivo === "principal" ? "Ecrã 1 Ativo" : ecraAtivo === "restantes" ? "Ecrã 2 Ativo" : "Ecrã 3 Ativo"}
+                  {ecraAtivo === "principal" ? "Ecrã 1" : ecraAtivo === "restantes" ? "Ecrã 2" : "Ecrã 3"}
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
@@ -3081,7 +3218,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ecraAtivo === "principal" ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"}`}
                 >
                   <span>✈️</span>
-                  <span>1. VOO PRINCIPAL</span>
+                  <span>{t.opcoes_ecra_principal}</span>
                 </button>
 
                 <button
@@ -3095,7 +3232,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   title={listaVoos.length <= 1 ? "Apenas existe 1 ou nenhum voo no radar" : "Ver restantes voos em LEDs"}
                 >
                   <span>🛫</span>
-                  <span>2. RESTANTES ({Math.max(0, listaVoos.length - 1)})</span>
+                  <span>{t.opcoes_ecra_restantes} ({Math.max(0, listaVoos.length - 1)})</span>
                 </button>
 
                 <button
@@ -3107,7 +3244,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ecraAtivo === "meteo" ? "bg-sky-500/25 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"}`}
                 >
                   <span>⛅</span>
-                  <span>3. METEOROLOGIA</span>
+                  <span>{t.opcoes_ecra_meteo}</span>
                 </button>
               </div>
 
@@ -3118,7 +3255,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   className="w-full py-1.5 px-2.5 rounded-lg border border-sky-400/30 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-bold text-sky-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-0.5"
                 >
                   <span>📋</span>
-                  <span>VER TABELA COMPLETA DE VOOS ({listaVoos.length})</span>
+                  <span>{t.opcoes_ver_tabela} ({listaVoos.length})</span>
                 </Link>
               )}
             </div>
@@ -3130,7 +3267,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 onClick={() => setModalOpcoesAberto(false)}
                 className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 active:scale-95 text-black font-black text-xs px-5 py-1.5 rounded-lg transition-all cursor-pointer shadow-md"
               >
-                GUARDAR E FECHAR
+                {t.opcoes_guardar_fechar}
               </button>
             </div>
 
@@ -3270,7 +3407,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     onClick={guardarCoordenadasManuais}
                     className="bg-amber-500 hover:bg-amber-400 text-black px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
                   >
-                    GRAVAR
+                    {t.loc_guardar}
                   </button>
                 </div>
               </div>
@@ -3281,7 +3418,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   onClick={() => setModalLocalizacaoAberto(false)}
                   className="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-lg text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer"
                 >
-                  CONCLUÍDO
+                  {t.opcoes_guardar_fechar}
                 </button>
               </div>
             </div>
