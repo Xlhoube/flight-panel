@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Idioma, IDIOMAS_DISPONIVEIS, TRADUCOES, traduzirPais } from "@/lib/i18n";
 import { obterDadosAeroporto } from "@/lib/aeroportos";
+import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/lib/localidades";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -1430,13 +1431,14 @@ const LED_FONT_5X7: Record<string, number[]> = {
 
 interface LedTextProps {
   text: string;
-  size?: "sm" | "md" | "lg" | "xl" | "hero";
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "hero";
   color?: string;
   className?: string;
 }
 
 function LedText({ text, size = "lg", color = "#f4f9ff", className = "" }: LedTextProps) {
   const sizeClass = {
+    xs: "h-[0.95rem] sm:h-[1.15rem]",
     sm: "h-[1.15rem] sm:h-[1.35rem]",
     md: "h-[1.4rem] sm:h-[1.75rem]",
     lg: "h-[1.75rem] sm:h-[2.35rem]",
@@ -1836,10 +1838,13 @@ export default function PainelAnalogicoMobileFullscreen() {
       (pos) => {
         const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : null;
         setPrecisaoMetros(acc);
+        const latFix = Number(pos.coords.latitude.toFixed(4));
+        const lonFix = Number(pos.coords.longitude.toFixed(4));
+        const nomeGeo = resolverLocalidadePorCoordenadas(latFix, lonFix);
         const novo: InfoLocalizacao = {
-          lat: Number(pos.coords.latitude.toFixed(4)),
-          lon: Number(pos.coords.longitude.toFixed(4)),
-          nome: acc && acc <= 30 ? `GPS SATÉLITE (±${acc}M)` : `GPS DO DISPOSITIVO (±${acc ?? "?"}M)`,
+          lat: latFix,
+          lon: lonFix,
+          nome: nomeGeo,
           origem: "gps",
         };
         setLocalizacao(novo);
@@ -1881,10 +1886,13 @@ export default function PainelAnalogicoMobileFullscreen() {
           // Apenas actualiza automaticamente se estivermos em modo GPS
           setLocalizacao((atual) => {
             if (atual.origem === "preset" || atual.origem === "manual") return atual;
+            const latFix = Number(pos.coords.latitude.toFixed(4));
+            const lonFix = Number(pos.coords.longitude.toFixed(4));
+            const nomeGeo = resolverLocalidadePorCoordenadas(latFix, lonFix);
             return {
-              lat: Number(pos.coords.latitude.toFixed(4)),
-              lon: Number(pos.coords.longitude.toFixed(4)),
-              nome: acc && acc <= 25 ? `GPS SATÉLITE (±${acc}M)` : `GPS (±${acc ?? "?"}M)`,
+              lat: latFix,
+              lon: lonFix,
+              nome: nomeGeo,
               origem: "gps",
             };
           });
@@ -2231,7 +2239,9 @@ export default function PainelAnalogicoMobileFullscreen() {
           listaVoosRef.current = voosEmAr;
           setListaVoos(voosEmAr);
           setTotalNoRadar(voosEmAr.length);
-          setMeteorologia(null);
+          if (ecraAtivo === "meteo") {
+            carregarMeteorologia({ lat: refLat, lon: refLon });
+          }
 
           // Partilha de dados em cache para a nova página de lista de voos restantes (/voos)
           try {
@@ -2288,6 +2298,21 @@ export default function PainelAnalogicoMobileFullscreen() {
 
     ultimoVooEcra1Ref.current = idVooEcra1;
   }, [vooAtual]);
+
+  // Assegura carregamento imediato da meteorologia ao entrar no 3º ecrã
+  useEffect(() => {
+    if (ecraAtivo === "meteo") {
+      carregarMeteorologia({ lat: localizacao.lat, lon: localizacao.lon });
+    }
+  }, [ecraAtivo, localizacao.lat, localizacao.lon, carregarMeteorologia]);
+
+  // Nome limpo da estação meteorológica (resolvido por GPS ou preset, sem strings técnicas)
+  const nomeEstacaoDisplay = useMemo(() => {
+    const nomeBruto = (meteorologia?.name && meteorologia.name !== "ESTAÇÃO LOCAL")
+      ? meteorologia.name
+      : localizacao.nome;
+    return formatarNomeEstacaoDisplay(nomeBruto, localizacao.lat, localizacao.lon);
+  }, [meteorologia?.name, localizacao.nome, localizacao.lat, localizacao.lon]);
 
   const refLatAtual = localizacao.lat;
   const refLonAtual = localizacao.lon;
@@ -2494,41 +2519,39 @@ export default function PainelAnalogicoMobileFullscreen() {
           <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
 
             {/* LINHA 1: CABEÇALHO DA ESTAÇÃO METEOROLÓGICA & RADAR */}
-            <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
+            <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-1.5 sm:gap-3 shadow-lg shrink-0 overflow-hidden">
+              <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
                   <WeatherIconSVG
                     code={meteorologia?.weather?.[0]?.code}
                     isDay={meteorologia?.environment?.is_day ?? true}
-                    className="w-6 h-6 sm:w-8 sm:h-8"
+                    className="w-5 h-5 sm:w-8 sm:h-8"
                   />
                 </div>
-                <div className="flex flex-col items-start gap-0.5 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-mono font-bold">
+                <div className="flex flex-col items-start gap-0.5 shrink-0">
+                  <div className="flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
+                    <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-mono font-bold truncate max-w-[150px] sm:max-w-none">
                       RADAR METEOROLÓGICO ATIVO (20 KM)
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-baseline gap-1.5 flex-nowrap whitespace-nowrap shrink-0">
                     <LedText text={horaAtual} size="lg" />
-                    <LedText text={dataAtual} size="md" />
+                    <LedText text={dataAtual} size="sm" />
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
-                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+              <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 max-w-[45%] justify-end shrink">
+                <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-hidden">
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold truncate">
                     {t.meteo_estacao}
                   </span>
-                  <LedText
-                    text={
-                      (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).length > 14
-                        ? (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).slice(0, 14)
-                        : (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome)
-                    }
-                    size="md"
-                  />
+                  <div className="truncate max-w-full flex justify-end">
+                    <LedText
+                      text={nomeEstacaoDisplay}
+                      size={nomeEstacaoDisplay.length > 10 ? "xs" : nomeEstacaoDisplay.length > 7 ? "sm" : "md"}
+                    />
+                  </div>
                   <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
                     {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
                   </span>
@@ -2773,54 +2796,52 @@ export default function PainelAnalogicoMobileFullscreen() {
         /* ── TERCEIRO ECRÃ: METEOROLOGIA DEDICADA ────────────────────────────── */
         <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
           {/* CABEÇALHO DO 3º ECRÃ: ESTAÇÃO METEOROLÓGICA & RADAR */}
-          <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-full bg-[#10121a] p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-1.5 sm:gap-3 shadow-lg shrink-0 overflow-hidden">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               <button
                 onClick={irParaPrincipal}
-                className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-amber-400 hover:text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-amber-400 hover:text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0"
                 title="Voltar ao Voo Principal"
               >
                 <span>⟵</span>
-                <span className="hidden xs:inline">{t.opcoes_ecra_principal}</span>
+                <span className="hidden md:inline">{t.opcoes_ecra_principal}</span>
               </button>
 
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 bg-neutral-900 border border-white/10 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
                 <WeatherIconSVG
                   code={meteorologia?.weather?.[0]?.code}
                   isDay={meteorologia?.environment?.is_day ?? true}
-                  className="w-6 h-6 sm:w-8 sm:h-8"
+                  className="w-5 h-5 sm:w-8 sm:h-8"
                 />
               </div>
 
-              <div className="flex flex-col items-start gap-0.5 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-sky-400 font-mono font-bold">
+              <div className="flex flex-col items-start gap-0.5 shrink-0">
+                <div className="flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-sky-400 font-mono font-bold truncate max-w-[130px] sm:max-w-none">
                     3º ECRÃ • {t.meteo_estacao_local} (20 KM)
                   </span>
-                  <span className="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 font-bold">
+                  <span className="hidden sm:inline-block text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 font-bold">
                     {listaVoos.length > 0 ? `${listaVoos.length} ${t.meteo_voos_detectados}` : t.meteo_aguardando}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-baseline gap-1.5 flex-nowrap whitespace-nowrap shrink-0">
                   <LedText text={horaAtual} size="lg" />
-                  <LedText text={dataAtual} size="md" />
+                  <LedText text={dataAtual} size="sm" />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <div className="flex flex-col items-end gap-0.5 text-right min-w-0">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 max-w-[45%] justify-end shrink">
+              <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold truncate">
                   {t.meteo_estacao}
                 </span>
-                <LedText
-                  text={
-                    (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).length > 14
-                      ? (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome).slice(0, 14)
-                      : (meteorologia?.name && localizacao.origem === "gps" ? meteorologia.name : localizacao.nome)
-                  }
-                  size="md"
-                />
+                <div className="truncate max-w-full flex justify-end">
+                  <LedText
+                    text={nomeEstacaoDisplay}
+                    size={nomeEstacaoDisplay.length > 10 ? "xs" : nomeEstacaoDisplay.length > 7 ? "sm" : "md"}
+                  />
+                </div>
                 <span className="text-[8px] sm:text-[9px] font-mono text-neutral-400 truncate">
                   {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
                 </span>

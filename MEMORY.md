@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.3  
+**Versão:** v2.0.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização completa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea sem recarregar a página, tradução de países e persistência local.
@@ -176,6 +176,19 @@
 | 2026-10-16 | v2.0.1 | Remoção do botão de idioma dos cabeçalhos dos ecrãs; seleção centralizada exclusivamente nas definições |
 | 2026-10-16 | v2.0.2 | Base global de 7.900+ aeroportos IATA; resolução completa de cidade, aeroporto e país em origens e destinos |
 | 2026-10-16 | v2.0.3 | Áudio de novo voo restrito exclusivamente ao Ecrã 1, ignorando entradas no Ecrã 2 |
+| 2026-10-16 | v2.0.4 | Resolução geográfica de estações por GPS, eliminação de strings técnicas e blindagem contra sobreposição no relógio |
+
+---
+
+### ADR-040 — Resolução Geográfica de Estações e Blindagem do Cabeçalho Meteorológico (2026-10-16)
+**Contexto:** O utilizador reportou que no cabeçalho meteorológico por vezes aparecia a string cortada `"GPS SATELITE ("` em vez do nome da localidade e que, dependendo do tamanho da palavra, o bloco da estação colidia e sobrepunha-se fisicamente sobre o relógio e a data.  
+**Causa Raiz:** O hook de geolocalização guardava em `localizacao.nome` strings técnicas brutas com parêntesis abertos (ex: `"GPS SATÉLITE (±15M)"`), as quais eram truncadas a 14 caracteres (`"GPS SATELITE ("`). Quando o ecrã continha voos no radar, `setMeteorologia(null)` limpava a meteorologia, forçando o fallback para essa string técnica. Além disso, o relógio e a data não tinham `shrink-0` nem `whitespace-nowrap`, permitindo que a data quebrasse de linha e colidisse com o bloco da direita.  
+**Decisão:**  
+1. Criar `lib/localidades.ts` com cálculo de menor distância Haversine a mais de 80 localidades e concelhos de Portugal e Ibéria, resolvendo nomes reais (ex: `"VALADARES / GAIA"`, `"PORTO"`, etc.).  
+2. Atribuir o nome geográfico resolvido diretamente em `getCurrentPosition` e `watchPosition`, expurgando qualquer string técnica com parêntesis da interface.  
+3. Assegurar carregamento imediato e preservação dos dados meteorológicos ao transitar para o 3º ecrã, mesmo com aeronaves detetadas no radar.  
+4. Reestruturar o cabeçalho meteorológico (no Fallback do Ecrã 1 e no 3º Ecrã) com `shrink-0` e alinhamento horizontal inquebrável para o relógio e a data (`horaAtual` em `lg` e `dataAtual` em `sm`), limitando o bloco da estação a `max-w-[45%]` com dimensionamento dinâmico no `LedText` (`xs`, `sm` ou `md`).  
+**Consequência:** Eliminação total de colisões visuais, relógio sempre estável e legível, e exibição limpa da estação meteorológica geográfica real.
 
 
 
