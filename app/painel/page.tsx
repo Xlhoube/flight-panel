@@ -315,6 +315,80 @@ function formatarNomeAeronave(raw: string): string {
   return s;
 }
 
+function obterFabricanteAeronave(codAeronave: string, nomeAeronave: string): string {
+  const c = (codAeronave || "").trim().toUpperCase();
+  const n = (nomeAeronave || "").trim().toUpperCase();
+
+  // Boeing
+  if (/^B7\d|B3[89]M|^7[0-9]{2}|BOEING|DREAMLINER|MAX\s*[89]/i.test(c) || /BOEING|B737|B747|B757|B767|B777|B787/i.test(n)) {
+    return "BOEING";
+  }
+  // Airbus
+  if (/^A[23][0-9]{2}|AIRBUS|^A3[123458][0-9N]|BELUGA/i.test(c) || /AIRBUS|^A[23][0-9]{2}/i.test(n)) {
+    return "AIRBUS";
+  }
+  // Embraer
+  if (/^E[12][0-9]{2}|^E\d{3}|EMBRAER|KC-?390|PHENOM|LINEAGE|ERJ/i.test(c) || /EMBRAER|E190|E195|E175|E170/i.test(n)) {
+    return "EMBRAER";
+  }
+  // ATR
+  if (/^AT[47][0-9]|ATR/i.test(c) || /ATR\s*[47]2/i.test(n)) {
+    return "ATR";
+  }
+  // Bombardier / De Havilland
+  if (/^CRJ|^CL[36]|DH8|DASH|CHALLENGER|GLOBAL|BOMBARDIER|DHC/i.test(c) || /BOMBARDIER|CHALLENGER|GLOBAL|DASH\s*8|CRJ/i.test(n)) {
+    return "BOMBARDIER";
+  }
+  // Cessna
+  if (/^C[1256][0-9]{2}|CITATION|CESSNA|^C208|^C172|^C152/i.test(c) || /CESSNA|CITATION/i.test(n)) {
+    return "CESSNA";
+  }
+  // Dassault
+  if (/^FA[782]X|^F900|^F2TH|FALCON|DASSAULT/i.test(c) || /FALCON|DASSAULT/i.test(n)) {
+    return "DASSAULT";
+  }
+  // Gulfstream
+  if (/^GLF|GULFSTREAM|^G[456][0-9]{2}/i.test(c) || /GULFSTREAM/i.test(n)) {
+    return "GULFSTREAM";
+  }
+  // Beechcraft
+  if (/^BE[1239]|KING\s*AIR|BEECHCRAFT|SUPER\s*KING/i.test(c) || /BEECHCRAFT|KING\s*AIR/i.test(n)) {
+    return "BEECHCRAFT";
+  }
+  // Pilatus
+  if (/^PC[12][24]|PILATUS/i.test(c) || /PILATUS/i.test(n)) {
+    return "PILATUS";
+  }
+  // Cirrus
+  if (/^SR2[02]|CIRRUS/i.test(c) || /CIRRUS/i.test(n)) {
+    return "CIRRUS";
+  }
+  // Sikorsky
+  if (/^H60|^S70|^UH60|BLACK\s*HAWK|SIKORSKY/i.test(c) || /BLACK\s*HAWK|SIKORSKY/i.test(n)) {
+    return "SIKORSKY";
+  }
+  // Lockheed
+  if (/^C130|^L100|^F16|LOCKHEED|HERCULES/i.test(c) || /LOCKHEED|F-16/i.test(n)) {
+    return "LOCKHEED MARTIN";
+  }
+  // Robinson
+  if (/^R[246]2|^R44|^R66|ROBINSON/i.test(c) || /ROBINSON/i.test(n)) {
+    return "ROBINSON";
+  }
+  // Leonardo / AgustaWestland
+  if (/^A119|^AW1|KOALA|MERLIN|EH101|LEONARDO|AGUSTA/i.test(c) || /KOALA|MERLIN|AGUSTA/i.test(n)) {
+    return "LEONARDO";
+  }
+
+  // Fallback inteligente
+  const primeiraPalavra = n.split(" ")[0];
+  if (primeiraPalavra && primeiraPalavra.length >= 3 && !/^\d+$/.test(primeiraPalavra)) {
+    return primeiraPalavra;
+  }
+
+  return "AERONAVE COMERCIAL";
+}
+
 const AEROPORTOS_PAISES: Record<string, string> = {
   OPO: "PORTUGAL", LIS: "PORTUGAL", FAO: "PORTUGAL", FNC: "PORTUGAL", PDL: "PORTUGAL",
   TER: "PORTUGAL", PXO: "PORTUGAL", SMA: "PORTUGAL", HOR: "PORTUGAL", FLW: "PORTUGAL",
@@ -896,6 +970,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     codAeronave = "UH-60 BLACK HAWK";
   }
   const nomeAeronave = formatarNomeAeronave(codAeronave);
+  const fabricante = obterFabricanteAeronave(codAeronave, nomeAeronave);
 
   let origemPais = rotaReal?.origemPais || "";
   let destinoPais = rotaReal?.destinoPais || "";
@@ -986,6 +1061,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     callsignIata,
     nomeCompanhia: nomeFinalCompanhia,
     aeronave: nomeAeronave,
+    fabricante,
     origem,
     origemCode,
     origemPais,
@@ -2558,7 +2634,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             {/* LINHA 1: VOO & LOGÓTIPO & COMPANHIA */}
             <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
 
-              {/* Logótipo Oficial Garantido + Voo */}
+              {/* Logótipo Oficial Garantido + Voo + Companhia Aérea */}
               <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 shrink-0">
                 <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
 
@@ -2570,10 +2646,13 @@ export default function PainelAnalogicoMobileFullscreen() {
                     text={infoVoo.numeroVoo}
                     size={infoVoo.numeroVoo.length >= 7 ? "md" : infoVoo.numeroVoo.length >= 5 ? "lg" : "xl"}
                   />
+                  <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
+                    {infoVoo.nomeCompanhia}
+                  </span>
                 </div>
               </div>
 
-              {/* Aeronave, Nome da Companhia e Botões de Ação */}
+              {/* Aeronave, Fabricante do Avião e Botões de Ação */}
               <div className="flex items-center gap-2 sm:gap-3 shrink-0 max-w-[60%]">
                 <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-hidden">
                   <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
@@ -2584,7 +2663,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     size={infoVoo.aeronave.length >= 12 ? "sm" : infoVoo.aeronave.length >= 9 ? "md" : "lg"}
                   />
                   <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
-                    {infoVoo.nomeCompanhia}
+                    {infoVoo.fabricante}
                   </span>
                 </div>
 

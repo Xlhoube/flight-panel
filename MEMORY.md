@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.1.0  
+**Versão:** v2.1.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
@@ -183,6 +183,7 @@
 | 2026-10-16 | v2.0.8 | Inversão simétrica dos flaps e leds na Linha 2 de rota: flaps no centro e leds nas extremidades exteriores |
 | 2026-10-16 | v2.0.9 | Blindagem e deduplicação estrita do som de novo voo: exclusivo ao Ecrã 1, sem repetições por oscilação ou alternância de voos |
 | 2026-10-16 | v2.1.0 | Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de telemetria com varrimento animado, azimute e distância exata (KM/NM) |
+| 2026-10-16 | v2.1.1 | Transferência da companhia aérea para o bloco esquerdo (junto ao voo) e adição do fabricante sob o modelo da aeronave à direita |
 
 ---
 
@@ -264,6 +265,15 @@
    - Exibição em grande formato numérico `LedText` da distância com adaptação automática de unidade: `NM` (milhas náuticas) quando a velocidade está em `KTS`, ou `KM` quando a velocidade está em `KMH`.
    - Subtítulo com direção cardeal e graus de azimute (ex: `NE • 042°`) e equivalência métrica/náutica secundária.
 **Consequência:** Informação de proximidade aeronáutica em tempo real de nível profissional, integrando perfeitamente a estética oficial do display sem comprometer o espaço útil do ecrã.
+
+### ADR-047 — Reorganização da Linha 1: Companhia Aérea à Esquerda e Fabricante do Avião à Direita (2026-10-16)
+**Contexto:** O utilizador solicitou mudar de lado o nome da companhia aérea e adicionar o fabricante do avião (`Muda o nome da companhia e adiciona o fabricante do aviao`), desenhando na captura de ecrã uma seta a transferir a companhia da direita para a esquerda.  
+**Decisão:**  
+1. **Transferência da Companhia Aérea:** Mover o nome da companhia (`infoVoo.nomeCompanhia`, ex: `RYANAIR`) para o bloco esquerdo da Linha 1, posicionado harmoniosamente por baixo do número de voo em LED e junto ao logótipo oficial.
+2. **Resolução Automática do Fabricante:** Criar a função `obterFabricanteAeronave(codAeronave, nomeAeronave)` que analisa os códigos ICAO e designações para determinar com precisão o construtor aeronáutico (`BOEING`, `AIRBUS`, `EMBRAER`, `ATR`, `BOMBARDIER`, `CESSNA`, `DASSAULT`, `GULFSTREAM`, `BEECHCRAFT`, `PILATUS`, `CIRRUS`, `SIKORSKY`, `LOCKHEED MARTIN`, `ROBINSON`, `LEONARDO`, etc.).
+3. **Exibição do Fabricante:** No bloco direito da Linha 1, por baixo do modelo da aeronave em LEDs (`B737 MAX 8`, `A320NEO`, etc.), exibir em destaque o fabricante aeronáutico resolvido (`infoVoo.fabricante`).  
+**Consequência:** Linha 1 perfeitamente equilibrada e contextualizada: a identidade da operadora (logótipo, voo e companhia) fica concentrada à esquerda, e a ficha técnica da máquina (rótulo, modelo e fabricante) fica concentrada à direita.
+
 
 
 
