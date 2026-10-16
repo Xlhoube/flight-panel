@@ -1915,6 +1915,9 @@ export default function PainelAnalogicoMobileFullscreen() {
             const latFix = Number(pos.coords.latitude.toFixed(4));
             const lonFix = Number(pos.coords.longitude.toFixed(4));
             const nomeGeo = resolverLocalidadePorCoordenadas(latFix, lonFix);
+            if (atual.lat === latFix && atual.lon === lonFix && atual.nome === nomeGeo) {
+              return atual;
+            }
             return {
               lat: latFix,
               lon: lonFix,
@@ -2303,27 +2306,67 @@ export default function PainelAnalogicoMobileFullscreen() {
   // O painel principal exibe exclusivamente o voo mais próximo detetado no radar (#1)
   const vooAtual = listaVoos.length > 0 ? listaVoos[0] : null;
 
-  // Áudio reproduzido (/Flight.mp3) exclusivamente quando um novo voo surge no Ecrã 1 (#1 / Voo Principal)
-  // Ignora completamente os voos secundários que entram ou saem no Ecrã 2 (Restantes Voos)
-  const ultimoVooEcra1Ref = useRef<string | null>(null);
-  const inicializadoRef = useRef<boolean>(false);
+  // ── Gestão de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
+  // Regras estritas:
+  // 1. Toca exclusivamente se o utilizador estiver no Ecrã 1 (ecraAtivo === "principal").
+  // 2. Toca apenas para o voo atualmente exibido no Ecrã 1 (vooAtual / #1).
+  // 3. Deduplicação estrita: cada aeronave (ICAO24 / Callsign) toca no máximo UMA ÚNICA VEZ por sessão (ou a cada 45 min).
+  //    Isto impede repetições infinitas quando dois voos alternam de posição no topo do radar ou quando a API oscila.
+  // 4. Cooldown de segurança (mínimo 15 segundos entre toques).
+  // 5. No arranque da aplicação (primeiro carregamento de voos), regista os voos existentes para não disparar som imediato.
+  const voosJaTocadosRef = useRef<Map<string, number>>(new Map());
+  const primeiroLoteRecebidoRef = useRef<boolean>(false);
+  const ultimoSomTocadoTimestampRef = useRef<number>(0);
 
   useEffect(() => {
-    const idVooEcra1 = vooAtual ? (vooAtual[0] || vooAtual[1] || "") : null;
+    // Se não há voo no Ecrã 1, nada a fazer
+    if (!vooAtual) return;
 
-    if (!inicializadoRef.current) {
-      inicializadoRef.current = true;
-      ultimoVooEcra1Ref.current = idVooEcra1;
+    const idIcao = (vooAtual[0] || "").trim().toLowerCase();
+    const idCallsign = (vooAtual[1] || "").trim().toUpperCase();
+    const idVoo = idIcao || idCallsign;
+    if (!idVoo) return;
+
+    const agora = Date.now();
+
+    // Limpeza de histórico antigo (> 45 minutos)
+    for (const [id, tempo] of voosJaTocadosRef.current.entries()) {
+      if (agora - tempo > 45 * 60 * 1000) {
+        voosJaTocadosRef.current.delete(id);
+      }
+    }
+
+    // No primeiro lote recebido com voos ao abrir a aplicação,
+    // registamos os voos presentes como já conhecidos para evitar disparos abruptos no arranque
+    if (!primeiroLoteRecebidoRef.current) {
+      primeiroLoteRecebidoRef.current = true;
+      listaVoos.forEach((v) => {
+        const i = (v[0] || "").trim().toLowerCase();
+        const c = (v[1] || "").trim().toUpperCase();
+        const chave = i || c;
+        if (chave) voosJaTocadosRef.current.set(chave, agora);
+      });
       return;
     }
 
-    // Tocar som de novo voo apenas quando um voo surge ou muda no Ecrã 1
-    if (idVooEcra1 && idVooEcra1 !== ultimoVooEcra1Ref.current) {
-      tocarSomNovoVoo();
+    // Apenas toca se o utilizador estiver no Ecrã 1
+    if (ecraAtivo !== "principal") return;
+
+    // Se este voo já foi anunciado recentemente, NÃO repete o som
+    if (voosJaTocadosRef.current.has(idVoo)) {
+      return;
     }
 
-    ultimoVooEcra1Ref.current = idVooEcra1;
-  }, [vooAtual]);
+    // Cooldown de segurança entre reproduções de som (pelo menos 15 segundos)
+    if (agora - ultimoSomTocadoTimestampRef.current < 15000) {
+      return;
+    }
+
+    // Tocar som de novo voo no Ecrã 1
+    tocarSomNovoVoo();
+    voosJaTocadosRef.current.set(idVoo, agora);
+    ultimoSomTocadoTimestampRef.current = agora;
+  }, [vooAtual, ecraAtivo, listaVoos]);
 
   // Assegura carregamento imediato da meteorologia ao entrar no 3º ecrã
   useEffect(() => {

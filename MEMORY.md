@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.8  
+**Versão:** v2.0.9  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
@@ -181,6 +181,7 @@
 | 2026-10-16 | v2.0.6 | Simplificação e purificação do modal de localização: remoção da grelha de localidades predefinidas e do botão de cópia de link para telemóvel |
 | 2026-10-16 | v2.0.7 | Adição do seletor exato de Raio de Ação do Radar (KM/NM) com filtro Haversine rigoroso e persistência local |
 | 2026-10-16 | v2.0.8 | Inversão simétrica dos flaps e leds na Linha 2 de rota: flaps no centro e leds nas extremidades exteriores |
+| 2026-10-16 | v2.0.9 | Blindagem e deduplicação estrita do som de novo voo: exclusivo ao Ecrã 1, sem repetições por oscilação ou alternância de voos |
 
 ---
 
@@ -232,6 +233,20 @@
    - **Destino (à direita do ecrã):** Posicionar as 3 palhetas Split-Flap (`FlapWord`) à esquerda (centro) e os LEDs informativos (`LedText` com cidade, aeroporto e país) à direita (exterior).
 2. Layout global resultante: `[LEDS ORIGEM] [FLAP ORIGEM]` ➔ ✈ ➔ `[FLAP DESTINO] [LEDS DESTINO]`. Os flaps mecânicos unem-se no centro da rota ao redor do ícone do avião, e os leds informativos equilibram harmoniosamente as extremidades laterais.  
 **Consequência:** Simetria visual e equilíbrio estético no Ecrã 1, mantendo total responsividade e legibilidade de todas as informações aeroportuárias.
+
+### ADR-045 — Blindagem e Deduplicação Estrita do Áudio de Novo Voo (/Flight.mp3) (2026-10-16)
+**Contexto:** O utilizador reportou que o som de novo voo parecia estar a repetir demasiadas vezes e exigiu que apenas deve tocar para o voo que estiver no Ecrã 1 (`Verifica o som de novo voo, parece estar a repetir demasiadas vezes. apenas deve tocar para o voo que estiver no ecra 1`).  
+**Causa Raiz:**  
+1. **Alternância no Topo (#1):** Quando 2 ou mais voos sobrevoam o radar com distâncias próximas, pequenas variações de cálculo faziam-nos alternar entre 1º e 2º lugar a cada 15 segundos; como a referência anterior guardava apenas o ID do último voo, cada transição disparava o som repetidamente em loop.  
+2. **Oscilação de Rede/API:** Se a OpenSky devolvesse temporariamente 0 estados ou desse timeout por um ciclo, a lista de voos era esvaziada e, no ciclo seguinte, o mesmo voo reaparecia e disparava o som de novo.  
+3. **Reprodução Fora do Ecrã 1:** O efeito disparava mesmo quando o utilizador estava a visualizar o Ecrã 2 (Restantes Voos) ou o Ecrã 3 (Meteorologia).  
+**Decisão:**  
+1. **Verificação de Ecrã Ativo:** Condicionar a reprodução estritamente a `ecraAtivo === "principal"` e `vooAtual !== null`. Se o utilizador estiver noutro ecrã, o áudio nunca toca.  
+2. **Deduplicação Persistente por Aeronave:** Implementar `voosJaTocadosRef` (`Map<string, number>`) indexado pela chave única da aeronave (`ICAO24` ou `Callsign`). Uma aeronave toca no máximo **uma única vez** por sessão (com janela de expiração de 45 min).  
+3. **Prevenção de Falso Alarme no Arranque:** Ao carregar a aplicação pela primeira vez com voos já presentes, as aeronaves existentes são registadas como já conhecidas, evitando disparos abruptos imediatos.  
+4. **Cooldown de Segurança:** Limitar o intervalo entre toques a um mínimo de 15 segundos para evitar qualquer disparo em rajada.  
+5. **Estabilização do GPS:** Impedir re-renders redundantes no hook `watchPosition` quando a latitude e longitude não sofreram alterações.  
+**Consequência:** O som `/Flight.mp3` toca com precisão cirúrgica apenas quando uma nova aeronave entra no Ecrã 1, eliminando completamente repetições irritantes ou loops de áudio.
 
 
 
