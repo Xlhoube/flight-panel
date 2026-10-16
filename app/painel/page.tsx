@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Idioma, IDIOMAS_DISPONIVEIS, TRADUCOES, traduzirPais } from "@/lib/i18n";
+import { Idioma, IDIOMAS_DISPONIVEIS, TRADUCOES, traduzirPais, traduzirCondicaoMeteo, obterMesAbreviado } from "@/lib/i18n";
 import { obterDadosAeroporto } from "@/lib/aeroportos";
 import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/lib/localidades";
 
@@ -1777,15 +1777,14 @@ export default function PainelAnalogicoMobileFullscreen() {
       const agora = new Date();
       const h = agora.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
       const dia = agora.getDate().toString().padStart(2, "0");
-      const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-      const mes = meses[agora.getMonth()];
+      const mes = obterMesAbreviado(agora.getMonth(), idioma);
       setHoraAtual(h);
       setDataAtual(`${dia} ${mes}`);
     };
     atualizarTempo();
     const interval = setInterval(atualizarTempo, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [idioma]);
 
   // Sincronização direta de coordenadas via URL (?lat=X&lon=Y) para partilha imediata PC -> Telemóvel
   useEffect(() => {
@@ -2531,7 +2530,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <div className="flex flex-col items-start gap-0.5 shrink-0">
                   <div className="flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
                     <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-mono font-bold truncate max-w-[150px] sm:max-w-none">
-                      RADAR METEOROLÓGICO ATIVO (20 KM)
+                      {t.cabecalho_radar}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-1.5 flex-nowrap whitespace-nowrap shrink-0">
@@ -2576,33 +2575,33 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                  CONDIÇÃO ATMOSFÉRICA
+                  {t.meteo_condicoes}
                 </span>
-                <span>TEMPERATURA &amp; SENSAÇÃO</span>
+                <span>{t.meteo_temperatura_sensacao}</span>
               </div>
 
               <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
                 <div className="flex flex-col items-start gap-1 min-w-0">
-                  <LedText text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+                  <LedText text={traduzirCondicaoMeteo(meteorologia?.weather?.[0]?.description, idioma)} size="hero" />
                   <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono whitespace-nowrap">
                     {meteorologia?.environment?.precipitation_mm != null && (
                       <>
                         <span className="text-cyan-400 font-bold tracking-wider">
-                          PRECIP: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
+                          {t.meteo_precipitacao}: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
                         </span>
                         <span>•</span>
                       </>
                     )}
                     <span className="text-amber-400/90 font-bold">
-                      SENSAÇÃO: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
+                      {t.meteo_sensacao}: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
                     </span>
                     <span>•</span>
                     <span className="text-sky-300">
-                      MIN {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
+                      {t.meteo_min} {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
                     </span>
                     <span>/</span>
                     <span className="text-orange-400">
-                      MAX {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
+                      {t.meteo_max} {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
                     </span>
                   </div>
                 </div>
@@ -2621,7 +2620,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* Módulo 1: Vento */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">VENTO / RUMO</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_vento}</span>
                 <div className="flex items-center gap-0.5">
                   <LedText text={`${meteorologia?.wind?.speed_kmh ?? Math.round((meteorologia?.wind?.speed ?? 3.5) * 3.6)}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">KM/H</span>
@@ -2633,53 +2632,53 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* Módulo 2: QNH */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PRESSÃO QNH</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_pressao}</span>
                 <div className="flex items-center gap-0.5">
                   <LedText text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">ALTÍMETRO</span>
+                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">{t.meteo_sub_altimetro}</span>
               </div>
 
               {/* Módulo 3: Humidade */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">HUMIDADE</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_humidade}</span>
                 <div className="flex items-center gap-0.5">
                   <LedText text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
                   <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">RELATIVA</span>
+                <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">{t.meteo_sub_humidade}</span>
               </div>
 
               {/* Módulo 4: Nascer do Sol */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">NASCER SOL</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_nascer_sol}</span>
                 <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
                   <span className="text-amber-400">☀️</span>
                   {meteorologia?.environment?.sunrise || "07:15"}
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">AURORA</span>
+                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">{t.meteo_sub_aurora}</span>
               </div>
 
               {/* Módulo 5: Pôr do Sol */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">PÔR DO SOL</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_por_sol}</span>
                 <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono font-black text-white">
                   <span className="text-orange-400">🌙</span>
                   {meteorologia?.environment?.sunset || "19:50"}
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">CREPÚSCULO</span>
+                <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">{t.meteo_sub_crepusculo}</span>
               </div>
 
               {/* Módulo 6: Índice UV */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">ÍNDICE UV</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5">{t.meteo_uv}</span>
                 <div className="flex items-center gap-0.5">
                   <span className="text-[10px] sm:text-xs font-mono font-black text-amber-300">
                     UV {meteorologia?.environment?.uv_index ?? 3}
                   </span>
                 </div>
-                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">MODERADO</span>
+                <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">{t.meteo_sub_uv}</span>
               </div>
 
             </div>
@@ -2817,8 +2816,8 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               <div className="flex flex-col items-start gap-0.5 shrink-0">
                 <div className="flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
-                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-sky-400 font-mono font-bold truncate max-w-[130px] sm:max-w-none">
-                    3º ECRÃ • {t.meteo_estacao_local} (20 KM)
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-sky-400 font-mono font-bold truncate max-w-[150px] sm:max-w-none">
+                    {t.cabecalho_ecra3}
                   </span>
                   <span className="hidden sm:inline-block text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 font-bold">
                     {listaVoos.length > 0 ? `${listaVoos.length} ${t.meteo_voos_detectados}` : t.meteo_aguardando}
@@ -2868,17 +2867,17 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
                 {t.meteo_condicoes}
               </span>
-              <span>{t.meteo_temperatura} &amp; {t.meteo_sensacao}</span>
+              <span>{t.meteo_temperatura_sensacao}</span>
             </div>
 
             <div className="w-full flex-1 flex items-center justify-between gap-4 min-h-0 py-1">
               <div className="flex flex-col items-start gap-1 min-w-0">
-                <LedText text={meteorologia?.weather?.[0]?.description || "CEU LIMPO"} size="hero" />
+                <LedText text={traduzirCondicaoMeteo(meteorologia?.weather?.[0]?.description, idioma)} size="hero" />
                 <div className="flex items-center gap-2 flex-wrap text-[9px] sm:text-xs text-neutral-400 font-mono whitespace-nowrap">
                   {meteorologia?.environment?.precipitation_mm != null && (
                     <>
                       <span className="text-cyan-400 font-bold tracking-wider">
-                        PRECIP: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
+                        {t.meteo_precipitacao}: {meteorologia.environment.precipitation_mm.toFixed(1)} mm
                       </span>
                       <span>•</span>
                     </>
@@ -2888,11 +2887,11 @@ export default function PainelAnalogicoMobileFullscreen() {
                   </span>
                   <span>•</span>
                   <span className="text-sky-300">
-                    MIN {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
+                    {t.meteo_min} {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
                   </span>
                   <span>/</span>
                   <span className="text-orange-400">
-                    MAX {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
+                    {t.meteo_max} {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
                   </span>
                 </div>
               </div>
@@ -2927,7 +2926,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <LedText text={`${meteorologia?.aviation?.qnh ?? meteorologia?.main?.pressure ?? 1016}`} size="sm" />
                 <span className="text-[8px] text-neutral-400 font-bold font-mono">HPA</span>
               </div>
-              <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">ALTÍMETRO</span>
+              <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">{t.meteo_sub_altimetro}</span>
             </div>
 
             {/* Módulo 3: Humidade */}
@@ -2937,7 +2936,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <LedText text={`${meteorologia?.main?.humidity ?? 70}`} size="sm" />
                 <span className="text-[8px] text-neutral-400 font-bold font-mono">%</span>
               </div>
-              <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">RELATIVA</span>
+              <span className="text-[8px] sm:text-[9px] text-sky-400 font-mono font-bold">{t.meteo_sub_humidade}</span>
             </div>
 
             {/* Módulo 4: Nascer do Sol */}
@@ -2947,7 +2946,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span className="text-amber-400">☀️</span>
                 {meteorologia?.environment?.sunrise || "07:15"}
               </div>
-              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">AURORA</span>
+              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">{t.meteo_sub_aurora}</span>
             </div>
 
             {/* Módulo 5: Pôr do Sol */}
@@ -2957,7 +2956,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span className="text-orange-400">🌙</span>
                 {meteorologia?.environment?.sunset || "19:50"}
               </div>
-              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">CREPÚSCULO</span>
+              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-mono">{t.meteo_sub_crepusculo}</span>
             </div>
 
             {/* Módulo 6: Índice UV */}
@@ -2968,7 +2967,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   UV {meteorologia?.environment?.uv_index ?? 3}
                 </span>
               </div>
-              <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">MODERADO</span>
+              <span className="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-bold">{t.meteo_sub_uv}</span>
             </div>
           </div>
 

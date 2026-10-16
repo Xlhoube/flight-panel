@@ -53,16 +53,27 @@ export interface DicionarioTraducoes {
   // Ecrã 3 & Fallback: Meteorologia
   meteo_estacao: string;
   meteo_estacao_local: string;
+  cabecalho_ecra3: string;
+  cabecalho_radar: string;
   meteo_condicoes: string;
   meteo_temperatura: string;
   meteo_sensacao: string;
+  meteo_temperatura_sensacao: string;
   meteo_min_max: string;
+  meteo_min: string;
+  meteo_max: string;
+  meteo_precipitacao: string;
   meteo_vento: string;
   meteo_humidade: string;
   meteo_pressao: string;
   meteo_uv: string;
   meteo_nascer_sol: string;
   meteo_por_sol: string;
+  meteo_sub_altimetro: string;
+  meteo_sub_humidade: string;
+  meteo_sub_aurora: string;
+  meteo_sub_crepusculo: string;
+  meteo_sub_uv: string;
   meteo_sem_voos_radar: string;
   meteo_aguardando: string;
   meteo_procurando_voos: string;
@@ -121,24 +132,24 @@ export interface DicionarioTraducoes {
 export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
   pt: {
     // Cabeçalho & Linha 1
-    rotulo_voo: "VOO / FLIGHT",
-    rotulo_callsign: "CALLSIGN",
-    rotulo_aeronave: "AIRCRAFT",
+    rotulo_voo: "VOO",
+    rotulo_callsign: "INDICATIVO",
+    rotulo_aeronave: "AERONAVE",
     rotulo_radar: "RADAR",
     btn_instalar: "📲 INSTALAR",
     btn_opcoes: "Opções",
     no_radar: "no radar",
 
     // Linha 2 (Rota)
-    rotulo_origem: "ORIGEM / DEPARTURE",
-    rotulo_destino: "DESTINO / DESTINATION",
+    rotulo_origem: "ORIGEM",
+    rotulo_destino: "DESTINO",
     estado_em_voo: "EM VOO",
     estado_no_solo: "NO SOLO",
 
     // Linha 3 (Telemetria)
     rotulo_altitude: "ALTITUDE",
     rotulo_velocidade: "VELOCIDADE",
-    rotulo_rumo: "RUMO / HEADING",
+    rotulo_rumo: "RUMO",
     rotulo_distancia: "DISTÂNCIA",
     telemetria_subindo: "SUBIDA",
     telemetria_descendo: "DESCIDA",
@@ -153,18 +164,29 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     ecra2_destino: "DESTINO",
 
     // Ecrã 3 & Fallback: Meteorologia
-    meteo_estacao: "LOCALIZAÇÃO / ESTAÇÃO",
+    meteo_estacao: "LOCALIZAÇÃO",
     meteo_estacao_local: "ESTAÇÃO METEOROLÓGICA LOCAL",
+    cabecalho_ecra3: "3º ECRÃ • ESTAÇÃO METEOROLÓGICA (20 KM)",
+    cabecalho_radar: "RADAR METEOROLÓGICO ATIVO (20 KM)",
     meteo_condicoes: "CONDIÇÕES METEOROLÓGICAS",
     meteo_temperatura: "TEMPERATURA",
     meteo_sensacao: "SENSAÇÃO",
+    meteo_temperatura_sensacao: "TEMPERATURA & SENSAÇÃO",
     meteo_min_max: "MÍN / MÁX",
+    meteo_min: "MÍN",
+    meteo_max: "MÁX",
+    meteo_precipitacao: "PRECIP",
     meteo_vento: "VENTO",
     meteo_humidade: "HUMIDADE",
     meteo_pressao: "PRESSÃO QNH",
     meteo_uv: "ÍNDICE UV",
     meteo_nascer_sol: "NASCER DO SOL",
     meteo_por_sol: "PÔR DO SOL",
+    meteo_sub_altimetro: "ALTÍMETRO",
+    meteo_sub_humidade: "RELATIVA",
+    meteo_sub_aurora: "AURORA",
+    meteo_sub_crepusculo: "CREPÚSCULO",
+    meteo_sub_uv: "MODERADO",
     meteo_sem_voos_radar: "SEM AERONAVES NO ESPAÇO AÉREO IMEDIATO",
     meteo_aguardando: "EM ESPERA DE TRÁFEGO AÉREO",
     meteo_procurando_voos: "A PROCURAR VOOS NO ESPAÇO AÉREO...",
@@ -231,7 +253,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     no_radar: "on radar",
 
     // Line 2 (Route)
-    rotulo_origem: "ORIGIN / DEPARTURE",
+    rotulo_origem: "ORIGIN",
     rotulo_destino: "DESTINATION",
     estado_em_voo: "AIRBORNE",
     estado_no_solo: "ON GROUND",
@@ -254,18 +276,29 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     ecra2_destino: "DESTINATION",
 
     // Screen 3 & Fallback: Weather
-    meteo_estacao: "LOCATION / STATION",
+    meteo_estacao: "LOCATION",
     meteo_estacao_local: "LOCAL WEATHER STATION",
+    cabecalho_ecra3: "3RD SCREEN • WEATHER STATION (20 KM)",
+    cabecalho_radar: "ACTIVE WEATHER RADAR (20 KM)",
     meteo_condicoes: "WEATHER CONDITIONS",
     meteo_temperatura: "TEMPERATURE",
     meteo_sensacao: "FEELS LIKE",
+    meteo_temperatura_sensacao: "TEMPERATURE & FEELS LIKE",
     meteo_min_max: "MIN / MAX",
+    meteo_min: "MIN",
+    meteo_max: "MAX",
+    meteo_precipitacao: "PRECIP",
     meteo_vento: "WIND",
     meteo_humidade: "HUMIDITY",
     meteo_pressao: "QNH PRESSURE",
     meteo_uv: "UV INDEX",
     meteo_nascer_sol: "SUNRISE",
     meteo_por_sol: "SUNSET",
+    meteo_sub_altimetro: "ALTIMETER",
+    meteo_sub_humidade: "RELATIVE",
+    meteo_sub_aurora: "DAWN",
+    meteo_sub_crepusculo: "DUSK",
+    meteo_sub_uv: "MODERATE",
     meteo_sem_voos_radar: "NO AIRCRAFT IN IMMEDIATE AIRSPACE",
     meteo_aguardando: "AWAITING AIR TRAFFIC",
     meteo_procurando_voos: "SCANNING AIRSPACE FOR FLIGHTS...",
@@ -323,7 +356,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
 
   fr: {
     // En-tête & Ligne 1
-    rotulo_voo: "VOL / FLIGHT",
+    rotulo_voo: "VOL",
     rotulo_callsign: "INDICATIF",
     rotulo_aeronave: "AÉRONEF",
     rotulo_radar: "RADAR",
@@ -332,7 +365,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     no_radar: "au radar",
 
     // Ligne 2 (Route)
-    rotulo_origem: "ORIGINE / DÉPART",
+    rotulo_origem: "ORIGINE",
     rotulo_destino: "DESTINATION",
     estado_em_voo: "EN VOL",
     estado_no_solo: "AU SOL",
@@ -340,7 +373,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     // Ligne 3 (Télémétrie)
     rotulo_altitude: "ALTITUDE",
     rotulo_velocidade: "VITESSE",
-    rotulo_rumo: "CAP / HEADING",
+    rotulo_rumo: "CAP",
     rotulo_distancia: "DISTANCE",
     telemetria_subindo: "MONTÉE",
     telemetria_descendo: "DESCENTE",
@@ -355,18 +388,29 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     ecra2_destino: "DESTINATION",
 
     // Écran 3 & Fallback: Météorologie
-    meteo_estacao: "LOCALISATION / STATION",
+    meteo_estacao: "LOCALISATION",
     meteo_estacao_local: "STATION MÉTÉO LOCALE",
+    cabecalho_ecra3: "3E ÉCRAN • STATION MÉTÉOROLOGIQUE (20 KM)",
+    cabecalho_radar: "RADAR MÉTÉOROLOGIQUE ACTIF (20 KM)",
     meteo_condicoes: "CONDITIONS MÉTÉOROLOGIQUES",
     meteo_temperatura: "TEMPÉRATURE",
     meteo_sensacao: "RESSENTI",
+    meteo_temperatura_sensacao: "TEMPÉRATURE & RESSENTI",
     meteo_min_max: "MIN / MAX",
+    meteo_min: "MIN",
+    meteo_max: "MAX",
+    meteo_precipitacao: "PRÉCIP",
     meteo_vento: "VENT",
     meteo_humidade: "HUMIDITÉ",
     meteo_pressao: "PRESSION QNH",
     meteo_uv: "INDICE UV",
     meteo_nascer_sol: "LEVER DU SOLEIL",
     meteo_por_sol: "COUCHER DU SOLEIL",
+    meteo_sub_altimetro: "ALTIMÈTRE",
+    meteo_sub_humidade: "RELATIVE",
+    meteo_sub_aurora: "AURORE",
+    meteo_sub_crepusculo: "CRÉPUSCULE",
+    meteo_sub_uv: "MODÉRÉ",
     meteo_sem_voos_radar: "AUCUN AÉRONEF DANS L'ESPACE AÉRIEN IMMÉDIAT",
     meteo_aguardando: "EN ATTENTE DE TRAFIC AÉRIEN",
     meteo_procurando_voos: "RECHERCHE DE VOLS EN COURS...",
@@ -424,8 +468,8 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
 
   es: {
     // Encabezado & Línea 1
-    rotulo_voo: "VUELO / FLIGHT",
-    rotulo_callsign: "CALLSIGN",
+    rotulo_voo: "VUELO",
+    rotulo_callsign: "INDICATIVO",
     rotulo_aeronave: "AERONAVE",
     rotulo_radar: "RADAR",
     btn_instalar: "📲 INSTALAR",
@@ -433,7 +477,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     no_radar: "en radar",
 
     // Línea 2 (Ruta)
-    rotulo_origem: "ORIGEN / SALIDA",
+    rotulo_origem: "ORIGEN",
     rotulo_destino: "DESTINO",
     estado_em_voo: "EN VUELO",
     estado_no_solo: "EN TIERRA",
@@ -441,7 +485,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     // Línea 3 (Telemetría)
     rotulo_altitude: "ALTITUD",
     rotulo_velocidade: "VELOCIDAD",
-    rotulo_rumo: "RUMBO / HEADING",
+    rotulo_rumo: "RUMBO",
     rotulo_distancia: "DISTANCIA",
     telemetria_subindo: "ASCENSO",
     telemetria_descendo: "DESCENSO",
@@ -456,18 +500,29 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     ecra2_destino: "DESTINO",
 
     // Pantalla 3 & Fallback: Meteorología
-    meteo_estacao: "UBICACIÓN / ESTACIÓN",
+    meteo_estacao: "LOCALIZACIÓN",
     meteo_estacao_local: "ESTACIÓN METEOROLÓGICA LOCAL",
+    cabecalho_ecra3: "3.ª PANTALLA • ESTACIÓN METEOROLÓGICA (20 KM)",
+    cabecalho_radar: "RADAR METEOROLÓGICO ACTIVO (20 KM)",
     meteo_condicoes: "CONDICIONES METEOROLÓGICAS",
     meteo_temperatura: "TEMPERATURA",
     meteo_sensacao: "SENSACIÓN",
+    meteo_temperatura_sensacao: "TEMPERATURA Y SENSACIÓN",
     meteo_min_max: "MÍN / MÁX",
+    meteo_min: "MÍN",
+    meteo_max: "MÁX",
+    meteo_precipitacao: "PRECIP",
     meteo_vento: "VIENTO",
     meteo_humidade: "HUMEDAD",
     meteo_pressao: "PRESIÓN QNH",
     meteo_uv: "ÍNDICE UV",
     meteo_nascer_sol: "AMANECER",
     meteo_por_sol: "ATARDECER",
+    meteo_sub_altimetro: "ALTÍMETRO",
+    meteo_sub_humidade: "RELATIVA",
+    meteo_sub_aurora: "AMANECER",
+    meteo_sub_crepusculo: "ATARDECER",
+    meteo_sub_uv: "MODERADO",
     meteo_sem_voos_radar: "SIN AERONAVES EN EL ESPACIO AÉREO INMEDIATO",
     meteo_aguardando: "EN ESPERA DE TRÁFICO AÉREO",
     meteo_procurando_voos: "BUSCANDO VUELOS EN EL ESPACIO AÉREO...",
@@ -650,3 +705,66 @@ export function obterTexto(idioma: Idioma, chave: keyof DicionarioTraducoes): st
   const dict = TRADUCOES[idioma] || TRADUCOES.pt;
   return dict[chave] || TRADUCOES.pt[chave] || "";
 }
+
+// ─── Tabela de Meses Abreviados por Idioma ────────────────────────────────────
+
+const MESES_POR_IDIOMA: Record<Idioma, string[]> = {
+  pt: ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
+  en: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+  fr: ["JAN", "FÉV", "MAR", "AVR", "MAI", "JUIN", "JUIL", "AOÛ", "SEP", "OCT", "NOV", "DÉC"],
+  es: ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"],
+};
+
+export function obterMesAbreviado(mesIndex: number, idioma: Idioma): string {
+  const lista = MESES_POR_IDIOMA[idioma] || MESES_POR_IDIOMA.pt;
+  return lista[mesIndex] || "JAN";
+}
+
+// ─── Tradução Automática de Condições Meteorológicas ──────────────────────────
+
+const CONDICOES_METEO: Record<string, Record<Idioma, string>> = {
+  "CEU LIMPO": { pt: "CÉU LIMPO", en: "CLEAR SKY", fr: "CIEL DÉGAGÉ", es: "CIELO DESPEJADO" },
+  "CLEAR SKY": { pt: "CÉU LIMPO", en: "CLEAR SKY", fr: "CIEL DÉGAGÉ", es: "CIELO DESPEJADO" },
+  "BOM TEMPO": { pt: "BOM TEMPO", en: "MAINLY CLEAR", fr: "BEAU TEMPS", es: "BUEN TIEMPO" },
+  "MAINLY CLEAR": { pt: "BOM TEMPO", en: "MAINLY CLEAR", fr: "BEAU TEMPS", es: "BUEN TIEMPO" },
+  "POUCO NUBLADO": { pt: "POUCO NUBLADO", en: "PARTLY CLOUDY", fr: "PEU NUAGEUX", es: "PARCIALMENTE NUBLADO" },
+  "PARTLY CLOUDY": { pt: "POUCO NUBLADO", en: "PARTLY CLOUDY", fr: "PEU NUAGEUX", es: "PARCIALMENTE NUBLADO" },
+  "FEW CLOUDS": { pt: "POUCO NUBLADO", en: "FEW CLOUDS", fr: "PEU NUAGEUX", es: "POCAS NUBES" },
+  "SCATTERED CLOUDS": { pt: "POUCO NUBLADO", en: "SCATTERED CLOUDS", fr: "NUAGES ÉPARS", es: "NUBES DISPERSAS" },
+  "NUBLADO": { pt: "NUBLADO", en: "CLOUDY", fr: "NUAGEUX", es: "NUBLADO" },
+  "CLOUDY": { pt: "NUBLADO", en: "CLOUDY", fr: "NUAGEUX", es: "NUBLADO" },
+  "BROKEN CLOUDS": { pt: "NUBLADO", en: "BROKEN CLOUDS", fr: "NUAGES FRAGMENTÉS", es: "NUBLADO" },
+  "ENCOBERTO": { pt: "ENCOBERTO", en: "OVERCAST", fr: "COUVERT", es: "CUBIERTO" },
+  "OVERCAST": { pt: "ENCOBERTO", en: "OVERCAST", fr: "COUVERT", es: "CUBIERTO" },
+  "OVERCAST CLOUDS": { pt: "ENCOBERTO", en: "OVERCAST", fr: "COUVERT", es: "CUBIERTO" },
+  "NEVOEIRO": { pt: "NEVOEIRO", en: "FOG", fr: "BROUILLARD", es: "NIEBLA" },
+  "FOG": { pt: "NEVOEIRO", en: "FOG", fr: "BROUILLARD", es: "NIEBLA" },
+  "MIST": { pt: "NEVOEIRO", en: "MIST", fr: "BRUME", es: "NEBLINA" },
+  "CHUVISCOS": { pt: "CHUVISCOS", en: "DRIZZLE", fr: "BRUINE", es: "LLOVIZNA" },
+  "DRIZZLE": { pt: "CHUVISCOS", en: "DRIZZLE", fr: "BRUINE", es: "LLOVIZNA" },
+  "CHUVA FRACA": { pt: "CHUVA FRACA", en: "LIGHT RAIN", fr: "PLUIE FAIBLE", es: "LLUVIA DÉBIL" },
+  "LIGHT RAIN": { pt: "CHUVA FRACA", en: "LIGHT RAIN", fr: "PLUIE FAIBLE", es: "LLUVIA DÉBIL" },
+  "CHUVA MODERADA": { pt: "CHUVA MODERADA", en: "MODERATE RAIN", fr: "PLUIE MODÉRÉE", es: "LLUVIA MODERADA" },
+  "MODERATE RAIN": { pt: "CHUVA MODERADA", en: "MODERATE RAIN", fr: "PLUIE MODÉRÉE", es: "LLUVIA MODERADA" },
+  "CHUVA FORTE": { pt: "CHUVA FORTE", en: "HEAVY RAIN", fr: "PLUIE FORTE", es: "LLUVIA FUERTE" },
+  "HEAVY RAIN": { pt: "CHUVA FORTE", en: "HEAVY RAIN", fr: "PLUIE FORTE", es: "LLUVIA FUERTE" },
+  "CHUVA": { pt: "CHUVA", en: "RAIN", fr: "PLUIE", es: "LLUVIA" },
+  "RAIN": { pt: "CHUVA", en: "RAIN", fr: "PLUIE", es: "LLUVIA" },
+  "NEVE": { pt: "NEVE", en: "SNOW", fr: "NEIGE", es: "NIEVE" },
+  "SNOW": { pt: "NEVE", en: "SNOW", fr: "NEIGE", es: "NIEVE" },
+  "AGUACEIROS": { pt: "AGUACEIROS", en: "SHOWERS", fr: "AVERSES", es: "CHUBASCOS" },
+  "SHOWERS": { pt: "AGUACEIROS", en: "SHOWERS", fr: "AVERSES", es: "CHUBASCOS" },
+  "TROVOADA": { pt: "TROVOADA", en: "THUNDERSTORM", fr: "ORAGE", es: "TORMENTA" },
+  "THUNDERSTORM": { pt: "TROVOADA", en: "THUNDERSTORM", fr: "ORAGE", es: "TORMENTA" },
+  "ESTAVEL": { pt: "ESTÁVEL", en: "FAIR", fr: "STABLE", es: "ESTABLE" },
+};
+
+export function traduzirCondicaoMeteo(condicao: string | null | undefined, idioma: Idioma): string {
+  if (!condicao) return CONDICOES_METEO["CEU LIMPO"][idioma] || "CEU LIMPO";
+  const limpo = condicao.trim().toUpperCase();
+  if (CONDICOES_METEO[limpo] && CONDICOES_METEO[limpo][idioma]) {
+    return CONDICOES_METEO[limpo][idioma];
+  }
+  return condicao.toUpperCase();
+}
+
