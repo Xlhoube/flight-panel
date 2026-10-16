@@ -748,7 +748,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   // Determinar o identificador de voo para o display:
   // Exibir SEMPRE o callsign completo e integral (ex: EJU34XV, AFR442, SWR1ZD, TAP1972)
   // para coincidir com o FlightRadar24 sem omitir qualquer letra.
-  let numeroVoo = csLimpo || voo[0].toUpperCase();
+  const numeroVoo = csLimpo || voo[0].toUpperCase();
   let callsignIata: string | null = rotaReal?.flightNumber || rotaReal?.callsignIata || null;
 
   if (!callsignIata && info && csLimpo.length > 3) {
@@ -2346,7 +2346,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     ? calcularDistanciaHaversineKm(refLatAtual, refLonAtual, vooAtual[6], vooAtual[5])
     : null;
 
-  const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMapRef.current) : null;
+  const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMap) : null;
 
   return (
     <main
@@ -2776,7 +2776,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             ) : (
               listaVoos.slice(1).map((voo, idx) => {
-                const info = resolverVooInfo(voo, rotasMapRef.current);
+                const info = resolverVooInfo(voo, rotasMap);
                 return (
                   <div
                     key={voo[0] || idx}
