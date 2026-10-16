@@ -1278,6 +1278,145 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
   );
 }
 
+// ─── Componente Visual: Mini-Radar de Proximidade Cockpit TCAS ─────────────────
+
+function calcularBearingGraus(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const rad = Math.PI / 180;
+  const phi1 = lat1 * rad;
+  const phi2 = lat2 * rad;
+  const deltaLambda = (lon2 - lon1) * rad;
+
+  const y = Math.sin(deltaLambda) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+  const theta = Math.atan2(y, x);
+  return ((theta * 180) / Math.PI + 360) % 360;
+}
+
+function obterCardeal(graus: number): string {
+  const direcoes = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  const val = Math.floor(graus / 22.5 + 0.5);
+  return direcoes[val % 16];
+}
+
+interface MiniRadarDisplayProps {
+  latUtilizador: number;
+  lonUtilizador: number;
+  latVoo?: number | null;
+  lonVoo?: number | null;
+  rumoVoo?: number;
+  distKm: number;
+  raioMaxKm: number;
+  unidadeVelocidade: "KTS" | "KMH";
+}
+
+function MiniRadarDisplay({
+  latUtilizador,
+  lonUtilizador,
+  latVoo,
+  lonVoo,
+  rumoVoo = 0,
+  distKm,
+  raioMaxKm,
+  unidadeVelocidade,
+}: MiniRadarDisplayProps) {
+  // Cálculo do azimute (direção cardeal do avião relativa ao utilizador)
+  const bearing = useMemo(() => {
+    if (latVoo == null || lonVoo == null) return 0;
+    return Math.round(calcularBearingGraus(latUtilizador, lonUtilizador, latVoo, lonVoo));
+  }, [latUtilizador, lonUtilizador, latVoo, lonVoo]);
+
+  const cardeal = useMemo(() => obterCardeal(bearing), [bearing]);
+
+  // Posição no radar circular SVG (cx=24, cy=24, R=20)
+  const { px, py } = useMemo(() => {
+    const cx = 24;
+    const cy = 24;
+    const R = 20;
+    // Escala normalizada entre 0.15 e 0.88 do raio do visor
+    const frac = Math.min(0.88, Math.max(0.18, distKm / Math.max(raioMaxKm, 1)));
+    const angRad = ((bearing - 90) * Math.PI) / 180;
+    return {
+      px: cx + frac * R * Math.cos(angRad),
+      py: cy + frac * R * Math.sin(angRad),
+    };
+  }, [bearing, distKm, raioMaxKm]);
+
+  // Formatação de distância
+  const isKts = unidadeVelocidade === "KTS";
+  const distNm = distKm / 1.852;
+  const valorDisplay = isKts
+    ? (distNm < 10 ? distNm.toFixed(1) : Math.round(distNm).toString())
+    : (distKm < 10 ? distKm.toFixed(1) : Math.round(distKm).toString());
+  const unidadePrincipal = isKts ? "NM" : "KM";
+  const subtextoSecundario = isKts ? `${distKm.toFixed(1)} KM` : `${distNm.toFixed(1)} NM`;
+
+  return (
+    <div className="flex items-center gap-1.5 sm:gap-2.5">
+      {/* Scope Circular do Radar com Efeito de Varrimento */}
+      <div className="relative w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-[#03090e] border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.25)] flex items-center justify-center overflow-hidden shrink-0">
+        {/* Feixe rotativo de varredura (Sweep Beam) */}
+        <div
+          className="absolute inset-0 rounded-full animate-spin pointer-events-none opacity-40"
+          style={{
+            animationDuration: "3.5s",
+            background: "conic-gradient(from 0deg, rgba(16,185,129,0.5) 0deg, rgba(16,185,129,0.05) 60deg, transparent 90deg, transparent 360deg)",
+          }}
+        />
+
+        {/* Grelha SVG: anéis concêntricos + mira central */}
+        <svg viewBox="0 0 48 48" className="absolute inset-0 w-full h-full pointer-events-none">
+          {/* Anel exterior (100% alcance) */}
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#10b981" strokeWidth="0.8" strokeOpacity="0.4" />
+          {/* Anel intermédio (50% alcance) */}
+          <circle cx="24" cy="24" r="10" fill="none" stroke="#10b981" strokeWidth="0.6" strokeDasharray="1.5,1.5" strokeOpacity="0.3" />
+          {/* Eixos cardeais da mira */}
+          <line x1="24" y1="4" x2="24" y2="44" stroke="#10b981" strokeWidth="0.5" strokeOpacity="0.25" />
+          <line x1="4" y1="24" x2="44" y2="24" stroke="#10b981" strokeWidth="0.5" strokeOpacity="0.25" />
+          {/* Ponto Central (Utilizador / Estação de Radar) */}
+          <circle cx="24" cy="24" r="1.5" fill="#34d399" />
+          {/* Letra N no topo */}
+          <text x="24" y="8" textAnchor="middle" fill="#34d399" fontSize="4.5" fontWeight="bold" opacity="0.7">N</text>
+        </svg>
+
+        {/* Blip Pulsante da Aeronave */}
+        <div
+          className="absolute z-10 flex items-center justify-center pointer-events-none"
+          style={{
+            left: `${(px / 48) * 100}%`,
+            top: `${(py / 48) * 100}%`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {/* Ponto de eco de radar pulsante */}
+          <span className="absolute w-3 h-3 rounded-full bg-amber-400/40 animate-ping" />
+          {/* Ícone estilizado do avião orientado com o rumo real */}
+          <svg
+            className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.9)]"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            style={{ transform: `rotate(${rumoVoo}deg)` }}
+          >
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Dados Numéricos de Distância e Azimute */}
+      <div className="flex flex-col items-start min-w-0">
+        <div className="flex items-baseline gap-1">
+          <LedText text={valorDisplay} size="lg" />
+          <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">{unidadePrincipal}</span>
+        </div>
+        <div className="flex items-center gap-1 text-[8px] sm:text-[9px] font-mono text-emerald-400 font-bold tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>{cardeal} • {bearing.toString().padStart(3, "0")}°</span>
+          <span className="text-neutral-500 hidden sm:inline">({subtextoSecundario})</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Componente de Palheta com Escala Universal Auto-Fit ──────────────────────
 
 interface FlapCellProps {
@@ -2532,11 +2671,11 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
-            {/* LINHA 3: TELEMETRIA EM 3 MÓDULOS ───────────────────────────────── */}
-            <div className="w-full grid grid-cols-3 gap-1.5 sm:gap-2.5 shrink-0">
+            {/* LINHA 3: TELEMETRIA EM 4 MÓDULOS (INCLUINDO MINI-RADAR DE PROXIMIDADE) ── */}
+            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2.5 shrink-0">
 
-              {/* ALTITUDE */}
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              {/* 1. ALTITUDE */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   {t.rotulo_altitude}
                 </span>
@@ -2551,8 +2690,8 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              {/* VELOCIDADE */}
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              {/* 2. VELOCIDADE */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   {t.rotulo_velocidade}
                 </span>
@@ -2567,8 +2706,8 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              {/* RUMO */}
-              <div className="bg-[#10121a] p-1.5 sm:p-3 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+              {/* 3. RUMO */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
                 <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
                   {t.rotulo_rumo}
                 </span>
@@ -2576,6 +2715,31 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <LedText text={`${infoVoo.rumo}`} size="lg" />
                   <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">°</span>
                 </div>
+              </div>
+
+              {/* 4. RADAR DE DISTÂNCIA */}
+              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-emerald-500/20 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden">
+                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {t.rotulo_distancia}
+                </span>
+                {distVooAtual != null ? (
+                  <MiniRadarDisplay
+                    latUtilizador={refLatAtual}
+                    lonUtilizador={refLonAtual}
+                    latVoo={vooAtual[6]}
+                    lonVoo={vooAtual[5]}
+                    rumoVoo={infoVoo.rumo}
+                    distKm={distVooAtual}
+                    raioMaxKm={raioKm}
+                    unidadeVelocidade={unidadeVelocidade}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <LedText text="---" size="lg" />
+                    <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KM</span>
+                  </div>
+                )}
               </div>
 
             </div>

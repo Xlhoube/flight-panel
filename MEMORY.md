@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.9  
+**Versão:** v2.1.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
@@ -182,6 +182,7 @@
 | 2026-10-16 | v2.0.7 | Adição do seletor exato de Raio de Ação do Radar (KM/NM) com filtro Haversine rigoroso e persistência local |
 | 2026-10-16 | v2.0.8 | Inversão simétrica dos flaps e leds na Linha 2 de rota: flaps no centro e leds nas extremidades exteriores |
 | 2026-10-16 | v2.0.9 | Blindagem e deduplicação estrita do som de novo voo: exclusivo ao Ecrã 1, sem repetições por oscilação ou alternância de voos |
+| 2026-10-16 | v2.1.0 | Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de telemetria com varrimento animado, azimute e distância exata (KM/NM) |
 
 ---
 
@@ -247,6 +248,23 @@
 4. **Cooldown de Segurança:** Limitar o intervalo entre toques a um mínimo de 15 segundos para evitar qualquer disparo em rajada.  
 5. **Estabilização do GPS:** Impedir re-renders redundantes no hook `watchPosition` quando a latitude e longitude não sofreram alterações.  
 **Consequência:** O som `/Flight.mp3` toca com precisão cirúrgica apenas quando uma nova aeronave entra no Ecrã 1, eliminando completamente repetições irritantes ou loops de áudio.
+
+### ADR-046 — Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de Telemetria (2026-10-16)
+**Contexto:** O utilizador solicitou a criação de uma espécie de radar que informa a que distância está o avião do utilizador (`Cria uma especie de radar que informa a que distançia esta o aviao do utiizador`).  
+**Decisão:**  
+1. **Módulo de Radar na Telemetria:** Expandir a Linha 3 de 3 para 4 módulos balanceados (`grid-cols-2 sm:grid-cols-4`): `ALTITUDE`, `VELOCIDADE`, `RUMO` e `DISTÂNCIA / RADAR`.
+2. **Componente Visual `MiniRadarDisplay`:**
+   - Scope circular escuro com acabamento esmeralda fosforescente (`#03090e`, borda `emerald-500/40` e sombra de cockpit).
+   - Efeito de varrimento contínuo 360° (*Sweep Beam*) via animação rotativa suave (`conic-gradient`).
+   - Grelha tática com anel exterior de alcance máximo (`raioKm`), anel intermédio de 50%, eixos cardeais de mira central e indicador Norte (`N`).
+   - Posição do utilizador no centro como ponto de radar verde fixo.
+   - Cálculo geodésico de azimute (*Bearing*) e distância relativa Haversine: a aeronave é plotada com precisão polar no ângulo e distância relativa exatos.
+   - Blip da aeronave com anel de eco pulsante e silhueta orientada dinamicamente com o rumo magnético real (`rumoVoo`).
+3. **Leitura Numérica Estilo Cockpit LED:**
+   - Exibição em grande formato numérico `LedText` da distância com adaptação automática de unidade: `NM` (milhas náuticas) quando a velocidade está em `KTS`, ou `KM` quando a velocidade está em `KMH`.
+   - Subtítulo com direção cardeal e graus de azimute (ex: `NE • 042°`) e equivalência métrica/náutica secundária.
+**Consequência:** Informação de proximidade aeronáutica em tempo real de nível profissional, integrando perfeitamente a estética oficial do display sem comprometer o espaço útil do ecrã.
+
 
 
 
