@@ -8,9 +8,9 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.0  
+**Versão:** v2.0.1  
 **Data de início:** 2026-09-06  
-**Última sessão:** 2026-09-20  
+**Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização completa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea sem recarregar a página, tradução de países e persistência local.
 
 ---
@@ -109,6 +109,11 @@
 **Decisão:** Criar módulo central de internacionalização (`lib/i18n.ts`) com tipos fortes `Idioma = "pt" | "en" | "fr" | "es"` e dicionários completos para as quatro línguas, abrangendo todos os ecrãs (Painel principal de voo, Ecrã 2 de Restantes Voos, Ecrã 3 de Meteorologia Dedicada, Fallback meteorológico automático, Modal de Opções, Modal de Localização e Tabela de Voos `/voos`). Adicionar dicionário multilíngue de nomes de países (`traduzirPais`). Integrar botão de alternância rápida de idioma diretamente no cabeçalho ao lado de `⚙️` (`🇵🇹 PT` / `🇬🇧 EN` / `🇫🇷 FR` / `🇪🇸 ES`) e um seletor visual com 4 botões e bandeiras no modal de opções. Implementar persistência local instantânea em `localStorage` sob as chaves `flightpanel_idioma` e `flight_panel_user_settings.idioma`, sincronização reativa imediata sem recarregar o ecrã e feedback sonoro Flap-Clack Solari ao trocar de língua.  
 **Consequência:** Experiência global nativa em 4 idiomas, com mudança a quente instantânea com 1 toque, garantindo total clareza internacional e fidelidade estética.
 
+### ADR-037 — Centralização da Seleção de Idioma Dentro das Definições (2026-10-16)
+**Contexto:** O utilizador solicitou a remoção da seleção de idioma do Ecrã 1 para dentro das definições.  
+**Decisão:** Eliminar os botões de alternância rápida de idioma presentes nos cabeçalhos dos ecrãs (Ecrã 1 no modo voo e modo meteorologia fallback, bem como Ecrã 2 e Ecrã 3). A seleção e configuração do idioma (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) passa a residir de forma exclusiva e dedicada dentro do modal de definições (`⚙️ OPÇÕES / DEFINIÇÕES`), onde se encontra a grelha visual com bandeiras e títulos nativos.  
+**Consequência:** Design purificado e limpo nos cabeçalhos analógicos dos ecrãs, alinhado com a autenticidade Solari, mantendo controlo total da internacionalização centralizado nas opções.
+
 ---
 
 ## Histórico
@@ -158,3 +163,5 @@
 | 2026-09-19 | v1.9.1 | Remoção do botão de restantes voos (+X RESTANTES ➔) do cabeçalho da Linha 1 |
 | 2026-09-19 | v1.9.2 | Remoção do botão METEO dos cabeçalhos e eliminação total das barras inferiores de navegação (Rodapés) |
 | 2026-09-20 | v2.0.0 | Internacionalização completa (i18n): 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea |
+| 2026-10-16 | v2.0.1 | Remoção do botão de idioma dos cabeçalhos dos ecrãs; seleção centralizada exclusivamente nas definições |
+

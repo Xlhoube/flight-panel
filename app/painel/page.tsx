@@ -2331,24 +2331,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                     </button>
                   )}
 
-                  {/* Botão de Alternância Rápida de Idioma */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      ciclarIdioma();
-                    }}
-                    title="Idioma / Language (PT, EN, FR, ES)"
-                    aria-label="Idioma"
-                    className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
-                  >
-                    <span className="text-xs sm:text-sm">
-                      {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
-                    </span>
-                    <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
-                      {idioma.toUpperCase()}
-                    </span>
-                  </button>
-
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -2518,24 +2500,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                   </span>
                 </div>
 
-                {/* Botão de Alternância Rápida de Idioma */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    ciclarIdioma();
-                  }}
-                  title="Idioma / Language (PT, EN, FR, ES)"
-                  aria-label="Idioma"
-                  className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
-                >
-                  <span className="text-xs sm:text-sm">
-                    {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
-                  </span>
-                  <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
-                    {idioma.toUpperCase()}
-                  </span>
-                </button>
-
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2698,24 +2662,6 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Botão de Alternância Rápida de Idioma */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  ciclarIdioma();
-                }}
-                title="Idioma / Language (PT, EN, FR, ES)"
-                aria-label="Idioma"
-                className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
-              >
-                <span className="text-xs sm:text-sm">
-                  {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
-                </span>
-                <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
-                  {idioma.toUpperCase()}
-                </span>
-              </button>
-
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -2845,24 +2791,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                   {localizacao.lat.toFixed(2)}°N, {Math.abs(localizacao.lon).toFixed(2)}°W
                 </span>
               </div>
-
-              {/* Botão de Alternância Rápida de Idioma */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  ciclarIdioma();
-                }}
-                title="Idioma / Language (PT, EN, FR, ES)"
-                aria-label="Idioma"
-                className="h-7 px-1.5 sm:h-8 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center gap-1 text-xs font-mono font-bold shadow-sm cursor-pointer shrink-0"
-              >
-                <span className="text-xs sm:text-sm">
-                  {IDIOMAS_DISPONIVEIS.find((i) => i.codigo === idioma)?.bandeira || "🇵🇹"}
-                </span>
-                <span className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold">
-                  {idioma.toUpperCase()}
-                </span>
-              </button>
 
               <button
                 onClick={(e) => {
