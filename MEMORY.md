@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.1.2  
+**Versão:** v2.2.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
-**Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), fluxo de onboarding sequencial de 2 passos na primeira abertura (Instalação PWA ➔ Calibração de Coordenadas GPS), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
 
 ---
 
@@ -185,6 +185,7 @@
 | 2026-10-16 | v2.1.0 | Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de telemetria com varrimento animado, azimute e distância exata (KM/NM) |
 | 2026-10-16 | v2.1.1 | Transferência da companhia aérea para o bloco esquerdo (junto ao voo) e adição do fabricante sob o modelo da aeronave à direita |
 | 2026-10-16 | v2.1.2 | Otimização total e blindagem de proporções para ecrãs de telemóvel na horizontal (landscape): eliminação de flex-wrap na rota, escala proporcional e encaixe perfeito |
+| 2026-10-16 | v2.2.0 | Fluxo de boas-vindas e onboarding sequencial na primeira abertura: popup 1 de instalação PWA seguido do popup 2 de calibração de GPS |
 
 ---
 
@@ -287,6 +288,29 @@
 3. **Alinhamento da Linha 3 (Telemetria):** Configurar `grid-cols-4` compacto numa única linha contínua (`py-1 sm:py-1.5`), mantendo o Mini-Radar de Proximidade e os módulos de Altitude, Velocidade e Rumo com proporções milimétricas.  
 4. **Proteção Anti-Transbordo:** Ajustar os espaçamentos gerais para `gap-1 sm:gap-1.5`, padding perimetral de segurança `p-1 sm:p-2` e `overflow-hidden` sem barras de scroll.  
 **Consequência:** Encaixe perfeito e milimétrico em 100% da área visível de qualquer telemóvel na horizontal (resoluções de 380px a 430px de altura), com 100% dos dados legíveis, zero quebras de linha e fidelidade total ao painel analógico Solari.
+
+### ADR-049 — Fluxo de Boas-Vindas e Onboarding Sequencial na Primeira Abertura (2026-10-16)
+**Contexto:** O utilizador solicitou que, ao abrir a aplicação pela primeira vez, surja um popup de instalação seguido de outro popup para obter as coordenadas do dispositivo (`Quando se abre pela primeira vez a app, popup de instalação, seguido de outro popup para obter cordenadas do dispositivo`).  
+**Decisão:**  
+1. **Deteção de Primeira Abertura:**  
+   - Utilização da chave de armazenamento `localStorage.getItem("flight_panel_onboarding_v1")`. Se inexistente, ativa o assistente de boas-vindas com transição suave.
+   - O disparo automático e invasivo do GPS nativo do browser no primeiro carregamento foi suprimido até que o utilizador chegue ao passo dedicado de geolocalização.
+2. **Passo 1 — Instalação PWA (Popup 1):**  
+   - Apresenta um cartão analógico de boas-vindas com destaque `PASSO 1 DE 2 • INSTALAÇÃO PWA`.  
+   - Explica as vantagens da aplicação instalada (ecrã inteiro nativo sem barras de navegação, áudio Solari ativo e radar contínuo).  
+   - Se o browser fornecer o evento nativo `beforeinstallprompt`, disponibiliza o botão primário de instalação direta (`📲 INSTALAR APLICAÇÃO`). Se não houver prompt nativo (ex: iOS Safari), apresenta instrução simples e botão de avanço (`SEGUINTE ➔`).  
+   - O botão secundário (`CONTINUAR NO NAVEGADOR` / `MAIS TARDE`) permite dispensar a instalação sem bloquear o utilizador, transitando de imediato para o Passo 2.
+3. **Passo 2 — Coordenadas do Dispositivo e Radar (Popup 2):**  
+   - Apresenta o cartão de calibração com destaque `PASSO 2 DE 2 • COORDENADAS & RADAR`.  
+   - Explica de forma clara que as coordenadas são essenciais para detetar os voos que passam por cima do utilizador em tempo real.  
+   - Botão primário com consentimento consciente (`📡 ATIVAR LOCALIZAÇÃO GPS`). Ao receber sinal, resolve a localidade geográfica com feedback visual imediato (`✅ Sinal GPS fixado com sucesso: [Localidade] (±Xm)`) e botão finalizador (`✈️ ENTRAR NO PAINEL ➔`).  
+   - Botão secundário (`USAR LOCALIZAÇÃO PADRÃO (PORTO, PT)`) permite prosseguir sem GPS caso o utilizador prefira não partilhar a localização.
+4. **Finalização e Persistência:**  
+   - Ao concluir o fluxo, grava `flight_panel_onboarding_v1 = "concluido"` e emite o feedback sonoro de palhetas Solari (`tocarSomFlapClack()`). Em todas as sessões futuras, a aplicação arranca imediatamente no painel de voos sem qualquer interrupção.  
+5. **Internacionalização Estrita (i18n):**  
+   - Todas as mensagens, botões e notas explicativas foram integradas nativamente nos 4 idiomas suportados (`pt`, `en`, `fr`, `es`).  
+**Consequência:** Experiência de utilizador moderna, ergonómica e guiada desde o primeiro segundo, assegurando taxa máxima de adoção de PWA e calibração imediata do radar com consentimento claro do utilizador.
+
 
 
 

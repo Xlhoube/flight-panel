@@ -1819,6 +1819,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [idioma, setIdioma] = useState<Idioma>("pt");
   const [raioKm, setRaioKm] = useState<number>(20);
   const [raioInput, setRaioInput] = useState<string>("20");
+  const [onboardingPasso, setOnboardingPasso] = useState<"nenhum" | "instalacao" | "gps">("nenhum");
 
   // Dicionário de traduções reactivo ao idioma ativo
   const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
@@ -2155,10 +2156,24 @@ export default function PainelAnalogicoMobileFullscreen() {
     };
   }, []);
 
-  // Recuperar localização guardada no dispositivo (localStorage) e obter GPS apenas se não houver escolha fixa
+  // Recuperar localização guardada no dispositivo (localStorage) e gerir onboarding de primeira abertura
   useEffect(() => {
     let devePedirGps = true;
     try {
+      // 1. Verificar se é a primeira vez que a app é aberta
+      const salvoOnboarding = localStorage.getItem("flight_panel_onboarding_v1");
+      if (!salvoOnboarding) {
+        // Primeira abertura: não dispara o GPS de imediato para permitir o fluxo dos 2 popups:
+        // Passo 1: Instalação PWA -> Passo 2: Coordenadas do Dispositivo (GPS)
+        devePedirGps = false;
+        const eStandalone = typeof window !== "undefined" && (
+          Boolean((window.navigator as any)?.standalone) ||
+          window.matchMedia("(display-mode: standalone)").matches
+        );
+        setOnboardingPasso(eStandalone ? "gps" : "instalacao");
+      }
+
+      // 2. Recuperar localização previamente gravada
       const salvo = localStorage.getItem("flight_panel_user_location");
       if (salvo) {
         const parsed = JSON.parse(salvo);
@@ -3860,6 +3875,239 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         )
       }
+
+      {/* ── MODAIS DE ONBOARDING NA PRIMEIRA ABERTURA (PASSO 1: INSTALAÇÃO -> PASSO 2: GPS) ──── */}
+      {onboardingPasso === "instalacao" && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="w-full max-w-md bg-[#0c0e14] border border-amber-400/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-3.5 text-white font-mono max-h-[92dvh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabeçalho com Badge */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📲</span>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-black tracking-widest uppercase">
+                      PASSO 1 DE 2
+                    </span>
+                    <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">
+                      INSTALAÇÃO PWA
+                    </span>
+                  </div>
+                  <h2 className="text-sm sm:text-base font-black tracking-wider text-amber-400 uppercase mt-0.5">
+                    {t.onboarding_instalar_titulo}
+                  </h2>
+                </div>
+              </div>
+            </div>
+
+            {/* Texto Descritivo */}
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              {t.onboarding_instalar_subtitulo}
+            </p>
+
+            {/* Vantagens em Grelha Compacta */}
+            <div className="grid grid-cols-3 gap-2 bg-[#141720] p-2.5 rounded-xl border border-white/10 text-center">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-base">⚡</span>
+                <span className="text-[9px] font-bold text-neutral-200 uppercase leading-tight">
+                  Ecrã Inteiro
+                </span>
+                <span className="text-[8px] text-neutral-400 leading-tight">Sem barras</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 border-x border-white/10 px-1">
+                <span className="text-base">🔊</span>
+                <span className="text-[9px] font-bold text-neutral-200 uppercase leading-tight">
+                  Áudio Cockpit
+                </span>
+                <span className="text-[8px] text-neutral-400 leading-tight">Jingle Solari</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-base">📡</span>
+                <span className="text-[9px] font-bold text-neutral-200 uppercase leading-tight">
+                  Radar Direto
+                </span>
+                <span className="text-[8px] text-neutral-400 leading-tight">Tempo Real</span>
+              </div>
+            </div>
+
+            {/* Dica para iOS se não houver prompt nativo */}
+            {!promptInstalacao && (
+              <p className="text-[10px] text-amber-300/80 bg-amber-950/30 p-2 rounded-lg border border-amber-500/20 leading-relaxed text-center">
+                ℹ️ {t.onboarding_instalar_dica_ios}
+              </p>
+            )}
+
+            {/* Botões de Ação */}
+            <div className="flex flex-col gap-2 pt-1 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => {
+                  if (promptInstalacao) {
+                    promptInstalacao.prompt();
+                    promptInstalacao.userChoice.finally(() => {
+                      setPromptInstalacao(null);
+                      tocarSomFlapClack();
+                      setOnboardingPasso("gps");
+                    });
+                  } else {
+                    tocarSomFlapClack();
+                    setOnboardingPasso("gps");
+                  }
+                }}
+                className="w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.99] text-black font-black text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-amber-300/50"
+              >
+                <span>📲</span>
+                <span>{promptInstalacao ? t.onboarding_instalar_btn : `${t.opcoes_guardar_fechar.toUpperCase()} / SEGUINTE ➔`}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  tocarSomFlapClack();
+                  setOnboardingPasso("gps");
+                }}
+                className="w-full bg-white/10 hover:bg-white/15 active:scale-[0.99] text-neutral-300 hover:text-white font-bold text-[11px] sm:text-xs py-2 px-3 rounded-xl transition-all cursor-pointer text-center"
+              >
+                {t.onboarding_instalar_mais_tarde}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {onboardingPasso === "gps" && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="w-full max-w-md bg-[#0c0e14] border border-emerald-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-3.5 text-white font-mono max-h-[92dvh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabeçalho com Badge */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📡</span>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded font-black tracking-widest uppercase">
+                      PASSO 2 DE 2
+                    </span>
+                    <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">
+                      COORDENADAS & RADAR
+                    </span>
+                  </div>
+                  <h2 className="text-sm sm:text-base font-black tracking-wider text-emerald-400 uppercase mt-0.5">
+                    {t.onboarding_gps_titulo}
+                  </h2>
+                </div>
+              </div>
+            </div>
+
+            {/* Texto Descritivo */}
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              {t.onboarding_gps_subtitulo}
+            </p>
+
+            {/* Cartão de Estado do GPS */}
+            <div className="bg-[#141720] p-3 rounded-xl border border-white/10 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  ESTADO DO SINAL
+                </span>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                  statusGps === "ativo"
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    : statusGps === "iniciando"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse"
+                    : "bg-neutral-800 text-neutral-400"
+                }`}>
+                  {statusGps === "ativo" ? "CONECTADO" : statusGps === "iniciando" ? "SINTONIZANDO" : "AGUARDANDO"}
+                </span>
+              </div>
+
+              {statusGps === "ativo" ? (
+                <div className="bg-emerald-950/30 border border-emerald-500/30 p-2.5 rounded-lg flex flex-col gap-1">
+                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <span>✅</span>
+                    <span>{t.onboarding_gps_sucesso}</span>
+                  </span>
+                  <span className="text-xs text-white font-mono font-bold">
+                    📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}m)` : ""}
+                  </span>
+                  <span className="text-[10px] text-neutral-400 font-mono">
+                    {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio {raioKm} KM
+                  </span>
+                </div>
+              ) : statusGps === "iniciando" ? (
+                <div className="bg-amber-950/30 border border-amber-500/30 p-2.5 rounded-lg flex items-center gap-2">
+                  <span className="animate-spin text-sm">⏳</span>
+                  <span className="text-xs text-amber-300 font-bold">{t.onboarding_gps_a_obter}</span>
+                </div>
+              ) : detalheErroGps ? (
+                <div className="bg-red-950/30 border border-red-500/30 p-2 rounded-lg text-[10px] text-red-300 leading-relaxed">
+                  ⚠️ {detalheErroGps}
+                </div>
+              ) : (
+                <div className="text-[11px] text-neutral-400">
+                  Clica no botão abaixo para permitir o acesso à localização do teu dispositivo.
+                </div>
+              )}
+            </div>
+
+            {/* Botões de Ação */}
+            <div className="flex flex-col gap-2 pt-1 border-t border-white/10">
+              {statusGps === "ativo" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("flight_panel_onboarding_v1", "concluido");
+                    } catch { }
+                    tocarSomFlapClack();
+                    setOnboardingPasso("nenhum");
+                  }}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-black font-black text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-300/50"
+                >
+                  <span>✈️</span>
+                  <span>{t.onboarding_concluir}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    obterGpsDoDispositivo(true);
+                  }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
+                >
+                  <span>📡</span>
+                  <span>{t.onboarding_gps_btn}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    localStorage.setItem("flight_panel_onboarding_v1", "concluido");
+                  } catch { }
+                  tocarSomFlapClack();
+                  setOnboardingPasso("nenhum");
+                }}
+                className="w-full bg-white/10 hover:bg-white/15 active:scale-[0.99] text-neutral-300 hover:text-white font-bold text-[11px] sm:text-xs py-2 px-3 rounded-xl transition-all cursor-pointer text-center"
+              >
+                {statusGps === "ativo" ? "CONCLUIR" : t.onboarding_gps_padrao_btn}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main >
   );
 }

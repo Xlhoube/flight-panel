@@ -131,6 +131,21 @@ export interface DicionarioTraducoes {
   tab_distancia: string;
   tab_aeronave: string;
   tab_voo_principal: string;
+
+  // Onboarding (Primeira Abertura)
+  onboarding_instalar_titulo: string;
+  onboarding_instalar_subtitulo: string;
+  onboarding_instalar_btn: string;
+  onboarding_instalar_mais_tarde: string;
+  onboarding_instalar_dica_ios: string;
+  onboarding_gps_titulo: string;
+  onboarding_gps_subtitulo: string;
+  onboarding_gps_btn: string;
+  onboarding_gps_padrao_btn: string;
+  onboarding_gps_a_obter: string;
+  onboarding_gps_sucesso: string;
+  onboarding_gps_erro: string;
+  onboarding_concluir: string;
 }
 
 export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
@@ -248,6 +263,21 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTÂNCIA",
     tab_aeronave: "AERONAVE",
     tab_voo_principal: "VOO PRINCIPAL",
+
+    // Onboarding (Primeira Abertura)
+    onboarding_instalar_titulo: "BEM-VINDO AO FLIGHT PANEL",
+    onboarding_instalar_subtitulo: "Instala a aplicação no teu ecrã inicial para uma experiência imersiva de ecrã inteiro sem barras do navegador e com áudio de cabine.",
+    onboarding_instalar_btn: "📲 INSTALAR APLICAÇÃO",
+    onboarding_instalar_mais_tarde: "CONTINUAR NO NAVEGADOR",
+    onboarding_instalar_dica_ios: "Dica iOS: toca em Partilhar ⎋ e seleciona 'Ecrã Principal'.",
+    onboarding_gps_titulo: "CALIBRAÇÃO DO RADAR",
+    onboarding_gps_subtitulo: "O Flight Panel necessita da localização do teu dispositivo para detetar os aviões que estão a passar por cima de ti em tempo real.",
+    onboarding_gps_btn: "📡 ATIVAR LOCALIZAÇÃO GPS",
+    onboarding_gps_padrao_btn: "USAR LOCALIZAÇÃO PADRÃO (PORTO, PT)",
+    onboarding_gps_a_obter: "A sintonizar satélites GPS...",
+    onboarding_gps_sucesso: "Sinal GPS fixado com sucesso!",
+    onboarding_gps_erro: "Não foi possível obter o sinal GPS.",
+    onboarding_concluir: "ENTRAR NO PAINEL ➔",
   },
 
   en: {
@@ -364,6 +394,21 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTANCE",
     tab_aeronave: "AIRCRAFT",
     tab_voo_principal: "MAIN FLIGHT",
+
+    // Onboarding (First Launch)
+    onboarding_instalar_titulo: "WELCOME TO FLIGHT PANEL",
+    onboarding_instalar_subtitulo: "Install the app on your home screen for an immersive full-screen cockpit experience without browser bars.",
+    onboarding_instalar_btn: "📲 INSTALL APP",
+    onboarding_instalar_mais_tarde: "CONTINUE IN BROWSER",
+    onboarding_instalar_dica_ios: "iOS tip: tap Share ⎋ and select 'Add to Home Screen'.",
+    onboarding_gps_titulo: "RADAR CALIBRATION",
+    onboarding_gps_subtitulo: "Flight Panel needs your device location to detect flights passing right above you in real time.",
+    onboarding_gps_btn: "📡 ENABLE GPS LOCATION",
+    onboarding_gps_padrao_btn: "USE DEFAULT LOCATION (PORTO, PT)",
+    onboarding_gps_a_obter: "Tuning GPS satellites...",
+    onboarding_gps_sucesso: "GPS signal locked successfully!",
+    onboarding_gps_erro: "Unable to acquire GPS signal.",
+    onboarding_concluir: "ENTER PANEL ➔",
   },
 
   fr: {
@@ -480,6 +525,21 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTANCE",
     tab_aeronave: "AÉRONEF",
     tab_voo_principal: "VOL PRINCIPAL",
+
+    // Onboarding (Première Ouverture)
+    onboarding_instalar_titulo: "BIENVENUE SUR FLIGHT PANEL",
+    onboarding_instalar_subtitulo: "Installez l'application sur votre écran d'accueil pour une expérience plein écran immersive sans barre de navigation.",
+    onboarding_instalar_btn: "📲 INSTALLER L'APPLICATION",
+    onboarding_instalar_mais_tarde: "CONTINUER SUR LE NAVIGATEUR",
+    onboarding_instalar_dica_ios: "Astuce iOS: touchez Partager ⎋ et sélectionnez 'Sur l'écran d'accueil'.",
+    onboarding_gps_titulo: "CALIBRAGE DU RADAR",
+    onboarding_gps_subtitulo: "Flight Panel a besoin de la position de votre appareil pour détecter les vols au-dessus de vous en temps réel.",
+    onboarding_gps_btn: "📡 ACTIVER LA POSITION GPS",
+    onboarding_gps_padrao_btn: "UTILISER LA POSITION PAR DÉFAUT (PORTO, PT)",
+    onboarding_gps_a_obter: "Recherche des satellites GPS...",
+    onboarding_gps_sucesso: "Signal GPS verrouillé avec succès!",
+    onboarding_gps_erro: "Impossible d'acquérir le signal GPS.",
+    onboarding_concluir: "OUVRIR LE PANNEAU ➔",
   },
 
   es: {
@@ -596,6 +656,21 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTANCIA",
     tab_aeronave: "AERONAVE",
     tab_voo_principal: "VUELO PRINCIPAL",
+
+    // Onboarding (Primera Apertura)
+    onboarding_instalar_titulo: "BIENVENIDO A FLIGHT PANEL",
+    onboarding_instalar_subtitulo: "Instala la aplicación en tu pantalla de inicio para una experiencia inmersiva a pantalla completa sin barras del navegador.",
+    onboarding_instalar_btn: "📲 INSTALAR APLICACIÓN",
+    onboarding_instalar_mais_tarde: "CONTINUAR EN EL NAVEGADOR",
+    onboarding_instalar_dica_ios: "Consejo iOS: pulsa Compartir ⎋ y selecciona 'Añadir a pantalla de inicio'.",
+    onboarding_gps_titulo: "CALIBRACIÓN DEL RADAR",
+    onboarding_gps_subtitulo: "Flight Panel necesita la ubicación de tu dispositivo para detectar los vuelos sobre ti en tiempo real.",
+    onboarding_gps_btn: "📡 ACTIVAR UBICACIÓN GPS",
+    onboarding_gps_padrao_btn: "USAR UBICACIÓN PREDETERMINADA (PORTO, PT)",
+    onboarding_gps_a_obter: "Sintonizando satélites GPS...",
+    onboarding_gps_sucesso: "¡Señal GPS fijada con éxito!",
+    onboarding_gps_erro: "No fue posible obtener la señal GPS.",
+    onboarding_concluir: "ENTRAR AL PANEL ➔",
   },
 };
 
