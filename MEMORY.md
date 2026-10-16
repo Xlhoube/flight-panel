@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.7  
+**Versão:** v2.0.8  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
@@ -180,6 +180,7 @@
 | 2026-10-16 | v2.0.5 | Purificação e consistência estrita de idiomas (i18n): eliminação de rótulos bilingues, tradução de condições meteorológicas e meses no relógio |
 | 2026-10-16 | v2.0.6 | Simplificação e purificação do modal de localização: remoção da grelha de localidades predefinidas e do botão de cópia de link para telemóvel |
 | 2026-10-16 | v2.0.7 | Adição do seletor exato de Raio de Ação do Radar (KM/NM) com filtro Haversine rigoroso e persistência local |
+| 2026-10-16 | v2.0.8 | Inversão simétrica dos flaps e leds na Linha 2 de rota: flaps no centro e leds nas extremidades exteriores |
 
 ---
 
@@ -222,6 +223,16 @@
 2. **Filtragem Circular Rigorosa (Haversine):** No backend (`/api/voos`), alargar o parâmetro `radius` para permitir qualquer valor exato entre 1 e 250 km e manter o filtro circular estrito `calcularDistanciaHaversineKm <= radiusKm`. No cliente (`/painel` e `/voos`), substituir os valores fixos de 20 km pelo estado dinâmico `raioKm`, garantindo exatidão geométrica perfeita.  
 3. **Persistência e Reatividade Imediata:** Guardar a preferência em `localStorage` sob `flight_panel_user_settings.raioKm` e `flight_panel_raio_km`. Qualquer alteração no raio aciona um novo pedido de voos imediato sem recarregar a página.  
 **Consequência:** O utilizador tem controlo milimétrico e absoluto sobre o alcance de deteção aérea, adaptável a aeroportos próximos ou a espaço aéreo alargado.
+ 
+### ADR-044 — Inversão Simétrica de Flaps e LEDs na Linha 2 de Rota (2026-10-16)
+**Contexto:** O utilizador solicitou trocar de lado os LEDs com os flaps na Linha 2 de rota aérea (`Muda de lado os leds com os flaps`), anexando uma imagem do bloco de destino.  
+**Decisão:**  
+1. Inverter a disposição interna dos elementos de rota para uma composição com simetria central:
+   - **Origem (à esquerda do ecrã):** Posicionar os LEDs informativos (`LedText` com cidade, aeroporto e país) à esquerda (exterior) e as 3 palhetas Split-Flap (`FlapWord`) à direita (centro).
+   - **Destino (à direita do ecrã):** Posicionar as 3 palhetas Split-Flap (`FlapWord`) à esquerda (centro) e os LEDs informativos (`LedText` com cidade, aeroporto e país) à direita (exterior).
+2. Layout global resultante: `[LEDS ORIGEM] [FLAP ORIGEM]` ➔ ✈ ➔ `[FLAP DESTINO] [LEDS DESTINO]`. Os flaps mecânicos unem-se no centro da rota ao redor do ícone do avião, e os leds informativos equilibram harmoniosamente as extremidades laterais.  
+**Consequência:** Simetria visual e equilíbrio estético no Ecrã 1, mantendo total responsividade e legibilidade de todas as informações aeroportuárias.
+
 
 
 

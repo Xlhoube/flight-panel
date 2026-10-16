@@ -2451,9 +2451,8 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* CORPO DE FLAPS: CÓDIGOS IATA + CIDADES COM AUTO-FIT */}
               <div className="w-full flex-1 flex items-center justify-between gap-2 sm:gap-6 min-h-0 pt-1">
-                {/* ORIGEM */}
+                {/* ORIGEM: LEDs no exterior esquerdo, Flap no centro */}
                 <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap min-w-0">
-                  <FlapWord text={infoVoo.origemCode} size="hero" />
                   <div className="flex flex-col items-start min-w-0">
                     <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "sm" : "md"} />
                     {infoVoo.origemAeroporto && (
@@ -2467,10 +2466,12 @@ export default function PainelAnalogicoMobileFullscreen() {
                       </span>
                     )}
                   </div>
+                  <FlapWord text={infoVoo.origemCode} size="hero" />
                 </div>
 
-                {/* DESTINO */}
+                {/* DESTINO: Flap no centro, LEDs no exterior direito */}
                 <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap justify-end min-w-0 text-right">
+                  <FlapWord text={infoVoo.destinoCode} size="hero" />
                   <div className="flex flex-col items-end min-w-0">
                     <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "sm" : "md"} />
                     {infoVoo.destinoAeroporto && (
@@ -2484,7 +2485,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                       </span>
                     )}
                   </div>
-                  <FlapWord text={infoVoo.destinoCode} size="hero" />
                 </div>
               </div>
             </div>
