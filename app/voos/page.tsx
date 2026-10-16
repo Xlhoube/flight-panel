@@ -808,6 +808,7 @@ export default function ListaVoosRestantes() {
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
   const [idioma, setIdioma] = useState<Idioma>("pt");
+  const [raioKm, setRaioKm] = useState<number>(20);
 
   // Dicionário de traduções
   const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
@@ -838,12 +839,20 @@ export default function ListaVoosRestantes() {
     }
   };
 
-  // Ler preferências de unidades e idioma do utilizador
+  // Ler preferências de unidades, idioma e raio do utilizador
   useEffect(() => {
     try {
       const idiomaSalvo = localStorage.getItem("flightpanel_idioma");
       if (idiomaSalvo && (idiomaSalvo === "pt" || idiomaSalvo === "en" || idiomaSalvo === "fr" || idiomaSalvo === "es")) {
         setIdioma(idiomaSalvo as Idioma);
+      }
+
+      const raioSalvo = localStorage.getItem("flight_panel_raio_km");
+      if (raioSalvo) {
+        const r = parseInt(raioSalvo, 10);
+        if (!isNaN(r) && r >= 1 && r <= 250) {
+          setRaioKm(r);
+        }
       }
 
       const configSalva = localStorage.getItem("flight_panel_user_settings");
@@ -854,6 +863,9 @@ export default function ListaVoosRestantes() {
         }
         if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
+        }
+        if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
+          setRaioKm(Math.max(1, Math.min(250, Math.round(parsed.raioKm))));
         }
         if (!idiomaSalvo && parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
           setIdioma(parsed.idioma as Idioma);
@@ -963,7 +975,7 @@ export default function ListaVoosRestantes() {
       const params = new URLSearchParams({
         lat: refLat.toString(),
         lon: refLon.toString(),
-        radius: "20",
+        radius: raioKm.toString(),
       });
 
       const res = await fetch(`/api/voos?${params.toString()}`);
@@ -978,7 +990,7 @@ export default function ListaVoosRestantes() {
           if (v[8]) return false;
           if (v[6] == null || v[5] == null) return false;
           const dist = calcularDistanciaHaversineKm(refLat, refLon, v[6], v[5]);
-          return dist <= 20;
+          return dist <= raioKm;
         });
 
         voosEmAr.sort((a: EstadoVoo, b: EstadoVoo) => {
@@ -995,7 +1007,7 @@ export default function ListaVoosRestantes() {
             JSON.stringify({
               voos: voosEmAr,
               rotas: dados.rotas || {},
-              localizacao: { lat: refLat, lon: refLon, nome: localizacao.nome },
+              localizacao: { lat: refLat, lon: refLon, nome: localizacao.nome, raioKm },
               atualizadoEm: Date.now(),
             })
           );
@@ -1006,7 +1018,7 @@ export default function ListaVoosRestantes() {
     } finally {
       setCarregando(false);
     }
-  }, [localizacao]);
+  }, [localizacao, raioKm]);
 
   useEffect(() => {
     buscarVoos();

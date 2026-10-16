@@ -817,7 +817,7 @@ export async function GET(request: NextRequest) {
 
     const lat = latParam ? parseFloat(latParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.15");
     const lon = lonParam ? parseFloat(lonParam) : parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.62");
-    const radiusKm = radiusParam ? Math.max(5, Math.min(120, parseFloat(radiusParam))) : 20;
+    const radiusKm = radiusParam ? Math.max(1, Math.min(250, parseFloat(radiusParam))) : 20;
 
     const deltaLat = radiusKm / 111;
     const deltaLon = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));

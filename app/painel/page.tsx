@@ -1602,11 +1602,13 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
   const [idioma, setIdioma] = useState<Idioma>("pt");
+  const [raioKm, setRaioKm] = useState<number>(20);
+  const [raioInput, setRaioInput] = useState<string>("20");
 
   // Dicionário de traduções reactivo ao idioma ativo
   const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
 
-  // Carregar definições do utilizador guardadas em localStorage (som, volume, unidades e idioma)
+  // Carregar definições do utilizador guardadas em localStorage (som, volume, unidades, idioma e raio)
   useEffect(() => {
     try {
       // 1. Idioma
@@ -1615,7 +1617,17 @@ export default function PainelAnalogicoMobileFullscreen() {
         setIdioma(idiomaSalvo as Idioma);
       }
 
-      // 2. Outras definições
+      // 2. Raio de Ação
+      const raioSalvo = localStorage.getItem("flight_panel_raio_km");
+      if (raioSalvo) {
+        const r = parseInt(raioSalvo, 10);
+        if (!isNaN(r) && r >= 1 && r <= 250) {
+          setRaioKm(r);
+          setRaioInput(r.toString());
+        }
+      }
+
+      // 3. Outras definições
       const configSalva = localStorage.getItem("flight_panel_user_settings");
       if (configSalva) {
         const parsed = JSON.parse(configSalva);
@@ -1634,6 +1646,11 @@ export default function PainelAnalogicoMobileFullscreen() {
         if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
         }
+        if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
+          const rClamp = Math.max(1, Math.min(250, Math.round(parsed.raioKm)));
+          setRaioKm(rClamp);
+          setRaioInput(rClamp.toString());
+        }
         if (!idiomaSalvo && parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
           setIdioma(parsed.idioma as Idioma);
         }
@@ -1647,7 +1664,7 @@ export default function PainelAnalogicoMobileFullscreen() {
       localStorage.setItem("flightpanel_idioma", novo);
       const configSalva = localStorage.getItem("flight_panel_user_settings");
       const parsed = configSalva ? JSON.parse(configSalva) : {};
-      localStorage.setItem("flight_panel_user_settings", JSON.stringify({ ...parsed, idioma: novo }));
+      localStorage.setItem("flight_panel_user_settings", JSON.stringify({ ...parsed, idioma: novo, raioKm }));
     } catch { }
     if (somAtivo) {
       tocarSomFlapClack(0.2);
@@ -1664,7 +1681,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const alternarSom = (novo: boolean) => {
     setSomAtivo(novo);
     globalSomHabilitado = novo;
-    guardarDefinicoes({ somAtivo: novo, volumeSom, unidadeAltitude, unidadeVelocidade, idioma });
+    guardarDefinicoes({ somAtivo: novo, volumeSom, unidadeAltitude, unidadeVelocidade, idioma, raioKm });
   };
 
   const alternarVolume = (novoVolume: number) => {
@@ -1675,23 +1692,33 @@ export default function PainelAnalogicoMobileFullscreen() {
       setSomAtivo(true);
       globalSomHabilitado = true;
     }
-    guardarDefinicoes({ somAtivo: volClamp > 0 ? (somAtivo ? true : true) : somAtivo, volumeSom: volClamp, unidadeAltitude, unidadeVelocidade, idioma });
+    guardarDefinicoes({ somAtivo: volClamp > 0 ? (somAtivo ? true : true) : somAtivo, volumeSom: volClamp, unidadeAltitude, unidadeVelocidade, idioma, raioKm });
   };
 
   const alternarAltitude = (novo: "FT" | "MT") => {
     setUnidadeAltitude(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade, idioma });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade, idioma, raioKm });
   };
 
   const alternarVelocidade = (novo: "KTS" | "KMH") => {
     setUnidadeVelocidade(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo, idioma });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo, idioma, raioKm });
   };
 
-  const guardarDefinicoes = (defs: { somAtivo: boolean; volumeSom: number; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH"; idioma: Idioma }) => {
+  const alternarRaio = (novoRaio: number) => {
+    const rClamp = Math.max(1, Math.min(250, Math.round(novoRaio)));
+    setRaioKm(rClamp);
+    setRaioInput(rClamp.toString());
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, idioma, raioKm: rClamp });
+  };
+
+  const guardarDefinicoes = (defs: { somAtivo: boolean; volumeSom: number; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH"; idioma: Idioma; raioKm?: number }) => {
     try {
-      localStorage.setItem("flight_panel_user_settings", JSON.stringify(defs));
+      const valorRaio = defs.raioKm ?? raioKm;
+      const payload = { ...defs, raioKm: valorRaio };
+      localStorage.setItem("flight_panel_user_settings", JSON.stringify(payload));
       localStorage.setItem("flightpanel_idioma", defs.idioma);
+      localStorage.setItem("flight_panel_raio_km", valorRaio.toString());
     } catch { }
   };
 
@@ -2200,7 +2227,7 @@ export default function PainelAnalogicoMobileFullscreen() {
       const params = new URLSearchParams();
       params.set("lat", localizacao.lat.toString());
       params.set("lon", localizacao.lon.toString());
-      params.set("radius", "20");
+      params.set("radius", raioKm.toString());
 
       const resVoos = await fetch(`/api/voos?${params.toString()}`);
       const dadosVoos = await resVoos.json();
@@ -2214,12 +2241,12 @@ export default function PainelAnalogicoMobileFullscreen() {
       const refLon = localizacao.lon;
 
       if (dadosVoos.estados && dadosVoos.estados.length > 0) {
-        // Filtrar aeronaves no ar (não no solo) e estritamente dentro do raio circular de 20 km (elimina cantos da caixa)
+        // Filtrar aeronaves no ar (não no solo) e estritamente dentro do raio circular exato (elimina cantos da caixa)
         const voosEmAr = dadosVoos.estados.filter((v: EstadoVoo) => {
           if (v[8]) return false;
           if (v[6] == null || v[5] == null) return false;
           const dist = calcularDistanciaHaversineKm(refLat, refLon, v[6], v[5]);
-          return dist <= 20;
+          return dist <= raioKm;
         });
 
         if (voosEmAr.length > 0) {
@@ -2249,7 +2276,7 @@ export default function PainelAnalogicoMobileFullscreen() {
               JSON.stringify({
                 voos: voosEmAr,
                 rotas: rotasMapRef.current,
-                localizacao: { lat: refLat, lon: refLon, nome: localizacao.nome },
+                localizacao: { lat: refLat, lon: refLon, nome: localizacao.nome, raioKm },
                 atualizadoEm: Date.now(),
               })
             );
@@ -2265,7 +2292,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     } finally {
       setCarregando(false);
     }
-  }, [localizacao, carregarMeteorologia, tratarZeroVoos]);
+  }, [localizacao, raioKm, carregarMeteorologia, tratarZeroVoos]);
 
   useEffect(() => {
     buscarDados();
@@ -3163,7 +3190,93 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
-            {/* Opção 4: Localização do Radar */}
+            {/* Opção 4: Raio de Ação do Radar (Exato) */}
+            <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0 bg-white/[0.02] border border-white/5 p-2 sm:p-2.5 rounded-xl">
+              <div className="flex items-center justify-between text-[11px]">
+                <div>
+                  <span className="font-bold text-neutral-300 flex items-center gap-1.5">
+                    <span>🎯</span>
+                    <span>{t.opcoes_raio_titulo}</span>
+                  </span>
+                  <span className="text-[9px] text-neutral-400 block">{t.opcoes_raio_subtitulo}</span>
+                </div>
+                <div className="text-right">
+                  <span className="font-mono font-bold text-amber-400 text-xs sm:text-sm">
+                    {raioKm} KM
+                  </span>
+                  <span className="text-[9px] text-neutral-400 block font-mono">
+                    ≈ {(raioKm * 0.539957).toFixed(1)} NM
+                  </span>
+                </div>
+              </div>
+
+              {/* Botões Rápidos */}
+              <div className="grid grid-cols-5 gap-1">
+                {[5, 10, 20, 30, 50].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => alternarRaio(r)}
+                    className={`py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                      raioKm === r
+                        ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm"
+                        : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {r} KM
+                  </button>
+                ))}
+              </div>
+
+              {/* Slider + Campo Numérico Exato */}
+              <div className="flex items-center gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => alternarRaio(raioKm - 1)}
+                  disabled={raioKm <= 1}
+                  className="w-6 h-6 bg-white/5 hover:bg-white/15 disabled:opacity-30 rounded text-white font-bold flex items-center justify-center border border-white/10 text-xs cursor-pointer"
+                >
+                  −
+                </button>
+                <input
+                  type="range"
+                  min="1"
+                  max="150"
+                  step="1"
+                  value={raioKm}
+                  onChange={(e) => alternarRaio(Number(e.target.value))}
+                  className="flex-1 accent-amber-400 cursor-pointer h-1.5 bg-neutral-800 rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => alternarRaio(raioKm + 1)}
+                  disabled={raioKm >= 250}
+                  className="w-6 h-6 bg-white/5 hover:bg-white/15 disabled:opacity-30 rounded text-white font-bold flex items-center justify-center border border-white/10 text-xs cursor-pointer"
+                >
+                  +
+                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <input
+                    type="number"
+                    min="1"
+                    max="250"
+                    step="1"
+                    value={raioInput}
+                    onChange={(e) => {
+                      setRaioInput(e.target.value);
+                      const v = parseInt(e.target.value, 10);
+                      if (!isNaN(v) && v >= 1 && v <= 250) {
+                        alternarRaio(v);
+                      }
+                    }}
+                    className="w-12 bg-[#141720] border border-white/20 rounded px-1.5 py-0.5 text-center font-mono text-[11px] text-white focus:border-amber-400 outline-none"
+                  />
+                  <span className="text-[10px] text-neutral-400 font-mono">KM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Opção 5: Localização do Radar */}
             <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-bold text-neutral-300">{t.opcoes_localizacao_titulo}</span>
@@ -3277,7 +3390,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                       Localização do Radar
                     </h2>
                     <p className="text-[10px] text-neutral-400">
-                      Define o centro do raio circular de 20 km
+                      Define o centro do raio circular de {raioKm} km
                     </p>
                   </div>
                 </div>
@@ -3299,12 +3412,99 @@ export default function PainelAnalogicoMobileFullscreen() {
                     {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}m)` : ""}
                   </span>
                   <span className="text-[10px] text-neutral-300 block font-mono">
-                    {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio 20 KM
+                    {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio {raioKm} KM
                   </span>
                 </div>
                 <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusGps === "ativo" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-neutral-700/50 text-neutral-300"}`}>
                   {localizacao.origem.toUpperCase()}
                 </span>
+              </div>
+
+              {/* Raio de Ação do Radar (Exato) */}
+              <div className="bg-[#151922] p-3 rounded-xl border border-white/10 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] uppercase tracking-widest text-amber-400 font-bold block">
+                      🎯 {t.opcoes_raio_titulo}
+                    </span>
+                    <span className="text-[9px] text-neutral-400">
+                      {t.opcoes_raio_subtitulo}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-black font-mono text-amber-400">
+                      {raioKm} KM
+                    </span>
+                    <span className="text-[9px] text-neutral-400 block font-mono">
+                      ≈ {(raioKm * 0.539957).toFixed(1)} NM
+                    </span>
+                  </div>
+                </div>
+
+                {/* Predefinições Rápidas */}
+                <div className="grid grid-cols-5 gap-1.5">
+                  {[5, 10, 20, 30, 50].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => alternarRaio(r)}
+                      className={`py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                        raioKm === r
+                          ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm"
+                          : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      {r} KM
+                    </button>
+                  ))}
+                </div>
+
+                {/* Slider + Campo Numérico Exato */}
+                <div className="flex items-center gap-2 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => alternarRaio(raioKm - 1)}
+                    disabled={raioKm <= 1}
+                    className="w-7 h-7 bg-white/5 hover:bg-white/15 disabled:opacity-30 rounded-lg text-white font-bold flex items-center justify-center border border-white/10 cursor-pointer"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="range"
+                    min="1"
+                    max="150"
+                    step="1"
+                    value={raioKm}
+                    onChange={(e) => alternarRaio(Number(e.target.value))}
+                    className="flex-1 accent-amber-400 cursor-pointer h-1.5 bg-neutral-800 rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => alternarRaio(raioKm + 1)}
+                    disabled={raioKm >= 250}
+                    className="w-7 h-7 bg-white/5 hover:bg-white/15 disabled:opacity-30 rounded-lg text-white font-bold flex items-center justify-center border border-white/10 cursor-pointer"
+                  >
+                    +
+                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <input
+                      type="number"
+                      min="1"
+                      max="250"
+                      step="1"
+                      value={raioInput}
+                      onChange={(e) => {
+                        setRaioInput(e.target.value);
+                        const v = parseInt(e.target.value, 10);
+                        if (!isNaN(v) && v >= 1 && v <= 250) {
+                          alternarRaio(v);
+                        }
+                      }}
+                      className="w-14 bg-[#141720] border border-white/20 rounded-lg px-2 py-1 text-center font-mono text-xs text-white focus:border-amber-400 outline-none"
+                    />
+                    <span className="text-[10px] text-neutral-400 font-mono">KM</span>
+                  </div>
+                </div>
               </div>
 
               {/* Botão GPS */}

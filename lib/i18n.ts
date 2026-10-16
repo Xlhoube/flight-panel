@@ -97,6 +97,10 @@ export interface DicionarioTraducoes {
   opcoes_velocidade_subtitulo: string;
   opcoes_unidade_nos: string;
   opcoes_unidade_kmh: string;
+  opcoes_raio_titulo: string;
+  opcoes_raio_subtitulo: string;
+  opcoes_raio_alcance_exato: string;
+  loc_raio_titulo: string;
   opcoes_localizacao_titulo: string;
   opcoes_localizacao_btn: string;
   opcoes_navegacao_titulo: string;
@@ -210,6 +214,10 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Ar",
     opcoes_unidade_nos: "NÓS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_raio_titulo: "RAIO DE AÇÃO DO RADAR",
+    opcoes_raio_subtitulo: "Alcance circular de deteção (exato)",
+    opcoes_raio_alcance_exato: "Raio exato",
+    loc_raio_titulo: "RAIO DE AÇÃO",
     opcoes_localizacao_titulo: "LOCALIZAÇÃO DO RADAR",
     opcoes_localizacao_btn: "ALTERAR LOCALIDADE OU COORDENADAS",
     opcoes_navegacao_titulo: "NAVEGAÇÃO ENTRE ECRÃS (3 ECRÃS)",
@@ -322,6 +330,10 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Air",
     opcoes_unidade_nos: "KNOTS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_raio_titulo: "RADAR ACTION RADIUS",
+    opcoes_raio_subtitulo: "Circular detection range (exact)",
+    opcoes_raio_alcance_exato: "Exact radius",
+    loc_raio_titulo: "ACTION RADIUS",
     opcoes_localizacao_titulo: "RADAR LOCATION",
     opcoes_localizacao_btn: "CHANGE CITY OR COORDINATES",
     opcoes_navegacao_titulo: "SCREEN NAVIGATION (3 SCREENS)",
@@ -434,6 +446,10 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Air",
     opcoes_unidade_nos: "NŒUDS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_raio_titulo: "RAYON D'ACTION DU RADAR",
+    opcoes_raio_subtitulo: "Portée circulaire de détection (exacte)",
+    opcoes_raio_alcance_exato: "Rayon exact",
+    loc_raio_titulo: "RAYON D'ACTION",
     opcoes_localizacao_titulo: "POSITION DU RADAR",
     opcoes_localizacao_btn: "CHANGER DE VILLE OU COORDONNÉES",
     opcoes_navegacao_titulo: "NAVIGATION ENTRE ÉCRANS (3 ÉCRANS)",
@@ -546,6 +562,10 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Aire",
     opcoes_unidade_nos: "NUDOS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_raio_titulo: "RADIO DE ACCIÓN DEL RADAR",
+    opcoes_raio_subtitulo: "Alcance circular de detección (exacto)",
+    opcoes_raio_alcance_exato: "Radio exacto",
+    loc_raio_titulo: "RADIO DE ACCIÓN",
     opcoes_localizacao_titulo: "UBICACIÓN DEL RADAR",
     opcoes_localizacao_btn: "CAMBIAR CIUDAD O COORDENADAS",
     opcoes_navegacao_titulo: "NAVEGACIÓN ENTRE PANTALLAS (3 PANTALLAS)",
