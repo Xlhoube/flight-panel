@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.2  
+**Versão:** v2.0.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização completa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea sem recarregar a página, tradução de países e persistência local.
@@ -119,6 +119,11 @@
 **Decisão:** Identificada a causa raiz: dependência de dicionários estáticos reduzidos que cobriam apenas cerca de 60 aeroportos. Implementada uma base global de dados com mais de 7.900 aeroportos IATA do mundo (`lib/aeroportos-db.ts`), integrada com sobreposição de alta qualidade para aeroportos e cidades ibéricas e europeias (`lib/aeroportos.ts`), mapeador completo de países ISO para português e suporte multilíngue em `PAISES_TRADUCOES`. Na API de voos (`/api/voos`) e no cliente (`/painel` e `/voos`), todas as origens e destinos são agora enriquecidos com resolução O(1) de latência zero: `cidade` por extenso, `aeroporto` oficial consagrado (ex: `FORONDA` para `VIT`) e `país` normalizado (ex: `ESPANHA` / `SPAIN`), eliminando qualquer assimetria ou falta de dados.  
 **Consequência:** Cobertura global de 100% de aeroportos IATA comerciais, civis e cargueiros, com exibição simétrica e rica de cidade, aeroporto e país em todos os voos.
 
+### ADR-039 — Áudio de Novo Voo Exclusivo para o Ecrã 1 / Voo Principal (2026-10-16)
+**Contexto:** O utilizador solicitou: "O som de novo voo so deve ser aplicado quando um novo voo aparece no ecra1, deve ignorar os voos do ecra 2". Anteriormente, o efeito sonoro de cabine (`/Flight.mp3`) era despoletado sempre que qualquer aeronave secundária entrava no alcance do radar, mesmo que ficasse posicionada apenas na lista do Ecrã 2.  
+**Decisão:** Reformular o gatilho de áudio de novo voo em `app/painel/page.tsx` para monitorizar exclusivamente o identificador da aeronave do Ecrã 1 (`vooAtual = listaVoos[0]`). O jingle `/Flight.mp3` toca unicamente quando um voo surge pela primeira vez no Ecrã 1 ou quando o voo principal em destaque é substituído por outro mais próximo. Qualquer entrada ou saída de voos secundários confinados ao Ecrã 2 (`listaVoos.slice(1)`) é totalmente silenciada.  
+**Consequência:** Experiência sonora focada e autêntica, eliminando alertas supérfluos causados por tráfego distante secundário no radar.
+
 ---
 
 ## Histórico
@@ -170,5 +175,7 @@
 | 2026-09-20 | v2.0.0 | Internacionalização completa (i18n): 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea |
 | 2026-10-16 | v2.0.1 | Remoção do botão de idioma dos cabeçalhos dos ecrãs; seleção centralizada exclusivamente nas definições |
 | 2026-10-16 | v2.0.2 | Base global de 7.900+ aeroportos IATA; resolução completa de cidade, aeroporto e país em origens e destinos |
+| 2026-10-16 | v2.0.3 | Áudio de novo voo restrito exclusivamente ao Ecrã 1, ignorando entradas no Ecrã 2 |
+
 
 

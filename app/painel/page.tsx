@@ -2267,27 +2267,27 @@ export default function PainelAnalogicoMobileFullscreen() {
   // O painel principal exibe exclusivamente o voo mais próximo detetado no radar (#1)
   const vooAtual = listaVoos.length > 0 ? listaVoos[0] : null;
 
-  // Áudio reproduzido (/Flight.mp3) exclusivamente quando um novo voo é detetado ou entra no radar
-  const voosConhecidosRef = useRef<Set<string>>(new Set());
+  // Áudio reproduzido (/Flight.mp3) exclusivamente quando um novo voo surge no Ecrã 1 (#1 / Voo Principal)
+  // Ignora completamente os voos secundários que entram ou saem no Ecrã 2 (Restantes Voos)
+  const ultimoVooEcra1Ref = useRef<string | null>(null);
+  const inicializadoRef = useRef<boolean>(false);
+
   useEffect(() => {
-    if (listaVoos.length > 0) {
-      const novosVoos = listaVoos.filter((v) => {
-        const id = v[0] || v[1];
-        return id && !voosConhecidosRef.current.has(id);
-      });
-      if (novosVoos.length > 0 && voosConhecidosRef.current.size > 0) {
-        tocarSomNovoVoo();
-      }
-      const novoConjunto = new Set<string>();
-      listaVoos.forEach((v) => {
-        const id = v[0] || v[1];
-        if (id) novoConjunto.add(id);
-      });
-      voosConhecidosRef.current = novoConjunto;
-    } else {
-      voosConhecidosRef.current.clear();
+    const idVooEcra1 = vooAtual ? (vooAtual[0] || vooAtual[1] || "") : null;
+
+    if (!inicializadoRef.current) {
+      inicializadoRef.current = true;
+      ultimoVooEcra1Ref.current = idVooEcra1;
+      return;
     }
-  }, [listaVoos]);
+
+    // Tocar som de novo voo apenas quando um voo surge ou muda no Ecrã 1
+    if (idVooEcra1 && idVooEcra1 !== ultimoVooEcra1Ref.current) {
+      tocarSomNovoVoo();
+    }
+
+    ultimoVooEcra1Ref.current = idVooEcra1;
+  }, [vooAtual]);
 
   const refLatAtual = localizacao.lat;
   const refLonAtual = localizacao.lon;
