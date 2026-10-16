@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.5  
+**Versão:** v2.0.6  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
@@ -178,6 +178,7 @@
 | 2026-10-16 | v2.0.3 | Áudio de novo voo restrito exclusivamente ao Ecrã 1, ignorando entradas no Ecrã 2 |
 | 2026-10-16 | v2.0.4 | Resolução geográfica de estações por GPS, eliminação de strings técnicas e blindagem contra sobreposição no relógio |
 | 2026-10-16 | v2.0.5 | Purificação e consistência estrita de idiomas (i18n): eliminação de rótulos bilingues, tradução de condições meteorológicas e meses no relógio |
+| 2026-10-16 | v2.0.6 | Simplificação e purificação do modal de localização: remoção da grelha de localidades predefinidas e do botão de cópia de link para telemóvel |
 
 ---
 
@@ -204,6 +205,14 @@
 3. Implementar a função `traduzirCondicaoMeteo(condicao, idioma)` para traduzir dinamicamente as condições atmosféricas da API para o idioma ativo.  
 4. Implementar a função `obterMesAbreviado(mesIndex, idioma)` e reativar a atualização da data no relógio ao alternar o idioma.  
 **Consequência:** 100% de coerência e pureza linguística em todos os ecrãs (Ecrã 1 Voo/Fallback, Ecrã 2 Restantes Voos, Ecrã 3 Meteorologia e tabela `/voos`), sem qualquer mistura de línguas.
+
+### ADR-042 — Simplificação do Modal de Localização / Radar (2026-10-16)
+**Contexto:** O utilizador solicitou a remoção da grelha de botões de localidades predefinidas (`OU SELECCIONA A TUA LOCALIDADE (1 TOQUE)`) e do botão de partilha de link para telemóvel (`COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL`) do modal de localização.  
+**Decisão:**  
+1. Remover cirurgicamente o bloco de cópia de coordenadas e respetiva legenda explicativa.  
+2. Remover a secção e a grelha de localidades predefinidas (`LOCAIS_PREDEFINIDOS`).  
+3. Preservar o bloco de telemetria ativa (`PONTO ACTUAL ACTIVO` com nome geográfico e precisão em metros), o botão direto de GPS (`OBTER COORDENADAS POR GPS (TELEMÓVEL / PC)`) e a secção de coordenadas manuais personalizadas com botão de gravação.  
+**Consequência:** Modal muito mais limpo, minimalista e sem poluição visual ou elementos redundantes.
 
 
 

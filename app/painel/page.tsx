@@ -3307,20 +3307,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </span>
               </div>
 
-              {/* Partilhar / Sincronizar com Telemóvel com 100% de Precisão */}
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={copiarLinkCoordenadas}
-                  className="w-full bg-sky-950/60 hover:bg-sky-900/80 active:scale-[0.99] text-sky-300 hover:text-white py-2 px-3 rounded-xl border border-sky-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
-                >
-                  <span>🔗</span>
-                  <span>{linkCopiado ? "✅ LINK COPIADO! ABRE NO TELEMÓVEL" : "COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL"}</span>
-                </button>
-                <p className="text-[9px] text-neutral-400 text-center leading-tight">
-                  Garante precisão milimétrica: copia este link no PC e abre-o no telemóvel para clonar as coordenadas exatas.
-                </p>
-              </div>
-
               {/* Botão GPS */}
               <div className="flex flex-col gap-1.5">
                 <button
@@ -3335,32 +3321,6 @@ export default function PainelAnalogicoMobileFullscreen() {
                     {detalheErroGps}
                   </p>
                 )}
-              </div>
-
-              {/* Predefinições Rápidas (1 Toque) */}
-              <div className="flex flex-col gap-2">
-                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  OU SELECCIONA A TUA LOCALIDADE (1 TOQUE):
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  {LOCAIS_PREDEFINIDOS.map((loc) => {
-                    const estaAtivo = Math.abs(loc.lat - localizacao.lat) < 0.005 && Math.abs(loc.lon - localizacao.lon) < 0.005;
-                    return (
-                      <button
-                        key={loc.nome}
-                        onClick={() => selecionarLocalPredefinido(loc)}
-                        className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between cursor-pointer ${estaAtivo ? "bg-sky-500/20 border-sky-400 text-white shadow-md shadow-sky-500/10" : "bg-[#141720] hover:bg-[#1a1f2c] border-white/10 text-neutral-300 hover:text-white"}`}
-                      >
-                        <span className="text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-                          {loc.nome}
-                        </span>
-                        <span className="text-[9px] text-neutral-400 truncate mt-0.5">
-                          {loc.regiao}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
 
               {/* Entrada Manual de Coordenadas */}
