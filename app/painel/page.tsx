@@ -2612,13 +2612,13 @@ export default function PainelAnalogicoMobileFullscreen() {
       onTouchEnd={lidarComFimArrasto}
       onMouseDown={lidarComInicioArrasto}
       onMouseUp={lidarComFimArrasto}
-      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1.5 sm:p-3 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.375rem,env(safe-area-inset-bottom))]"
+      className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1 sm:p-2 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.25rem,env(safe-area-inset-bottom))]"
     >
 
       {/* ── SELETOR DE ECRÃ: PAINEL PRINCIPAL (VOO MAIS PRÓXIMO) vs SEGUNDO ECRÃ (RESTANTES VOOS) ── */}
       {ecraAtivo === "principal" ? (
         /* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */
-        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
+        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1 sm:gap-1.5 overflow-hidden">
 
         {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
         {carregando && (
@@ -2629,24 +2629,24 @@ export default function PainelAnalogicoMobileFullscreen() {
 
         {/* ── MODO 1: VOO ACTIVO DETECTADO NO RADAR ────────────────────────── */}
         {!carregando && vooAtual && infoVoo && (
-          <div className="flex-1 min-h-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col justify-between gap-1 sm:gap-1.5 overflow-hidden">
 
             {/* LINHA 1: VOO & LOGÓTIPO & COMPANHIA */}
-            <div className="w-full bg-[#10121a] p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
+            <div className="w-full bg-[#10121a] px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-row items-center justify-between gap-2 shadow-lg shrink-0">
 
               {/* Logótipo Oficial Garantido + Voo + Companhia Aérea */}
-              <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
                 <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
 
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold leading-none">
                     {t.rotulo_voo}
                   </span>
                   <LedText
                     text={infoVoo.numeroVoo}
-                    size={infoVoo.numeroVoo.length >= 7 ? "md" : infoVoo.numeroVoo.length >= 5 ? "lg" : "xl"}
+                    size={infoVoo.numeroVoo.length >= 7 ? "sm" : infoVoo.numeroVoo.length >= 5 ? "md" : "lg"}
                   />
-                  <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
+                  <span className="text-[9px] sm:text-[11px] font-bold text-neutral-300 tracking-wider truncate max-w-[120px] sm:max-w-[200px] leading-tight">
                     {infoVoo.nomeCompanhia}
                   </span>
                 </div>
@@ -2655,14 +2655,14 @@ export default function PainelAnalogicoMobileFullscreen() {
               {/* Aeronave, Fabricante do Avião e Botões de Ação */}
               <div className="flex items-center gap-2 sm:gap-3 shrink-0 max-w-[60%]">
                 <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-hidden">
-                  <span className="text-[9px] sm:text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold leading-none">
                     {t.rotulo_aeronave}
                   </span>
                   <LedText
                     text={infoVoo.aeronave}
-                    size={infoVoo.aeronave.length >= 12 ? "sm" : infoVoo.aeronave.length >= 9 ? "md" : "lg"}
+                    size={infoVoo.aeronave.length >= 12 ? "xs" : infoVoo.aeronave.length >= 9 ? "sm" : "md"}
                   />
-                  <span className="text-[10px] sm:text-xs font-bold text-neutral-300 tracking-wider truncate max-w-[140px] sm:max-w-none">
+                  <span className="text-[9px] sm:text-[11px] font-bold text-neutral-300 tracking-wider truncate max-w-[120px] sm:max-w-none leading-tight">
                     {infoVoo.fabricante}
                   </span>
                 </div>
@@ -2671,7 +2671,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   {promptInstalacao && (
                     <button
                       onClick={instalarApp}
-                      className="bg-white/10 hover:bg-white/20 text-white text-[9px] sm:text-[11px] font-bold px-2 py-1 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse cursor-pointer"
+                      className="bg-white/10 hover:bg-white/20 text-white text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/20 transition-all flex items-center gap-1 shadow-md animate-pulse cursor-pointer"
                     >
                       {t.btn_instalar}
                     </button>
@@ -2684,7 +2684,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     }}
                     title={t.btn_opcoes}
                     aria-label={t.btn_opcoes}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-xs sm:text-sm shadow-sm cursor-pointer shrink-0"
                   >
                     ⚙️
                   </button>
@@ -2694,54 +2694,61 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 2: SECÇÃO PRINCIPAL DE ROTA (EXPANDIDA NO CENTRO) ───────── */}
-            <div className="w-full flex-1 min-h-0 bg-[#10121a] px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
+            <div className="w-full flex-1 min-h-0 bg-[#10121a] px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg overflow-hidden">
 
-              {/* CABEÇALHO DEDICADO DE ROTA: ORIGEM | ESTADO DE VOO | DESTINO (NUNCA CORTA) */}
-              <div className="w-full flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pt-0.5">
+              {/* CABEÇALHO DEDICADO DE ROTA: ORIGEM | ESTADO DE VOO | DESTINO */}
+              <div className="w-full flex items-center justify-between text-[7px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold shrink-0 pb-0.5">
                 <span className="text-left">{t.rotulo_origem}</span>
-                <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
-                  <div className="w-4 sm:w-8 h-px bg-white/30" />
-                  <span className="text-[8px] sm:text-[9px] text-amber-400 font-bold tracking-wider">
+                <div className="flex items-center gap-1 sm:gap-2 text-neutral-300">
+                  <div className="w-3 sm:w-6 h-px bg-white/30" />
+                  <span className="text-[7px] sm:text-[8px] text-amber-400 font-bold tracking-wider">
                     {infoVoo.noSolo ? t.estado_no_solo : t.estado_em_voo}
                   </span>
-                  <span className="text-white text-xs sm:text-base">✈</span>
-                  <div className="w-4 sm:w-8 h-px bg-white/30" />
+                  <span className="text-white text-[10px] sm:text-xs">✈</span>
+                  <div className="w-3 sm:w-6 h-px bg-white/30" />
                 </div>
                 <span className="text-right">{t.rotulo_destino}</span>
               </div>
 
-              {/* CORPO DE FLAPS: CÓDIGOS IATA + CIDADES COM AUTO-FIT */}
-              <div className="w-full flex-1 flex items-center justify-between gap-2 sm:gap-6 min-h-0 pt-1">
+              {/* CORPO DE FLAPS: CÓDIGOS IATA + CIDADES EM LINHA HORIZONTAL CONTÍNUA (FLEX-NOWRAP) */}
+              <div className="w-full flex-1 flex items-center justify-between gap-1 sm:gap-4 min-h-0">
                 {/* ORIGEM: LEDs no exterior esquerdo, Flap no centro */}
-                <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap min-w-0 shrink-0">
                   <div className="flex flex-col items-start min-w-0">
-                    <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "sm" : "md"} />
+                    <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "xs" : "sm"} />
                     {infoVoo.origemAeroporto && (
-                      <span className="text-[8px] sm:text-[11px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[130px] sm:max-w-[220px]">
+                      <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[100px] sm:max-w-[180px] leading-tight">
                         {infoVoo.origemAeroporto}
                       </span>
                     )}
                     {infoVoo.origemPais && (
-                      <span className="text-[8px] sm:text-[10px] font-mono font-bold text-sky-400 tracking-wider uppercase">
+                      <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
                         {traduzirPais(infoVoo.origemPais, idioma)}
                       </span>
                     )}
                   </div>
-                  <FlapWord text={infoVoo.origemCode} size="hero" />
+                  <FlapWord text={infoVoo.origemCode} size="xl" />
+                </div>
+
+                {/* INDICADOR CENTRAL ENTRE OS FLAPS */}
+                <div className="hidden sm:flex items-center gap-1 text-neutral-400 shrink-0 px-1">
+                  <div className="w-2 h-px bg-white/20" />
+                  <span className="text-amber-400 text-xs">✈</span>
+                  <div className="w-2 h-px bg-white/20" />
                 </div>
 
                 {/* DESTINO: Flap no centro, LEDs no exterior direito */}
-                <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap justify-end min-w-0 text-right">
-                  <FlapWord text={infoVoo.destinoCode} size="hero" />
+                <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap justify-end min-w-0 shrink-0 text-right">
+                  <FlapWord text={infoVoo.destinoCode} size="xl" />
                   <div className="flex flex-col items-end min-w-0">
-                    <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "sm" : "md"} />
+                    <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "xs" : "sm"} />
                     {infoVoo.destinoAeroporto && (
-                      <span className="text-[8px] sm:text-[11px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[130px] sm:max-w-[220px]">
+                      <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[100px] sm:max-w-[180px] leading-tight">
                         {infoVoo.destinoAeroporto}
                       </span>
                     )}
                     {infoVoo.destinoPais && (
-                      <span className="text-[8px] sm:text-[10px] font-mono font-bold text-sky-400 tracking-wider uppercase">
+                      <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
                         {traduzirPais(infoVoo.destinoPais, idioma)}
                       </span>
                     )}
@@ -2751,54 +2758,54 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA EM 4 MÓDULOS (INCLUINDO MINI-RADAR DE PROXIMIDADE) ── */}
-            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2.5 shrink-0">
+            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0">
 
               {/* 1. ALTITUDE */}
-              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none">
                   {t.rotulo_altitude}
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   <LedText
                     text={`${unidadeAltitude === "FT" ? infoVoo.altitudePes : infoVoo.altitudeMetros}`}
-                    size="lg"
+                    size="md"
                   />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">
                     {unidadeAltitude}
                   </span>
                 </div>
               </div>
 
               {/* 2. VELOCIDADE */}
-              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none">
                   {t.rotulo_velocidade}
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   <LedText
                     text={`${unidadeVelocidade === "KTS" ? infoVoo.velocidadeKts : infoVoo.velocidadeKmh}`}
-                    size="lg"
+                    size="md"
                   />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">
                     {unidadeVelocidade === "KTS" ? "KTS" : "KMS"}
                   </span>
                 </div>
               </div>
 
               {/* 3. RUMO */}
-              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-neutral-400 font-bold mb-1">
+              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none">
                   {t.rotulo_rumo}
                 </span>
-                <div className="flex items-center gap-1">
-                  <LedText text={`${infoVoo.rumo}`} size="lg" />
-                  <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">°</span>
+                <div className="flex items-center gap-0.5 sm:gap-1">
+                  <LedText text={`${infoVoo.rumo}`} size="md" />
+                  <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">°</span>
                 </div>
               </div>
 
               {/* 4. RADAR DE DISTÂNCIA */}
-              <div className="bg-[#10121a] p-1.5 sm:p-2.5 rounded-xl border border-emerald-500/20 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden">
-                <span className="text-[8px] sm:text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1 flex items-center gap-1">
+              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-emerald-500/20 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-emerald-400 font-bold mb-0.5 flex items-center gap-1 leading-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   {t.rotulo_distancia}
                 </span>
@@ -2815,8 +2822,8 @@ export default function PainelAnalogicoMobileFullscreen() {
                   />
                 ) : (
                   <div className="flex items-center gap-1">
-                    <LedText text="---" size="lg" />
-                    <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">KM</span>
+                    <LedText text="---" size="md" />
+                    <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">KM</span>
                   </div>
                 )}
               </div>

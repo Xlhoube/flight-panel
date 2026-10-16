@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.1.1  
+**Versão:** v2.1.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
@@ -184,6 +184,7 @@
 | 2026-10-16 | v2.0.9 | Blindagem e deduplicação estrita do som de novo voo: exclusivo ao Ecrã 1, sem repetições por oscilação ou alternância de voos |
 | 2026-10-16 | v2.1.0 | Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de telemetria com varrimento animado, azimute e distância exata (KM/NM) |
 | 2026-10-16 | v2.1.1 | Transferência da companhia aérea para o bloco esquerdo (junto ao voo) e adição do fabricante sob o modelo da aeronave à direita |
+| 2026-10-16 | v2.1.2 | Otimização total e blindagem de proporções para ecrãs de telemóvel na horizontal (landscape): eliminação de flex-wrap na rota, escala proporcional e encaixe perfeito |
 
 ---
 
@@ -273,6 +274,20 @@
 2. **Resolução Automática do Fabricante:** Criar a função `obterFabricanteAeronave(codAeronave, nomeAeronave)` que analisa os códigos ICAO e designações para determinar com precisão o construtor aeronáutico (`BOEING`, `AIRBUS`, `EMBRAER`, `ATR`, `BOMBARDIER`, `CESSNA`, `DASSAULT`, `GULFSTREAM`, `BEECHCRAFT`, `PILATUS`, `CIRRUS`, `SIKORSKY`, `LOCKHEED MARTIN`, `ROBINSON`, `LEONARDO`, etc.).
 3. **Exibição do Fabricante:** No bloco direito da Linha 1, por baixo do modelo da aeronave em LEDs (`B737 MAX 8`, `A320NEO`, etc.), exibir em destaque o fabricante aeronáutico resolvido (`infoVoo.fabricante`).  
 **Consequência:** Linha 1 perfeitamente equilibrada e contextualizada: a identidade da operadora (logótipo, voo e companhia) fica concentrada à esquerda, e a ficha técnica da máquina (rótulo, modelo e fabricante) fica concentrada à direita.
+
+### ADR-048 — Otimização Estrita para Ecrãs de Telemóvel na Horizontal (Landscape) (2026-10-16)
+**Contexto:** O utilizador relembrou que a aplicação é concebida prioritariamente para ecrãs de telemóvel na horizontal (modo paisagem/landscape) e exigiu que todos os elementos têm de encaixar com perfeição absoluta sem cortes ou distorções (`Lembra-te que esta app é para ser usada em ecra de telemovel na horizontal, não te esqueças que tem de encaizar tudo muito bem`).  
+**Causa Raiz:**  
+1. Em ecrãs móveis landscape (ex: 844x390, 896x414, 915x412), a largura do dispositivo ativa os prefixos `sm:` do Tailwind que aumentam o padding e os tamanhos das fontes, enquanto a altura útil real é muito reduzida (~380px a 410px).  
+2. Na Linha 2 de rota aérea, o contentor usava `flex-wrap`, provocando quebras de linha indesejadas que empurravam as palhetas split-flap ou os LEDs para uma segunda linha, dobrando a altura vertical exigida e cortando os elementos na base.  
+3. As palhetas mecânicas Split-Flap (`FlapWord`) com tamanho `hero` excediam a altura disponível quando conjugadas com o cabeçalho e a telemetria da Linha 3.  
+**Decisão:**  
+1. **Linha 2 (Rota) Inquebrável:** Substituir `flex-wrap` por `flex-nowrap shrink-0` em toda a extensão da rota: `[CIDADES + AEROPORTO] [FLAP] --- ✈ --- [FLAP] [CIDADES + AEROPORTO]`. Reduzir `FlapWord` de `hero` para `xl`, que possui a altura mecânica ideal (~38px) para ecrãs horizontais móveis com altura <= 430px.  
+2. **Compactação Proporcional da Linha 1 (Cabeçalho):** Ajustar o padding vertical para `px-2 py-1 sm:px-3 sm:py-1.5`, com logótipo proporcional (`w-8 h-8 sm:w-10 sm:h-10`) e distribuição harmoniosa entre o bloco da companhia à esquerda e o fabricante à direita.  
+3. **Alinhamento da Linha 3 (Telemetria):** Configurar `grid-cols-4` compacto numa única linha contínua (`py-1 sm:py-1.5`), mantendo o Mini-Radar de Proximidade e os módulos de Altitude, Velocidade e Rumo com proporções milimétricas.  
+4. **Proteção Anti-Transbordo:** Ajustar os espaçamentos gerais para `gap-1 sm:gap-1.5`, padding perimetral de segurança `p-1 sm:p-2` e `overflow-hidden` sem barras de scroll.  
+**Consequência:** Encaixe perfeito e milimétrico em 100% da área visível de qualquer telemóvel na horizontal (resoluções de 380px a 430px de altura), com 100% dos dados legíveis, zero quebras de linha e fidelidade total ao painel analógico Solari.
+
 
 
 
