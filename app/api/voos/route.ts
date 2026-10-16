@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { obterDadosAeroporto } from "@/lib/aeroportos";
 
 export interface RotaAdsb {
   origem: string;
@@ -322,6 +323,9 @@ export function obterPaisDoAeroporto(codigo?: string, paisIsoOuNome?: string): s
   const cod = (codigo || "").trim().toUpperCase();
   if (AEROPORTOS_PAISES[cod]) return AEROPORTOS_PAISES[cod];
 
+  const infoGlobal = obterDadosAeroporto(cod, { pais: paisIsoOuNome });
+  if (infoGlobal.pais) return infoGlobal.pais;
+
   if (cod.length === 4) {
     if (cod.startsWith("LP")) return "PORTUGAL";
     if (cod.startsWith("LE")) return "ESPANHA";
@@ -635,6 +639,9 @@ export function obterNomeAeroporto(codigo?: string, nomeRecebido?: string): stri
   const cod = (codigo || "").trim().toUpperCase();
   if (AEROPORTOS_NOMES[cod]) return AEROPORTOS_NOMES[cod];
 
+  const infoGlobal = obterDadosAeroporto(cod, { nome: nomeRecebido });
+  if (infoGlobal.aeroporto && infoGlobal.aeroporto !== cod) return infoGlobal.aeroporto;
+
   if (nomeRecebido) {
     const limpo = nomeRecebido
       .replace(/\s+international\s+airport/i, "")
@@ -705,15 +712,26 @@ async function obterRotaPorCallsign(callsign: string, curLat?: number, curLon?: 
         const origIata = r.origin.iata_code || "OPO";
         const destIata = r.destination.iata_code || "DES";
 
+        const origInfo = obterDadosAeroporto(origIata, {
+          cidade: r.origin.municipality,
+          nome: r.origin.name,
+          pais: r.origin.country_name || r.origin.iso_country,
+        });
+        const destInfo = obterDadosAeroporto(destIata, {
+          cidade: r.destination.municipality,
+          nome: r.destination.name,
+          pais: r.destination.country_name || r.destination.iso_country,
+        });
+
         const rota: RotaAdsb = {
-          origem: AEROPORTOS_CIDADES[origIata] || TRADUCOES_CIDADES[rawOrigem] || rawOrigem,
+          origem: origInfo.cidade,
           origemCode: origIata,
-          origemPais: obterPaisDoAeroporto(origIata, r.origin.country_name || r.origin.iso_country),
-          origemAeroporto: obterNomeAeroporto(origIata, r.origin.name),
-          destino: AEROPORTOS_CIDADES[destIata] || TRADUCOES_CIDADES[rawDestino] || rawDestino,
+          origemPais: origInfo.pais,
+          origemAeroporto: origInfo.aeroporto,
+          destino: destInfo.cidade,
           destinoCode: destIata,
-          destinoPais: obterPaisDoAeroporto(destIata, r.destination.country_name || r.destination.iso_country),
-          destinoAeroporto: obterNomeAeroporto(destIata, r.destination.name),
+          destinoPais: destInfo.pais,
+          destinoAeroporto: destInfo.aeroporto,
           airline: r.airline?.name,
           callsignIata: r.callsign_iata,
           callsignIcao: r.callsign_icao,
@@ -884,17 +902,17 @@ export async function GET(request: NextRequest) {
             ]);
 
             if (originCode && destCode && callsign) {
-              const origCidade = AEROPORTOS_CIDADES[originCode] || originCode;
-              const destCidade = AEROPORTOS_CIDADES[destCode] || destCode;
+              const origInfo = obterDadosAeroporto(originCode);
+              const destInfo = obterDadosAeroporto(destCode);
               rotasMap[callsign] = {
-                origem: origCidade,
+                origem: origInfo.cidade,
                 origemCode: originCode,
-                origemPais: obterPaisDoAeroporto(originCode),
-                origemAeroporto: obterNomeAeroporto(originCode),
-                destino: destCidade,
+                origemPais: origInfo.pais,
+                origemAeroporto: origInfo.aeroporto,
+                destino: destInfo.cidade,
                 destinoCode: destCode,
-                destinoPais: obterPaisDoAeroporto(destCode),
-                destinoAeroporto: obterNomeAeroporto(destCode),
+                destinoPais: destInfo.pais,
+                destinoAeroporto: destInfo.aeroporto,
                 flightNumber: flightNumber || callsign,
                 airlineIcao: airlineIcao,
                 model: model,

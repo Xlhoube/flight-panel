@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Idioma, TRADUCOES, traduzirPais } from "@/lib/i18n";
+import { obterDadosAeroporto } from "@/lib/aeroportos";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -193,6 +194,9 @@ function obterPaisDoAeroporto(codigo: string): string {
   if (!codigo) return "";
   const cod = codigo.trim().toUpperCase();
   if (AEROPORTOS_PAISES[cod]) return AEROPORTOS_PAISES[cod];
+
+  const infoGlobal = obterDadosAeroporto(cod);
+  if (infoGlobal.pais) return infoGlobal.pais;
 
   if (cod.startsWith("LP")) return "PORTUGAL";
   if (cod.startsWith("LE")) return "ESPANHA";
@@ -469,6 +473,9 @@ function obterNomeAeroporto(codigo?: string, nomeRecebido?: string): string {
   const cod = (codigo || "").trim().toUpperCase();
   if (AEROPORTOS_NOMES[cod]) return AEROPORTOS_NOMES[cod];
 
+  const infoGlobal = obterDadosAeroporto(cod, { nome: nomeRecebido });
+  if (infoGlobal.aeroporto && infoGlobal.aeroporto !== cod) return infoGlobal.aeroporto;
+
   if (nomeRecebido) {
     const limpo = nomeRecebido
       .replace(/\s+international\s+airport/i, "")
@@ -606,6 +613,33 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 
     if (!destinoAeroporto && destinoCode && destinoCode !== "---" && destinoCode !== "N/D") {
       destinoAeroporto = obterNomeAeroporto(destinoCode);
+    }
+  }
+
+  // Enriquecimento e validação com base global para garantir que origem e destino nunca fiquem sem cidade, aeroporto ou país
+  if (origemCode && origemCode !== "---" && origemCode !== "N/D") {
+    const dadosOrig = obterDadosAeroporto(origemCode);
+    if (!origem || origem === origemCode) {
+      origem = dadosOrig.cidade;
+    }
+    if (!origemAeroporto) {
+      origemAeroporto = dadosOrig.aeroporto;
+    }
+    if (!origemPais) {
+      origemPais = dadosOrig.pais;
+    }
+  }
+
+  if (destinoCode && destinoCode !== "---" && destinoCode !== "N/D") {
+    const dadosDest = obterDadosAeroporto(destinoCode);
+    if (!destino || destino === destinoCode) {
+      destino = dadosDest.cidade;
+    }
+    if (!destinoAeroporto) {
+      destinoAeroporto = dadosDest.aeroporto;
+    }
+    if (!destinoPais) {
+      destinoPais = dadosDest.pais;
     }
   }
 

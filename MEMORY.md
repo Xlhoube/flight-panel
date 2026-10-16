@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.0.1  
+**Versão:** v2.0.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-16  
 **Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), navegação fluida por arrasto lateral (*swipe*), internacionalização completa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea sem recarregar a página, tradução de países e persistência local.
@@ -114,6 +114,11 @@
 **Decisão:** Eliminar os botões de alternância rápida de idioma presentes nos cabeçalhos dos ecrãs (Ecrã 1 no modo voo e modo meteorologia fallback, bem como Ecrã 2 e Ecrã 3). A seleção e configuração do idioma (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) passa a residir de forma exclusiva e dedicada dentro do modal de definições (`⚙️ OPÇÕES / DEFINIÇÕES`), onde se encontra a grelha visual com bandeiras e títulos nativos.  
 **Consequência:** Design purificado e limpo nos cabeçalhos analógicos dos ecrãs, alinhado com a autenticidade Solari, mantendo controlo total da internacionalização centralizado nas opções.
 
+### ADR-038 — Base Global de 7.900+ Aeroportos IATA e Resolução Simétrica de Origem/Destino (2026-10-16)
+**Contexto:** O utilizador reportou que em certos voos faltava informação na Origem comparado ao Destino (ex: voo cargueiro DHL BCS57D com origem em Vitória/Foronda `VIT`, onde as palhetas e LEDs apresentavam apenas a sigla `VIT` sem o nome do aeroporto nem o país, enquanto o destino `PORTO` exibia cidade, nome oficial do aeroporto e país).  
+**Decisão:** Identificada a causa raiz: dependência de dicionários estáticos reduzidos que cobriam apenas cerca de 60 aeroportos. Implementada uma base global de dados com mais de 7.900 aeroportos IATA do mundo (`lib/aeroportos-db.ts`), integrada com sobreposição de alta qualidade para aeroportos e cidades ibéricas e europeias (`lib/aeroportos.ts`), mapeador completo de países ISO para português e suporte multilíngue em `PAISES_TRADUCOES`. Na API de voos (`/api/voos`) e no cliente (`/painel` e `/voos`), todas as origens e destinos são agora enriquecidos com resolução O(1) de latência zero: `cidade` por extenso, `aeroporto` oficial consagrado (ex: `FORONDA` para `VIT`) e `país` normalizado (ex: `ESPANHA` / `SPAIN`), eliminando qualquer assimetria ou falta de dados.  
+**Consequência:** Cobertura global de 100% de aeroportos IATA comerciais, civis e cargueiros, com exibição simétrica e rica de cidade, aeroporto e país em todos os voos.
+
 ---
 
 ## Histórico
@@ -164,4 +169,6 @@
 | 2026-09-19 | v1.9.2 | Remoção do botão METEO dos cabeçalhos e eliminação total das barras inferiores de navegação (Rodapés) |
 | 2026-09-20 | v2.0.0 | Internacionalização completa (i18n): 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea |
 | 2026-10-16 | v2.0.1 | Remoção do botão de idioma dos cabeçalhos dos ecrãs; seleção centralizada exclusivamente nas definições |
+| 2026-10-16 | v2.0.2 | Base global de 7.900+ aeroportos IATA; resolução completa de cidade, aeroporto e país em origens e destinos |
+
 
