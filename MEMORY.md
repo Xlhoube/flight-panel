@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.2  
+**Versão:** v2.6.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, eliminação de popups nativos de fullscreen do Android, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
 
 ---
 
@@ -465,6 +465,18 @@
 1. **Chave de Tradução `estado_carregando`:** Adicionada à interface `DicionarioTraducoes` em `lib/i18n.ts` com os valores `"LOADING"` (EN), `"A CARREGAR"` (PT), `"CHARGEMENT"` (FR) e `"CARGANDO"` (ES).  
 2. **Substituição Dinâmica no Painel:** O componente `PainelAnalogicoMobileFullscreen` consome agora `t.estado_carregando || "LOADING"` no visor de matriz LED central (`LedText`).  
 **Consequência:** Consistência linguística absoluta desde o primeiro milissegundo de arranque da aplicação, apresentando `LOADING` por defeito.
+
+### ADR-062 — Eliminação do Balão de Sistema de Ecrã Inteiro do Android (2026-10-17)
+**Contexto:** O navegador Android exibia um balão nativo flutuante de segurança ("Para sair do ecrã inteiro, arraste a partir da parte superior...") sobreposto aos dados de voo no fundo do ecrã.  
+**Decisão:**  
+1. **Identificação da Causa Raiz:** O aviso é emitido obrigatoriamente pelo sistema operativo Android sempre que a API Web `document.documentElement.requestFullscreen()` é invocada programaticamente num separador normal do browser. Como o código anterior possuía um ouvinte global nos eventos `pointerdown`, `click` e `touchstart` que chamava `acionarFs()` a cada toque, o sistema Android forçava a notificação de segurança.  
+2. **Remoção de Invocação Automática:** Removida a chamada compulsiva de `requestFullscreen()` dos ouvintes globais de toque em `app/painel/page.tsx` e `app/voos/page.tsx`.  
+3. **Preservação de Funcionalidades Críticas:**  
+   - O `navigator.wakeLock` permanece ativo, garantindo que o ecrã não se desliga.  
+   - O desbloqueio de áudio global no primeiro toque continua a funcionar perfeitamente.  
+   - Como PWA instalada, a aplicação corre nativamente em modo de aplicação sem barras nem popups de sistema.  
+**Consequência:** Desaparecimento total da notificação flutuante cinzenta do Android, mantendo a visualização nítida de ponta a ponta.
+
 
 
 

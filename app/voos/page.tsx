@@ -944,23 +944,10 @@ export default function ListaVoosRestantes() {
       }
     };
 
-    acionarFs();
-
-    const onUserInteraction = () => {
-      acionarFs();
-    };
-
-    window.addEventListener("pointerdown", onUserInteraction, { passive: true });
-    window.addEventListener("click", onUserInteraction, { passive: true });
-    window.addEventListener("touchstart", onUserInteraction, { passive: true });
-    window.addEventListener("keydown", onUserInteraction, { passive: true });
-
-    return () => {
-      window.removeEventListener("pointerdown", onUserInteraction);
-      window.removeEventListener("click", onUserInteraction);
-      window.removeEventListener("touchstart", onUserInteraction);
-      window.removeEventListener("keydown", onUserInteraction);
-    };
+    // 1. Manter o ecrã sempre activo (WakeLock) sem suspensão de energia
+    if (typeof window !== "undefined" && "wakeLock" in navigator) {
+      (navigator as any).wakeLock.request("screen").catch(() => { });
+    }
   }, []);
 
   // 1. Carregar de imediato os dados em cache do painel

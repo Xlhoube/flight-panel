@@ -1818,13 +1818,13 @@ export default function PainelAnalogicoMobileFullscreen() {
       }
     };
 
-    // 1. Tentar imediatamente ao carregar
-    acionarFs();
+    // 1. Manter o ecrã sempre activo (WakeLock) sem suspensão de energia
+    if (typeof window !== "undefined" && "wakeLock" in navigator) {
+      (navigator as any).wakeLock.request("screen").catch(() => { });
+    }
 
-    // 2. Garantir ativação automática no primeiro toque/clique em qualquer ponto do ecrã
-    // caso as políticas de segurança do navegador exijam um gesto inicial do utilizador
+    // 2. Desbloquear permissões de áudio no primeiro gesto do utilizador (sem forçar fullscreen da API JS)
     const onUserInteraction = () => {
-      acionarFs();
       desbloquearAudioGlobal();
     };
 

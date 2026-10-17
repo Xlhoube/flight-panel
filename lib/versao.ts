@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.2",
-  buildId: "build-20261017-v262",
+  versao: "2.6.3",
+  buildId: "build-20261017-v263",
   dataLancamento: "2026-10-17",
-  descricao: "Internacionalização integral do ecrã de carregamento para LOADING no arranque.",
+  descricao: "Eliminação da chamada forçada de requestFullscreen nos toques, eliminando a notificação nativa do Android.",
 };
