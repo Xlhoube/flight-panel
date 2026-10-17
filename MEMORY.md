@@ -520,6 +520,19 @@
 4. **Persistência Local e Internacionalização:** Valores guardados em `localStorage` sob `flight_panel_luminosidade` e `flight_panel_luminosidade_auto`, com suporte multilíngue em PT, EN, FR e ES.  
 **Consequência:** Experiência visual imersiva tipo cockpit e quiosque noturno, permitindo poupar energia/luz em repouso e chamar a atenção com classe sempre que surge tráfego aéreo.
 
+### ADR-067 — Animação Mecânica de Split-Flaps de 1.5 Segundos em Cascata ao Entrar Novo Voo (2026-10-17)
+**Contexto:** O utilizador solicitou uma animação realista das palhetas Split-Flap logo após um novo voo entrar no radar, girando durante 1.5 segundos antes de fixar nos códigos IATA de origem e destino correspondentes.  
+**Decisão:**  
+1. **Duração Exata de 1.5 Segundos e Paragem em Cascata (Solari di Udine):**  
+   - Intervalo mecânico de rotação configurado para 65ms por ciclo, alternando caracteres alfanuméricos realistas (`A-Z0-9`).  
+   - Para um efeito autêntico de painel de aeroporto mecânico, as palhetas de cada palavra param de forma desfasada em cascata: o primeiro caractere fixa aos ~1.15s, o segundo aos ~1.325s e o terceiro exatamente aos 1.50s (`1150 + (index % 3) * 175 ms`).  
+2. **Efeitos Visuais e Sonoros Sincronizados:**  
+   - Cada rotação de palheta aciona o som de clique mecânico original (`tocarSomFlapClack()`) e reinicia a animação 3D de flip CSS através de chave dinâmica (`flipKey`).  
+   - Ao atingir o tempo de paragem de cada coluna, a palheta fixa de imediato no caractere de destino pretendido e dispara o clique final de assentamento.  
+3. **Disparo Automático e Manual:**  
+   - Disparo automático integrado no hook de deteção de novas aeronaves no ecrã principal (`setTriggerFlapsNovoVoo(agora)`).  
+   - Disparo manual incluído nos botões de teste do Modal de Opções (teste de áudio e teste de luminosidade) para validação e demonstração instantânea.  
+**Consequência:** Fidelidade física e visual máxima com sensação tátil de painel de partidas analógico em cada deteção de voo.
 
 
 

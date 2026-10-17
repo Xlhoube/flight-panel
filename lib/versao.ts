@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.7.0",
-  buildId: "build-20261017-v270",
+  versao: "2.7.1",
+  buildId: "build-20261017-v271",
   dataLancamento: "2026-10-17",
-  descricao: "Controlo manual e automático de luminosidade do ecrã com boost de 5 segundos ao detetar novo voo.",
+  descricao: "Animação mecânica de split-flaps de 1.5 segundos em cascata ao entrar um novo voo.",
 };

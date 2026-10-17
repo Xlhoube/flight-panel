@@ -1280,35 +1280,82 @@ function MiniRadarDisplay({
 
 // ─── Componente de Palheta com Escala Universal Auto-Fit ──────────────────────
 
+// ─── Componente de Palheta Mecânica Solari com Rotação Dinâmica ──────────────
+
+const ALFABETO_FLAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
 interface FlapCellProps {
   char: string;
   size?: "sm" | "md" | "lg" | "xl" | "hero";
   index?: number;
+  triggerRoll?: number;
 }
 
-function FlapCell({ char, size = "lg", index = 0 }: FlapCellProps) {
-  const [prevChar, setPrevChar] = useState(char);
+function FlapCell({ char, size = "lg", index = 0, triggerRoll = 0 }: FlapCellProps) {
+  const [charExibir, setCharExibir] = useState<string>(char === " " ? "\u00A0" : (char || "").toUpperCase());
   const [animating, setAnimating] = useState(false);
+  const [flipKey, setFlipKey] = useState(0);
+
+  const ultimoCharRef = useRef<string>(char);
+  const ultimoTriggerRef = useRef<number>(triggerRoll);
 
   useEffect(() => {
-    if (char !== prevChar) {
-      const delay = index * 40;
-      const animTimer = setTimeout(() => {
-        setAnimating(true);
-        tocarSomFlapClack();
-      }, delay);
+    const charAlvo = char === " " ? "\u00A0" : (char || "").toUpperCase();
+    const mudouChar = char !== ultimoCharRef.current;
+    const disparouTrigger = triggerRoll !== ultimoTriggerRef.current && triggerRoll > 0;
 
-      const finishTimer = setTimeout(() => {
-        setPrevChar(char);
-        setAnimating(false);
-      }, delay + 220);
+    ultimoCharRef.current = char;
+    ultimoTriggerRef.current = triggerRoll;
 
-      return () => {
-        clearTimeout(animTimer);
-        clearTimeout(finishTimer);
-      };
+    // Se não há alteração nem disparo explícito, mantém o caractere alvo sem rodar
+    if (!mudouChar && !disparouTrigger) {
+      setCharExibir(charAlvo);
+      return;
     }
-  }, [char, prevChar, index]);
+
+    if (!charAlvo || charAlvo === "\u00A0") {
+      setCharExibir("\u00A0");
+      return;
+    }
+
+    // Duração total: 1.5 segundos (1500ms) com cascata mecânica Solari di Udine.
+    // Índice 0 para aos 1150ms, índice 1 aos 1325ms, índice 2 aos 1500ms exatos.
+    const tempoParagem = 1150 + (index % 3) * 175;
+    const inicio = Date.now();
+    let idxAlfa = Math.floor(Math.random() * 26);
+
+    // Arranque com o primeiro estalo mecânico
+    setAnimating(true);
+    setFlipKey((prev) => prev + 1);
+    tocarSomFlapClack();
+
+    const intervalTimer = setInterval(() => {
+      const decorrido = Date.now() - inicio;
+
+      if (decorrido >= tempoParagem) {
+        clearInterval(intervalTimer);
+        setCharExibir(charAlvo);
+        setAnimating(true);
+        setFlipKey((prev) => prev + 1);
+        tocarSomFlapClack();
+
+        // Liberta a animação após assentar
+        setTimeout(() => {
+          setAnimating(false);
+        }, 220);
+      } else {
+        idxAlfa = (idxAlfa + 1) % ALFABETO_FLAP.length;
+        setCharExibir(ALFABETO_FLAP[idxAlfa]);
+        setAnimating(true);
+        setFlipKey((prev) => prev + 1);
+        tocarSomFlapClack();
+      }
+    }, 65);
+
+    return () => {
+      clearInterval(intervalTimer);
+    };
+  }, [char, triggerRoll, index]);
 
   const dimensões = {
     sm: "w-[clamp(0.7rem,min(2.4vw,4.2dvh),1.35rem)] h-[clamp(0.95rem,min(3.4vw,5.5dvh),1.9rem)] text-[clamp(0.7rem,min(2.2vw,3.8dvh),1.15rem)] font-black rounded-[2px]",
@@ -1319,10 +1366,12 @@ function FlapCell({ char, size = "lg", index = 0 }: FlapCellProps) {
   }[size];
 
   const coresTexto = "text-white bg-[#0e1017] border-[#252834] shadow-[0_2px_8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.25)]";
-  const charExibir = char === " " ? "\u00A0" : char.toUpperCase();
 
   return (
-    <div className={`flap-cell shrink-0 ${dimensões} ${coresTexto} ${animating ? "animate-flap" : ""}`}>
+    <div
+      key={flipKey}
+      className={`flap-cell shrink-0 ${dimensões} ${coresTexto} ${animating ? "animate-flap" : ""}`}
+    >
       <span className="flap-pin-left" />
       <span className="flap-pin-right" />
       <span className="flap-split-line" />
@@ -1333,20 +1382,21 @@ function FlapCell({ char, size = "lg", index = 0 }: FlapCellProps) {
   );
 }
 
-// ─── Componente de Palavra Contínua ───────────────────────────────────────────
+// ─── Componente de Palavra Contínua com Sincronismo de Rotação ───────────────
 
 interface FlapWordProps {
   text: string;
   size?: "sm" | "md" | "lg" | "xl" | "hero";
+  triggerRoll?: number;
 }
 
-function FlapWord({ text, size = "lg" }: FlapWordProps) {
+function FlapWord({ text, size = "lg", triggerRoll = 0 }: FlapWordProps) {
   const chars = (text || "").split("");
 
   return (
     <div className="flex items-center gap-[2px] sm:gap-1 flex-nowrap shrink-0 max-w-full">
       {chars.map((c, i) => (
-        <FlapCell key={i} char={c} size={size} index={i} />
+        <FlapCell key={i} char={c} size={size} index={i} triggerRoll={triggerRoll} />
       ))}
     </div>
   );
@@ -1634,6 +1684,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [raioKm, setRaioKm] = useState<number>(20);
   const [raioInput, setRaioInput] = useState<string>("20");
   const [onboardingPasso, setOnboardingPasso] = useState<"nenhum" | "instalacao" | "gps">("nenhum");
+  const [triggerFlapsNovoVoo, setTriggerFlapsNovoVoo] = useState<number>(0);
 
   // Dicionário de traduções reactivo ao idioma ativo (arranque sempre em inglês por omissão)
   const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.en, [idioma]);
@@ -2518,14 +2569,15 @@ export default function PainelAnalogicoMobileFullscreen() {
       return;
     }
 
-    // 5. Novo voo assumiu o ecrã principal (#1): toca som oficial de cabine (/Flight.mp3 com fallback para chime)
+    // 5. Novo voo assumiu o ecrã principal (#1): toca som oficial de cabine (/Flight.mp3), roda flaps durante 1.5s e aciona boost de luz
     tocarSomNovoVoo();
+    setTriggerFlapsNovoVoo(agora);
     if (luminosidadeAuto) {
       dispararBoostLuminosidade();
     }
     ultimoVooExibidoIdRef.current = idVoo;
     ultimoSomTocadoTimestampRef.current = agora;
-  }, [vooAtual, ecraAtivo]);
+  }, [vooAtual, ecraAtivo, luminosidadeAuto, dispararBoostLuminosidade]);
 
   // Assegura carregamento imediato da meteorologia ao entrar no 3º ecrã
   useEffect(() => {
@@ -2696,13 +2748,13 @@ export default function PainelAnalogicoMobileFullscreen() {
 
                 {/* CENTRO: Os dois FlapWords agrupados, aumentados com size="hero" e destacados */}
                 <div className="flex items-center justify-center gap-1.5 sm:gap-3 flex-nowrap shrink-0 px-2 py-1 rounded-xl bg-black/40 border border-white/10 shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)]">
-                  <FlapWord text={infoVoo.origemCode} size="hero" />
+                  <FlapWord text={infoVoo.origemCode} size="hero" triggerRoll={triggerFlapsNovoVoo} />
                   <div className="flex items-center gap-1 text-amber-400 font-bold shrink-0 px-1">
                     <div className="w-2 sm:w-3 h-px bg-white/20" />
                     <span className="text-amber-400 text-xs sm:text-sm animate-pulse">✈</span>
                     <div className="w-2 sm:w-3 h-px bg-white/20" />
                   </div>
-                  <FlapWord text={infoVoo.destinoCode} size="hero" />
+                  <FlapWord text={infoVoo.destinoCode} size="hero" triggerRoll={triggerFlapsNovoVoo} />
                 </div>
 
                 {/* DESTINO: LEDs no exterior direito */}
@@ -3404,6 +3456,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     onClick={() => {
                       desbloquearAudioGlobal();
                       tocarSomNovoVoo(volumeSom / 100);
+                      setTriggerFlapsNovoVoo(Date.now());
                     }}
                     className="w-full py-1.5 px-2 bg-amber-400/15 hover:bg-amber-400/25 active:scale-[0.99] border border-amber-400/50 rounded-lg text-amber-300 font-mono text-[10px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
                   >
@@ -3494,7 +3547,10 @@ export default function PainelAnalogicoMobileFullscreen() {
                 {/* Botão de Teste do Efeito (5 segundos) */}
                 <button
                   type="button"
-                  onClick={dispararBoostLuminosidade}
+                  onClick={() => {
+                    dispararBoostLuminosidade();
+                    setTriggerFlapsNovoVoo(Date.now());
+                  }}
                   className="w-full py-1 px-2 bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-lg text-neutral-300 font-mono text-[9px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
                   <span>✨</span>
