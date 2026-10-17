@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.3  
+**Versão:** v2.6.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, eliminação de popups nativos de fullscreen do Android, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, reativação do assistente de instalação PWA na primeira abertura, eliminação de popups nativos de fullscreen do Android, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
 
 ---
 
@@ -476,6 +476,20 @@
    - O desbloqueio de áudio global no primeiro toque continua a funcionar perfeitamente.  
    - Como PWA instalada, a aplicação corre nativamente em modo de aplicação sem barras nem popups de sistema.  
 **Consequência:** Desaparecimento total da notificação flutuante cinzenta do Android, mantendo a visualização nítida de ponta a ponta.
+
+### ADR-063 — Reativação do Popup de Instalação PWA e Calibração na Primeira Abertura (2026-10-17)
+**Contexto:** O utilizador reportou que, ao abrir a aplicação pela primeira vez, o sistema não estava a questionar se pretendia instalar ou não a PWA.  
+**Decisão:**  
+1. **Ativação no `useEffect` de Montagem:**  
+   - Adicionada a verificação da chave `localStorage.getItem("flight_panel_onboarding_v1")` e deteção de modo autónomo (`display-mode: standalone`).  
+   - Se o utilizador aceder pela primeira vez no navegador (sem chave de conclusão e fora de modo standalone), o estado `onboardingPasso` é automaticamente inicializado em `"instalacao"`.  
+2. **Fluxo Sequencial em 2 Passos:**  
+   - **Passo 1 (Instalação PWA):** Apresenta o popup analógico com as vantagens de instalação e botão direto `📲 INSTALAR APLICAÇÃO` (ou instrução para Safari iOS) e opção de avançar/dispensar (`MAIS TARDE`).  
+   - **Passo 2 (Coordenadas & Radar):** Transita para a permissão de GPS ou geolocalização por IP e calibração do radar, concluindo o onboarding e gravando a preferência.  
+3. **Botão de Reabertura nas Opções:**  
+   - Adicionado o botão `📲 REABRIR ASSISTENTE DE INSTALAÇÃO & GPS` dentro do modal `⚙️ OPÇÕES` para permitir testar ou reinstalar a qualquer momento sem necessidade de limpar os dados do navegador.  
+**Consequência:** Fluxo de boas-vindas e instalação 100% reposto e acessível a qualquer momento.
+
 
 
 

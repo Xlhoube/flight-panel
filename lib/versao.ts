@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.3",
-  buildId: "build-20261017-v263",
+  versao: "2.6.4",
+  buildId: "build-20261017-v264",
   dataLancamento: "2026-10-17",
-  descricao: "Eliminação da chamada forçada de requestFullscreen nos toques, eliminando a notificação nativa do Android.",
+  descricao: "Reativação do assistente de instalação PWA na primeira abertura com botão de reabertura nas opções.",
 };

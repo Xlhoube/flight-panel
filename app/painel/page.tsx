@@ -1679,6 +1679,17 @@ export default function PainelAnalogicoMobileFullscreen() {
           setRaioInput(rClamp.toString());
         }
       }
+
+      // 3. Verificação de primeira abertura (Onboarding: Passo 1 - Instalação PWA)
+      const jaViuOnboarding = localStorage.getItem("flight_panel_onboarding_v1");
+      const isStandalone = typeof window !== "undefined" && (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        (window.navigator as any).standalone === true
+      );
+      if (!jaViuOnboarding && !isStandalone) {
+        setOnboardingPasso("instalacao");
+      }
     } catch { }
   }, []);
 
@@ -3609,6 +3620,21 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <span>{t.opcoes_ver_tabela} ({listaVoos.length})</span>
                 </Link>
               )}
+            </div>
+
+            {/* Assistente de Instalação e Calibração Inicial */}
+            <div className="border-t border-white/10 pt-2 flex flex-col gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setModalOpcoesAberto(false);
+                  setOnboardingPasso("instalacao");
+                }}
+                className="w-full py-1.5 px-3 rounded-lg border border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 text-xs font-bold text-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <span>📲</span>
+                <span>REABRIR ASSISTENTE DE INSTALAÇÃO & GPS</span>
+              </button>
             </div>
 
             {/* Botão Fechar */}
