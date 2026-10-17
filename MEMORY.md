@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.0  
+**Versão:** v2.6.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações, base de dados ICAO Doc 8643/8585, catálogo executivo jets.flights e operadores aviapages.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
 
 ---
 
@@ -447,6 +447,18 @@
 4. **Modal `⚙️ OPÇÕES`:**  
    - Adicionados dois novos blocos de controlo tátil com botões interativos para Distância e Temperatura, com persistência imediata em `localStorage`.  
 **Consequência:** Aplicação 100% internacionalizada, compatível com os padrões aeronáuticos e preferências dos utilizadores de qualquer região do mundo.
+
+### ADR-060 — Desativação do Popup Nativo de Tradução do Google Chrome / Edge (2026-10-17)
+**Contexto:** Ao iniciar canonicamente a aplicação em Inglês num navegador com idioma de sistema em Português, o Google Chrome e Microsoft Edge ativam automaticamente uma caixa de diálogo flutuante (*popup*) do Google Tradutor ("inglês | português"), sobrepondo-se ao painel. O utilizador questionou se é possível desativar este popup.  
+**Decisão:**  
+1. **Atributo HTML5 `translate="no"`:** Adicionado ao elemento `<html lang="en" translate="no" className="notranslate">`.  
+2. **Meta Tags de Bloqueio Canónico:** Inseridas no `<head>`:  
+   - `<meta name="google" content="notranslate" />`  
+   - `<meta name="googlebot" content="notranslate" />`  
+3. **Metadados Next.js:** Adicionada a propriedade `other: { google: "notranslate" }` em `export const metadata: Metadata`.  
+4. **Classe CSS de Isenção:** Classe `notranslate` atribuída a `<html>` e `<body>`.  
+**Consequência:** Os motores de tradução automática do Google Chrome, Edge e Chromium respeitam a diretiva oficial e não voltam a apresentar a caixa de tradução automática, mantendo o ecrã limpo.
+
 
 
 

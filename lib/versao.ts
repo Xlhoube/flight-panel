@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.0",
-  buildId: "build-20261017-v260",
+  versao: "2.6.1",
+  buildId: "build-20261017-v261",
   dataLancamento: "2026-10-17",
-  descricao: "Suporte internacional para unidades de temperatura (°C e °F) e distância (KM, NM e MI).",
+  descricao: "Diretivas canónicas notranslate para desativação do popup de tradução automática dos browsers.",
 };

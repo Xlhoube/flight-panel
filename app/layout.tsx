@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "Flight Panel · Split-Flap",
   description: "Painel mecânico analógico de partidas e radar aéreo em tempo real",
   manifest: "/manifest.json",
+  other: {
+    google: "notranslate",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -44,14 +47,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" translate="no" className="notranslate">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <meta name="google" content="notranslate" />
+        <meta name="googlebot" content="notranslate" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className={`${geistMono.variable} ${vt323.variable} font-mono antialiased bg-[#050608] text-white overflow-hidden`}>
+      <body className={`${geistMono.variable} ${vt323.variable} notranslate font-mono antialiased bg-[#050608] text-white overflow-hidden`}>
         {/* Alerta de Atualização Ativo para ecrãs e quiosques permanentemente ligados */}
         <AlertaAtualizacao />
         {children}
