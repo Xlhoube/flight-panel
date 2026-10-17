@@ -824,11 +824,11 @@ export default function ListaVoosRestantes() {
   const [horaAtual, setHoraAtual] = useState("12:00:00");
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
-  const [idioma, setIdioma] = useState<Idioma>("pt");
+  const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
 
-  // Dicionário de traduções
-  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
+  // Dicionário de traduções (arranque sempre em inglês por omissão)
+  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.en, [idioma]);
 
   // Gestos de Swipe lateral (arrastar para a direita volta ao painel)
   const touchStartX = useRef<number | null>(null);
@@ -856,14 +856,9 @@ export default function ListaVoosRestantes() {
     }
   };
 
-  // Ler preferências de unidades, idioma e raio do utilizador
+  // Ler preferências de unidades e raio do utilizador (idioma inicia sempre em inglês)
   useEffect(() => {
     try {
-      const idiomaSalvo = localStorage.getItem("flightpanel_idioma");
-      if (idiomaSalvo && (idiomaSalvo === "pt" || idiomaSalvo === "en" || idiomaSalvo === "fr" || idiomaSalvo === "es")) {
-        setIdioma(idiomaSalvo as Idioma);
-      }
-
       const raioSalvo = localStorage.getItem("flight_panel_raio_km");
       if (raioSalvo) {
         const r = parseInt(raioSalvo, 10);
@@ -883,9 +878,6 @@ export default function ListaVoosRestantes() {
         }
         if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
           setRaioKm(Math.max(1, Math.min(250, Math.round(parsed.raioKm))));
-        }
-        if (!idiomaSalvo && parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
-          setIdioma(parsed.idioma as Idioma);
         }
       }
     } catch { }

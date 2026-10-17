@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.5.2  
+**Versão:** v2.5.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, motor de áudio restaurado e aperfeiçoado (pré-carregamento de áudio, sintetizador de chime de cabine de passageiros Web Audio e desbloqueio automático de autoplay nos gestos), alerta ativo de nova atualização (v2.5.2), base de dados ICAO Doc 8643/8585, catálogo executivo jets.flights, operadores aviapages e geolocalização híbrida inteligente.
+**Estado:** PWA completa com 3 ecrãs integrados, arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações, base de dados ICAO Doc 8643/8585, catálogo executivo jets.flights e operadores aviapages.
 
 ---
 
@@ -420,6 +420,18 @@
 3. **Botão de Teste no Modal `⚙️ OPÇÕES`:**  
    - Adição do botão `🔔 TESTAR SOM DE NOVO VOO (/Flight.mp3)` que permite ao utilizador testar e ouvir o som imediatamente.  
 **Consequência:** Som de novo voo 100% restaurado, imune a bloqueios de autoplay e com feedback auditivo garantido.
+
+### ADR-058 — Padronização Canónica de Arranque Sempre em Inglês (2026-10-17)
+**Contexto:** O utilizador solicitou expressamente que a aplicação deve arrancar sempre em inglês ("en"), alinhando o Flight Panel com o padrão internacional da aviação civil comercial e executiva.  
+**Decisão:**  
+1. **Configuração de Idioma Raiz em `app/layout.tsx`:**  
+   - Atualização da propriedade `<html lang="en">` no layout principal.  
+2. **Inicialização de Estado em `app/painel/page.tsx` e `app/voos/page.tsx`:**  
+   - O estado do componente arranca estritamente em `useState<Idioma>("en")`.  
+   - O fallback das traduções é configurado para `TRADUCOES.en`.  
+   - A rotina de montagem de componentes (`useEffect`) deixa de restaurar idiomas locais anteriores gravados no navegador, assegurando que, independentemente do dispositivo ou histórico anterior de sessões, cada novo carregamento ou abertura da aplicação arranca sempre em Inglês.  
+   - A alternância dinâmica de idioma durante a sessão continua disponível através do seletor de 4 bandeiras (PT, EN, FR, ES) no modal `⚙️ OPÇÕES`.  
+**Consequência:** Consistência internacional aeronáutica e respeito integral pela especificação de arranque do utilizador.
 
 
 

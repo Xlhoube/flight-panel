@@ -1602,24 +1602,19 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [volumeSom, setVolumeSom] = useState<number>(80);
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
-  const [idioma, setIdioma] = useState<Idioma>("pt");
+  const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
   const [raioInput, setRaioInput] = useState<string>("20");
   const [onboardingPasso, setOnboardingPasso] = useState<"nenhum" | "instalacao" | "gps">("nenhum");
 
-  // Dicionário de traduções reactivo ao idioma ativo
-  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.pt, [idioma]);
+  // Dicionário de traduções reactivo ao idioma ativo (arranque sempre em inglês por omissão)
+  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.en, [idioma]);
 
-  // Carregar definições do utilizador guardadas em localStorage (som, volume, unidades, idioma e raio)
+  // Carregar definições do utilizador guardadas em localStorage (som, volume, unidades e raio)
+  // Nota: Conforme especificado, o idioma arranca SEMPRE em inglês ("en")
   useEffect(() => {
     try {
-      // 1. Idioma
-      const idiomaSalvo = localStorage.getItem("flightpanel_idioma");
-      if (idiomaSalvo && (idiomaSalvo === "pt" || idiomaSalvo === "en" || idiomaSalvo === "fr" || idiomaSalvo === "es")) {
-        setIdioma(idiomaSalvo as Idioma);
-      }
-
-      // 2. Raio de Ação
+      // 1. Raio de Ação
       const raioSalvo = localStorage.getItem("flight_panel_raio_km");
       if (raioSalvo) {
         const r = parseInt(raioSalvo, 10);
@@ -1629,7 +1624,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         }
       }
 
-      // 3. Outras definições
+      // 2. Outras definições (som, volume, unidades)
       const configSalva = localStorage.getItem("flight_panel_user_settings");
       if (configSalva) {
         const parsed = JSON.parse(configSalva);
@@ -1652,9 +1647,6 @@ export default function PainelAnalogicoMobileFullscreen() {
           const rClamp = Math.max(1, Math.min(250, Math.round(parsed.raioKm)));
           setRaioKm(rClamp);
           setRaioInput(rClamp.toString());
-        }
-        if (!idiomaSalvo && parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
-          setIdioma(parsed.idioma as Idioma);
         }
       }
     } catch { }
