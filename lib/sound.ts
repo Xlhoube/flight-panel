@@ -1,12 +1,13 @@
-// Gerador de som mecânico de palhetas Solari (Split-Flap) usando Web Audio API
+// ─── Motor de Áudio Unificado: Palhetas Solari (Split-Flap) e Cabine Aeronáutica ───
+
 class SplitFlapAudioEngine {
   private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
-  private volume: number = 0.8;
+  private volume: number = 0.8; // 0.0 a 1.0
   private lastSoundTime: number = 0;
 
   constructor() {
-    // Inicialização atrasada no primeiro clique para respeitar políticas de reprodução do browser
+    // Inicialização atrasada no primeiro gesto para respeitar políticas de reprodução do browser
   }
 
   private getAudioContext(): AudioContext | null {
@@ -20,7 +21,7 @@ class SplitFlapAudioEngine {
       }
     }
     if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
     return this.ctx;
   }
@@ -33,6 +34,11 @@ class SplitFlapAudioEngine {
     return this.isMuted;
   }
 
+  public toggleMute(): boolean {
+    this.isMuted = !this.isMuted;
+    return this.isMuted;
+  }
+
   public setVolume(vol: number) {
     this.volume = Math.max(0, Math.min(1, vol));
   }
@@ -41,18 +47,18 @@ class SplitFlapAudioEngine {
     return this.volume;
   }
 
-  public toggleMute(): boolean {
-    this.isMuted = !this.isMuted;
-    return this.isMuted;
-  }
+  /**
+   * Som percussivo analógico de palheta Solari (impacto plástico/metálico com amortecimento rápido)
+   */
+  public playMechanicalClick(volumeOverride?: number) {
+    if (this.isMuted || typeof window === "undefined") return;
 
-  // Som mecânico de palheta analógica a bater
-  public playMechanicalClick(intensity = 1.0) {
-    if (this.isMuted || this.volume <= 0 || typeof window === "undefined") return;
+    const vol = volumeOverride !== undefined ? Math.max(0, Math.min(1, volumeOverride)) : this.volume;
+    if (vol <= 0) return;
 
     const now = performance.now();
-    // Limite de taxa para não saturar quando muitas palhetas viram simultaneamente
-    if (now - this.lastSoundTime < 25) return;
+    // Limite de taxa de 20ms para evitar sobreposição excessiva de buffers em palavras longas
+    if (now - this.lastSoundTime < 20) return;
     this.lastSoundTime = now;
 
     try {
@@ -61,51 +67,127 @@ class SplitFlapAudioEngine {
 
       const t = ctx.currentTime;
 
-      // 1. Ruído de impacto do plástico/metal
-      const bufferSize = ctx.sampleRate * 0.035; // 35ms
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
+      // 1. Ruído de impacto do plástico mecânico
+      const bufferSize = ctx.sampleRate * 0.03; // 30ms
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
+        output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
       }
 
-      const noiseSource = ctx.createBufferSource();
-      noiseSource.buffer = noiseBuffer;
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
 
-      // Filtro passa-banda para dar timbre oco de plástico de palheta mecânica
+      // Filtro passa-banda para dar o timbre oco característico de painel de aeroporto
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(1400 + Math.random() * 400, t);
-      filter.Q.setValueAtTime(3.5, t);
+      filter.frequency.setValueAtTime(1250 + Math.random() * 200, t);
+      filter.Q.setValueAtTime(3.2, t);
 
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.35 * intensity * this.volume, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.032);
+      const gainMax = 0.18 * vol;
+      gain.gain.setValueAtTime(gainMax, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
 
-      noiseSource.connect(filter);
+      noise.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
 
-      noiseSource.start(t);
-      noiseSource.stop(t + 0.035);
+      noise.start(t);
 
-      // 2. Ressonância subtil da caixa metálica
+      // 2. Ressonância subtil da carcaça metálica do display
       const osc = ctx.createOscillator();
       const oscGain = ctx.createGain();
       osc.type = "triangle";
-      osc.frequency.setValueAtTime(380 + Math.random() * 60, t);
-      oscGain.gain.setValueAtTime(0.12 * intensity * this.volume, t);
-      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.025);
+      osc.frequency.setValueAtTime(360 + Math.random() * 60, t);
+      oscGain.gain.setValueAtTime(0.08 * vol, t);
+      oscGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
 
       osc.connect(oscGain);
       oscGain.connect(ctx.destination);
 
       osc.start(t);
-      osc.stop(t + 0.028);
+      osc.stop(t + 0.026);
     } catch {
       // Ignorar erros de áudio silenciosamente
     }
   }
+
+  /**
+   * Dispara uma rajada percussiva de 4 cliques rápidos simulando um tambor de palhetas a girar
+   */
+  public playBurst(volumeOverride?: number, count = 4, intervalMs = 45) {
+    if (this.isMuted || typeof window === "undefined") return;
+    const vol = volumeOverride !== undefined ? volumeOverride : this.volume;
+    if (vol <= 0) return;
+
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        this.playMechanicalClick(vol * 0.85);
+      }, i * intervalMs);
+    }
+  }
+
+  /**
+   * Reproduz o jingle oficial de aviso de cabine (/Flight.mp3) com fallback mecânico
+   */
+  public playNewFlight(volumeOverride?: number) {
+    if (this.isMuted || typeof window === "undefined") return;
+    const vol = volumeOverride !== undefined ? Math.max(0, Math.min(1, volumeOverride)) : this.volume;
+    if (vol <= 0) return;
+
+    try {
+      const audio = new Audio("/Flight.mp3");
+      audio.volume = vol;
+      audio.play().catch(() => {
+        // Fallback para o sintetizador mecânico se o browser bloquear autoplay
+        this.playMechanicalClick(vol);
+      });
+    } catch {
+      this.playMechanicalClick(vol);
+    }
+  }
+
+  public resume(): void {
+    const ctx = this.getAudioContext();
+    if (ctx && ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+  }
 }
 
+// Instância Singleton
 export const splitFlapAudio = new SplitFlapAudioEngine();
+
+// Funções utilitárias diretas
+export function tocarSomFlapClack(volumeOverride?: number) {
+  splitFlapAudio.playMechanicalClick(volumeOverride);
+}
+
+export function tocarRajadaFlaps(volumeOverride?: number) {
+  splitFlapAudio.playBurst(volumeOverride);
+}
+
+export function tocarSomNovoVoo(volumeOverride?: number) {
+  splitFlapAudio.playNewFlight(volumeOverride);
+}
+
+export function definirVolumeGlobal(vol: number) {
+  splitFlapAudio.setVolume(vol);
+}
+
+export function obterVolumeGlobal(): number {
+  return splitFlapAudio.getVolume();
+}
+
+export function definirSomHabilitado(ativo: boolean) {
+  splitFlapAudio.setMuted(!ativo);
+}
+
+export function obterSomHabilitado(): boolean {
+  return !splitFlapAudio.getIsMuted();
+}
+
+export function inicializarAudioContext(): void {
+  splitFlapAudio.resume();
+}

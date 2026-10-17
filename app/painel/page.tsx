@@ -8,6 +8,14 @@ import { obterDadosAeroporto } from "@/lib/aeroportos";
 import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/lib/localidades";
 import { resolverInfoAeronave } from "@/lib/aeronaves-db";
 import { EmblemaFabricante } from "@/lib/fabricantes-logos";
+import {
+  tocarSomFlapClack,
+  tocarRajadaFlaps,
+  tocarSomNovoVoo,
+  definirVolumeGlobal,
+  definirSomHabilitado,
+  inicializarAudioContext,
+} from "@/lib/sound";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -898,89 +906,8 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   };
 }
 
-// ─── Sintetizador de Som Mecânico ─────────────────────────────────────────────
-
-let globalAudioCtx: AudioContext | null = null;
-let globalSomHabilitado = true;
-let globalVolume = 0.8; // Nível de ganho sonoro independente (0.0 a 1.0)
-
-function tocarSomFlapClack(volumeOverride?: number) {
-  if (!globalSomHabilitado || typeof window === "undefined") return;
-  const vol = volumeOverride !== undefined ? volumeOverride : globalVolume;
-  if (vol <= 0) return;
-
-  try {
-    if (!globalAudioCtx) {
-      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      globalAudioCtx = new AudioCtxClass();
-    }
-    if (globalAudioCtx.state === "suspended") {
-      globalAudioCtx.resume();
-    }
-    const now = globalAudioCtx.currentTime;
-
-    const bufferSize = globalAudioCtx.sampleRate * 0.03;
-    const buffer = globalAudioCtx.createBuffer(1, bufferSize, globalAudioCtx.sampleRate);
-    const output = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
-    }
-
-    const noise = globalAudioCtx.createBufferSource();
-    noise.buffer = buffer;
-
-    const filter = globalAudioCtx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1200, now);
-    filter.Q.setValueAtTime(3.0, now);
-
-    const gain = globalAudioCtx.createGain();
-    const gainMax = 0.15 * vol;
-    gain.gain.setValueAtTime(gainMax, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
-
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(globalAudioCtx.destination);
-
-    noise.start(now);
-  } catch {
-    // Ignorar
-  }
-}
-
-// ─── Efeito Sonoro de Rotação Mecânica de Palhetas Solari (Burst de Clacks) ───
-
-function tocarRajadaFlaps(volumeOverride?: number) {
-  if (!globalSomHabilitado || typeof window === "undefined") return;
-  const vol = volumeOverride !== undefined ? volumeOverride : globalVolume;
-  if (vol <= 0) return;
-
-  for (let i = 0; i < 4; i++) {
-    setTimeout(() => {
-      tocarSomFlapClack(vol * 0.85);
-    }, i * 45);
-  }
-}
-
-// ─── Reprodutor de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
-
-function tocarSomNovoVoo(volumeOverride?: number) {
-  if (!globalSomHabilitado || typeof window === "undefined") return;
-  const vol = volumeOverride !== undefined ? volumeOverride : globalVolume;
-  if (vol <= 0) return;
-
-  try {
-    const audio = new Audio("/Flight.mp3");
-    audio.volume = Math.max(0, Math.min(1, vol));
-    audio.play().catch(() => {
-      // Fallback para sintetizador mecânico caso o browser bloqueie o ficheiro de áudio por autoplay
-      tocarSomFlapClack(vol);
-    });
-  } catch {
-    tocarSomFlapClack(vol);
-  }
-}
+// ─── Motor de Áudio Unificado (Importado de @/lib/sound) ──────────────────────
+// tocarSomFlapClack, tocarRajadaFlaps, tocarSomNovoVoo, definirVolumeGlobal, definirSomHabilitado
 
 // ─── Componente de Ícones Meteorológicos Dinâmicos (SVG Cockpit Style) ────────
 
@@ -1687,12 +1614,12 @@ export default function PainelAnalogicoMobileFullscreen() {
         const parsed = JSON.parse(configSalva);
         if (typeof parsed.somAtivo === "boolean") {
           setSomAtivo(parsed.somAtivo);
-          globalSomHabilitado = parsed.somAtivo;
+          definirSomHabilitado(parsed.somAtivo);
         }
         if (typeof parsed.volumeSom === "number" && !isNaN(parsed.volumeSom)) {
           const volClamp = Math.max(0, Math.min(100, Math.round(parsed.volumeSom)));
           setVolumeSom(volClamp);
-          globalVolume = volClamp / 100;
+          definirVolumeGlobal(volClamp / 100);
         }
         if (parsed.unidadeAltitude === "FT" || parsed.unidadeAltitude === "MT") {
           setUnidadeAltitude(parsed.unidadeAltitude);
@@ -1734,17 +1661,17 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   const alternarSom = (novo: boolean) => {
     setSomAtivo(novo);
-    globalSomHabilitado = novo;
+    definirSomHabilitado(novo);
     guardarDefinicoes({ somAtivo: novo, volumeSom, unidadeAltitude, unidadeVelocidade, idioma, raioKm });
   };
 
   const alternarVolume = (novoVolume: number) => {
     const volClamp = Math.max(0, Math.min(100, Math.round(novoVolume)));
     setVolumeSom(volClamp);
-    globalVolume = volClamp / 100;
+    definirVolumeGlobal(volClamp / 100);
     if (volClamp > 0 && !somAtivo) {
       setSomAtivo(true);
-      globalSomHabilitado = true;
+      definirSomHabilitado(true);
     }
     guardarDefinicoes({ somAtivo: volClamp > 0 ? (somAtivo ? true : true) : somAtivo, volumeSom: volClamp, unidadeAltitude, unidadeVelocidade, idioma, raioKm });
   };
@@ -2197,14 +2124,8 @@ export default function PainelAnalogicoMobileFullscreen() {
       (navigator as any).wakeLock.request("screen").catch(() => { });
     }
 
-    if (!globalAudioCtx && typeof window !== "undefined") {
-      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtxClass) {
-        globalAudioCtx = new AudioCtxClass();
-      }
-    }
-    if (globalAudioCtx && globalAudioCtx.state === "suspended") {
-      globalAudioCtx.resume().catch(() => { });
+    if (typeof window !== "undefined") {
+      inicializarAudioContext();
     }
 
     if (typeof document !== "undefined") {

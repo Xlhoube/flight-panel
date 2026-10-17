@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.3.3  
+**Versão:** v2.3.4  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), emblemas oficiais de construtores aeronáuticos OEM (HondaJet, Cessna, Gulfstream, Embraer, Bombardier, etc.) em substituição de caixas vazias quando não há logótipo de companhia aérea, palhetas mecânicas Split-Flap ampliadas e agrupadas no centro, síntese sonora de clacks mecânicos na rotação de caracteres, internacionalização em 4 idiomas e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), emblemas oficiais de construtores aeronáuticos OEM (HondaJet, Cessna, Gulfstream, Embraer, Bombardier, etc.), motor de som unificado (SplitFlapAudioEngine em lib/sound.ts) com síntese precisa de clacks mecânicos na rotação de caracteres e jingle de cabine, internacionalização em 4 idiomas e persistência local.
 
 ---
 
@@ -344,6 +344,19 @@
    - Se existir logótipo da companhia aérea comercial via CDN, continua a ser apresentado.
    - Se o logótipo não existir ou falhar, o sistema deteta automaticamente o fabricante e o modelo da aeronave através de `aeronaves-db.ts` e renderiza o emblema vetorial oficial com moldura escura de luxo (`#0d0f16` com rebordo `border-neutral-800`), sem caixas brancas desfasadas.  
 **Consequência:** Aspeto premium de fábrica aeronáutica (OEM), eliminando caixas vazias ou genéricas e enriquecendo imediatamente a presença visual de jatos executivos.
+
+### ADR-053 — Unificação Arquitetural do Motor de Áudio Split-Flap e Cabine (2026-10-17)
+**Contexto:** Existiam implementações dispersas de Web Audio API e gestão de volume entre `lib/sound.ts` e `app/painel/page.tsx`, gerando código redundante e variáveis globais não sincronizadas.  
+**Decisão:**  
+1. **Consolidação em `lib/sound.ts`:**  
+   - Classe Singleton `SplitFlapAudioEngine` com controlo de estado (`volume`, `isMuted`), gestão preguiçosa e resiliente do `AudioContext` (`resume()`), e sintetizador de impacto mecânico com amortecimento exponencial e ressonância metálica.  
+   - Métodos dedicados: `playMechanicalClick()`, `playBurst()` (rajadas percussivas de rotação rápida de palhetas) e `playNewFlight()` (jingle oficial `/Flight.mp3` com fallback mecânico).  
+2. **Exportação de API Limpa e Consistente:**  
+   - Exportação direta de `tocarSomFlapClack()`, `tocarRajadaFlaps()`, `tocarSomNovoVoo()`, `definirVolumeGlobal()`, `obterVolumeGlobal()`, `definirSomHabilitado()`, `obterSomHabilitado()` e `inicializarAudioContext()`.  
+3. **Refatorização de `app/painel/page.tsx`:**  
+   - Eliminação de todo o código redundante de sintetizador local e variáveis globais soltas.  
+   - Conexão direta dos seletores de áudio do modal de opções `⚙️` e dos componentes `FlapCell` ao motor unificado.  
+**Consequência:** Arquitetura limpa, ficheiro `lib/sound.ts` totalmente ativo como fonte única da verdade para o áudio, e desempenho sem fugas de memória nem colisões de `AudioContext`.
 
 
 
