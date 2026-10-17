@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.5.0",
-  buildId: "build-20261017-v250",
+  versao: "2.5.2",
+  buildId: "build-20261017-v252",
   dataLancamento: "2026-10-17",
-  descricao: "Catálogo ICAO Doc 8643/8585, frota executiva jets.flights e operadores aviapages.",
+  descricao: "Correção do motor de áudio de novo voo, desbloqueio de autoplay e chime aeronáutico de cabine.",
 };

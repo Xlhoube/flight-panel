@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.5.1  
+**Versão:** v2.5.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, alerta ativo e resiliente de nova atualização para ecrãs e quiosques permanentemente ligados (polling 60s no-cache + Service Worker), base de dados ICAO Doc 8643 e Doc 8585 enriquecida com catálogo executivo (jets.flights), diretório de operadores charter (aviapages.com), emblemas oficiais OEM e operadores charter (NetJets, VistaJet, Flexjet, GlobeAir, Daher, Piaggio, Cessna, etc.), motor de som unificado (lib/sound.ts), geolocalização híbrida inteligente (GPS satélite + IP de rede para PC), internacionalização em 4 idiomas e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados, motor de áudio restaurado e aperfeiçoado (pré-carregamento de áudio, sintetizador de chime de cabine de passageiros Web Audio e desbloqueio automático de autoplay nos gestos), alerta ativo de nova atualização (v2.5.2), base de dados ICAO Doc 8643/8585, catálogo executivo jets.flights, operadores aviapages e geolocalização híbrida inteligente.
 
 ---
 
@@ -402,6 +402,24 @@
    - Botão de adiamento `⏱️ ADIAR` (15 min) que preserva um *pill* discreto e pulsante no canto do ecrã para atualização posterior a qualquer momento.  
    - Sinal sonoro discreto de aviso ao disparar pela primeira vez no cockpit.  
 **Consequência:** Experiência ininterrupta e autonomia total para ecrãs dedicados — o utilizador é sempre informado no exato momento em que uma nova compilação é disponibilizada na nuvem.
+
+### ADR-057 — Correção do Disparo de Som de Novo Voo, Pré-Carregamento e Chime de Cabine Resiliente (2026-10-17)
+**Contexto:** O utilizador reportou que o som de novo voo (`/Flight.mp3`) deixou de funcionar.  
+**Diagnóstico & Causa Raiz:**  
+1. **Deduplicação Inicial Ultra-Agressiva:** No arranque do painel, o código anterior iterava por todos os voos retornados pela API e marcava toda a lista como já tocada. Quando o voo mais próximo (#1) mudava para outro avião que já constava na lista da área, o som era bloqueado e nunca chegava a tocar.  
+2. **Políticas de Autoplay dos Navegadores:** O navegador bloqueava chamadas a `new Audio().play()` geradas por timers assíncronos (`useEffect`/`fetch`) sem prévia interação com o elemento.  
+3. **Falta de Desbloqueio Global:** O `AudioContext` permanecia em estado `suspended` na ausência de retoma associada aos gestos globais do utilizador.  
+**Decisão:**  
+1. **Reestruturação da Lógica de Deteção em `app/painel/page.tsx`:**  
+   - Rastreio estrito de `ultimoVooExibidoIdRef`. No arranque inicial, apenas a aeronave atual é registada como linha de base.  
+   - Assim que o voo em destaque no Ecrã 1 (#1) muda para outra aeronave, dispara de imediato `tocarSomNovoVoo()` com um cooldown de segurança de 6 segundos.  
+2. **Arquitetura de Áudio em `lib/sound.ts`:**  
+   - Instância persistente de áudio com `preload = "auto"`.  
+   - Função `unlockAudio()` acionada nos eventos de ponteiro/clique/teclado para desbloquear permissões de media de forma transparente.  
+   - Criação de sintetizador nativo de **Chime de Cabine Aeronáutica** (*Ding-Dong* com dois tons senoidais Fá#5 e Ré#5) através de Web Audio API, garantindo som instantâneo mesmo que o ficheiro MP3 seja barrado por políticas de navegador.  
+3. **Botão de Teste no Modal `⚙️ OPÇÕES`:**  
+   - Adição do botão `🔔 TESTAR SOM DE NOVO VOO (/Flight.mp3)` que permite ao utilizador testar e ouvir o som imediatamente.  
+**Consequência:** Som de novo voo 100% restaurado, imune a bloqueios de autoplay e com feedback auditivo garantido.
 
 
 

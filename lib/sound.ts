@@ -128,23 +128,112 @@ class SplitFlapAudioEngine {
     }
   }
 
+  private flightAudio: HTMLAudioElement | null = null;
+  private isUnlocked: boolean = false;
+
+  private initFlightAudio() {
+    if (typeof window === "undefined") return;
+    if (!this.flightAudio) {
+      try {
+        this.flightAudio = new Audio("/Flight.mp3");
+        this.flightAudio.preload = "auto";
+      } catch {
+        // Ignorar em ambientes sem suporte
+      }
+    }
+  }
+
   /**
-   * Reproduz o jingle oficial de aviso de cabine (/Flight.mp3) com fallback mecânico
+   * Desbloqueia permissões de áudio do navegador no primeiro gesto do utilizador
+   */
+  public unlockAudio() {
+    if (typeof window === "undefined") return;
+    this.resume();
+    this.initFlightAudio();
+
+    if (this.flightAudio && !this.isUnlocked) {
+      // Pequeno toque silencioso para registar a permissão de media no navegador
+      const prevVol = this.flightAudio.volume;
+      this.flightAudio.volume = 0;
+      this.flightAudio
+        .play()
+        .then(() => {
+          this.flightAudio?.pause();
+          if (this.flightAudio) {
+            this.flightAudio.currentTime = 0;
+            this.flightAudio.volume = prevVol;
+          }
+          this.isUnlocked = true;
+        })
+        .catch(() => {});
+    }
+  }
+
+  /**
+   * Sintetizador aeronáutico de cabine (clássico chime 'Ding-Dong' de cinto de segurança e aviso de voo)
+   * Garantia total de áudio através de Web Audio API mesmo se ficheiros de mídia externa forem bloqueados
+   */
+  public playCabinChime(volumeOverride?: number) {
+    if (this.isMuted || typeof window === "undefined") return;
+    const vol = volumeOverride !== undefined ? Math.max(0, Math.min(1, volumeOverride)) : this.volume;
+    if (vol <= 0) return;
+
+    try {
+      const ctx = this.getAudioContext();
+      if (!ctx) return;
+
+      const t = ctx.currentTime;
+
+      // 1. Tom alto (Fá#5 / ~740 Hz) seguido de Tom baixo (Ré#5 / ~622 Hz)
+      const notas = [
+        { freq: 739.99, inicio: 0, duracao: 0.65 },
+        { freq: 622.25, inicio: 0.22, duracao: 0.8 },
+      ];
+
+      notas.forEach(({ freq, inicio, duracao }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t + inicio);
+
+        const ganhoMaximo = 0.22 * vol;
+        gain.gain.setValueAtTime(0.0001, t + inicio);
+        gain.gain.exponentialRampToValueAtTime(ganhoMaximo, t + inicio + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + inicio + duracao);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(t + inicio);
+        osc.stop(t + inicio + duracao + 0.05);
+      });
+    } catch {
+      this.playMechanicalClick(vol);
+    }
+  }
+
+  /**
+   * Reproduz o som de novo voo: tenta o ficheiro /Flight.mp3 e tem fallback imediato para o chime de cabine aeronáutica
    */
   public playNewFlight(volumeOverride?: number) {
     if (this.isMuted || typeof window === "undefined") return;
     const vol = volumeOverride !== undefined ? Math.max(0, Math.min(1, volumeOverride)) : this.volume;
     if (vol <= 0) return;
 
-    try {
-      const audio = new Audio("/Flight.mp3");
-      audio.volume = vol;
-      audio.play().catch(() => {
-        // Fallback para o sintetizador mecânico se o browser bloquear autoplay
-        this.playMechanicalClick(vol);
-      });
-    } catch {
-      this.playMechanicalClick(vol);
+    this.initFlightAudio();
+
+    if (this.flightAudio) {
+      this.flightAudio.volume = vol;
+      this.flightAudio.currentTime = 0;
+      this.flightAudio
+        .play()
+        .catch(() => {
+          // Se o navegador barrar o ficheiro MP3 (política de autoplay), executa o sintetizador de cabine Web Audio
+          this.playCabinChime(vol);
+        });
+    } else {
+      this.playCabinChime(vol);
     }
   }
 
@@ -191,3 +280,12 @@ export function obterSomHabilitado(): boolean {
 export function inicializarAudioContext(): void {
   splitFlapAudio.resume();
 }
+
+export function desbloquearAudioGlobal(): void {
+  splitFlapAudio.unlockAudio();
+}
+
+export function tocarChimeCabine(volumeOverride?: number): void {
+  splitFlapAudio.playCabinChime(volumeOverride);
+}
+

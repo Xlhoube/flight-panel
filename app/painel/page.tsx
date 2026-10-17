@@ -12,9 +12,11 @@ import {
   tocarSomFlapClack,
   tocarRajadaFlaps,
   tocarSomNovoVoo,
+  tocarChimeCabine,
   definirVolumeGlobal,
   definirSomHabilitado,
   inicializarAudioContext,
+  desbloquearAudioGlobal,
 } from "@/lib/sound";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -1777,6 +1779,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     // caso as políticas de segurança do navegador exijam um gesto inicial do utilizador
     const onUserInteraction = () => {
       acionarFs();
+      desbloquearAudioGlobal();
     };
 
     window.addEventListener("pointerdown", onUserInteraction, { passive: true });
@@ -2351,21 +2354,20 @@ export default function PainelAnalogicoMobileFullscreen() {
   // O painel principal exibe exclusivamente o voo mais próximo detetado no radar (#1)
   const vooAtual = listaVoos.length > 0 ? listaVoos[0] : null;
 
-  // ── Gestão de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
-  // Regras estritas:
+  // ── Gestão de Áudio de Entrada de Novo Voo (/Flight.mp3 e Chime de Cabine) ──
   // 1. Toca exclusivamente se o utilizador estiver no Ecrã 1 (ecraAtivo === "principal").
-  // 2. Toca apenas para o voo atualmente exibido no Ecrã 1 (vooAtual / #1).
-  // 3. Deduplicação estrita: cada aeronave (ICAO24 / Callsign) toca no máximo UMA ÚNICA VEZ por sessão (ou a cada 45 min).
-  //    Isto impede repetições infinitas quando dois voos alternam de posição no topo do radar ou quando a API oscila.
-  // 4. Cooldown de segurança (mínimo 15 segundos entre toques).
-  // 5. No arranque da aplicação (primeiro carregamento de voos), regista os voos existentes para não disparar som imediato.
-  const voosJaTocadosRef = useRef<Map<string, number>>(new Map());
-  const primeiroLoteRecebidoRef = useRef<boolean>(false);
+  // 2. Dispara sempre que o voo em destaque no Ecrã 1 (#1) mudar para uma aeronave diferente da anterior.
+  // 3. No arranque inicial da página, guarda o voo existente como ponto de partida (baseline) sem disparar som abrupto.
+  // 4. Cooldown de segurança (mínimo 6 segundos) para evitar oscilações se dois voos estiverem emparelhados à mesma distância.
+  const ultimoVooExibidoIdRef = useRef<string | null>(null);
+  const primeiroCarregamentoFeitoRef = useRef<boolean>(false);
   const ultimoSomTocadoTimestampRef = useRef<number>(0);
 
   useEffect(() => {
-    // Se não há voo no Ecrã 1, nada a fazer
-    if (!vooAtual) return;
+    if (!vooAtual) {
+      ultimoVooExibidoIdRef.current = null;
+      return;
+    }
 
     const idIcao = (vooAtual[0] || "").trim().toLowerCase();
     const idCallsign = (vooAtual[1] || "").trim().toUpperCase();
@@ -2374,44 +2376,36 @@ export default function PainelAnalogicoMobileFullscreen() {
 
     const agora = Date.now();
 
-    // Limpeza de histórico antigo (> 45 minutos)
-    for (const [id, tempo] of voosJaTocadosRef.current.entries()) {
-      if (agora - tempo > 45 * 60 * 1000) {
-        voosJaTocadosRef.current.delete(id);
-      }
-    }
-
-    // No primeiro lote recebido com voos ao abrir a aplicação,
-    // registamos os voos presentes como já conhecidos para evitar disparos abruptos no arranque
-    if (!primeiroLoteRecebidoRef.current) {
-      primeiroLoteRecebidoRef.current = true;
-      listaVoos.forEach((v) => {
-        const i = (v[0] || "").trim().toLowerCase();
-        const c = (v[1] || "").trim().toUpperCase();
-        const chave = i || c;
-        if (chave) voosJaTocadosRef.current.set(chave, agora);
-      });
+    // 1. No arranque inicial (primeiro voo recebido após abrir a app),
+    // define a aeronave de partida como conhecida para não assustar no primeiro frame
+    if (!primeiroCarregamentoFeitoRef.current) {
+      primeiroCarregamentoFeitoRef.current = true;
+      ultimoVooExibidoIdRef.current = idVoo;
       return;
     }
 
-    // Apenas toca se o utilizador estiver no Ecrã 1
-    if (ecraAtivo !== "principal") return;
-
-    // Se este voo já foi anunciado recentemente, NÃO repete o som
-    if (voosJaTocadosRef.current.has(idVoo)) {
+    // 2. Apenas toca se estiver no Ecrã 1
+    if (ecraAtivo !== "principal") {
+      ultimoVooExibidoIdRef.current = idVoo;
       return;
     }
 
-    // Cooldown de segurança entre reproduções de som (pelo menos 15 segundos)
-    if (agora - ultimoSomTocadoTimestampRef.current < 15000) {
+    // 3. Se o voo exibido for exatamente o mesmo do ciclo anterior, não toca
+    if (ultimoVooExibidoIdRef.current === idVoo) {
       return;
     }
 
-    // Tocar som de novo voo no Ecrã 1
+    // 4. Cooldown de segurança (6 segundos) para evitar repetições caso 2 voos alternem rapidamente
+    if (agora - ultimoSomTocadoTimestampRef.current < 6000) {
+      ultimoVooExibidoIdRef.current = idVoo;
+      return;
+    }
+
+    // 5. Novo voo assumiu o ecrã principal (#1): toca som oficial de cabine (/Flight.mp3 com fallback para chime)
     tocarSomNovoVoo();
-    voosJaTocadosRef.current.set(idVoo, agora);
+    ultimoVooExibidoIdRef.current = idVoo;
     ultimoSomTocadoTimestampRef.current = agora;
-  }, [vooAtual, ecraAtivo, listaVoos]);
+  }, [vooAtual, ecraAtivo]);
 
   // Assegura carregamento imediato da meteorologia ao entrar no 3º ecrã
   useEffect(() => {
@@ -3277,6 +3271,22 @@ export default function PainelAnalogicoMobileFullscreen() {
                       {preset}%
                     </button>
                   ))}
+                </div>
+
+                {/* Botão de Teste do Som de Novo Voo (Cabine / Chime) */}
+                <div className="pt-1.5 border-t border-white/5">
+                  <button
+                    type="button"
+                    disabled={!somAtivo}
+                    onClick={() => {
+                      desbloquearAudioGlobal();
+                      tocarSomNovoVoo(volumeSom / 100);
+                    }}
+                    className="w-full py-1.5 px-2 bg-amber-400/15 hover:bg-amber-400/25 active:scale-[0.99] border border-amber-400/50 rounded-lg text-amber-300 font-mono text-[10px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+                  >
+                    <span>🔔</span>
+                    <span>TESTAR SOM DE NOVO VOO (/Flight.mp3)</span>
+                  </button>
                 </div>
               </div>
             </div>
