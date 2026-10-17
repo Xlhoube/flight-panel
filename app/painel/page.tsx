@@ -1212,9 +1212,9 @@ function MiniRadarDisplay({
   const unidadePrincipal = unidadeAtiva;
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2.5">
+    <div className="flex items-center justify-center gap-1 sm:gap-2 w-full max-w-full overflow-hidden">
       {/* Scope Circular do Radar com Efeito de Varrimento */}
-      <div className="relative w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-[#03090e] border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.25)] flex items-center justify-center overflow-hidden shrink-0">
+      <div className="relative w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#03090e] border border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.25)] flex items-center justify-center overflow-hidden shrink-0">
         {/* Feixe rotativo de varredura (Sweep Beam) */}
         <div
           className="absolute inset-0 rounded-full animate-spin pointer-events-none opacity-40"
@@ -1249,10 +1249,10 @@ function MiniRadarDisplay({
           }}
         >
           {/* Ponto de eco de radar pulsante */}
-          <span className="absolute w-3 h-3 rounded-full bg-amber-400/40 animate-ping" />
+          <span className="absolute w-2 h-2 rounded-full bg-amber-400/40 animate-ping" />
           {/* Ícone estilizado do avião orientado com o rumo real */}
           <svg
-            className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.9)]"
+            className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.9)]"
             viewBox="0 0 24 24"
             fill="currentColor"
             style={{ transform: `rotate(${rumoVoo}deg)` }}
@@ -1263,15 +1263,15 @@ function MiniRadarDisplay({
       </div>
 
       {/* Dados Numéricos de Distância e Azimute */}
-      <div className="flex flex-col items-start min-w-0">
-        <div className="flex items-baseline gap-1">
-          <LedText text={valorDisplay} size="lg" />
-          <span className="text-[10px] sm:text-xs text-neutral-400 font-bold">{unidadePrincipal}</span>
+      <div className="flex flex-col items-start min-w-0 overflow-hidden">
+        <div className="flex items-baseline gap-0.5 sm:gap-1 leading-none">
+          <LedText text={valorDisplay} size="md" />
+          <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold shrink-0">{unidadePrincipal}</span>
         </div>
-        <div className="flex items-center gap-1 text-[8px] sm:text-[9px] font-mono text-emerald-400 font-bold tracking-wider">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>{cardeal} • {bearing.toString().padStart(3, "0")}°</span>
-          <span className="text-neutral-500 hidden sm:inline">({subtextoSecundario})</span>
+        <div className="flex items-center gap-1 text-[7px] sm:text-[8px] font-mono text-emerald-400 font-bold tracking-wider leading-none truncate max-w-full">
+          <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <span className="truncate">{cardeal} • {bearing.toString().padStart(3, "0")}°</span>
+          <span className="text-neutral-500 hidden xl:inline">({subtextoSecundario})</span>
         </div>
       </div>
     </div>
@@ -2658,14 +2658,14 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA EM 4 MÓDULOS (INCLUINDO MINI-RADAR DE PROXIMIDADE) ── */}
-            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0">
+            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0 h-13 sm:h-16">
 
               {/* 1. ALTITUDE */}
-              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none">
+              <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md h-full overflow-hidden">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none shrink-0">
                   {t.rotulo_altitude}
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <LedText
                     text={`${unidadeAltitude === "FT" ? infoVoo.altitudePes : infoVoo.altitudeMetros}`}
                     size="md"
@@ -2677,11 +2677,11 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               {/* 2. VELOCIDADE */}
-              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none">
+              <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md h-full overflow-hidden">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none shrink-0">
                   {t.rotulo_velocidade}
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <LedText
                     text={`${unidadeVelocidade === "KTS" ? infoVoo.velocidadeKts : infoVoo.velocidadeKmh}`}
                     size="md"
@@ -2693,19 +2693,19 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               {/* 3. RUMO */}
-              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none">
+              <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md h-full overflow-hidden">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-neutral-400 font-bold mb-0.5 leading-none shrink-0">
                   {t.rotulo_rumo}
                 </span>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <LedText text={`${infoVoo.rumo}`} size="md" />
                   <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">°</span>
                 </div>
               </div>
 
               {/* 4. RADAR DE DISTÂNCIA */}
-              <div className="bg-[#10121a] px-1 py-1 sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl border border-emerald-500/20 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden">
-                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-emerald-400 font-bold mb-0.5 flex items-center gap-1 leading-none">
+              <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-emerald-500/20 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden h-full">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-emerald-400 font-bold mb-0.5 flex items-center gap-1 leading-none shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   {t.rotulo_distancia}
                 </span>
@@ -2722,7 +2722,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     unidadeDistancia={unidadeDistancia}
                   />
                 ) : (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <LedText text="---" size="md" />
                     <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">{unidadeDistancia}</span>
                   </div>

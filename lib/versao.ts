@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.4",
-  buildId: "build-20261017-v264",
+  versao: "2.6.5",
+  buildId: "build-20261017-v265",
   dataLancamento: "2026-10-17",
-  descricao: "Reativação do assistente de instalação PWA na primeira abertura com botão de reabertura nas opções.",
+  descricao: "Fixação e estabilização de altura da barra inferior de telemetria (h-13/h-16 uniforme com LedText size=md e scope compacto).",
 };

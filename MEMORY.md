@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.4  
+**Versão:** v2.6.5  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, reativação do assistente de instalação PWA na primeira abertura, eliminação de popups nativos de fullscreen do Android, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, fixação e estabilização rigorosa de altura na barra inferior de telemetria (h-13/h-16 com LedText size=md e scope compacto sem saltos verticais), reativação do assistente de instalação PWA na primeira abertura, eliminação de popups nativos de fullscreen do Android, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
 
 ---
 
@@ -489,6 +489,15 @@
 3. **Botão de Reabertura nas Opções:**  
    - Adicionado o botão `📲 REABRIR ASSISTENTE DE INSTALAÇÃO & GPS` dentro do modal `⚙️ OPÇÕES` para permitir testar ou reinstalar a qualquer momento sem necessidade de limpar os dados do navegador.  
 **Consequência:** Fluxo de boas-vindas e instalação 100% reposto e acessível a qualquer momento.
+
+### ADR-064 — Fixação e Estabilização de Altura da Barra Inferior de Telemetria (2026-10-17)
+**Contexto:** O utilizador reportou que "Os kms da distançia alteram o tamanho da barra inferior". Quando a distância era calculada ou quando a quilometragem variava (1 dígito, 2 dígitos, 3 dígitos ou com casas decimais), o módulo do radar de distância expandia verticalmente, fazendo com que toda a grelha inferior de telemetria (Altitude, Velocidade, Rumo e Distância) mudasse de altura e provocasse saltos visuais no painel principal.  
+**Decisão:**  
+1. **Padronização Tipográfica (`LedText size="md"`):** No componente `MiniRadarDisplay`, o valor numérico da distância foi ajustado de `size="lg"` para `size="md"`, igualando a altura exata dos módulos de Altitude, Velocidade e Rumo.  
+2. **Compactação Proporcional do Scope de Radar:** O círculo do radar analógico foi ajustado de `w-8 h-8 sm:w-11 sm:h-11` para `w-6 h-6 sm:w-8 sm:h-8 shrink-0`, integrando-se perfeitamente no cartão sem forçar a expansão vertical.  
+3. **Travamento Rígido de Altura da Grelha:** A grelha da Linha 3 foi bloqueada com `h-13 sm:h-16 shrink-0` e cada um dos 4 cartões com `h-full overflow-hidden flex flex-col items-center justify-center`.  
+4. **Alinhamento dos Rótulos e Subtextos:** Atribuído `leading-none shrink-0` aos cabeçalhos e `truncate max-w-full` ao azimute, eliminando quebras de linha acidentais.  
+**Consequência:** A barra inferior tem agora uma altura perfeitamente fixa e imutável, permanecendo milimetricamente nivelada e estável quer a distância seja de 1 dígito, 3 dígitos, esteja em KM/NM/MI ou em espera (`---`).
 
 
 
