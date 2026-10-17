@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.4.0  
+**Versão:** v2.5.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), emblemas oficiais de construtores aeronáuticos OEM, motor de som unificado (lib/sound.ts), geolocalização híbrida inteligente (GPS satélite para telemóveis + fallback automático e botão dedicado por IP de rede para computadores/PC), internacionalização em 4 idiomas e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados, base de dados ICAO Doc 8643 e Doc 8585 enriquecida com catálogo executivo exhaustivo (jets.flights), diretório de operadores charter (aviapages.com), emblemas oficiais OEM e operadores charter (NetJets, VistaJet, Flexjet, GlobeAir, Daher, Piaggio, Cessna, HondaJet, Embraer, Gulfstream, etc.), motor de som unificado (lib/sound.ts), geolocalização híbrida inteligente (GPS satélite + IP de rede para PC), internacionalização em 4 idiomas e persistência local.
 
 ---
 
@@ -370,6 +370,20 @@
 3. **Controlos Dedicados:**  
    - Adição do botão táctil `🌐 OBTER LOCALIZAÇÃO POR IP (IDEAL PARA PC)` tanto no modal `⚙️ OPÇÕES` como no Passo 2 do assistente de boas-vindas (*Onboarding*).  
 **Consequência:** Resolução instantânea e sem atritos da localização em computadores sem antena de satélite GPS, garantindo experiência suave e radar ativo em qualquer dispositivo à primeira tentativa.
+
+### ADR-055 — Integração com Padrões ICAO, Catálogo jets.flights e Diretório aviapages (2026-10-17)
+**Contexto:** O utilizador forneceu três referências essenciais de aviação: o portal da ICAO (International Civil Aviation Organization), o catálogo de jatos executivos `jets.flights/catalog/` e o diretório de operadores charter `aviapages.com/companies/`. Era necessário enriquecer a base de dados para garantir que qualquer jato executivo, táxi aéreo ou operador VIP europeu ou global seja imediatamente identificado com o modelo exato, classe, fabricante e logótipo oficial.  
+**Decisão:**  
+1. **Catálogo de Aeronaves ICAO Doc 8643 (`lib/aeronaves-db.ts`):**  
+   - Expansão de modelos executivos e bimotores: Grob SPn (`G180`), SyberJet (`SJ30`), Nextant 400XTI/G90XT (`BE4W`, `G90X`), Mitsubishi Diamond (`MU30`), Gulfstream G100 / Astra (`ASTR`), Westwind (`WW24`), Vulcanair P68 (`P68`), Tecnam P2006T/P2012 (`P206`, `P201`).  
+   - Helicópteros executivos e VIP de luxo: Leonardo AW109/AW139/AW169 (`A109`, `A139`, `A169`), Sikorsky S-76 e S-92 VIP (`S76`, `S92`), Bell 206 e 429 (`B06`, `B429`), Airbus Helicopters H130 e Dauphin H155 (`EC30`, `EC55`).  
+   - Heurística inteligente enriquecida com suporte a Piaggio, Daher, Bell, Grob, Tecnam e Vulcanair.  
+2. **Dicionário de Operadores ICAO Doc 8585 (`app/painel/page.tsx` e `app/voos/page.tsx`):**  
+   - Mapeamento direto de companhias charter da `aviapages.com`: NetJets Europe (`NJE`), NetJets US (`EJA`), VistaJet (`VJT`), Flexjet (`LXJ`), Flexjet Europe (`FLJ`), GlobeAir (`GAC`), Air Hamburg (`AHO`), Luxaviation (`LXA`), White Airways Portugal (`WHT`), Valair Portugal (`VVV`), Omni Aviation (`OCN`), ExecuJet (`VCN`), Air X Charter (`AXY`), Luxwing (`LWG`), Tyrol Air Ambulance (`TYW`), Swiss Air-Ambulance Rega (`SAZ`), AirGO Flugservice (`XGO`), Flying Group (`FYL`).  
+3. **Emblemas Vetoriais Oficiais OEM e Operadores (`lib/fabricantes-logos.tsx`):**  
+   - Criação de insígnias oficiais vetoriais para: **NetJets** (estrela de diamante/asas em preto e platina), **VistaJet** (listra carmesim icónica horizontal), **Flexjet** (asas rubi e ouro), **GlobeAir** (ave geométrica rubi), **Daher TBM** (vórtice aerodinâmico azul e laranja), e **Piaggio Aerospace** (escudo clássico com P alado).  
+   - Despacho dinâmico inteligente em `EmblemaFabricante` por fabricante, modelo ou indicativo de chamada (*callsign*).  
+**Consequência:** Cobertura de aviação executiva e privada de nível profissional em estrita conformidade com os padrões da ICAO e as principais referências do setor aeronáutico internacional.
 
 
 

@@ -263,8 +263,101 @@ export function LogoVipWings({ callsign, className = "w-full h-full" }: LogoProp
   );
 }
 
+// ─── 13. NETJETS (THE PRIVATE JET LEADER) ────────────────────────────────────
+export function LogoNetJets({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-gradient-to-b from-[#14151a] to-[#08090c] p-1 rounded-lg border border-neutral-400/40 shadow-inner ${className}`}>
+      <svg className="w-7 h-5 sm:w-9 sm:h-7" viewBox="0 0 100 60" fill="none">
+        {/* Estrela diamante estilizada com asas geométricas */}
+        <polygon points="50,12 55,28 72,30 58,40 62,56 50,46 38,56 42,40 28,30 45,28" fill="#e5e5e5" />
+        <circle cx="50" cy="34" r="3" fill="#000000" />
+      </svg>
+      <span className="font-mono font-black text-[7px] sm:text-[8px] text-neutral-200 tracking-widest uppercase mt-0.5 leading-none">
+        NETJETS
+      </span>
+    </div>
+  );
+}
+
+// ─── 14. VISTAJET (GLOBAL BUSINESS AVIATION) ──────────────────────────────────
+export function LogoVistaJet({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-gradient-to-b from-[#181a1f] to-[#0c0e12] p-1 rounded-lg border border-red-500/40 shadow-inner ${className}`}>
+      {/* Listra vermelha carmesim horizontal icónica da VistaJet */}
+      <svg className="w-8 h-4 sm:w-10 sm:h-5" viewBox="0 0 100 40" fill="none">
+        <line x1="5" y1="20" x2="95" y2="20" stroke="#d90429" strokeWidth="6" strokeLinecap="round" />
+        <path d="M50 8 L58 20 L50 32 L42 20 Z" fill="#ffffff" />
+      </svg>
+      <span className="font-mono font-black text-[6px] sm:text-[7px] text-red-400 tracking-widest uppercase mt-0.5 leading-none">
+        VISTAJET
+      </span>
+    </div>
+  );
+}
+
+// ─── 15. FLEXJET (PREMIUM FRACTIONAL JETS) ────────────────────────────────────
+export function LogoFlexjet({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1515] to-[#0d0909] p-1 rounded-lg border border-red-600/30 shadow-inner ${className}`}>
+      <svg className="w-7 h-5 sm:w-9 sm:h-6" viewBox="0 0 100 50" fill="none">
+        <path d="M15 25 Q35 10 85 15 Q55 25 35 40 Z" fill="#dc2626" />
+        <circle cx="78" cy="18" r="4" fill="#fbbf24" />
+      </svg>
+      <span className="font-mono font-black text-[6px] sm:text-[7px] text-red-300 tracking-widest uppercase mt-0.5 leading-none">
+        FLEXJET
+      </span>
+    </div>
+  );
+}
+
+// ─── 16. GLOBEAIR (VERY LIGHT JET AIR TAXI) ───────────────────────────────────
+export function LogoGlobeAir({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-gradient-to-b from-[#18181c] to-[#0b0b0e] p-1 rounded-lg border border-rose-500/40 shadow-inner ${className}`}>
+      <svg className="w-7 h-5 sm:w-8 sm:h-6" viewBox="0 0 100 60" fill="none">
+        <circle cx="50" cy="30" r="22" stroke="#e11d48" strokeWidth="4" />
+        <path d="M30 30 L70 30 M50 10 L50 50" stroke="#ffffff" strokeWidth="2.5" />
+      </svg>
+      <span className="font-mono font-black text-[6px] sm:text-[7px] text-rose-300 tracking-widest uppercase mt-0.5 leading-none">
+        GLOBEAIR
+      </span>
+    </div>
+  );
+}
+
+// ─── 17. DAHER (TBM & KODIAK) ─────────────────────────────────────────────────
+export function LogoDaher({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-gradient-to-b from-[#111928] to-[#070b14] p-1 rounded-lg border border-sky-400/40 shadow-inner ${className}`}>
+      <svg className="w-7 h-5 sm:w-9 sm:h-6" viewBox="0 0 100 50" fill="none">
+        <path d="M20 35 L50 12 L80 35 L65 35 L50 24 L35 35 Z" fill="#38bdf8" />
+        <circle cx="50" cy="12" r="3.5" fill="#f97316" />
+      </svg>
+      <span className="font-mono font-black text-[6px] sm:text-[7px] text-sky-300 tracking-widest uppercase mt-0.5 leading-none">
+        DAHER TBM
+      </span>
+    </div>
+  );
+}
+
+// ─── 18. PIAGGIO AEROSPACE (AVANTI P180) ──────────────────────────────────────
+export function LogoPiaggio({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-gradient-to-b from-[#191924] to-[#0a0a10] p-1 rounded-lg border border-indigo-400/40 shadow-inner ${className}`}>
+      <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="40" stroke="#6366f1" strokeWidth="4" fill="#11111b" />
+        <path d="M40 30 L40 70 M40 30 C58 30, 68 40, 58 52 C52 56, 40 56, 40 56" stroke="#ffffff" strokeWidth="6" strokeLinecap="round" />
+      </svg>
+      <span className="font-mono font-black text-[6px] sm:text-[7px] text-indigo-300 tracking-widest uppercase mt-0.5 leading-none">
+        PIAGGIO
+      </span>
+    </div>
+  );
+}
+
 /**
  * Componente que resolve e renderiza o emblema oficial do fabricante da aeronave (OEM)
+ * ou do operador líder de aviação executiva caso seja um voo charter.
  */
 export function EmblemaFabricante({
   fabricante,
@@ -279,7 +372,23 @@ export function EmblemaFabricante({
 }) {
   const fab = (fabricante || "").toUpperCase();
   const mod = (modelo || "").toUpperCase();
+  const call = (callsign || "").toUpperCase();
 
+  // Operadores de Jatos Executivos e Charters (Aviapages & ICAO Doc 8585)
+  if (call.startsWith("NJE") || call.startsWith("EJA") || fab.includes("NETJETS")) {
+    return <LogoNetJets className={className} />;
+  }
+  if (call.startsWith("VJT") || fab.includes("VISTAJET")) {
+    return <LogoVistaJet className={className} />;
+  }
+  if (call.startsWith("LXJ") || call.startsWith("FLJ") || fab.includes("FLEXJET")) {
+    return <LogoFlexjet className={className} />;
+  }
+  if (call.startsWith("GAC") || fab.includes("GLOBEAIR")) {
+    return <LogoGlobeAir className={className} />;
+  }
+
+  // Fabricantes Aeronáuticos (OEM)
   // Honda
   if (fab.includes("HONDA") || mod.includes("HONDA") || mod.includes("HDJT")) {
     return <LogoHonda className={className} />;
@@ -289,31 +398,39 @@ export function EmblemaFabricante({
     return <LogoCessna className={className} />;
   }
   // Gulfstream
-  if (fab.includes("GULFSTREAM") || mod.includes("GULFSTREAM")) {
+  if (fab.includes("GULFSTREAM") || mod.includes("GULFSTREAM") || mod.includes("GLF")) {
     return <LogoGulfstream className={className} />;
   }
   // Bombardier / Learjet
-  if (fab.includes("BOMBARDIER") || mod.includes("CHALLENGER") || mod.includes("GLOBAL") || mod.includes("LEARJET")) {
+  if (fab.includes("BOMBARDIER") || mod.includes("CHALLENGER") || mod.includes("GLOBAL") || mod.includes("LEARJET") || mod.includes("CL3") || mod.includes("CL6")) {
     return <LogoBombardier className={className} />;
   }
   // Embraer
-  if (fab.includes("EMBRAER") || mod.includes("PHENOM") || mod.includes("PRAETOR") || mod.includes("LEGACY")) {
+  if (fab.includes("EMBRAER") || mod.includes("PHENOM") || mod.includes("PRAETOR") || mod.includes("LEGACY") || mod.includes("E50P") || mod.includes("E55P")) {
     return <LogoEmbraer className={className} />;
   }
   // Dassault Falcon
-  if (fab.includes("DASSAULT") || mod.includes("FALCON")) {
+  if (fab.includes("DASSAULT") || mod.includes("FALCON") || mod.includes("FA7X") || mod.includes("FA8X") || mod.includes("F2TH")) {
     return <LogoDassault className={className} />;
   }
   // Pilatus
-  if (fab.includes("PILATUS") || mod.includes("PC-12") || mod.includes("PC-24")) {
+  if (fab.includes("PILATUS") || mod.includes("PC-12") || mod.includes("PC-24") || mod.includes("PC12") || mod.includes("PC24")) {
     return <LogoPilatus className={className} />;
   }
   // Cirrus
-  if (fab.includes("CIRRUS") || mod.includes("VISION")) {
+  if (fab.includes("CIRRUS") || mod.includes("VISION") || mod.includes("SF50")) {
     return <LogoCirrus className={className} />;
   }
+  // Daher
+  if (fab.includes("DAHER") || mod.includes("TBM") || mod.includes("KODIAK")) {
+    return <LogoDaher className={className} />;
+  }
+  // Piaggio
+  if (fab.includes("PIAGGIO") || mod.includes("AVANTI") || mod.includes("P180")) {
+    return <LogoPiaggio className={className} />;
+  }
   // Beechcraft
-  if (fab.includes("BEECHCRAFT") || mod.includes("KING AIR") || mod.includes("HAWKER")) {
+  if (fab.includes("BEECHCRAFT") || mod.includes("KING AIR") || mod.includes("HAWKER") || mod.includes("BE20") || mod.includes("B350")) {
     return <LogoBeechcraft className={className} />;
   }
   // Boeing

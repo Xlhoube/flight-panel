@@ -166,10 +166,25 @@ const COMPANHIAS: Record<string, InfoCompanhia> = {
   LIL: { nome: "FLY LILI", iata: "LIL", origem: "BRASOV", destino: "PORTO", origemCode: "GHV", destinoCode: "OPO", aeronave: "A320-200" },
   ANX: { nome: "ANIMAWINGS", iata: "A2", origem: "BUCARESTE", destino: "PORTO", origemCode: "OTP", destinoCode: "OPO", aeronave: "A220-300" },
 
-  // Aviação Executiva e Charter Internacional
+  // Aviação Executiva e Charter Internacional (Aviapages & ICAO Doc 8585)
   NJE: { nome: "NETJETS EUROPE", iata: "1I", origem: "LONDRES", destino: "PORTO", origemCode: "EGGW", destinoCode: "OPO", aeronave: "CITATION LATITUDE" },
   EJA: { nome: "NETJETS US", iata: "QS", origem: "NOVA IORQUE", destino: "PORTO", origemCode: "TEB", destinoCode: "OPO", aeronave: "CHALLENGER 350" },
   VJT: { nome: "VISTAJET", iata: "VJ", origem: "GENEBRA", destino: "PORTO", origemCode: "GVA", destinoCode: "OPO", aeronave: "GLOBAL 6000" },
+  LXJ: { nome: "FLEXJET", iata: "LXJ", origem: "FARNBOROUGH", destino: "PORTO", origemCode: "EGLF", destinoCode: "OPO", aeronave: "PRAETOR 600" },
+  FLJ: { nome: "FLEXJET EUROPE", iata: "FLJ", origem: "MILAO", destino: "PORTO", origemCode: "LIN", destinoCode: "OPO", aeronave: "PHENOM 300" },
+  GAC: { nome: "GLOBEAIR", iata: "GAC", origem: "LINZ", destino: "PORTO", origemCode: "LNZ", destinoCode: "OPO", aeronave: "CITATION MUSTANG" },
+  AHO: { nome: "AIR HAMBURG", iata: "AHO", origem: "HAMBURGO", destino: "PORTO", origemCode: "HAM", destinoCode: "OPO", aeronave: "LEGACY 650" },
+  LXA: { nome: "LUXAVIATION", iata: "LXA", origem: "LUXEMBURGO", destino: "PORTO", origemCode: "LUX", destinoCode: "OPO", aeronave: "FALCON 2000" },
+  WHT: { nome: "WHITE AIRWAYS", iata: "WI", origem: "LISBOA", destino: "PORTO", origemCode: "LIS", destinoCode: "OPO", aeronave: "AIRBUS A319 VIP" },
+  VVV: { nome: "VALAIR", iata: "VVV", origem: "CASCAIS", destino: "PORTO", origemCode: "CAT", destinoCode: "OPO", aeronave: "PILATUS PC-12" },
+  OCN: { nome: "OMNI AVIATION", iata: "OCN", origem: "CASCAIS", destino: "PORTO", origemCode: "CAT", destinoCode: "OPO", aeronave: "LEARJET 45" },
+  VCN: { nome: "EXECUJET", iata: "VCN", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "GLOBAL 5000" },
+  AXY: { nome: "AIR X CHARTER", iata: "AXY", origem: "MALTA", destino: "PORTO", origemCode: "MLA", destinoCode: "OPO", aeronave: "CHALLENGER 850" },
+  LWG: { nome: "LUXWING", iata: "LWG", origem: "MALTA", destino: "PORTO", origemCode: "MLA", destinoCode: "OPO", aeronave: "CITATION XLS" },
+  TYW: { nome: "TYROL AIR AMBULANCE", iata: "TYW", origem: "INNSBRUCK", destino: "PORTO", origemCode: "INN", destinoCode: "OPO", aeronave: "GULFSTREAM G100" },
+  SAZ: { nome: "SWISS AIR-AMBULANCE", iata: "SAZ", origem: "ZURIQUE", destino: "PORTO", origemCode: "ZRH", destinoCode: "OPO", aeronave: "CHALLENGER 650" },
+  XGO: { nome: "AIRGO FLUGSERVICE", iata: "XGO", origem: "MAINZ", destino: "PORTO", origemCode: "EDFZ", destinoCode: "OPO", aeronave: "AVANTI P180" },
+  FYL: { nome: "FLYING GROUP", iata: "FYL", origem: "ANTUERPIA", destino: "PORTO", origemCode: "ANR", destinoCode: "OPO", aeronave: "FALCON 900" },
   GES: { nome: "GESTAIR", iata: "GP", origem: "MADRID", destino: "PORTO", origemCode: "MAD", destinoCode: "OPO", aeronave: "CITATION XLS" },
   TAG: { nome: "TAG AVIATION", iata: "FP", origem: "FARNBOROUGH", destino: "PORTO", origemCode: "FAB", destinoCode: "OPO", aeronave: "FALCON 2000" },
 

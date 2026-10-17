@@ -120,10 +120,29 @@ export const AERONAVES_DB: Record<string, InfoAeronave> = {
   PA46: { modelo: "PIPER MALIBU", fabricante: "PIPER", classe: "Pressurized Single", categoria: "executivo" },
   PAY2: { modelo: "PIPER CHEYENNE", fabricante: "PIPER", classe: "Twin Turboprop", categoria: "executivo" },
 
+  // Grob Aerospace
+  G180: { modelo: "GROB SPN", fabricante: "GROB", classe: "Light Jet", categoria: "executivo" },
+
+  // SyberJet Aircraft
+  SJ30: { modelo: "SYBERJET SJ30", fabricante: "SYBERJET", classe: "Light Jet", categoria: "executivo" },
+
+  // Mitsubishi / Nextant Aerospace
+  MU30: { modelo: "DIAMOND IA", fabricante: "MITSUBISHI", classe: "Light Jet", categoria: "executivo" },
+  G90X: { modelo: "NEXTANT G90XT", fabricante: "NEXTANT", classe: "Twin Turboprop", categoria: "executivo" },
+
+  // Israel Aerospace Industries (IAI) / Gulfstream Astra
+  ASTR: { modelo: "GULFSTREAM G100", fabricante: "GULFSTREAM", classe: "Midsize Jet", categoria: "executivo" },
+  WW24: { modelo: "WESTWIND II", fabricante: "IAI", classe: "Midsize Jet", categoria: "executivo" },
+
   // Diamond Aircraft
   DA40: { modelo: "DIAMOND DA40", fabricante: "DIAMOND", classe: "Piston Single", categoria: "geral" },
   DA42: { modelo: "DIAMOND DA42", fabricante: "DIAMOND", classe: "Piston Twin", categoria: "geral" },
   DA62: { modelo: "DIAMOND DA62", fabricante: "DIAMOND", classe: "Twin Piston Exec", categoria: "executivo" },
+
+  // Vulcanair & Tecnam (Bimotores executivos / táxi aéreo)
+  P68: { modelo: "VULCANAIR P68", fabricante: "VULCANAIR", classe: "Twin Piston", categoria: "executivo" },
+  P206: { modelo: "TECNAM P2006T", fabricante: "TECNAM", classe: "Twin Light", categoria: "geral" },
+  P201: { modelo: "TECNAM P2012", fabricante: "TECNAM", classe: "Twin Commuter", categoria: "executivo" },
 
   // ─── LINHAS AÉREAS COMERCIAIS (AIRBUS) ───────────────────────────────────────
   A318: { modelo: "AIRBUS A318", fabricante: "AIRBUS", classe: "Narrow-body", categoria: "comercial" },
@@ -205,7 +224,22 @@ export const AERONAVES_DB: Record<string, InfoAeronave> = {
   A119: { modelo: "AW119 KOALA", fabricante: "LEONARDO", classe: "Light Helicopter", categoria: "militar" },
   EC35: { modelo: "H135", fabricante: "AIRBUS HELICOPTERS", classe: "Twin Helicopter", categoria: "helicoptero" },
   EC45: { modelo: "H145", fabricante: "AIRBUS HELICOPTERS", classe: "Twin Helicopter", categoria: "helicoptero" },
+  EC55: { modelo: "H155 DAUPHIN", fabricante: "AIRBUS HELICOPTERS", classe: "VIP Helicopter", categoria: "executivo" },
+  EC30: { modelo: "H130", fabricante: "AIRBUS HELICOPTERS", classe: "Single Helicopter", categoria: "helicoptero" },
   AS50: { modelo: "H125 ÉCUREUIL", fabricante: "AIRBUS HELICOPTERS", classe: "Single Helicopter", categoria: "helicoptero" },
+
+  // Leonardo Helicopters (VIP & Executivo)
+  A109: { modelo: "AW109 GRAND", fabricante: "LEONARDO", classe: "VIP Helicopter", categoria: "executivo" },
+  A139: { modelo: "AW139 VIP", fabricante: "LEONARDO", classe: "VIP Helicopter", categoria: "executivo" },
+  A169: { modelo: "AW169 VIP", fabricante: "LEONARDO", classe: "VIP Helicopter", categoria: "executivo" },
+
+  // Sikorsky Aircraft (VIP & Offshore)
+  S76: { modelo: "SIKORSKY S-76", fabricante: "SIKORSKY", classe: "Executive Helo", categoria: "executivo" },
+  S92: { modelo: "SIKORSKY S-92", fabricante: "SIKORSKY", classe: "Heavy Helo", categoria: "executivo" },
+
+  // Bell Helicopter
+  B06: { modelo: "BELL 206 JET", fabricante: "BELL", classe: "Light Turbine Helo", categoria: "helicoptero" },
+  B429: { modelo: "BELL 429", fabricante: "BELL", classe: "Twin VIP Helo", categoria: "executivo" },
 
   // ─── AVIAÇÃO GERAL E ESCOLARES ──────────────────────────────────────────────
   C150: { modelo: "CESSNA 150", fabricante: "CESSNA", classe: "Trainer Single", categoria: "geral" },
@@ -312,6 +346,30 @@ export function resolverInfoAeronave(codAeronaveRaw: string, nomeRaw?: string): 
   // Robinson
   else if (/^R[246]2|^R44|^R66|ROBINSON/i.test(codLimpo) || /ROBINSON/i.test(nomeLimpo)) {
     fabricante = "ROBINSON";
+  }
+  // Piaggio Aerospace
+  else if (/^P180|AVANTI|PIAGGIO/i.test(codLimpo) || /PIAGGIO|AVANTI/i.test(nomeLimpo)) {
+    fabricante = "PIAGGIO";
+  }
+  // Daher (TBM / Kodiak)
+  else if (/^TBM[789]|^KODI|DAHER|SOCATA/i.test(codLimpo) || /DAHER|TBM|KODIAK/i.test(nomeLimpo)) {
+    fabricante = "DAHER";
+  }
+  // Bell Helicopter
+  else if (/^B06|^B429|^B407|^B212|BELL/i.test(codLimpo) || /BELL\s*[0-9]/i.test(nomeLimpo)) {
+    fabricante = "BELL";
+  }
+  // Grob Aerospace
+  else if (/^G180|^G115|^G120|GROB/i.test(codLimpo) || /GROB/i.test(nomeLimpo)) {
+    fabricante = "GROB";
+  }
+  // Tecnam
+  else if (/^P20[0-9]|TECNAM/i.test(codLimpo) || /TECNAM/i.test(nomeLimpo)) {
+    fabricante = "TECNAM";
+  }
+  // Vulcanair
+  else if (/^P68|VULCANAIR/i.test(codLimpo) || /VULCANAIR/i.test(nomeLimpo)) {
+    fabricante = "VULCANAIR";
   }
   // Fallback inteligente
   else {
