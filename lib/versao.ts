@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.5",
-  buildId: "build-20261017-v265",
+  versao: "2.6.6",
+  buildId: "build-20261017-v266",
   dataLancamento: "2026-10-17",
-  descricao: "Fixação e estabilização de altura da barra inferior de telemetria (h-13/h-16 uniforme com LedText size=md e scope compacto).",
+  descricao: "Proteção anti-corte e adaptação vertical dinâmica para telemóveis em modo horizontal (landscape 100dvh e viewportFit cover).",
 };

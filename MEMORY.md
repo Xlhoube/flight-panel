@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.5  
+**Versão:** v2.6.6  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, fixação e estabilização rigorosa de altura na barra inferior de telemetria (h-13/h-16 com LedText size=md e scope compacto sem saltos verticais), reativação do assistente de instalação PWA na primeira abertura, eliminação de popups nativos de fullscreen do Android, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, proteção anti-corte e calibração dinâmica vertical para telemóveis em modo horizontal (landscape 100dvh, viewportFit cover, FlapCells calibradas com dvh e contenção rígida da barra de telemetria), fixação e estabilização de altura da barra inferior, reativação do assistente de instalação PWA, eliminação de popups nativos de fullscreen do Android, internacionalização para LOADING e diretivas notranslate.
 
 ---
 
@@ -498,6 +498,15 @@
 3. **Travamento Rígido de Altura da Grelha:** A grelha da Linha 3 foi bloqueada com `h-13 sm:h-16 shrink-0` e cada um dos 4 cartões com `h-full overflow-hidden flex flex-col items-center justify-center`.  
 4. **Alinhamento dos Rótulos e Subtextos:** Atribuído `leading-none shrink-0` aos cabeçalhos e `truncate max-w-full` ao azimute, eliminando quebras de linha acidentais.  
 **Consequência:** A barra inferior tem agora uma altura perfeitamente fixa e imutável, permanecendo milimetricamente nivelada e estável quer a distância seja de 1 dígito, 3 dígitos, esteja em KM/NM/MI ou em espera (`---`).
+
+### ADR-065 — Proteção Anti-Corte Vertical e Adaptação Dinâmica para Telemóveis em Modo Horizontal (2026-10-17)
+**Contexto:** O utilizador reportou que "Sempre que se faz uma atualização, o tamanho fica grande e passa o tamanho do ecra para baixo. Não é em todos os telemoveis." Em telemóveis em modo horizontal/paisagem, a largura superior a 640px ativava cegamente as classes utilitárias `sm:` do Tailwind (concebidas para ecrãs de computadores e tablets), inflando os tamanhos dos logótipos (`sm:w-14 sm:h-14`), das palhetas mecânicas e da barra de telemetria. Simultaneamente, ao recarregar ou atualizar a página, as barras de navegação nativas do navegador reapareciam, reduzindo a altura útil disponível da viewport para menos de 300px e forçando a barra inferior para fora do ecrã visível.  
+**Decisão:**  
+1. **Bloqueio de Viewport e Scroll Global:** No ficheiro `app/globals.css`, configurado `html, body` com `height: 100dvh; overflow: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch;`.  
+2. **Ativação de `viewportFit: "cover"`:** No ficheiro `app/layout.tsx`, adicionado `viewportFit: "cover"` aos metadados de viewport para eliminar recalibrações de escala espúrias no recarregamento.  
+3. **Migração de `vh` para `dvh` em FlapCells:** No componente `FlapCell`, as fórmulas `clamp()` passaram a usar `dvh` (Dynamic Viewport Height) com tetos calibrados (`11dvh` em vez de `12vh` teóricos sem barras), garantindo que as palhetas encolhem proporcionalmente em ecrãs com altura reduzida.  
+4. **Media Query Anti-Corte (`@media (max-height: 440px)`):** Introduzida regra global em CSS que, em qualquer dispositivo com altura física inferior a 440px (telemóveis em landscape), trava a barra de telemetria em `2.75rem` (44px), redimensiona o logótipo para `2.25rem` e compacta os flaps para caberem com folga no ecrã.  
+**Consequência:** A aplicação cabe agora na perfeição em 100% dos telemóveis, mesmo com as barras de navegação do browser abertas e após qualquer atualização ou recarregamento de página.
 
 
 

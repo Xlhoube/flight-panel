@@ -1098,7 +1098,7 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
 
   if (srcAtual) {
     return (
-      <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
+      <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 max-w-[14dvh] max-h-[14dvh] airline-logo-box rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
         <Image
           key={srcAtual}
           src={srcAtual}
@@ -1115,7 +1115,7 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
 
   // Opção 1: Quando não existe companhia aérea ou logótipo, apresentar o Emblema Oficial do Construtor (OEM)
   return (
-    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-800 shadow-md flex items-center justify-center shrink-0 overflow-hidden transition-all bg-[#0d0f16]">
+    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 max-w-[14dvh] max-h-[14dvh] airline-logo-box rounded-lg sm:rounded-xl border border-neutral-800 shadow-md flex items-center justify-center shrink-0 overflow-hidden transition-all bg-[#0d0f16]">
       <EmblemaFabricante
         fabricante={fabricante}
         modelo={modeloAeronave}
@@ -1311,11 +1311,11 @@ function FlapCell({ char, size = "lg", index = 0 }: FlapCellProps) {
   }, [char, prevChar, index]);
 
   const dimensões = {
-    sm: "w-[clamp(0.75rem,min(2.4vw,4.5vh),1.5rem)] h-[clamp(1.05rem,min(3.4vw,6vh),2.1rem)] text-[clamp(0.75rem,min(2.2vw,4vh),1.25rem)] font-black rounded-[2px]",
-    md: "w-[clamp(0.9rem,min(3vw,5.5vh),1.9rem)] h-[clamp(1.25rem,min(4.2vw,7.5vh),2.5rem)] text-[clamp(0.85rem,min(2.8vw,5vh),1.45rem)] font-black rounded-[3px]",
-    lg: "w-[clamp(1.05rem,min(3.6vw,6.5vh),2.3rem)] h-[clamp(1.45rem,min(5vw,9vh),3.1rem)] text-[clamp(0.95rem,min(3.3vw,6vh),1.9rem)] font-black rounded-[4px]",
-    xl: "w-[clamp(1.25rem,min(4.4vw,7.8vh),2.7rem)] h-[clamp(1.65rem,min(5.8vw,10.5vh),3.5rem)] text-[clamp(1.1rem,min(3.8vw,6.8vh),2.1rem)] font-black rounded-[5px]",
-    hero: "w-[clamp(1.4rem,min(5vw,9vh),3.2rem)] h-[clamp(1.9rem,min(6.8vw,12vh),4.1rem)] text-[clamp(1.25rem,min(4.6vw,8.2vh),2.6rem)] font-black rounded-[5px]",
+    sm: "w-[clamp(0.7rem,min(2.4vw,4.2dvh),1.35rem)] h-[clamp(0.95rem,min(3.4vw,5.5dvh),1.9rem)] text-[clamp(0.7rem,min(2.2vw,3.8dvh),1.15rem)] font-black rounded-[2px]",
+    md: "w-[clamp(0.85rem,min(3vw,5.2dvh),1.7rem)] h-[clamp(1.15rem,min(4.2vw,7dvh),2.3rem)] text-[clamp(0.8rem,min(2.8vw,4.8dvh),1.35rem)] font-black rounded-[3px]",
+    lg: "w-[clamp(0.95rem,min(3.6vw,6.2dvh),2.1rem)] h-[clamp(1.35rem,min(5vw,8.5dvh),2.8rem)] text-[clamp(0.9rem,min(3.3vw,5.8dvh),1.7rem)] font-black rounded-[4px]",
+    xl: "w-[clamp(1.15rem,min(4.4vw,7.4dvh),2.5rem)] h-[clamp(1.5rem,min(5.8vw,9.8dvh),3.2rem)] text-[clamp(1.05rem,min(3.8vw,6.5dvh),1.95rem)] font-black rounded-[5px]",
+    hero: "w-[clamp(1.2rem,min(4.8vw,8.5dvh),2.8rem)] h-[clamp(1.55rem,min(6.2vw,11dvh),3.6rem)] text-[clamp(1.1rem,min(4.2vw,7.8dvh),2.3rem)] font-black rounded-[5px]",
   }[size];
 
   const coresTexto = "text-white bg-[#0e1017] border-[#252834] shadow-[0_2px_8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.25)]";
@@ -2658,7 +2658,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA EM 4 MÓDULOS (INCLUINDO MINI-RADAR DE PROXIMIDADE) ── */}
-            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0 h-13 sm:h-16">
+            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0 h-11 sm:h-13 md:h-14 max-h-[14dvh] telemetry-row">
 
               {/* 1. ALTITUDE */}
               <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md h-full overflow-hidden">
@@ -2837,7 +2837,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA METEOROLÓGICA (GRELHA DE 6 MÓDULOS) */}
-            <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 shrink-0">
+            <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2 shrink-0 telemetry-row">
 
               {/* Módulo 1: Vento */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
