@@ -36,6 +36,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import AlertaAtualizacao from "@/components/AlertaAtualizacao";
+
 export default function RootLayout({
   children,
 }: {
@@ -50,6 +52,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className={`${geistMono.variable} ${vt323.variable} font-mono antialiased bg-[#050608] text-white overflow-hidden`}>
+        {/* Alerta de Atualização Ativo para ecrãs e quiosques permanentemente ligados */}
+        <AlertaAtualizacao />
         {children}
         <script
           dangerouslySetInnerHTML={{
@@ -58,6 +62,10 @@ export default function RootLayout({
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').then((reg) => {
                     reg.update();
+                    // Verificação periódica do Service Worker a cada 5 minutos
+                    setInterval(() => {
+                      reg.update().catch(() => {});
+                    }, 5 * 60 * 1000);
                   }).catch(() => {});
                 });
               }

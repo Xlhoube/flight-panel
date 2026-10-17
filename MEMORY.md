@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.5.0  
+**Versão:** v2.5.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, base de dados ICAO Doc 8643 e Doc 8585 enriquecida com catálogo executivo exhaustivo (jets.flights), diretório de operadores charter (aviapages.com), emblemas oficiais OEM e operadores charter (NetJets, VistaJet, Flexjet, GlobeAir, Daher, Piaggio, Cessna, HondaJet, Embraer, Gulfstream, etc.), motor de som unificado (lib/sound.ts), geolocalização híbrida inteligente (GPS satélite + IP de rede para PC), internacionalização em 4 idiomas e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados, alerta ativo e resiliente de nova atualização para ecrãs e quiosques permanentemente ligados (polling 60s no-cache + Service Worker), base de dados ICAO Doc 8643 e Doc 8585 enriquecida com catálogo executivo (jets.flights), diretório de operadores charter (aviapages.com), emblemas oficiais OEM e operadores charter (NetJets, VistaJet, Flexjet, GlobeAir, Daher, Piaggio, Cessna, etc.), motor de som unificado (lib/sound.ts), geolocalização híbrida inteligente (GPS satélite + IP de rede para PC), internacionalização em 4 idiomas e persistência local.
 
 ---
 
@@ -384,6 +384,24 @@
    - Criação de insígnias oficiais vetoriais para: **NetJets** (estrela de diamante/asas em preto e platina), **VistaJet** (listra carmesim icónica horizontal), **Flexjet** (asas rubi e ouro), **GlobeAir** (ave geométrica rubi), **Daher TBM** (vórtice aerodinâmico azul e laranja), e **Piaggio Aerospace** (escudo clássico com P alado).  
    - Despacho dinâmico inteligente em `EmblemaFabricante` por fabricante, modelo ou indicativo de chamada (*callsign*).  
 **Consequência:** Cobertura de aviação executiva e privada de nível profissional em estrita conformidade com os padrões da ICAO e as principais referências do setor aeronáutico internacional.
+
+### ADR-056 — Sistema Ativo de Deteção e Notificação de Novas Versões para Aplicações em Execução Permanente (2026-10-17)
+**Contexto:** Sendo o Flight Panel uma aplicação concebida para funcionar continuamente ligada num ecrã dedicado, tablet, monitor de parede ou quiosque (24 horas por dia, 7 dias por semana), o utilizador necessitava que qualquer nova versão publicada emitisse um alerta visível e ativo enquanto a aplicação está aberta, permitindo atualizar de imediato com um toque.  
+**Decisão:**  
+1. **Configuração de Versão Central (`lib/versao.ts`):**  
+   - Definição canónica de `INFO_VERSAO` contendo `versao`, `buildId`, `dataLancamento` e `descricao` das novidades.  
+2. **Endpoint em Tempo Real (`/api/versao`):**  
+   - Route handler Next.js configurado com `dynamic = 'force-dynamic'` e cabeçalhos estritos `Cache-Control: no-store, no-cache, max-age=0` para garantir que respostas nunca fiquem em cache intermédia de rede.  
+3. **Componente de Cliente Ativo (`components/AlertaAtualizacao.tsx`):**  
+   - Registo em `app/layout.tsx` cobrindo transversalmente todos os ecrãs (`/painel`, `/voos`, etc.).  
+   - Polling ativo a cada 60 segundos com verificação imediata ao retomar visibilidade (`visibilitychange`/`focus`).  
+   - Integração com o Service Worker da PWA (`updatefound` / `SKIP_WAITING`).  
+4. **Interface de Alerta com Estética Aeronáutica:**  
+   - Notificação flutuante com luz de aviso pulsante ciano/esmeralda, diferencial de versões (`v2.5.0 ➔ v2.5.1`) e resumo das novidades.  
+   - Botão de ação primária `🔄 ATUALIZAR AGORA (RECARREGAR)` que limpa caches da PWA e recarrega instantaneamente.  
+   - Botão de adiamento `⏱️ ADIAR` (15 min) que preserva um *pill* discreto e pulsante no canto do ecrã para atualização posterior a qualquer momento.  
+   - Sinal sonoro discreto de aviso ao disparar pela primeira vez no cockpit.  
+**Consequência:** Experiência ininterrupta e autonomia total para ecrãs dedicados — o utilizador é sempre informado no exato momento em que uma nova compilação é disponibilizada na nuvem.
 
 
 
