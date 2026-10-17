@@ -1330,32 +1330,42 @@ function MiniRadarDisplay({
 interface FlapCellProps {
   char: string;
   size?: "sm" | "md" | "lg" | "xl" | "hero";
+  index?: number;
 }
 
-function FlapCell({ char, size = "lg" }: FlapCellProps) {
+function FlapCell({ char, size = "lg", index = 0 }: FlapCellProps) {
   const [prevChar, setPrevChar] = useState(char);
   const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
     if (char !== prevChar) {
-      setAnimating(true);
-      const timer = setTimeout(() => {
+      const delay = index * 40;
+      const animTimer = setTimeout(() => {
+        setAnimating(true);
+        tocarSomFlapClack();
+      }, delay);
+
+      const finishTimer = setTimeout(() => {
         setPrevChar(char);
         setAnimating(false);
-      }, 220);
-      return () => clearTimeout(timer);
+      }, delay + 220);
+
+      return () => {
+        clearTimeout(animTimer);
+        clearTimeout(finishTimer);
+      };
     }
-  }, [char, prevChar]);
+  }, [char, prevChar, index]);
 
   const dimensões = {
     sm: "w-[clamp(0.75rem,min(2.4vw,4.5vh),1.5rem)] h-[clamp(1.05rem,min(3.4vw,6vh),2.1rem)] text-[clamp(0.75rem,min(2.2vw,4vh),1.25rem)] font-black rounded-[2px]",
     md: "w-[clamp(0.9rem,min(3vw,5.5vh),1.9rem)] h-[clamp(1.25rem,min(4.2vw,7.5vh),2.5rem)] text-[clamp(0.85rem,min(2.8vw,5vh),1.45rem)] font-black rounded-[3px]",
     lg: "w-[clamp(1.05rem,min(3.6vw,6.5vh),2.3rem)] h-[clamp(1.45rem,min(5vw,9vh),3.1rem)] text-[clamp(0.95rem,min(3.3vw,6vh),1.9rem)] font-black rounded-[4px]",
     xl: "w-[clamp(1.25rem,min(4.4vw,7.8vh),2.7rem)] h-[clamp(1.65rem,min(5.8vw,10.5vh),3.5rem)] text-[clamp(1.1rem,min(3.8vw,6.8vh),2.1rem)] font-black rounded-[5px]",
-    hero: "w-[clamp(1.35rem,min(4.8vw,8.5vh),3.1rem)] h-[clamp(1.8rem,min(6.5vw,11.5vh),3.9rem)] text-[clamp(1.2rem,min(4.4vw,7.8vh),2.5rem)] font-black rounded-[5px]",
+    hero: "w-[clamp(1.4rem,min(5vw,9vh),3.2rem)] h-[clamp(1.9rem,min(6.8vw,12vh),4.1rem)] text-[clamp(1.25rem,min(4.6vw,8.2vh),2.6rem)] font-black rounded-[5px]",
   }[size];
 
-  const coresTexto = "text-white bg-[#111319] border-[#252834] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]";
+  const coresTexto = "text-white bg-[#0e1017] border-[#252834] shadow-[0_2px_8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.25)]";
   const charExibir = char === " " ? "\u00A0" : char.toUpperCase();
 
   return (
@@ -1379,21 +1389,11 @@ interface FlapWordProps {
 
 function FlapWord({ text, size = "lg" }: FlapWordProps) {
   const chars = (text || "").split("");
-  const prevTextRef = useRef(text);
-
-  useEffect(() => {
-    if (prevTextRef.current !== text) {
-      prevTextRef.current = text;
-      if (text && text !== "---" && text !== "N/D") {
-        tocarRajadaFlaps();
-      }
-    }
-  }, [text]);
 
   return (
     <div className="flex items-center gap-[2px] sm:gap-1 flex-nowrap shrink-0 max-w-full">
       {chars.map((c, i) => (
-        <FlapCell key={i} char={c} size={size} />
+        <FlapCell key={i} char={c} size={size} index={i} />
       ))}
     </div>
   );
