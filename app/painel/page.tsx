@@ -2178,24 +2178,16 @@ export default function PainelAnalogicoMobileFullscreen() {
     // Arrasto horizontal nítido (> 35px e mais horizontal do que vertical)
     if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
       if (deltaX < 0) {
-        // Arrastar para a esquerda: avança para o ecrã seguinte
+        // Arrastar para a esquerda: avança sempre sequencialmente (1 -> 2 -> 3)
         if (ecraAtivo === "principal") {
-          if (listaVoos.length > 1) {
-            irParaRestantes();
-          } else {
-            irParaMeteo();
-          }
+          irParaRestantes();
         } else if (ecraAtivo === "restantes") {
           irParaMeteo();
         }
       } else {
-        // Arrastar para a direita: recua para o ecrã anterior
+        // Arrastar para a direita: recua sempre sequencialmente (3 -> 2 -> 1)
         if (ecraAtivo === "meteo") {
-          if (listaVoos.length > 1) {
-            irParaRestantes();
-          } else {
-            irParaPrincipal();
-          }
+          irParaRestantes();
         } else if (ecraAtivo === "restantes") {
           irParaPrincipal();
         }
@@ -2533,6 +2525,20 @@ export default function PainelAnalogicoMobileFullscreen() {
                       {t.btn_instalar}
                     </button>
                   )}
+
+                  {/* Atalho tátil para o Segundo Ecrã (Restantes Voos) */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      irParaRestantes();
+                    }}
+                    title="Ver Ecrã 2 (Restantes Voos)"
+                    aria-label="Ver Ecrã 2"
+                    className="h-6 sm:h-7 px-1.5 sm:px-2 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-amber-400 hover:text-amber-300 border border-white/15 transition-all flex items-center gap-1 text-[9px] sm:text-[10px] font-mono font-bold shadow-sm cursor-pointer shrink-0"
+                  >
+                    <span>🛫</span>
+                    <span>{Math.max(0, listaVoos.length - 1)}</span>
+                  </button>
 
                   <button
                     onClick={(e) => {
@@ -3466,13 +3472,12 @@ export default function PainelAnalogicoMobileFullscreen() {
 
                 <button
                   type="button"
-                  disabled={listaVoos.length <= 1}
                   onClick={() => {
                     setModalOpcoesAberto(false);
                     irParaRestantes();
                   }}
-                  className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${listaVoos.length <= 1 ? "opacity-40 cursor-not-allowed border-white/5 bg-white/5 text-neutral-500" : ecraAtivo === "restantes" ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm cursor-pointer" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 cursor-pointer"}`}
-                  title={listaVoos.length <= 1 ? "Apenas existe 1 ou nenhum voo no radar" : "Ver restantes voos em LEDs"}
+                  className={`w-full py-1.5 px-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ecraAtivo === "restantes" ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"}`}
+                  title="Ver restantes voos em LEDs"
                 >
                   <span>🛫</span>
                   <span>{t.opcoes_ecra_restantes} ({Math.max(0, listaVoos.length - 1)})</span>
