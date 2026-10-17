@@ -1155,6 +1155,7 @@ interface MiniRadarDisplayProps {
   distKm: number;
   raioMaxKm: number;
   unidadeVelocidade: "KTS" | "KMH";
+  unidadeDistancia?: "KM" | "NM" | "MI";
 }
 
 function MiniRadarDisplay({
@@ -1166,6 +1167,7 @@ function MiniRadarDisplay({
   distKm,
   raioMaxKm,
   unidadeVelocidade,
+  unidadeDistancia,
 }: MiniRadarDisplayProps) {
   // Cálculo do azimute (direção cardeal do avião relativa ao utilizador)
   const bearing = useMemo(() => {
@@ -1189,14 +1191,25 @@ function MiniRadarDisplay({
     };
   }, [bearing, distKm, raioMaxKm]);
 
-  // Formatação de distância
-  const isKts = unidadeVelocidade === "KTS";
+  // Formatação de distância respeitando a unidade escolhida (KM, NM ou MI)
   const distNm = distKm / 1.852;
-  const valorDisplay = isKts
-    ? (distNm < 10 ? distNm.toFixed(1) : Math.round(distNm).toString())
-    : (distKm < 10 ? distKm.toFixed(1) : Math.round(distKm).toString());
-  const unidadePrincipal = isKts ? "NM" : "KM";
-  const subtextoSecundario = isKts ? `${distKm.toFixed(1)} KM` : `${distNm.toFixed(1)} NM`;
+  const distMi = distKm / 1.60934;
+  const unidadeAtiva = unidadeDistancia || (unidadeVelocidade === "KTS" ? "NM" : "KM");
+
+  let valorDisplay = "";
+  let subtextoSecundario = "";
+
+  if (unidadeAtiva === "NM") {
+    valorDisplay = distNm < 10 ? distNm.toFixed(1) : Math.round(distNm).toString();
+    subtextoSecundario = `${distKm.toFixed(1)} KM`;
+  } else if (unidadeAtiva === "MI") {
+    valorDisplay = distMi < 10 ? distMi.toFixed(1) : Math.round(distMi).toString();
+    subtextoSecundario = `${distKm.toFixed(1)} KM`;
+  } else {
+    valorDisplay = distKm < 10 ? distKm.toFixed(1) : Math.round(distKm).toString();
+    subtextoSecundario = `${distNm.toFixed(1)} NM`;
+  }
+  const unidadePrincipal = unidadeAtiva;
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2.5">
@@ -1549,6 +1562,15 @@ function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function converterTemperatura(tempCelsius: number, unidade: "C" | "F"): { valor: number; simbolo: string; str: string } {
+  if (unidade === "F") {
+    const f = Math.round((tempCelsius * 9) / 5 + 32);
+    return { valor: f, simbolo: "°F", str: `${f}°F` };
+  }
+  const c = Math.round(tempCelsius);
+  return { valor: c, simbolo: "°C", str: `${c}°C` };
+}
+
 export interface InfoLocalizacao {
   lat: number;
   lon: number;
@@ -1602,6 +1624,8 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [volumeSom, setVolumeSom] = useState<number>(80);
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+  const [unidadeDistancia, setUnidadeDistancia] = useState<"KM" | "NM" | "MI">("KM");
+  const [unidadeTemperatura, setUnidadeTemperatura] = useState<"C" | "F">("C");
   const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
   const [raioInput, setRaioInput] = useState<string>("20");
@@ -1642,6 +1666,12 @@ export default function PainelAnalogicoMobileFullscreen() {
         }
         if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
+        }
+        if (parsed.unidadeDistancia === "KM" || parsed.unidadeDistancia === "NM" || parsed.unidadeDistancia === "MI") {
+          setUnidadeDistancia(parsed.unidadeDistancia);
+        }
+        if (parsed.unidadeTemperatura === "C" || parsed.unidadeTemperatura === "F") {
+          setUnidadeTemperatura(parsed.unidadeTemperatura);
         }
         if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
           const rClamp = Math.max(1, Math.min(250, Math.round(parsed.raioKm)));
@@ -1691,25 +1721,49 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   const alternarAltitude = (novo: "FT" | "MT") => {
     setUnidadeAltitude(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade, idioma, raioKm });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, idioma, raioKm });
   };
 
   const alternarVelocidade = (novo: "KTS" | "KMH") => {
     setUnidadeVelocidade(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo, idioma, raioKm });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo, unidadeDistancia, unidadeTemperatura, idioma, raioKm });
+  };
+
+  const alternarDistancia = (novo: "KM" | "NM" | "MI") => {
+    setUnidadeDistancia(novo);
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia: novo, unidadeTemperatura, idioma, raioKm });
+  };
+
+  const alternarTemperatura = (novo: "C" | "F") => {
+    setUnidadeTemperatura(novo);
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura: novo, idioma, raioKm });
   };
 
   const alternarRaio = (novoRaio: number) => {
     const rClamp = Math.max(1, Math.min(250, Math.round(novoRaio)));
     setRaioKm(rClamp);
     setRaioInput(rClamp.toString());
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, idioma, raioKm: rClamp });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, idioma, raioKm: rClamp });
   };
 
-  const guardarDefinicoes = (defs: { somAtivo: boolean; volumeSom: number; unidadeAltitude: "FT" | "MT"; unidadeVelocidade: "KTS" | "KMH"; idioma: Idioma; raioKm?: number }) => {
+  const guardarDefinicoes = (defs: {
+    somAtivo: boolean;
+    volumeSom: number;
+    unidadeAltitude: "FT" | "MT";
+    unidadeVelocidade: "KTS" | "KMH";
+    unidadeDistancia?: "KM" | "NM" | "MI";
+    unidadeTemperatura?: "C" | "F";
+    idioma: Idioma;
+    raioKm?: number;
+  }) => {
     try {
       const valorRaio = defs.raioKm ?? raioKm;
-      const payload = { ...defs, raioKm: valorRaio };
+      const payload = {
+        ...defs,
+        unidadeDistancia: defs.unidadeDistancia ?? unidadeDistancia,
+        unidadeTemperatura: defs.unidadeTemperatura ?? unidadeTemperatura,
+        raioKm: valorRaio,
+      };
       localStorage.setItem("flight_panel_user_settings", JSON.stringify(payload));
       localStorage.setItem("flightpanel_idioma", defs.idioma);
       localStorage.setItem("flight_panel_raio_km", valorRaio.toString());
@@ -2654,11 +2708,12 @@ export default function PainelAnalogicoMobileFullscreen() {
                     distKm={distVooAtual}
                     raioMaxKm={raioKm}
                     unidadeVelocidade={unidadeVelocidade}
+                    unidadeDistancia={unidadeDistancia}
                   />
                 ) : (
                   <div className="flex items-center gap-1">
                     <LedText text="---" size="md" />
-                    <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">KM</span>
+                    <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">{unidadeDistancia}</span>
                   </div>
                 )}
               </div>
@@ -2748,23 +2803,23 @@ export default function PainelAnalogicoMobileFullscreen() {
                       </>
                     )}
                     <span className="text-amber-400/90 font-bold">
-                      {t.meteo_sensacao}: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
+                      {t.meteo_sensacao}: {converterTemperatura(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18, unidadeTemperatura).str}
                     </span>
                     <span>•</span>
                     <span className="text-sky-300">
-                      {t.meteo_min} {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
+                      {t.meteo_min} {converterTemperatura(meteorologia?.main?.temp_min ?? ((meteorologia?.main?.temp ?? 18) - 3), unidadeTemperatura).str}
                     </span>
                     <span>/</span>
                     <span className="text-orange-400">
-                      {t.meteo_max} {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
+                      {t.meteo_max} {converterTemperatura(meteorologia?.main?.temp_max ?? ((meteorologia?.main?.temp ?? 18) + 3), unidadeTemperatura).str}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-end shrink-0">
                   <div className="flex items-center gap-1">
-                    <LedText text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
-                    <span className="text-2xl sm:text-4xl font-black text-white">°C</span>
+                    <LedText text={`${converterTemperatura(meteorologia?.main?.temp ?? 18, unidadeTemperatura).valor}`} size="hero" />
+                    <span className="text-2xl sm:text-4xl font-black text-white">{converterTemperatura(meteorologia?.main?.temp ?? 18, unidadeTemperatura).simbolo}</span>
                   </div>
                 </div>
               </div>
@@ -3038,23 +3093,23 @@ export default function PainelAnalogicoMobileFullscreen() {
                     </>
                   )}
                   <span className="text-amber-400/90 font-bold">
-                    {t.meteo_sensacao}: {Math.round(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18)}°C
+                    {t.meteo_sensacao}: {converterTemperatura(meteorologia?.main?.feels_like ?? meteorologia?.main?.temp ?? 18, unidadeTemperatura).str}
                   </span>
                   <span>•</span>
                   <span className="text-sky-300">
-                    {t.meteo_min} {meteorologia?.main?.temp_min ?? Math.round((meteorologia?.main?.temp ?? 18) - 3)}°C
+                    {t.meteo_min} {converterTemperatura(meteorologia?.main?.temp_min ?? ((meteorologia?.main?.temp ?? 18) - 3), unidadeTemperatura).str}
                   </span>
                   <span>/</span>
                   <span className="text-orange-400">
-                    {t.meteo_max} {meteorologia?.main?.temp_max ?? Math.round((meteorologia?.main?.temp ?? 18) + 3)}°C
+                    {t.meteo_max} {converterTemperatura(meteorologia?.main?.temp_max ?? ((meteorologia?.main?.temp ?? 18) + 3), unidadeTemperatura).str}
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-col items-end shrink-0">
                 <div className="flex items-center gap-1">
-                  <LedText text={`${Math.round(meteorologia?.main?.temp ?? 18)}`} size="hero" />
-                  <span className="text-2xl sm:text-4xl font-black text-white">°C</span>
+                  <LedText text={`${converterTemperatura(meteorologia?.main?.temp ?? 18, unidadeTemperatura).valor}`} size="hero" />
+                  <span className="text-2xl sm:text-4xl font-black text-white">{converterTemperatura(meteorologia?.main?.temp ?? 18, unidadeTemperatura).simbolo}</span>
                 </div>
               </div>
             </div>
@@ -3329,6 +3384,64 @@ export default function PainelAnalogicoMobileFullscreen() {
                     className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "KMH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                   >
                     <span>{t.opcoes_unidade_kmh}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Opções: Unidades de Distância e Temperatura */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
+              {/* Unidade de Distância */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-neutral-300">{t.opcoes_distancia_titulo}</span>
+                  <span className="text-[9px] text-neutral-400">{t.opcoes_distancia_subtitulo}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => alternarDistancia("KM")}
+                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeDistancia === "KM" ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>{t.opcoes_unidade_km}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => alternarDistancia("NM")}
+                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeDistancia === "NM" ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>{t.opcoes_unidade_nm}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => alternarDistancia("MI")}
+                    className={`py-1.5 px-1 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeDistancia === "MI" ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>{t.opcoes_unidade_mi}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Unidade de Temperatura */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-neutral-300">{t.opcoes_temperatura_titulo}</span>
+                  <span className="text-[9px] text-neutral-400">{t.opcoes_temperatura_subtitulo}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => alternarTemperatura("C")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeTemperatura === "C" ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>{t.opcoes_unidade_celsius}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => alternarTemperatura("F")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeTemperatura === "F" ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>{t.opcoes_unidade_fahrenheit}</span>
                   </button>
                 </div>
               </div>

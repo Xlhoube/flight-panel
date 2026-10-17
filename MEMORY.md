@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.5.3  
+**Versão:** v2.6.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações, base de dados ICAO Doc 8643/8585, catálogo executivo jets.flights e operadores aviapages.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações, base de dados ICAO Doc 8643/8585, catálogo executivo jets.flights e operadores aviapages.
 
 ---
 
@@ -432,6 +432,22 @@
    - A rotina de montagem de componentes (`useEffect`) deixa de restaurar idiomas locais anteriores gravados no navegador, assegurando que, independentemente do dispositivo ou histórico anterior de sessões, cada novo carregamento ou abertura da aplicação arranca sempre em Inglês.  
    - A alternância dinâmica de idioma durante a sessão continua disponível através do seletor de 4 bandeiras (PT, EN, FR, ES) no modal `⚙️ OPÇÕES`.  
 **Consequência:** Consistência internacional aeronáutica e respeito integral pela especificação de arranque do utilizador.
+
+### ADR-059 — Unidades Internacionais de Temperatura (°C / °F) e Distância (KM / NM / MI) (2026-10-17)
+**Contexto:** O utilizador solicitou o suporte para outras medidas de temperatura no painel meteorológico e unidades de milhas junto aos quilómetros para internacionalização completa da aplicação.  
+**Decisão:**  
+1. **Internacionalização em `lib/i18n.ts`:**  
+   - Adicionadas 9 novas chaves de tradução nos 4 idiomas (PT, EN, FR, ES) para títulos, subtítulos e unidades de distância (`KM`, `NM`, `MI`) e temperatura (`°C`, `°F`).  
+2. **Temperatura Configurável (°C vs °F):**  
+   - Implementada a função utilitária `converterTemperatura(tempC, unidade)` com a fórmula `(C * 9/5) + 32`.  
+   - Aplicada a conversão automática em tempo real a todas as métricas térmicas: temperatura ambiente principal, sensação térmica, temperatura mínima e temperatura máxima no Ecrã 3 (Meteorologia Dedicada) e no modo meteorológico do Ecrã 1.  
+3. **Distância Configurável (KM vs NM vs MI):**  
+   - O componente `MiniRadarDisplay` calcula agora a unidade ativa com conversão simultânea em quilómetros (`KM`), milhas náuticas aeronáuticas (`NM` com fator 1.852) e milhas terrestres (`MI` com fator 1.60934), mantendo o valor secundário legível em parêntesis.  
+   - A página de voos restantes (`/voos`) lê a preferência do utilizador e formata automaticamente os crachás de proximidade do voo principal e a lista de tráfego aéreo.  
+4. **Modal `⚙️ OPÇÕES`:**  
+   - Adicionados dois novos blocos de controlo tátil com botões interativos para Distância e Temperatura, com persistência imediata em `localStorage`.  
+**Consequência:** Aplicação 100% internacionalizada, compatível com os padrões aeronáuticos e preferências dos utilizadores de qualquer região do mundo.
+
 
 
 

@@ -97,6 +97,15 @@ export interface DicionarioTraducoes {
   opcoes_velocidade_subtitulo: string;
   opcoes_unidade_nos: string;
   opcoes_unidade_kmh: string;
+  opcoes_distancia_titulo: string;
+  opcoes_distancia_subtitulo: string;
+  opcoes_unidade_km: string;
+  opcoes_unidade_nm: string;
+  opcoes_unidade_mi: string;
+  opcoes_temperatura_titulo: string;
+  opcoes_temperatura_subtitulo: string;
+  opcoes_unidade_celsius: string;
+  opcoes_unidade_fahrenheit: string;
   opcoes_raio_titulo: string;
   opcoes_raio_subtitulo: string;
   opcoes_raio_alcance_exato: string;
@@ -229,6 +238,15 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Ar",
     opcoes_unidade_nos: "NÓS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_distancia_titulo: "DISTÂNCIA",
+    opcoes_distancia_subtitulo: "Radar e Voos",
+    opcoes_unidade_km: "QUILÓMETROS (KM)",
+    opcoes_unidade_nm: "MILHAS NÁUTICAS (NM)",
+    opcoes_unidade_mi: "MILHAS (MI)",
+    opcoes_temperatura_titulo: "TEMPERATURA",
+    opcoes_temperatura_subtitulo: "Meteorologia",
+    opcoes_unidade_celsius: "CELSIUS (°C)",
+    opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
     opcoes_raio_titulo: "RAIO DE AÇÃO DO RADAR",
     opcoes_raio_subtitulo: "Alcance circular de deteção (exato)",
     opcoes_raio_alcance_exato: "Raio exato",
@@ -360,6 +378,15 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Air",
     opcoes_unidade_nos: "KNOTS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_distancia_titulo: "DISTANCE",
+    opcoes_distancia_subtitulo: "Radar & Flights",
+    opcoes_unidade_km: "KILOMETERS (KM)",
+    opcoes_unidade_nm: "NAUTICAL MILES (NM)",
+    opcoes_unidade_mi: "STATUTE MILES (MI)",
+    opcoes_temperatura_titulo: "TEMPERATURE",
+    opcoes_temperatura_subtitulo: "Weather",
+    opcoes_unidade_celsius: "CELSIUS (°C)",
+    opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
     opcoes_raio_titulo: "RADAR ACTION RADIUS",
     opcoes_raio_subtitulo: "Circular detection range (exact)",
     opcoes_raio_alcance_exato: "Exact radius",
@@ -491,6 +518,15 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Air",
     opcoes_unidade_nos: "NŒUDS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_distancia_titulo: "DISTANCE",
+    opcoes_distancia_subtitulo: "Radar et Vols",
+    opcoes_unidade_km: "KILOMÈTRES (KM)",
+    opcoes_unidade_nm: "MILLES NAUTIQUES (NM)",
+    opcoes_unidade_mi: "MILLES (MI)",
+    opcoes_temperatura_titulo: "TEMPÉRATURE",
+    opcoes_temperatura_subtitulo: "Météo",
+    opcoes_unidade_celsius: "CELSIUS (°C)",
+    opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
     opcoes_raio_titulo: "RAYON D'ACTION DU RADAR",
     opcoes_raio_subtitulo: "Portée circulaire de détection (exacte)",
     opcoes_raio_alcance_exato: "Rayon exact",
@@ -622,6 +658,15 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Aire",
     opcoes_unidade_nos: "NUDOS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_distancia_titulo: "DISTANCIA",
+    opcoes_distancia_subtitulo: "Radar y Vuelos",
+    opcoes_unidade_km: "KILÓMETROS (KM)",
+    opcoes_unidade_nm: "MILLAS NÁUTICAS (NM)",
+    opcoes_unidade_mi: "MILLAS (MI)",
+    opcoes_temperatura_titulo: "TEMPERATURA",
+    opcoes_temperatura_subtitulo: "Meteorología",
+    opcoes_unidade_celsius: "CELSIUS (°C)",
+    opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
     opcoes_raio_titulo: "RADIO DE ACCIÓN DEL RADAR",
     opcoes_raio_subtitulo: "Alcance circular de detección (exacto)",
     opcoes_raio_alcance_exato: "Radio exacto",

@@ -813,6 +813,19 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
   );
 }
 
+function formatarDistanciaDisplay(distKmNum: number | null | undefined, unidade: "KM" | "NM" | "MI"): string {
+  if (distKmNum == null || isNaN(distKmNum)) return "--";
+  if (unidade === "NM") {
+    const nm = distKmNum / 1.852;
+    return `${nm < 10 ? nm.toFixed(1) : Math.round(nm)} NM`;
+  }
+  if (unidade === "MI") {
+    const mi = distKmNum / 1.60934;
+    return `${mi < 10 ? mi.toFixed(1) : Math.round(mi)} MI`;
+  }
+  return `${distKmNum < 10 ? distKmNum.toFixed(1) : Math.round(distKmNum)} KM`;
+}
+
 // ─── Página Principal de Lista de Voos Restantes (/voos) ──────────────────────
 
 export default function ListaVoosRestantes() {
@@ -824,6 +837,7 @@ export default function ListaVoosRestantes() {
   const [horaAtual, setHoraAtual] = useState("12:00:00");
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+  const [unidadeDistancia, setUnidadeDistancia] = useState<"KM" | "NM" | "MI">("KM");
   const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
 
@@ -875,6 +889,9 @@ export default function ListaVoosRestantes() {
         }
         if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
+        }
+        if (parsed.unidadeDistancia === "KM" || parsed.unidadeDistancia === "NM" || parsed.unidadeDistancia === "MI") {
+          setUnidadeDistancia(parsed.unidadeDistancia);
         }
         if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
           setRaioKm(Math.max(1, Math.min(250, Math.round(parsed.raioKm))));
@@ -1086,10 +1103,11 @@ export default function ListaVoosRestantes() {
         {/* ── VOO ACTIVO NO PAINEL PRINCIPAL (MAIS PRÓXIMO) ── */}
         {vooPrincipal && (() => {
           const info = resolverVooInfo(vooPrincipal, rotasMap);
-          const distKm =
+          const distKmNum =
             vooPrincipal[6] != null && vooPrincipal[5] != null
-              ? calcularDistanciaHaversineKm(localizacao.lat, localizacao.lon, vooPrincipal[6], vooPrincipal[5]).toFixed(1)
-              : "--";
+              ? calcularDistanciaHaversineKm(localizacao.lat, localizacao.lon, vooPrincipal[6], vooPrincipal[5])
+              : null;
+          const textoDistancia = formatarDistanciaDisplay(distKmNum, unidadeDistancia);
 
           return (
             <section className="bg-gradient-to-r from-emerald-950/40 via-[#10131d] to-[#0c0e14] border border-emerald-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg flex flex-col gap-2">
@@ -1099,7 +1117,7 @@ export default function ListaVoosRestantes() {
                   {t.tab_voo_principal}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">
-                  📍 {distKm} KM
+                  📍 {textoDistancia}
                 </span>
               </div>
 
@@ -1188,10 +1206,11 @@ export default function ListaVoosRestantes() {
           <div className="flex flex-col gap-2.5">
             {voosRestantes.map((voo, idx) => {
               const info = resolverVooInfo(voo, rotasMap);
-              const distKm =
+              const distKmNum =
                 voo[6] != null && voo[5] != null
-                  ? calcularDistanciaHaversineKm(localizacao.lat, localizacao.lon, voo[6], voo[5]).toFixed(1)
-                  : "--";
+                  ? calcularDistanciaHaversineKm(localizacao.lat, localizacao.lon, voo[6], voo[5])
+                  : null;
+              const textoDistancia = formatarDistanciaDisplay(distKmNum, unidadeDistancia);
 
               return (
                 <div
@@ -1241,7 +1260,7 @@ export default function ListaVoosRestantes() {
                     {/* Distância */}
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs sm:text-sm font-black text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/30 tabular-nums">
-                        📍 {distKm} KM
+                        📍 {textoDistancia}
                       </span>
                     </div>
 
