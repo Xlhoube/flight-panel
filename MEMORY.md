@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.2.0  
+**Versão:** v2.3.0  
 **Data de início:** 2026-09-06  
-**Última sessão:** 2026-10-16  
-**Estado:** PWA completa com 3 ecrãs integrados (Ecrã 1: Voo Principal com fallback automático para meteorologia; Ecrã 2: Lista dos Restantes Voos com LEDs redondos físicos; Ecrã 3: Meteorologia Dedicada completa), fluxo de onboarding sequencial de 2 passos na primeira abertura (Instalação PWA ➔ Calibração de Coordenadas GPS), navegação fluida por arrasto lateral (*swipe*), internacionalização rigorosa (i18n) em 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) sem misturas linguísticas, tradução de condições e meses dinâmicos, e persistência local.
+**Última sessão:** 2026-10-17  
+**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), palhetas mecânicas Split-Flap ampliadas e agrupadas no centro, síntese sonora de clacks mecânicos na rotação de caracteres, internacionalização em 4 idiomas e persistência local.
 
 ---
 
@@ -310,6 +310,22 @@
 5. **Internacionalização Estrita (i18n):**  
    - Todas as mensagens, botões e notas explicativas foram integradas nativamente nos 4 idiomas suportados (`pt`, `en`, `fr`, `es`).  
 **Consequência:** Experiência de utilizador moderna, ergonómica e guiada desde o primeiro segundo, assegurando taxa máxima de adoção de PWA e calibração imediata do radar com consentimento claro do utilizador.
+
+### ADR-050 — Base de Dados Dedicada de Aeronaves ICAO com Foco em Jatos Executivos (2026-10-17)
+**Contexto:** O utilizador reportou que jatos privados como o HondaJet surgiam identificados de forma crua pelo código ICAO (`HDJT` tanto no modelo como no fabricante).  
+**Decisão:**  
+1. Criação do módulo dedicado `lib/aeronaves-db.ts` contendo mais de 150 códigos ICAO de jatos executivos (HondaJet, Embraer Phenom/Praetor/Legacy, Cessna Citation M2/CJ/XLS/Latitude/Longitude, Bombardier Challenger/Global/Learjet, Gulfstream G150 a G800, Dassault Falcon, Pilatus PC-12/PC-24, Beechcraft King Air/Premier, Cirrus Vision Jet, Eclipse, Daher TBM, etc.), além de aviões comerciais e militares.  
+2. Implementação da função `resolverInfoAeronave` que resolve modelos para a matriz LED (ex: `HDJT` ➔ `HONDAJET`) e determina o fabricante oficial (ex: `HONDA AIRCRAFT`), eliminando repetições brutas.  
+**Consequência:** Apresentação elegante, profissional e precisa de qualquer jato particular ou comercial no painel principal e na lista de voos.
+
+### ADR-051 — Centralização e Ampliação das Palhetas Split-Flap com Áudio Mecânico Ativo (2026-10-17)
+**Contexto:** O utilizador questionou sobre juntar os painéis de palhetas no centro, aumentá-los ligeiramente e se o som de rotação mecânica continuava ativo ao mudarem de letra.  
+**Decisão:**  
+1. **Layout Centralizado em 3 Colunas:** Reorganizar a Linha 2 de forma simétrica: Origem em LEDs no exterior esquerdo, painéis de palhetas (`FlapWord`) agrupados no centro com moldura e sombra interna analógica (`[ ORIGEM ] ✈ [ DESTINO ]`), e Destino em LEDs no exterior direito.  
+2. **Ampliação Responsiva (`hero`):** Aumentar a escala das palhetas com regras dinâmicas `clamp()` seguras para visualização em telemóveis horizontais.  
+3. **Áudio Mecânico Autêntico na Rotação:** Criar a função `tocarRajadaFlaps()` e associá-la à mudança de texto no componente `FlapWord`. Sempre que os códigos IATA mudam, o sistema dispara uma rajada percussiva de 4 cliques rápidos (Web Audio API sintetizada), reproduzindo o som físico de palhetas Solari a rodar.  
+**Consequência:** Linha 2 com foco imponente no centro, estética autêntica de painel de aeroporto e feedback sonoro realista a cada rotação de voo.
+
 
 
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Idioma, IDIOMAS_DISPONIVEIS, TRADUCOES, traduzirPais, traduzirCondicaoMeteo, obterMesAbreviado } from "@/lib/i18n";
 import { obterDadosAeroporto } from "@/lib/aeroportos";
 import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/lib/localidades";
+import { resolverInfoAeronave } from "@/lib/aeronaves-db";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -198,195 +199,12 @@ const PREFIXOS_REGISTO: Record<string, { pais: string; cidade: string; code: str
   LZ: { pais: "BULGÁRIA", cidade: "SÓFIA", code: "SOF" },
 };
 
-const NOMES_AERONAVES: Record<string, string> = {
-  B738: "BOEING 737-800",
-  B737: "BOEING 737-700",
-  B739: "BOEING 737-900",
-  B38M: "B737 MAX 8",
-  B39M: "B737 MAX 9",
-  A320: "AIRBUS A320",
-  A20N: "AIRBUS A320NEO",
-  A321: "AIRBUS A321",
-  A21N: "AIRBUS A321NEO",
-  A319: "AIRBUS A319",
-  A318: "AIRBUS A318",
-  A332: "AIRBUS A330-200",
-  A333: "AIRBUS A330-300",
-  A339: "AIRBUS A330-900",
-  A359: "AIRBUS A350-900",
-  A35K: "AIRBUS A350-1000",
-  B772: "BOEING 777-200",
-  B77W: "BOEING 777-300ER",
-  B788: "BOEING 787-8",
-  B789: "BOEING 787-9",
-  B78X: "BOEING 787-10",
-  E190: "EMBRAER 190",
-  E195: "EMBRAER 195",
-  E295: "EMBRAER E195-E2",
-  AT76: "ATR 72-600",
-  DH8D: "DASH 8-400",
-  CRJ9: "CRJ-900",
-  C55B: "CITATION BRAVO",
-  C56X: "CITATION XLS",
-  C680: "CITATION SOV",
-  C25A: "CITATION CJ2",
-  C25B: "CITATION CJ3",
-  C25C: "CITATION CJ4",
-  C510: "CITATION MUST",
-  C525: "CITATION M2",
-  C550: "CITATION II",
-  C560: "CITATION V",
-  CL30: "CHALLENGER 300",
-  CL35: "CHALLENGER 350",
-  CL60: "CHALLENGER 600",
-  CL65: "CHALLENGER 605",
-  FA7X: "FALCON 7X",
-  FA8X: "FALCON 8X",
-  F2TH: "FALCON 2000",
-  F900: "FALCON 900",
-  GL5T: "GLOBAL 5000",
-  GL6T: "GLOBAL 6000",
-  GL7T: "GLOBAL 7500",
-  GLEX: "GLOBAL EXP",
-  GLF4: "GULFSTREAM IV",
-  GLF5: "GULFSTREAM V",
-  GLF6: "GULFSTREAM 650",
-  PC12: "PILATUS PC-12",
-  PC24: "PILATUS PC-24",
-  BE20: "SUPER KING AIR",
-  B350: "KING AIR 350",
-  BE9L: "KING AIR 90",
-  SR20: "CIRRUS SR20",
-  SR22: "CIRRUS SR22",
-  C152: "CESSNA 152",
-  C172: "CESSNA 172",
-  R22: "ROBINSON R22",
-  R44: "ROBINSON R44",
-  // Aeronaves e Helicópteros Militares
-  H60: "UH-60 BLACK HAWK",
-  UH60: "UH-60 BLACK HAWK",
-  S70: "SIKORSKY S-70",
-  F16: "F-16M FALCON",
-  C130: "LOCKHEED C-130H",
-  C390: "EMBRAER KC-390",
-  C295: "AIRBUS C-295M",
-  E101: "EH-101 MERLIN",
-  FA50: "FALCON 50",
-  A119: "AW119 KOALA",
-};
-
 function formatarNomeAeronave(raw: string): string {
-  if (!raw) return "A320";
-  let s = raw.trim().toUpperCase();
-
-  // 1. Mapeamento directo por código exacto ICAO
-  if (NOMES_AERONAVES[s]) {
-    return NOMES_AERONAVES[s];
-  }
-
-  // 2. Se for curto (<= 14 caracteres), mantemos intacto (ex: "CESSNA 172", "BOEING 737")
-  if (s.length <= 14) {
-    return s;
-  }
-
-  // 3. Limpeza de prefixos extensos se ultrapassar 14 caracteres
-  s = s
-    .replace(/^CESSNA\s+\d+[A-Z]*\s+/i, "")
-    .replace(/^CESSNA\s+/i, "")
-    .replace(/^BEECHCRAFT\s+(SUPER\s+)?/i, "")
-    .replace(/^DASSAULT\s+/i, "")
-    .replace(/^BOMBARDIER\s+/i, "")
-    .replace(/^GULFSTREAM\s+AEROSPACE\s+/i, "GULFSTREAM ")
-    .replace(/^EMBRAER\s+/i, "EMBRAER ")
-    .replace(/^AIRBUS\s+/i, "A")
-    .replace(/^BOEING\s+/i, "B")
-    .trim();
-
-  // 4. Compactação se ainda assim ultrapassar 14 caracteres
-  if (s.length > 14) {
-    if (s.includes("CITATION")) return "CITATION";
-    if (s.includes("CHALLENGER")) return "CHALLENGER";
-    if (s.includes("FALCON")) return "FALCON";
-    if (s.includes("KING AIR")) return "KING AIR";
-    if (s.includes("GLOBAL")) return "GLOBAL EXP";
-    s = s.slice(0, 14).trim();
-  }
-
-  return s;
+  return resolverInfoAeronave(raw).modelo;
 }
 
-function obterFabricanteAeronave(codAeronave: string, nomeAeronave: string): string {
-  const c = (codAeronave || "").trim().toUpperCase();
-  const n = (nomeAeronave || "").trim().toUpperCase();
-
-  // Boeing
-  if (/^B7\d|B3[89]M|^7[0-9]{2}|BOEING|DREAMLINER|MAX\s*[89]/i.test(c) || /BOEING|B737|B747|B757|B767|B777|B787/i.test(n)) {
-    return "BOEING";
-  }
-  // Airbus
-  if (/^A[23][0-9]{2}|AIRBUS|^A3[123458][0-9N]|BELUGA/i.test(c) || /AIRBUS|^A[23][0-9]{2}/i.test(n)) {
-    return "AIRBUS";
-  }
-  // Embraer
-  if (/^E[12][0-9]{2}|^E\d{3}|EMBRAER|KC-?390|PHENOM|LINEAGE|ERJ/i.test(c) || /EMBRAER|E190|E195|E175|E170/i.test(n)) {
-    return "EMBRAER";
-  }
-  // ATR
-  if (/^AT[47][0-9]|ATR/i.test(c) || /ATR\s*[47]2/i.test(n)) {
-    return "ATR";
-  }
-  // Bombardier / De Havilland
-  if (/^CRJ|^CL[36]|DH8|DASH|CHALLENGER|GLOBAL|BOMBARDIER|DHC/i.test(c) || /BOMBARDIER|CHALLENGER|GLOBAL|DASH\s*8|CRJ/i.test(n)) {
-    return "BOMBARDIER";
-  }
-  // Cessna
-  if (/^C[1256][0-9]{2}|CITATION|CESSNA|^C208|^C172|^C152/i.test(c) || /CESSNA|CITATION/i.test(n)) {
-    return "CESSNA";
-  }
-  // Dassault
-  if (/^FA[782]X|^F900|^F2TH|FALCON|DASSAULT/i.test(c) || /FALCON|DASSAULT/i.test(n)) {
-    return "DASSAULT";
-  }
-  // Gulfstream
-  if (/^GLF|GULFSTREAM|^G[456][0-9]{2}/i.test(c) || /GULFSTREAM/i.test(n)) {
-    return "GULFSTREAM";
-  }
-  // Beechcraft
-  if (/^BE[1239]|KING\s*AIR|BEECHCRAFT|SUPER\s*KING/i.test(c) || /BEECHCRAFT|KING\s*AIR/i.test(n)) {
-    return "BEECHCRAFT";
-  }
-  // Pilatus
-  if (/^PC[12][24]|PILATUS/i.test(c) || /PILATUS/i.test(n)) {
-    return "PILATUS";
-  }
-  // Cirrus
-  if (/^SR2[02]|CIRRUS/i.test(c) || /CIRRUS/i.test(n)) {
-    return "CIRRUS";
-  }
-  // Sikorsky
-  if (/^H60|^S70|^UH60|BLACK\s*HAWK|SIKORSKY/i.test(c) || /BLACK\s*HAWK|SIKORSKY/i.test(n)) {
-    return "SIKORSKY";
-  }
-  // Lockheed
-  if (/^C130|^L100|^F16|LOCKHEED|HERCULES/i.test(c) || /LOCKHEED|F-16/i.test(n)) {
-    return "LOCKHEED MARTIN";
-  }
-  // Robinson
-  if (/^R[246]2|^R44|^R66|ROBINSON/i.test(c) || /ROBINSON/i.test(n)) {
-    return "ROBINSON";
-  }
-  // Leonardo / AgustaWestland
-  if (/^A119|^AW1|KOALA|MERLIN|EH101|LEONARDO|AGUSTA/i.test(c) || /KOALA|MERLIN|AGUSTA/i.test(n)) {
-    return "LEONARDO";
-  }
-
-  // Fallback inteligente
-  const primeiraPalavra = n.split(" ")[0];
-  if (primeiraPalavra && primeiraPalavra.length >= 3 && !/^\d+$/.test(primeiraPalavra)) {
-    return primeiraPalavra;
-  }
-
-  return "AERONAVE COMERCIAL";
+function obterFabricanteAeronave(codAeronave: string, nomeAeronave?: string): string {
+  return resolverInfoAeronave(codAeronave, nomeAeronave).fabricante;
 }
 
 const AEROPORTOS_PAISES: Record<string, string> = {
@@ -1130,6 +948,20 @@ function tocarSomFlapClack(volumeOverride?: number) {
   }
 }
 
+// ─── Efeito Sonoro de Rotação Mecânica de Palhetas Solari (Burst de Clacks) ───
+
+function tocarRajadaFlaps(volumeOverride?: number) {
+  if (!globalSomHabilitado || typeof window === "undefined") return;
+  const vol = volumeOverride !== undefined ? volumeOverride : globalVolume;
+  if (vol <= 0) return;
+
+  for (let i = 0; i < 4; i++) {
+    setTimeout(() => {
+      tocarSomFlapClack(vol * 0.85);
+    }, i * 45);
+  }
+}
+
 // ─── Reprodutor de Áudio de Entrada de Novo Voo (/Flight.mp3) ─────────────────
 
 function tocarSomNovoVoo(volumeOverride?: number) {
@@ -1547,6 +1379,16 @@ interface FlapWordProps {
 
 function FlapWord({ text, size = "lg" }: FlapWordProps) {
   const chars = (text || "").split("");
+  const prevTextRef = useRef(text);
+
+  useEffect(() => {
+    if (prevTextRef.current !== text) {
+      prevTextRef.current = text;
+      if (text && text !== "---" && text !== "N/D") {
+        tocarRajadaFlaps();
+      }
+    }
+  }, [text]);
 
   return (
     <div className="flex items-center gap-[2px] sm:gap-1 flex-nowrap shrink-0 max-w-full">
@@ -2725,49 +2567,47 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <span className="text-right">{t.rotulo_destino}</span>
               </div>
 
-              {/* CORPO DE FLAPS: CÓDIGOS IATA + CIDADES EM LINHA HORIZONTAL CONTÍNUA (FLEX-NOWRAP) */}
+              {/* CORPO DE FLAPS: ORIGEM (ESQUERDA) | FLAPS CENTRADOS E AMPLIADOS (CENTRO) | DESTINO (DIREITA) */}
               <div className="w-full flex-1 flex items-center justify-between gap-1 sm:gap-4 min-h-0">
-                {/* ORIGEM: LEDs no exterior esquerdo, Flap no centro */}
-                <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap min-w-0 shrink-0">
-                  <div className="flex flex-col items-start min-w-0">
-                    <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "xs" : "sm"} />
-                    {infoVoo.origemAeroporto && (
-                      <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[100px] sm:max-w-[180px] leading-tight">
-                        {infoVoo.origemAeroporto}
-                      </span>
-                    )}
-                    {infoVoo.origemPais && (
-                      <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
-                        {traduzirPais(infoVoo.origemPais, idioma)}
-                      </span>
-                    )}
-                  </div>
-                  <FlapWord text={infoVoo.origemCode} size="xl" />
+                {/* ORIGEM: LEDs no exterior esquerdo */}
+                <div className="flex-1 flex flex-col items-start justify-center min-w-0 pr-1 sm:pr-2">
+                  <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "xs" : "sm"} />
+                  {infoVoo.origemAeroporto && (
+                    <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[110px] sm:max-w-[180px] leading-tight">
+                      {infoVoo.origemAeroporto}
+                    </span>
+                  )}
+                  {infoVoo.origemPais && (
+                    <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
+                      {traduzirPais(infoVoo.origemPais, idioma)}
+                    </span>
+                  )}
                 </div>
 
-                {/* INDICADOR CENTRAL ENTRE OS FLAPS */}
-                <div className="hidden sm:flex items-center gap-1 text-neutral-400 shrink-0 px-1">
-                  <div className="w-2 h-px bg-white/20" />
-                  <span className="text-amber-400 text-xs">✈</span>
-                  <div className="w-2 h-px bg-white/20" />
+                {/* CENTRO: Os dois FlapWords agrupados, aumentados com size="hero" e destacados */}
+                <div className="flex items-center justify-center gap-1.5 sm:gap-3 flex-nowrap shrink-0 px-2 py-1 rounded-xl bg-black/40 border border-white/10 shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)]">
+                  <FlapWord text={infoVoo.origemCode} size="hero" />
+                  <div className="flex items-center gap-1 text-amber-400 font-bold shrink-0 px-1">
+                    <div className="w-2 sm:w-3 h-px bg-white/20" />
+                    <span className="text-amber-400 text-xs sm:text-sm animate-pulse">✈</span>
+                    <div className="w-2 sm:w-3 h-px bg-white/20" />
+                  </div>
+                  <FlapWord text={infoVoo.destinoCode} size="hero" />
                 </div>
 
-                {/* DESTINO: Flap no centro, LEDs no exterior direito */}
-                <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap justify-end min-w-0 shrink-0 text-right">
-                  <FlapWord text={infoVoo.destinoCode} size="xl" />
-                  <div className="flex flex-col items-end min-w-0">
-                    <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "xs" : "sm"} />
-                    {infoVoo.destinoAeroporto && (
-                      <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[100px] sm:max-w-[180px] leading-tight">
-                        {infoVoo.destinoAeroporto}
-                      </span>
-                    )}
-                    {infoVoo.destinoPais && (
-                      <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
-                        {traduzirPais(infoVoo.destinoPais, idioma)}
-                      </span>
-                    )}
-                  </div>
+                {/* DESTINO: LEDs no exterior direito */}
+                <div className="flex-1 flex flex-col items-end justify-center min-w-0 pl-1 sm:pl-2 text-right">
+                  <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "xs" : "sm"} />
+                  {infoVoo.destinoAeroporto && (
+                    <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[110px] sm:max-w-[180px] leading-tight">
+                      {infoVoo.destinoAeroporto}
+                    </span>
+                  )}
+                  {infoVoo.destinoPais && (
+                    <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
+                      {traduzirPais(infoVoo.destinoPais, idioma)}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

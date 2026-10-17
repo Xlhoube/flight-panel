@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Idioma, TRADUCOES, traduzirPais } from "@/lib/i18n";
 import { obterDadosAeroporto } from "@/lib/aeroportos";
+import { resolverInfoAeronave } from "@/lib/aeronaves-db";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -650,8 +651,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const velocidadeKts = Math.round(velMs * 1.94384);
   const velocidadeKmh = Math.round(velMs * 3.6);
   const rumo = Math.round(voo[10] || 0);
-
-  const aeronave = rotaReal?.aircraftName || rotaReal?.aircraftType || (isFap ? "AERONAVE MILITAR" : "AERONAVE COMERCIAL");
+  const codAero = (voo[12] ? String(voo[12]) : (rotaReal?.model || (isFap ? "F16" : "")));
+  const infoAero = codAero ? resolverInfoAeronave(codAero) : null;
+  const aeronave = infoAero?.modelo || rotaReal?.aircraftName || rotaReal?.aircraftType || (isFap ? "AERONAVE MILITAR" : "AERONAVE COMERCIAL");
 
   return {
     icao,
