@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.6",
-  buildId: "build-20261017-v266",
+  versao: "2.7.0",
+  buildId: "build-20261017-v270",
   dataLancamento: "2026-10-17",
-  descricao: "Proteção anti-corte e adaptação vertical dinâmica para telemóveis em modo horizontal (landscape 100dvh e viewportFit cover).",
+  descricao: "Controlo manual e automático de luminosidade do ecrã com boost de 5 segundos ao detetar novo voo.",
 };

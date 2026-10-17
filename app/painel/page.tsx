@@ -1626,6 +1626,10 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
   const [unidadeDistancia, setUnidadeDistancia] = useState<"KM" | "NM" | "MI">("KM");
   const [unidadeTemperatura, setUnidadeTemperatura] = useState<"C" | "F">("C");
+  const [luminosidadeManual, setLuminosidadeManual] = useState<number>(100);
+  const [luminosidadeAuto, setLuminosidadeAuto] = useState<boolean>(true);
+  const [brilhoBoostAtivo, setBrilhoBoostAtivo] = useState<boolean>(false);
+  const timerBrilhoBoostRef = useRef<NodeJS.Timeout | null>(null);
   const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
   const [raioInput, setRaioInput] = useState<string>("20");
@@ -1673,11 +1677,31 @@ export default function PainelAnalogicoMobileFullscreen() {
         if (parsed.unidadeTemperatura === "C" || parsed.unidadeTemperatura === "F") {
           setUnidadeTemperatura(parsed.unidadeTemperatura);
         }
+        if (typeof parsed.luminosidadeManual === "number" && !isNaN(parsed.luminosidadeManual)) {
+          const lClamp = Math.max(10, Math.min(100, Math.round(parsed.luminosidadeManual)));
+          setLuminosidadeManual(lClamp);
+        }
+        if (typeof parsed.luminosidadeAuto === "boolean") {
+          setLuminosidadeAuto(parsed.luminosidadeAuto);
+        }
         if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
           const rClamp = Math.max(1, Math.min(250, Math.round(parsed.raioKm)));
           setRaioKm(rClamp);
           setRaioInput(rClamp.toString());
         }
+      }
+
+      // 2.1 Carregamento independente de luminosidade de chaves dedicadas
+      const lumDedicada = localStorage.getItem("flight_panel_luminosidade");
+      if (lumDedicada !== null) {
+        const lNum = Number(lumDedicada);
+        if (!isNaN(lNum) && lNum >= 10 && lNum <= 100) {
+          setLuminosidadeManual(lNum);
+        }
+      }
+      const autoDedicada = localStorage.getItem("flight_panel_luminosidade_auto");
+      if (autoDedicada !== null) {
+        setLuminosidadeAuto(autoDedicada === "true");
       }
 
       // 3. Verificação de primeira abertura (Onboarding: Passo 1 - Instalação PWA)
@@ -1747,14 +1771,42 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   const alternarTemperatura = (novo: "C" | "F") => {
     setUnidadeTemperatura(novo);
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura: novo, idioma, raioKm });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura: novo, luminosidadeManual, luminosidadeAuto, idioma, raioKm });
+  };
+
+  const dispararBoostLuminosidade = useCallback(() => {
+    if (timerBrilhoBoostRef.current) {
+      clearTimeout(timerBrilhoBoostRef.current);
+    }
+    setBrilhoBoostAtivo(true);
+    timerBrilhoBoostRef.current = setTimeout(() => {
+      setBrilhoBoostAtivo(false);
+      timerBrilhoBoostRef.current = null;
+    }, 5000);
+  }, []);
+
+  const alternarLuminosidadeManual = (novo: number) => {
+    const lClamp = Math.max(10, Math.min(100, Math.round(novo)));
+    setLuminosidadeManual(lClamp);
+    try {
+      localStorage.setItem("flight_panel_luminosidade", lClamp.toString());
+    } catch { }
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, luminosidadeManual: lClamp, luminosidadeAuto, idioma, raioKm });
+  };
+
+  const alternarLuminosidadeAuto = (novo: boolean) => {
+    setLuminosidadeAuto(novo);
+    try {
+      localStorage.setItem("flight_panel_luminosidade_auto", novo.toString());
+    } catch { }
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, luminosidadeManual, luminosidadeAuto: novo, idioma, raioKm });
   };
 
   const alternarRaio = (novoRaio: number) => {
     const rClamp = Math.max(1, Math.min(250, Math.round(novoRaio)));
     setRaioKm(rClamp);
     setRaioInput(rClamp.toString());
-    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, idioma, raioKm: rClamp });
+    guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, luminosidadeManual, luminosidadeAuto, idioma, raioKm: rClamp });
   };
 
   const guardarDefinicoes = (defs: {
@@ -1764,18 +1816,26 @@ export default function PainelAnalogicoMobileFullscreen() {
     unidadeVelocidade: "KTS" | "KMH";
     unidadeDistancia?: "KM" | "NM" | "MI";
     unidadeTemperatura?: "C" | "F";
+    luminosidadeManual?: number;
+    luminosidadeAuto?: boolean;
     idioma: Idioma;
     raioKm?: number;
   }) => {
     try {
       const valorRaio = defs.raioKm ?? raioKm;
+      const valorLum = defs.luminosidadeManual ?? luminosidadeManual;
+      const valorAutoLum = defs.luminosidadeAuto ?? luminosidadeAuto;
       const payload = {
         ...defs,
         unidadeDistancia: defs.unidadeDistancia ?? unidadeDistancia,
         unidadeTemperatura: defs.unidadeTemperatura ?? unidadeTemperatura,
+        luminosidadeManual: valorLum,
+        luminosidadeAuto: valorAutoLum,
         raioKm: valorRaio,
       };
       localStorage.setItem("flight_panel_user_settings", JSON.stringify(payload));
+      localStorage.setItem("flight_panel_luminosidade", valorLum.toString());
+      localStorage.setItem("flight_panel_luminosidade_auto", valorAutoLum.toString());
       localStorage.setItem("flightpanel_idioma", defs.idioma);
       localStorage.setItem("flight_panel_raio_km", valorRaio.toString());
     } catch { }
@@ -2460,6 +2520,9 @@ export default function PainelAnalogicoMobileFullscreen() {
 
     // 5. Novo voo assumiu o ecrã principal (#1): toca som oficial de cabine (/Flight.mp3 com fallback para chime)
     tocarSomNovoVoo();
+    if (luminosidadeAuto) {
+      dispararBoostLuminosidade();
+    }
     ultimoVooExibidoIdRef.current = idVoo;
     ultimoSomTocadoTimestampRef.current = agora;
   }, [vooAtual, ecraAtivo]);
@@ -2486,6 +2549,8 @@ export default function PainelAnalogicoMobileFullscreen() {
     : null;
 
   const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMap) : null;
+  const brilhoEfetivo = brilhoBoostAtivo ? 100 : luminosidadeManual;
+  const opacidadeDimmer = ((100 - brilhoEfetivo) / 100) * 0.88;
 
   return (
     <main
@@ -3349,6 +3414,95 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
+            {/* Opção: Luminosidade do Ecrã (Manual & Automático em Novo Voo) */}
+            <div className="flex flex-col gap-2 shrink-0 bg-white/[0.02] border border-white/5 p-2 sm:p-2.5 rounded-xl">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-bold text-neutral-300 flex items-center gap-1.5">
+                  <span>☀️</span>
+                  <span>{t.opcoes_luminosidade_titulo}</span>
+                </span>
+                <span className={`text-[9px] font-mono font-bold ${brilhoBoostAtivo ? "text-amber-300 animate-pulse" : "text-amber-400"}`}>
+                  {brilhoBoostAtivo ? "100% (BOOST 5s)" : `${luminosidadeManual}%`}
+                </span>
+              </div>
+
+              {/* Slider Manual de Luminosidade */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between text-[10px] text-neutral-400">
+                  <span>{t.opcoes_luminosidade_manual}</span>
+                  <span className="font-mono">{luminosidadeManual}%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-500">🌙</span>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="5"
+                    value={luminosidadeManual}
+                    onChange={(e) => alternarLuminosidadeManual(Number(e.target.value))}
+                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                  />
+                  <span className="text-xs text-amber-300">☀️</span>
+                </div>
+
+                {/* Predefinições Rápidas de Luminosidade */}
+                <div className="grid grid-cols-4 gap-1 pt-0.5">
+                  {[25, 50, 75, 100].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => alternarLuminosidadeManual(preset)}
+                      className={`py-0.5 text-[9px] font-mono rounded border transition-colors cursor-pointer ${
+                        luminosidadeManual === preset
+                          ? "bg-amber-400/20 border-amber-400 text-amber-300 font-bold"
+                          : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"
+                      }`}
+                    >
+                      {preset}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Alternador do Modo Automático (Aumento em Novo Voo) */}
+              <div className="pt-2 border-t border-white/5 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-neutral-300 flex items-center gap-1">
+                      <span>💡</span>
+                      <span>{t.opcoes_luminosidade_auto}</span>
+                    </span>
+                    <span className="text-[8px] sm:text-[9px] text-neutral-400 leading-tight">
+                      {t.opcoes_luminosidade_auto_desc}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => alternarLuminosidadeAuto(!luminosidadeAuto)}
+                    className={`py-1 px-2.5 rounded-lg border text-[10px] font-bold font-mono transition-all shrink-0 cursor-pointer ${
+                      luminosidadeAuto
+                        ? "bg-emerald-500/25 border-emerald-400 text-emerald-300 shadow-sm"
+                        : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"
+                    }`}
+                  >
+                    {luminosidadeAuto ? "ATIVADO" : "DESATIVADO"}
+                  </button>
+                </div>
+
+                {/* Botão de Teste do Efeito (5 segundos) */}
+                <button
+                  type="button"
+                  onClick={dispararBoostLuminosidade}
+                  className="w-full py-1 px-2 bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-lg text-neutral-300 font-mono text-[9px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <span>✨</span>
+                  <span>{t.opcoes_luminosidade_testar_btn}</span>
+                </button>
+              </div>
+            </div>
+
             {/* Opções 2 e 3: Unidades lado a lado (Altitude e Velocidade) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
               {/* Opção 2: Unidade de Altitude */}
@@ -4138,6 +4292,16 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         </div>
       )}
-    </main >
+
+      {/* Camada Dinâmica de Luminosidade / Dimmer de Ecrã (Transição Suave de 700ms) */}
+      <div
+        className="fixed inset-0 pointer-events-none z-[9990] transition-opacity duration-700 ease-out"
+        style={{
+          backgroundColor: "#000000",
+          opacity: opacidadeDimmer,
+        }}
+        aria-hidden="true"
+      />
+    </main>
   );
 }

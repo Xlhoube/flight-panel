@@ -107,6 +107,12 @@ export interface DicionarioTraducoes {
   opcoes_temperatura_subtitulo: string;
   opcoes_unidade_celsius: string;
   opcoes_unidade_fahrenheit: string;
+  opcoes_luminosidade_titulo: string;
+  opcoes_luminosidade_subtitulo: string;
+  opcoes_luminosidade_manual: string;
+  opcoes_luminosidade_auto: string;
+  opcoes_luminosidade_auto_desc: string;
+  opcoes_luminosidade_testar_btn: string;
   opcoes_raio_titulo: string;
   opcoes_raio_subtitulo: string;
   opcoes_raio_alcance_exato: string;
@@ -249,6 +255,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_temperatura_subtitulo: "Meteorologia",
     opcoes_unidade_celsius: "CELSIUS (°C)",
     opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
+    opcoes_luminosidade_titulo: "LUMINOSIDADE DO ECRÃ",
+    opcoes_luminosidade_subtitulo: "Controlo manual e automático",
+    opcoes_luminosidade_manual: "Nível de Luminosidade",
+    opcoes_luminosidade_auto: "Aumento Automático em Novo Voo",
+    opcoes_luminosidade_auto_desc: "Aumenta a luminosidade para 100% durante 5 segundos ao detetar um novo voo.",
+    opcoes_luminosidade_testar_btn: "TESTAR AUMENTO DE BRILHO (5 SEGUNDOS)",
     opcoes_raio_titulo: "RAIO DE AÇÃO DO RADAR",
     opcoes_raio_subtitulo: "Alcance circular de deteção (exato)",
     opcoes_raio_alcance_exato: "Raio exato",
@@ -390,6 +402,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_temperatura_subtitulo: "Weather",
     opcoes_unidade_celsius: "CELSIUS (°C)",
     opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
+    opcoes_luminosidade_titulo: "SCREEN BRIGHTNESS",
+    opcoes_luminosidade_subtitulo: "Manual & automatic control",
+    opcoes_luminosidade_manual: "Brightness Level",
+    opcoes_luminosidade_auto: "Auto-Boost on New Flight",
+    opcoes_luminosidade_auto_desc: "Increases brightness to 100% for 5 seconds when a new flight is detected.",
+    opcoes_luminosidade_testar_btn: "TEST BRIGHTNESS BOOST (5 SECONDS)",
     opcoes_raio_titulo: "RADAR ACTION RADIUS",
     opcoes_raio_subtitulo: "Circular detection range (exact)",
     opcoes_raio_alcance_exato: "Exact radius",
@@ -531,6 +549,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_temperatura_subtitulo: "Météo",
     opcoes_unidade_celsius: "CELSIUS (°C)",
     opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
+    opcoes_luminosidade_titulo: "LUMINOSITÉ DE L'ÉCRAN",
+    opcoes_luminosidade_subtitulo: "Contrôle manuel et automatique",
+    opcoes_luminosidade_manual: "Niveau de Luminosité",
+    opcoes_luminosidade_auto: "Augmentation Auto sur Nouveau Vol",
+    opcoes_luminosidade_auto_desc: "Augmente la luminosité à 100% pendant 5 secondes lors de la détection d'un nouveau vol.",
+    opcoes_luminosidade_testar_btn: "TESTER L'AUGMENTATION DE LUMINOSITÉ (5 SECONDES)",
     opcoes_raio_titulo: "RAYON D'ACTION DU RADAR",
     opcoes_raio_subtitulo: "Portée circulaire de détection (exacte)",
     opcoes_raio_alcance_exato: "Rayon exact",
@@ -672,6 +696,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_temperatura_subtitulo: "Meteorología",
     opcoes_unidade_celsius: "CELSIUS (°C)",
     opcoes_unidade_fahrenheit: "FAHRENHEIT (°F)",
+    opcoes_luminosidade_titulo: "BRILLO DE LA PANTALLA",
+    opcoes_luminosidade_subtitulo: "Control manual y automático",
+    opcoes_luminosidade_manual: "Nivel de Brillo",
+    opcoes_luminosidade_auto: "Aumento Automático en Nuevo Vuelo",
+    opcoes_luminosidade_auto_desc: "Aumenta el brillo al 100% durante 5 segundos al detectar un nuevo vuelo.",
+    opcoes_luminosidade_testar_btn: "PROBAR AUMENTO DE BRILLO (5 SEGUNDOS)",
     opcoes_raio_titulo: "RADIO DE ACCIÓN DEL RADAR",
     opcoes_raio_subtitulo: "Alcance circular de detección (exacto)",
     opcoes_raio_alcance_exato: "Radio exacto",

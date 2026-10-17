@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.6  
+**Versão:** v2.7.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, proteção anti-corte e calibração dinâmica vertical para telemóveis em modo horizontal (landscape 100dvh, viewportFit cover, FlapCells calibradas com dvh e contenção rígida da barra de telemetria), fixação e estabilização de altura da barra inferior, reativação do assistente de instalação PWA, eliminação de popups nativos de fullscreen do Android, internacionalização para LOADING e diretivas notranslate.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, controlo manual e automático de luminosidade do ecrã com aumento para 100% durante 5 segundos ao detetar novo voo no radar, proteção anti-corte e calibração dinâmica vertical para telemóveis em modo horizontal (landscape 100dvh, viewportFit cover, FlapCells calibradas com dvh e contenção rígida da barra de telemetria), fixação e estabilização de altura da barra inferior, reativação do assistente de instalação PWA, eliminação de popups nativos de fullscreen do Android, internacionalização para LOADING e diretivas notranslate.
 
 ---
 
@@ -505,8 +505,20 @@
 1. **Bloqueio de Viewport e Scroll Global:** No ficheiro `app/globals.css`, configurado `html, body` com `height: 100dvh; overflow: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch;`.  
 2. **Ativação de `viewportFit: "cover"`:** No ficheiro `app/layout.tsx`, adicionado `viewportFit: "cover"` aos metadados de viewport para eliminar recalibrações de escala espúrias no recarregamento.  
 3. **Migração de `vh` para `dvh` em FlapCells:** No componente `FlapCell`, as fórmulas `clamp()` passaram a usar `dvh` (Dynamic Viewport Height) com tetos calibrados (`11dvh` em vez de `12vh` teóricos sem barras), garantindo que as palhetas encolhem proporcionalmente em ecrãs com altura reduzida.  
-4. **Media Query Anti-Corte (`@media (max-height: 440px)`):** Introduzida regra global em CSS que, em qualquer dispositivo com altura física inferior a 440px (telemóveis em landscape), trava a barra de telemetria em `2.75rem` (44px), redimensiona o logótipo para `2.25rem` e compacta os flaps para caberem com folga no ecrã.  
 **Consequência:** A aplicação cabe agora na perfeição em 100% dos telemóveis, mesmo com as barras de navegação do browser abertas e após qualquer atualização ou recarregamento de página.
+
+### ADR-066 — Controlo Manual e Automático de Luminosidade com Boost em Novo Voo (2026-10-17)
+**Contexto:** O utilizador solicitou a capacidade de regular a luminosidade do ecrã manualmente ou automaticamente. Em modo automático, sempre que um novo voo entra no radar, a luminosidade do ecrã sobe para 100% e, 5 segundos depois, reduz-se suavemente de volta para o nível manual configurado. Esta funcionalidade tem de ser configurável e passível de desativação dentro do menu de opções.  
+**Decisão:**  
+1. **Camada de Dimmer com Transição Suave (700ms):** Implementado overlay analógico `fixed inset-0 pointer-events-none z-[9990]` com `backgroundColor: #000000` e opacidade calculada `(100 - brilhoEfetivo) / 100 * 0.88` com `transition-opacity duration-700 ease-out`. Esta solução atua em qualquer dispositivo móvel e ecrã sem artefactos gráficos e sem afetar a fidelidade das cores.  
+2. **Gatilho de Boost Temporário (5 segundos):** Ligado ao mesmo observador de estado que reproduz o áudio oficial de cabine quando uma nova aeronave assume o topo do radar (`tocarSomNovoVoo`). Se `luminosidadeAuto` estiver ativo, o brilho sobre instantaneamente para 100% (`brilhoBoostAtivo = true`) e um temporizador de 5000ms restaura suavemente o nível manual.  
+3. **Controlos Completos no Modal de Opções:**  
+   - Slider contínuo de luminosidade manual de 10% a 100% com degraus de 5%.  
+   - 4 atalhos rápidos de calibração táctil (`25%`, `50%`, `75%`, `100%`).  
+   - Alternador tátil (Toggle ON/OFF) para o aumento automático em novo voo.  
+   - Botão interativo `✨ TESTAR AUMENTO DE BRILHO (5 SEGUNDOS)` para pré-visualização imediata.  
+4. **Persistência Local e Internacionalização:** Valores guardados em `localStorage` sob `flight_panel_luminosidade` e `flight_panel_luminosidade_auto`, com suporte multilíngue em PT, EN, FR e ES.  
+**Consequência:** Experiência visual imersiva tipo cockpit e quiosque noturno, permitindo poupar energia/luz em repouso e chamar a atenção com classe sempre que surge tráfego aéreo.
 
 
 
