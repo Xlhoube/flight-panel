@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.3.0  
+**Versão:** v2.3.3  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), palhetas mecânicas Split-Flap ampliadas e agrupadas no centro, síntese sonora de clacks mecânicos na rotação de caracteres, internacionalização em 4 idiomas e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), emblemas oficiais de construtores aeronáuticos OEM (HondaJet, Cessna, Gulfstream, Embraer, Bombardier, etc.) em substituição de caixas vazias quando não há logótipo de companhia aérea, palhetas mecânicas Split-Flap ampliadas e agrupadas no centro, síntese sonora de clacks mecânicos na rotação de caracteres, internacionalização em 4 idiomas e persistência local.
 
 ---
 
@@ -325,6 +325,26 @@
 2. **Ampliação Responsiva (`hero`):** Aumentar a escala das palhetas com regras dinâmicas `clamp()` seguras para visualização em telemóveis horizontais.  
 3. **Áudio Mecânico Autêntico na Rotação:** Criar a função `tocarRajadaFlaps()` e associá-la à mudança de texto no componente `FlapWord`. Sempre que os códigos IATA mudam, o sistema dispara uma rajada percussiva de 4 cliques rápidos (Web Audio API sintetizada), reproduzindo o som físico de palhetas Solari a rodar.  
 **Consequência:** Linha 2 com foco imponente no centro, estética autêntica de painel de aeroporto e feedback sonoro realista a cada rotação de voo.
+
+### ADR-052 — Emblemas Oficiais de Construtores Aeronáuticos OEM para Jatos Executivos e Voos Sem Logótipo (2026-10-17)
+**Contexto:** Em voos executivos particulares (ex: HondaJet, Cessna Citation, Embraer Phenom, Gulfstream) ou voos sem companhia aérea registada, surgia uma caixa quadrada genérica escura ou um espaço vazio, quebrando a estética de luxo do cockpit. O utilizador escolheu a Opção 1: exibir o emblema oficial do fabricante da aeronave (OEM).  
+**Decisão:**  
+1. Criação do componente vetorial dedicado `lib/fabricantes-logos.tsx` contendo logótipos SVG oficiais de alta fidelidade e emblemas estilizados dos principais construtores aeronáuticos mundiais:
+   - **Honda / HondaJet:** Asas estilizadas e tipografia oficial HondaJet.
+   - **Cessna:** Emblema histórico do brasão e asas Cessna Citation.
+   - **Gulfstream:** Asas de longo alcance com o logótipo oficial Gulfstream.
+   - **Bombardier / Learjet:** Trevo emblemático Bombardier Aerospace.
+   - **Embraer Executive:** Monograma estilizado de luxo Embraer Executive Jets.
+   - **Dassault Falcon:** Silhueta e asas Dassault Aviation.
+   - **Pilatus:** Logótipo e escudo suíço Pilatus Aircraft.
+   - **Cirrus:** Asas elípticas Cirrus Aircraft / Vision Jet.
+   - **Beechcraft:** Brasão clássico Beechcraft / King Air.
+   - **Airbus / Boeing / VIP Wings:** Fallbacks dedicados para linhas aéreas ou charters privados.
+2. Atualização dos componentes `AirlineLogo` no painel principal (`/painel`) e na lista de voos (`/voos`):
+   - Se existir logótipo da companhia aérea comercial via CDN, continua a ser apresentado.
+   - Se o logótipo não existir ou falhar, o sistema deteta automaticamente o fabricante e o modelo da aeronave através de `aeronaves-db.ts` e renderiza o emblema vetorial oficial com moldura escura de luxo (`#0d0f16` com rebordo `border-neutral-800`), sem caixas brancas desfasadas.  
+**Consequência:** Aspeto premium de fábrica aeronáutica (OEM), eliminando caixas vazias ou genéricas e enriquecendo imediatamente a presença visual de jatos executivos.
+
 
 
 

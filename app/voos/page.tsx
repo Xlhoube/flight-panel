@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Idioma, TRADUCOES, traduzirPais } from "@/lib/i18n";
 import { obterDadosAeroporto } from "@/lib/aeroportos";
 import { resolverInfoAeronave } from "@/lib/aeronaves-db";
+import { EmblemaFabricante } from "@/lib/fabricantes-logos";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -654,6 +655,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const codAero = (voo[12] ? String(voo[12]) : (rotaReal?.model || (isFap ? "F16" : "")));
   const infoAero = codAero ? resolverInfoAeronave(codAero) : null;
   const aeronave = infoAero?.modelo || rotaReal?.aircraftName || rotaReal?.aircraftType || (isFap ? "AERONAVE MILITAR" : "AERONAVE COMERCIAL");
+  const fabricante = infoAero?.fabricante || (isFap ? "FORÇA AÉREA PORTUGUESA" : "");
 
   return {
     icao,
@@ -676,6 +678,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     velocidadeKmh,
     rumo,
     aeronave,
+    fabricante,
     paisOrigem: voo[2] || "Desconhecido",
   };
 }
@@ -713,9 +716,11 @@ interface AirlineLogoProps {
   iata?: string | null;
   nome: string;
   callsign?: string;
+  fabricante?: string;
+  modeloAeronave?: string;
 }
 
-function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
+function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }: AirlineLogoProps) {
   const [urlIndex, setUrlIndex] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
 
@@ -764,16 +769,9 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
 
   const srcAtual = !hasFailed && urls.length > 0 ? urls[urlIndex] : null;
 
-  const siglaEmblema =
-    icao && icao.length === 3 && /^[A-Z]{3}$/.test(icao)
-      ? icao
-      : callsign
-        ? callsign.slice(0, 3)
-        : "AIR";
-
-  return (
-    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
-      {srcAtual ? (
+  if (srcAtual) {
+    return (
+      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
         <Image
           key={srcAtual}
           src={srcAtual}
@@ -784,16 +782,19 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
           onError={handleImgError}
           unoptimized
         />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-neutral-900 via-neutral-950 to-black rounded-md flex flex-col items-center justify-center p-0.5 border border-white/10 shadow-inner">
-          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 opacity-90 drop-shadow mb-0.5" fill="currentColor">
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-          </svg>
-          <span className="font-mono font-black text-[6px] sm:text-[7px] text-amber-300 tracking-wider leading-none truncate max-w-full text-center">
-            {siglaEmblema}
-          </span>
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  // Opção 1: Quando não existe companhia aérea ou logótipo, apresentar o Emblema Oficial do Construtor (OEM)
+  return (
+    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-neutral-800 shadow-md flex items-center justify-center shrink-0 overflow-hidden transition-all bg-[#0d0f16]">
+      <EmblemaFabricante
+        fabricante={fabricante}
+        modelo={modeloAeronave}
+        callsign={callsign}
+        className="w-full h-full"
+      />
     </div>
   );
 }
@@ -1098,7 +1099,14 @@ export default function ListaVoosRestantes() {
 
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <AirlineLogo icao={info.icao} iata={info.iata} nome={info.nomeCompanhia} callsign={info.callsign} />
+                  <AirlineLogo
+                    icao={info.icao}
+                    iata={info.iata}
+                    nome={info.nomeCompanhia}
+                    callsign={info.callsign}
+                    fabricante={info.fabricante}
+                    modeloAeronave={info.aeronave}
+                  />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm sm:text-lg font-black text-white tracking-tight">
@@ -1190,7 +1198,14 @@ export default function ListaVoosRestantes() {
                       #{idx + 2}
                     </span>
 
-                    <AirlineLogo icao={info.icao} iata={info.iata} nome={info.nomeCompanhia} callsign={info.callsign} />
+                    <AirlineLogo
+                      icao={info.icao}
+                      iata={info.iata}
+                      nome={info.nomeCompanhia}
+                      callsign={info.callsign}
+                      fabricante={info.fabricante}
+                      modeloAeronave={info.aeronave}
+                    />
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">

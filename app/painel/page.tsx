@@ -7,6 +7,7 @@ import { Idioma, IDIOMAS_DISPONIVEIS, TRADUCOES, traduzirPais, traduzirCondicaoM
 import { obterDadosAeroporto } from "@/lib/aeroportos";
 import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/lib/localidades";
 import { resolverInfoAeronave } from "@/lib/aeronaves-db";
+import { EmblemaFabricante } from "@/lib/fabricantes-logos";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -1093,9 +1094,11 @@ interface AirlineLogoProps {
   iata?: string | null;
   nome: string;
   callsign?: string;
+  fabricante?: string;
+  modeloAeronave?: string;
 }
 
-function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
+function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }: AirlineLogoProps) {
   const [urlIndex, setUrlIndex] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
 
@@ -1149,15 +1152,9 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
 
   const srcAtual = !hasFailed && urls.length > 0 ? urls[urlIndex] : null;
 
-  // Sigla aeronáutica para o emblema elegante caso não exista logótipo
-  const siglaEmblema =
-    (icao && icao.length === 3 && /^[A-Z]{3}$/.test(icao))
-      ? icao
-      : (callsign ? callsign.slice(0, 3) : "AIR");
-
-  return (
-    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
-      {srcAtual ? (
+  if (srcAtual) {
+    return (
+      <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
         <Image
           key={srcAtual}
           src={srcAtual}
@@ -1168,20 +1165,19 @@ function AirlineLogo({ icao, iata, nome, callsign }: AirlineLogoProps) {
           onError={handleImgError}
           unoptimized
         />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-neutral-900 via-neutral-950 to-black rounded-md sm:rounded-lg flex flex-col items-center justify-center p-0.5 border border-white/10 shadow-inner">
-          {/* Silhueta aeronáutica estilizada */}
-          <svg
-            className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 fill-current drop-shadow"
-            viewBox="0 0 24 24"
-          >
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-          </svg>
-          <span className="font-mono font-black text-[7px] sm:text-[9px] text-white tracking-widest uppercase leading-none mt-0.5">
-            {siglaEmblema}
-          </span>
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  // Opção 1: Quando não existe companhia aérea ou logótipo, apresentar o Emblema Oficial do Construtor (OEM)
+  return (
+    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-800 shadow-md flex items-center justify-center shrink-0 overflow-hidden transition-all bg-[#0d0f16]">
+      <EmblemaFabricante
+        fabricante={fabricante}
+        modelo={modeloAeronave}
+        callsign={callsign}
+        className="w-full h-full"
+      />
     </div>
   );
 }
@@ -2485,7 +2481,14 @@ export default function PainelAnalogicoMobileFullscreen() {
 
               {/* Logótipo Oficial Garantido + Voo + Companhia Aérea */}
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
-                <AirlineLogo icao={infoVoo.icao} iata={infoVoo.iata} nome={infoVoo.nomeCompanhia} callsign={infoVoo.callsign} />
+                <AirlineLogo
+                  icao={infoVoo.icao}
+                  iata={infoVoo.iata}
+                  nome={infoVoo.nomeCompanhia}
+                  callsign={infoVoo.callsign}
+                  fabricante={infoVoo.fabricante}
+                  modeloAeronave={infoVoo.aeronave}
+                />
 
                 <div className="flex flex-col items-start gap-0.5 min-w-0">
                   <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-400 font-bold leading-none">
