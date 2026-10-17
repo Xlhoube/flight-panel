@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.7.1",
-  buildId: "build-20261017-v271",
+  versao: "2.7.2",
+  buildId: "build-20261017-v272",
   dataLancamento: "2026-10-17",
-  descricao: "Animação mecânica de split-flaps de 1.5 segundos em cascata ao entrar um novo voo.",
+  descricao: "Restauro da escala visual heróica e imponente das palhetas split-flaps, logótipos e telemetria.",
 };

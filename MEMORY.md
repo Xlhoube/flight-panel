@@ -532,7 +532,15 @@
 3. **Disparo Automático e Manual:**  
    - Disparo automático integrado no hook de deteção de novas aeronaves no ecrã principal (`setTriggerFlapsNovoVoo(agora)`).  
    - Disparo manual incluído nos botões de teste do Modal de Opções (teste de áudio e teste de luminosidade) para validação e demonstração instantânea.  
-**Consequência:** Fidelidade física e visual máxima com sensação tátil de painel de partidas analógico em cada deteção de voo.
+### ADR-068 — Restauro da Escala Visual Heróica das Palhetas Split-Flap, Logótipos e Telemetria (2026-10-17)
+**Contexto:** O utilizador reportou que "ficou tudo mais pequeno", enviando uma captura de ecrã em modo paisagem onde as palhetas centrais, logótipos e telemetria apareciam diminutos com vazios excessivos no ecrã.  
+**Causa Raiz:** A regra `@media (max-height: 440px)` em `app/globals.css` estava a forçar com `!important` tamanhos reduzidos em telemóveis em modo horizontal (`height: clamp(1.35rem, 11dvh, 2.2rem) !important` e telemetria a `2.75rem !important`). Em conjunto com limites conservadores no componente JSX, as flaps perdiam a imponência visual pretendida.  
+**Decisão:**  
+1. **Remoção da Regra Restritiva com `!important`:** Eliminado o bloco forçado de `@media (max-height: 440px)` de `app/globals.css`, permitindo que o cálculo responsivo flexível governe o painel naturalmente.  
+2. **Restauro das Dimensões Heróicas de `FlapCell`:** O tamanho `hero` foi calibrado para `w-[clamp(1.5rem,min(5.4vw,11vh),3.4rem)] h-[clamp(2.1rem,min(7.4vw,15vh),4.3rem)] text-[clamp(1.4rem,min(5vw,10.5vh),2.8rem)]`, preenchendo a Linha 2 com destaque mecânico digno de aeroporto.  
+3. **Escala Nobre de Companhias e Cidades:** O logótipo voltou para `w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16` e as cidades de origem e destino passaram a adotar `"md"` para nomes correntes (ex: `PARIS`, `PORTO`), com a telemetria inferior a recuperar a altura sólida de `h-13 sm:h-15 md:h-16`.  
+4. **Proteção Vertical 100dvh Mantida:** A contenção estrita `html, body { height: 100dvh; overflow: hidden; }` e `flex-1 min-h-0` na linha central garante que o layout preenche 100% da viewport sem transbordar o ecrã.  
+**Consequência:** Equilíbrio visual perfeito com impacto estético imersivo e sem qualquer elemento encolhido.
 
 
 

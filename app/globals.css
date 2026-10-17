@@ -120,27 +120,4 @@ html, body {
   background-size: 8px 8px;
 }
 
-/* ─── Proteção Anti-Corte para Telemóveis em Modo Horizontal (Landscape) ─── */
-@media (max-height: 440px) {
-  /* Força escala adaptativa no painel sem transbordar o ecrã em telemóveis */
-  .telemetry-row {
-    height: 2.75rem !important; /* 44px */
-    max-height: 14dvh !important;
-  }
-  
-  .flap-cell {
-    height: clamp(1.35rem, 11dvh, 2.2rem) !important;
-    width: clamp(1rem, 4.5vw, 1.7rem) !important;
-  }
-
-  .flap-cell span {
-    font-size: clamp(0.95rem, 9dvh, 1.45rem) !important;
-  }
-
-  .airline-logo-box {
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-  }
-}
-
 

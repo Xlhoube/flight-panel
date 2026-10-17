@@ -1098,7 +1098,7 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
 
   if (srcAtual) {
     return (
-      <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 max-w-[14dvh] max-h-[14dvh] airline-logo-box rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
+      <div className="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-700 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 transition-all">
         <Image
           key={srcAtual}
           src={srcAtual}
@@ -1115,7 +1115,7 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
 
   // Opção 1: Quando não existe companhia aérea ou logótipo, apresentar o Emblema Oficial do Construtor (OEM)
   return (
-    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 max-w-[14dvh] max-h-[14dvh] airline-logo-box rounded-lg sm:rounded-xl border border-neutral-800 shadow-md flex items-center justify-center shrink-0 overflow-hidden transition-all bg-[#0d0f16]">
+    <div className="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-neutral-800 shadow-md flex items-center justify-center shrink-0 overflow-hidden transition-all bg-[#0d0f16]">
       <EmblemaFabricante
         fabricante={fabricante}
         modelo={modeloAeronave}
@@ -1358,11 +1358,11 @@ function FlapCell({ char, size = "lg", index = 0, triggerRoll = 0 }: FlapCellPro
   }, [char, triggerRoll, index]);
 
   const dimensões = {
-    sm: "w-[clamp(0.7rem,min(2.4vw,4.2dvh),1.35rem)] h-[clamp(0.95rem,min(3.4vw,5.5dvh),1.9rem)] text-[clamp(0.7rem,min(2.2vw,3.8dvh),1.15rem)] font-black rounded-[2px]",
-    md: "w-[clamp(0.85rem,min(3vw,5.2dvh),1.7rem)] h-[clamp(1.15rem,min(4.2vw,7dvh),2.3rem)] text-[clamp(0.8rem,min(2.8vw,4.8dvh),1.35rem)] font-black rounded-[3px]",
-    lg: "w-[clamp(0.95rem,min(3.6vw,6.2dvh),2.1rem)] h-[clamp(1.35rem,min(5vw,8.5dvh),2.8rem)] text-[clamp(0.9rem,min(3.3vw,5.8dvh),1.7rem)] font-black rounded-[4px]",
-    xl: "w-[clamp(1.15rem,min(4.4vw,7.4dvh),2.5rem)] h-[clamp(1.5rem,min(5.8vw,9.8dvh),3.2rem)] text-[clamp(1.05rem,min(3.8vw,6.5dvh),1.95rem)] font-black rounded-[5px]",
-    hero: "w-[clamp(1.2rem,min(4.8vw,8.5dvh),2.8rem)] h-[clamp(1.55rem,min(6.2vw,11dvh),3.6rem)] text-[clamp(1.1rem,min(4.2vw,7.8dvh),2.3rem)] font-black rounded-[5px]",
+    sm: "w-[clamp(0.8rem,min(2.6vw,4.5vh),1.5rem)] h-[clamp(1.1rem,min(3.6vw,6.2vh),2.1rem)] text-[clamp(0.8rem,min(2.4vw,4.2vh),1.3rem)] font-black rounded-[2px]",
+    md: "w-[clamp(0.95rem,min(3.2vw,5.5vh),1.9rem)] h-[clamp(1.3rem,min(4.4vw,7.8vh),2.6rem)] text-[clamp(0.9rem,min(3vw,5.2vh),1.55rem)] font-black rounded-[3px]",
+    lg: "w-[clamp(1.15rem,min(3.8vw,6.8vh),2.3rem)] h-[clamp(1.55rem,min(5.2vw,9.5vh),3.2rem)] text-[clamp(1.05rem,min(3.5vw,6.5vh),1.95rem)] font-black rounded-[4px]",
+    xl: "w-[clamp(1.35rem,min(4.6vw,8.2vh),2.8rem)] h-[clamp(1.8rem,min(6.2vw,11.2vh),3.7rem)] text-[clamp(1.2rem,min(4.2vw,7.8vh),2.3rem)] font-black rounded-[5px]",
+    hero: "w-[clamp(1.5rem,min(5.4vw,11vh),3.4rem)] h-[clamp(2.1rem,min(7.4vw,15vh),4.3rem)] text-[clamp(1.4rem,min(5vw,10.5vh),2.8rem)] font-black rounded-[5px]",
   }[size];
 
   const coresTexto = "text-white bg-[#0e1017] border-[#252834] shadow-[0_2px_8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.25)]";
@@ -2733,40 +2733,40 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="w-full flex-1 flex items-center justify-between gap-1 sm:gap-4 min-h-0">
                 {/* ORIGEM: LEDs no exterior esquerdo */}
                 <div className="flex-1 flex flex-col items-start justify-center min-w-0 pr-1 sm:pr-2">
-                  <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 9 ? "xs" : "sm"} />
+                  <LedText text={infoVoo.origem} size={infoVoo.origem.length >= 12 ? "xs" : infoVoo.origem.length >= 8 ? "sm" : "md"} />
                   {infoVoo.origemAeroporto && (
-                    <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[110px] sm:max-w-[180px] leading-tight">
+                    <span className="text-[8px] sm:text-[10px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[120px] sm:max-w-[200px] leading-tight">
                       {infoVoo.origemAeroporto}
                     </span>
                   )}
                   {infoVoo.origemPais && (
-                    <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
+                    <span className="text-[8px] sm:text-[9px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
                       {traduzirPais(infoVoo.origemPais, idioma)}
                     </span>
                   )}
                 </div>
 
                 {/* CENTRO: Os dois FlapWords agrupados, aumentados com size="hero" e destacados */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-3 flex-nowrap shrink-0 px-2 py-1 rounded-xl bg-black/40 border border-white/10 shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)]">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-3 flex-nowrap shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-black/50 border border-white/15 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)]">
                   <FlapWord text={infoVoo.origemCode} size="hero" triggerRoll={triggerFlapsNovoVoo} />
                   <div className="flex items-center gap-1 text-amber-400 font-bold shrink-0 px-1">
-                    <div className="w-2 sm:w-3 h-px bg-white/20" />
-                    <span className="text-amber-400 text-xs sm:text-sm animate-pulse">✈</span>
-                    <div className="w-2 sm:w-3 h-px bg-white/20" />
+                    <div className="w-2.5 sm:w-4 h-px bg-white/20" />
+                    <span className="text-amber-400 text-xs sm:text-base animate-pulse">✈</span>
+                    <div className="w-2.5 sm:w-4 h-px bg-white/20" />
                   </div>
                   <FlapWord text={infoVoo.destinoCode} size="hero" triggerRoll={triggerFlapsNovoVoo} />
                 </div>
 
                 {/* DESTINO: LEDs no exterior direito */}
                 <div className="flex-1 flex flex-col items-end justify-center min-w-0 pl-1 sm:pl-2 text-right">
-                  <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 9 ? "xs" : "sm"} />
+                  <LedText text={infoVoo.destino} size={infoVoo.destino.length >= 12 ? "xs" : infoVoo.destino.length >= 8 ? "sm" : "md"} />
                   {infoVoo.destinoAeroporto && (
-                    <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[110px] sm:max-w-[180px] leading-tight">
+                    <span className="text-[8px] sm:text-[10px] font-mono font-bold text-amber-300/90 tracking-wide uppercase truncate max-w-[120px] sm:max-w-[200px] leading-tight">
                       {infoVoo.destinoAeroporto}
                     </span>
                   )}
                   {infoVoo.destinoPais && (
-                    <span className="text-[7px] sm:text-[8px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
+                    <span className="text-[8px] sm:text-[9px] font-mono font-bold text-sky-400 tracking-wider uppercase leading-tight">
                       {traduzirPais(infoVoo.destinoPais, idioma)}
                     </span>
                   )}
@@ -2775,7 +2775,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA EM 4 MÓDULOS (INCLUINDO MINI-RADAR DE PROXIMIDADE) ── */}
-            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0 h-11 sm:h-13 md:h-14 max-h-[14dvh] telemetry-row">
+            <div className="w-full grid grid-cols-4 gap-1 sm:gap-2 shrink-0 h-13 sm:h-15 md:h-16">
 
               {/* 1. ALTITUDE */}
               <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md h-full overflow-hidden">
@@ -2954,7 +2954,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             </div>
 
             {/* LINHA 3: TELEMETRIA METEOROLÓGICA (GRELHA DE 6 MÓDULOS) */}
-            <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2 shrink-0 telemetry-row">
+            <div className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2 shrink-0">
 
               {/* Módulo 1: Vento */}
               <div className="bg-[#10121a] p-1.5 sm:p-2 rounded-xl border border-white/10 flex flex-col items-center justify-center text-center shadow-md">
