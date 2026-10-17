@@ -1547,9 +1547,13 @@ export const LOCALIZACAO_PADRAO: InfoLocalizacao = {
 };
 
 export const LOCAIS_PREDEFINIDOS = [
-  { nome: "VALADARES / GAIA", regiao: "Vila Nova de Gaia (Porto)", lat: 41.091, lon: -8.642 },
+  { nome: "VILA NOVA DE GAIA", regiao: "Gaia Centro / Mafamude / Devesas", lat: 41.133, lon: -8.617 },
+  { nome: "VALADARES / GAIA", regiao: "Gaia Sul / Litoral", lat: 41.091, lon: -8.642 },
   { nome: "PORTO / CENTRO", regiao: "Porto Centro / Boavista", lat: 41.158, lon: -8.629 },
   { nome: "AEROPORTO DO PORTO", regiao: "Francisco Sá Carneiro (OPO)", lat: 41.242, lon: -8.681 },
+  { nome: "MATOSINHOS", regiao: "Litoral Norte", lat: 41.182, lon: -8.690 },
+  { nome: "MAIA", regiao: "Grande Porto Norte", lat: 41.233, lon: -8.621 },
+  { nome: "ESPINHO", regiao: "Litoral Sul", lat: 40.993, lon: -8.641 },
   { nome: "LISBOA / AEROPORTO", regiao: "Humberto Delgado (LIS)", lat: 38.776, lon: -9.135 },
   { nome: "CASCAIS / OEIRAS", regiao: "Linha de Cascais / Tires", lat: 38.726, lon: -9.355 },
   { nome: "FARO / ALGARVE", regiao: "Aeroporto de Faro (FAO)", lat: 37.018, lon: -7.97 },
@@ -3654,6 +3658,38 @@ export default function PainelAnalogicoMobileFullscreen() {
                     {detalheErroGps}
                   </p>
                 )}
+              </div>
+
+              {/* Seleção Rápida de Localidades Predefinidas */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  SELEÇÃO RÁPIDA DE LOCALIDADE:
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                  {LOCAIS_PREDEFINIDOS.map((loc) => {
+                    const isAtivo =
+                      Math.abs(localizacao.lat - loc.lat) < 0.015 &&
+                      Math.abs(localizacao.lon - loc.lon) < 0.015;
+                    return (
+                      <button
+                        key={loc.nome}
+                        type="button"
+                        onClick={() => {
+                          selecionarLocalPredefinido(loc);
+                          tocarSomFlapClack(0.2);
+                        }}
+                        className={`p-2 rounded-xl border text-left flex flex-col gap-0.5 transition-all cursor-pointer ${
+                          isAtivo
+                            ? "bg-amber-400/20 border-amber-400 text-amber-300 shadow-md ring-1 ring-amber-400/50"
+                            : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white hover:border-white/20"
+                        }`}
+                      >
+                        <span className="text-[11px] font-black truncate">{loc.nome}</span>
+                        <span className="text-[9px] text-neutral-400 truncate">{loc.regiao}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Entrada Manual de Coordenadas */}
