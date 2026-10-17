@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.3.4  
+**Versão:** v2.4.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), emblemas oficiais de construtores aeronáuticos OEM (HondaJet, Cessna, Gulfstream, Embraer, Bombardier, etc.), motor de som unificado (SplitFlapAudioEngine em lib/sound.ts) com síntese precisa de clacks mecânicos na rotação de caracteres e jingle de cabine, internacionalização em 4 idiomas e persistência local.
+**Estado:** PWA completa com 3 ecrãs integrados, base de dados dedicada de aeronaves (ICAO) com cobertura alargada para jatos executivos (HondaJet, Citation, Phenom, Global, etc.), emblemas oficiais de construtores aeronáuticos OEM, motor de som unificado (lib/sound.ts), geolocalização híbrida inteligente (GPS satélite para telemóveis + fallback automático e botão dedicado por IP de rede para computadores/PC), internacionalização em 4 idiomas e persistência local.
 
 ---
 
@@ -357,6 +357,19 @@
    - Eliminação de todo o código redundante de sintetizador local e variáveis globais soltas.  
    - Conexão direta dos seletores de áudio do modal de opções `⚙️` e dos componentes `FlapCell` ao motor unificado.  
 **Consequência:** Arquitetura limpa, ficheiro `lib/sound.ts` totalmente ativo como fonte única da verdade para o áudio, e desempenho sem fugas de memória nem colisões de `AudioContext`.
+
+### ADR-054 — Geolocalização Híbrida Inteligente com Suporte a IP de Rede para Computadores / PC (2026-10-17)
+**Contexto:** No computador (PC de secretária ou portátil ligado por cabo Ethernet ou sem antenas de satélite ativas), o navegador disparava erro de tempo esgotado (`Timeout expired`), impedindo a obtenção automática de coordenadas para o radar de proximidade.  
+**Decisão:**  
+1. **Endpoint de Servidor Dedicado (`/api/geolocalizacao-ip`):**  
+   - Criação da rota Route Handler com múltiplos fornecedores em cascata (`ipapi.co`, `ipwho.is`, `freeipapi.com`) com timeout de segurança e leitura de cabeçalhos de proxy (`x-forwarded-for`, `x-real-ip`).  
+   - Devolve latitude, longitude, cidade e país com precisão aproximada (~2 a 4 km) e imunidade a bloqueadores de anúncios (adblockers).  
+2. **Fallback Automático Transparente:**  
+   - Redução do timeout do GPS do navegador para 7 segundos.  
+   - Se ocorrer erro de satélite (`TIMEOUT`, `PERMISSION_DENIED` ou `POSITION_UNAVAILABLE`), o sistema aciona de imediato e de forma transparente o fallback por IP, resolvendo a cidade e fixando o radar de voos sem bloquear o utilizador com ecrãs de erro.  
+3. **Controlos Dedicados:**  
+   - Adição do botão táctil `🌐 OBTER LOCALIZAÇÃO POR IP (IDEAL PARA PC)` tanto no modal `⚙️ OPÇÕES` como no Passo 2 do assistente de boas-vindas (*Onboarding*).  
+**Consequência:** Resolução instantânea e sem atritos da localização em computadores sem antena de satélite GPS, garantindo experiência suave e radar ativo em qualquer dispositivo à primeira tentativa.
 
 
 

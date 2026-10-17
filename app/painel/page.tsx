@@ -1822,24 +1822,73 @@ export default function PainelAnalogicoMobileFullscreen() {
     } catch { }
   }, []);
 
-  // Motor de Geolocalização com detecção de HTTPS e fallback de precisão
+  // Obtenção de Coordenadas por IP da Rede (Ideal para PC sem chip de GPS)
+  const obterLocalizacaoPorIp = useCallback(async (silencioso = false) => {
+    if (typeof window === "undefined") return;
+
+    setStatusGps("iniciando");
+    setDetalheErroGps("A consultar localização aproximada através do IP da rede...");
+
+    try {
+      const res = await fetch("/api/geolocalizacao-ip");
+      const data = await res.json();
+
+      if (data.sucesso && typeof data.lat === "number" && typeof data.lon === "number") {
+        const nomeGeo =
+          resolverLocalidadePorCoordenadas(data.lat, data.lon) ||
+          `${(data.cidade || "LOCALIDADE DETETADA").toUpperCase()} (${(data.pais || "PT").toUpperCase()})`;
+
+        const novo: InfoLocalizacao = {
+          lat: data.lat,
+          lon: data.lon,
+          nome: nomeGeo,
+          origem: "gps",
+        };
+        setLocalizacao(novo);
+        setStatusGps("ativo");
+        setPrecisaoMetros(null);
+        setDetalheErroGps(`Localização obtida por IP da rede (${nomeGeo}).`);
+        setLatManual(novo.lat.toString());
+        setLonManual(novo.lon.toString());
+        try {
+          localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
+        } catch { }
+        tocarSomFlapClack(0.3);
+        return true;
+      } else {
+        if (!silencioso) {
+          setStatusGps("erro");
+          setDetalheErroGps("Não foi possível obter localização por IP. Escolhe a localidade na lista abaixo.");
+        }
+        return false;
+      }
+    } catch {
+      if (!silencioso) {
+        setStatusGps("erro");
+        setDetalheErroGps("Falha ao contactar o serviço de localização por IP.");
+      }
+      return false;
+    }
+  }, []);
+
+  // Motor de Geolocalização com fallback automático por IP para PCs
   const obterGpsDoDispositivo = useCallback((altaPrecisao = true) => {
     if (typeof window === "undefined") return;
 
     if (!("geolocation" in navigator)) {
-      setStatusGps("erro");
-      setDetalheErroGps("O teu navegador não tem suporte a GPS.");
+      setDetalheErroGps("Navegador sem GPS físico. A tentar obter localização por IP...");
+      obterLocalizacaoPorIp(false);
       return;
     }
 
     if (window.isSecureContext === false) {
-      setStatusGps("bloqueado");
-      setDetalheErroGps("Contexto inseguro (HTTP). Os navegadores bloqueiam o GPS do telemóvel fora de HTTPS. Podes selecionar a tua localidade na lista ou sincronizar com o link do PC.");
+      setDetalheErroGps("Contexto HTTP inseguro. A obter localização por IP...");
+      obterLocalizacaoPorIp(false);
       return;
     }
 
     setStatusGps("iniciando");
-    setDetalheErroGps("A solicitar coordenadas ao satélite...");
+    setDetalheErroGps("A solicitar coordenadas de satélite / rede...");
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -1864,21 +1913,17 @@ export default function PainelAnalogicoMobileFullscreen() {
         } catch { }
       },
       (err) => {
+        // Se o GPS falhar por timeout (comum em PC sem antena) ou permissão, aciona o fallback por IP
         if (altaPrecisao && err.code === err.TIMEOUT) {
           obterGpsDoDispositivo(false);
         } else {
-          if (err.code === err.PERMISSION_DENIED) {
-            setStatusGps("bloqueado");
-            setDetalheErroGps("Permissão de GPS negada no browser do telemóvel. Escolhe a tua localidade abaixo.");
-          } else {
-            setStatusGps("erro");
-            setDetalheErroGps(`Falha de GPS (${err.message}). Escolhe a tua localidade abaixo.`);
-          }
+          setDetalheErroGps(`GPS não disponível no PC (${err.message}). A obter localização por IP da rede...`);
+          obterLocalizacaoPorIp(false);
         }
       },
-      { timeout: 15000, enableHighAccuracy: altaPrecisao, maximumAge: 10000 }
+      { timeout: 7000, enableHighAccuracy: altaPrecisao, maximumAge: 10000 }
     );
-  }, []);
+  }, [obterLocalizacaoPorIp]);
 
   // Refinamento Contínuo via watchPosition (activa o chip de satélite em telemóveis e melhora a precisão)
   useEffect(() => {
@@ -3584,15 +3629,26 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               </div>
 
-              {/* Botão GPS */}
-              <div className="flex flex-col gap-1.5">
+              {/* Botões de Localização (GPS e IP) */}
+              <div className="flex flex-col gap-2">
                 <button
+                  type="button"
                   onClick={() => obterGpsDoDispositivo(true)}
                   className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
                 >
                   <span>📡</span>
                   <span>OBTER COORDENADAS POR GPS (TELEMÓVEL / PC)</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => obterLocalizacaoPorIp(false)}
+                  className="w-full bg-sky-700/80 hover:bg-sky-600 active:scale-[0.99] text-white py-2 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-sky-400/30"
+                >
+                  <span>🌐</span>
+                  <span>OBTER LOCALIZAÇÃO POR IP (IDEAL PARA PC)</span>
+                </button>
+
                 {detalheErroGps && (
                   <p className="text-[10px] sm:text-xs text-amber-300 bg-amber-950/40 p-2 rounded border border-amber-500/30 leading-relaxed">
                     {detalheErroGps}
@@ -3848,16 +3904,29 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <span>{t.onboarding_concluir}</span>
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    obterGpsDoDispositivo(true);
-                  }}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
-                >
-                  <span>📡</span>
-                  <span>{t.onboarding_gps_btn}</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      obterGpsDoDispositivo(true);
+                    }}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-emerald-400/30"
+                  >
+                    <span>📡</span>
+                    <span>{t.onboarding_gps_btn}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      obterLocalizacaoPorIp(false);
+                    }}
+                    className="w-full bg-sky-700/80 hover:bg-sky-600 active:scale-[0.99] text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-sky-400/30"
+                  >
+                    <span>🌐</span>
+                    <span>OBTER POR IP DA REDE (PC)</span>
+                  </button>
+                </>
               )}
 
               <button
