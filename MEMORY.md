@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.6.1  
+**Versão:** v2.6.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização do ecrã de carregamento para LOADING, diretivas notranslate contra popups do Google Tradutor, suporte para unidades de temperatura (°C e °F) e distância (KM, NM e MI), arranque canónico padronizado sempre em inglês (English default boot), motor de áudio com pré-carregamento e chime aeronáutico de cabine, alerta ativo de novas atualizações.
 
 ---
 
@@ -458,6 +458,14 @@
 3. **Metadados Next.js:** Adicionada a propriedade `other: { google: "notranslate" }` em `export const metadata: Metadata`.  
 4. **Classe CSS de Isenção:** Classe `notranslate` atribuída a `<html>` e `<body>`.  
 **Consequência:** Os motores de tradução automática do Google Chrome, Edge e Chromium respeitam a diretiva oficial e não voltam a apresentar a caixa de tradução automática, mantendo o ecrã limpo.
+
+### ADR-061 — Internacionalização do Ecrã de Carregamento para LOADING no Arranque (2026-10-17)
+**Contexto:** O ecrã inicial de montagem enquanto os voos são recolhidos continha a string estática "A CARREGAR" codificada no template, em vez de respeitar o arranque em inglês ("LOADING").  
+**Decisão:**  
+1. **Chave de Tradução `estado_carregando`:** Adicionada à interface `DicionarioTraducoes` em `lib/i18n.ts` com os valores `"LOADING"` (EN), `"A CARREGAR"` (PT), `"CHARGEMENT"` (FR) e `"CARGANDO"` (ES).  
+2. **Substituição Dinâmica no Painel:** O componente `PainelAnalogicoMobileFullscreen` consome agora `t.estado_carregando || "LOADING"` no visor de matriz LED central (`LedText`).  
+**Consequência:** Consistência linguística absoluta desde o primeiro milissegundo de arranque da aplicação, apresentando `LOADING` por defeito.
+
 
 
 

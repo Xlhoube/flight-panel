@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.6.1",
-  buildId: "build-20261017-v261",
+  versao: "2.6.2",
+  buildId: "build-20261017-v262",
   dataLancamento: "2026-10-17",
-  descricao: "Diretivas canónicas notranslate para desativação do popup de tradução automática dos browsers.",
+  descricao: "Internacionalização integral do ecrã de carregamento para LOADING no arranque.",
 };

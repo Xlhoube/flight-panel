@@ -2490,10 +2490,10 @@ export default function PainelAnalogicoMobileFullscreen() {
         /* ── PAINEL INTEGRADO SEM MOLDURA EXTERNA (EDGE-TO-EDGE) ─────────────── */
         <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-1 sm:gap-1.5 overflow-hidden">
 
-        {/* ── ESTADO A CARREGAR ───────────────────────────────────────────── */}
+        {/* ── ESTADO A CARREGAR / LOADING ─────────────────────────────────── */}
         {carregando && (
           <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-            <LedText text="A CARREGAR" size="lg" />
+            <LedText text={t.estado_carregando || "LOADING"} size="lg" />
           </div>
         )}
 

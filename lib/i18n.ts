@@ -32,6 +32,7 @@ export interface DicionarioTraducoes {
   rotulo_destino: string;
   estado_em_voo: string;
   estado_no_solo: string;
+  estado_carregando: string;
 
   // Linha 3 (Telemetria)
   rotulo_altitude: string;
@@ -173,6 +174,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     rotulo_destino: "DESTINO",
     estado_em_voo: "EM VOO",
     estado_no_solo: "NO SOLO",
+    estado_carregando: "A CARREGAR",
 
     // Linha 3 (Telemetria)
     rotulo_altitude: "ALTITUDE",
@@ -313,6 +315,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     rotulo_destino: "DESTINATION",
     estado_em_voo: "AIRBORNE",
     estado_no_solo: "ON GROUND",
+    estado_carregando: "LOADING",
 
     // Line 3 (Telemetry)
     rotulo_altitude: "ALTITUDE",
@@ -453,6 +456,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     rotulo_destino: "DESTINATION",
     estado_em_voo: "EN VOL",
     estado_no_solo: "AU SOL",
+    estado_carregando: "CHARGEMENT",
 
     // Ligne 3 (Télémétrie)
     rotulo_altitude: "ALTITUDE",
@@ -593,6 +597,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     rotulo_destino: "DESTINO",
     estado_em_voo: "EN VUELO",
     estado_no_solo: "EN TIERRA",
+    estado_carregando: "CARGANDO",
 
     // Línea 3 (Telemetría)
     rotulo_altitude: "ALTITUD",
