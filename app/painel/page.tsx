@@ -3470,7 +3470,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     className="w-full py-1.5 px-2 bg-amber-400/15 hover:bg-amber-400/25 active:scale-[0.99] border border-amber-400/50 rounded-lg text-amber-300 font-mono text-[10px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
                   >
                     <span>🔔</span>
-                    <span>TESTAR SOM DE NOVO VOO (/Flight.mp3)</span>
+                    <span>{t.opcoes_testar_som_novo_voo}</span>
                   </button>
                 </div>
               </div>

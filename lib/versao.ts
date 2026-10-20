@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.8.1",
-  buildId: "build-20261020-v281",
+  versao: "2.8.2",
+  buildId: "build-20261020-v282",
   dataLancamento: "2026-10-20",
-  descricao: "Substituição dos caracteres de bandeira emoji por bandeiras vetoriais SVG nítidas no seletor de idioma.",
+  descricao: "Remoção do nome do ficheiro (/Flight.mp3) no botão de teste de som e internacionalização nas 4 línguas.",
 };

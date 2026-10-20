@@ -90,6 +90,7 @@ export interface DicionarioTraducoes {
   opcoes_audio_desativado: string;
   opcoes_volume_titulo: string;
   opcoes_volume_silenciado: string;
+  opcoes_testar_som_novo_voo: string;
   opcoes_altitude_titulo: string;
   opcoes_altitude_subtitulo: string;
   opcoes_unidade_pes: string;
@@ -260,6 +261,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_audio_desativado: "DESATIVADO",
     opcoes_volume_titulo: "VOLUME INDEPENDENTE",
     opcoes_volume_silenciado: "SILENCIADO",
+    opcoes_testar_som_novo_voo: "TESTAR SOM DE NOVO VOO",
     opcoes_altitude_titulo: "ALTITUDE",
     opcoes_altitude_subtitulo: "Telemetria",
     opcoes_unidade_pes: "PÉS (FT)",
@@ -429,6 +431,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_audio_desativado: "DISABLED",
     opcoes_volume_titulo: "INDEPENDENT VOLUME",
     opcoes_volume_silenciado: "MUTED",
+    opcoes_testar_som_novo_voo: "TEST NEW FLIGHT SOUND",
     opcoes_altitude_titulo: "ALTITUDE",
     opcoes_altitude_subtitulo: "Telemetry",
     opcoes_unidade_pes: "FEET (FT)",
@@ -598,6 +601,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_audio_desativado: "DÉSACTIVÉ",
     opcoes_volume_titulo: "VOLUME INDÉPENDANT",
     opcoes_volume_silenciado: "EN SOURDINE",
+    opcoes_testar_som_novo_voo: "TESTER LE SON DU NOUVEAU VOL",
     opcoes_altitude_titulo: "ALTITUDE",
     opcoes_altitude_subtitulo: "Télémétrie",
     opcoes_unidade_pes: "PIEDS (FT)",
@@ -767,6 +771,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_audio_desativado: "DESACTIVADO",
     opcoes_volume_titulo: "VOLUMEN INDEPENDIENTE",
     opcoes_volume_silenciado: "SILENCIADO",
+    opcoes_testar_som_novo_voo: "PROBAR SONIDO DE NUEVO VUELO",
     opcoes_altitude_titulo: "ALTITUD",
     opcoes_altitude_subtitulo: "Telemetría",
     opcoes_unidade_pes: "PIES (FT)",

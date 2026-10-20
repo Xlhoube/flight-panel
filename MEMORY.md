@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.8.1  
+**Versão:** v2.8.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-20  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização total dos modais de onboarding (passos 1 e 2, vantagens, badges e botões) e de localização em 4 idiomas (PT, EN, FR, ES), eliminação de emojis duplicados, e pesquisa automática e silenciosa de localização em segundo plano a cada arranque da aplicação (GPS com fallback automático para IP da rede).
+**Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização total dos modais de onboarding e de opções em 4 idiomas (PT, EN, FR, ES), bandeiras vetoriais SVG nítidas, pesquisa silenciosa de GPS/IP no arranque e rótulo limpo do botão de teste de som sem menção a ficheiros técnicos.
 
 ---
 
@@ -556,3 +556,16 @@
 1. **Componentes Vetoriais SVG Dedicados (`components/IconesBandeiras.tsx`):** Criação dos gráficos vetoriais autênticos e proporcionados para Portugal (verde, vermelho, esfera armilar e quinas), Reino Unido (Union Jack autêntica), França (tricolor vertical) e Espanha (vermelho/amarelo com brasão simplificado).  
 2. **Substituição Visual:** No modal de opções (`app/painel/page.tsx`), o seletor de idiomas passou a renderizar `<IconeBandeira>` com cantos subtilmente arredondados e sombra discreta tanto no título do idioma ativo como no interior de cada um dos quatro botões táteis.  
 **Consequência:** Apresentação gráfica nítida e consistente de bandeiras em qualquer sistema operativo (Windows, macOS, Linux, Android e iOS), eliminando completamente a duplicação de texto.
+
+### ADR-071 — Remoção do Nome de Ficheiro no Botão de Teste de Som e Internacionalização (2026-10-20)
+**Contexto:** O utilizador solicitou a remoção do nome do ficheiro técnico (`(/Flight.mp3)`) presente no botão de teste de áudio do modal de opções, o qual exibia `TESTAR SOM DE NOVO VOO (/Flight.mp3)`.  
+**Decisão:**  
+1. **Remoção de Detalhes de Implementação da Interface:** Eliminação da menção técnica ao caminho `/Flight.mp3` no botão de teste.  
+2. **Internacionalização Estrita:** Criação da chave `opcoes_testar_som_novo_voo` em `lib/i18n.ts` com traduções completas nas 4 línguas:
+   - PT: `"TESTAR SOM DE NOVO VOO"`
+   - EN: `"TEST NEW FLIGHT SOUND"`
+   - FR: `"TESTER LE SON DU NOUVEAU VOL"`
+   - ES: `"PROBAR SONIDO DE NUEVO VUELO"`  
+3. **Ligação no Painel:** Substituição do texto em `app/painel/page.tsx` por `{t.opcoes_testar_som_novo_voo}`.  
+**Consequência:** Interface de utilizador polida, profissional e uniforme em todos os idiomas suportados, sem expor artefactos ou nomes de ficheiros internos.
+
