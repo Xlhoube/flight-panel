@@ -207,6 +207,20 @@ export interface DicionarioTraducoes {
   onboarding_concluir: string;
   onboarding_concluir_btn: string;
   onboarding_raio_rotulo: string;
+
+  // Alerta de Atualização (PWA / Cockpit)
+  alerta_atualizacao_titulo: string;
+  alerta_atualizacao_desc_prefix: string;
+  alerta_atualizacao_desc_sufixo: string;
+  alerta_atualizacao_novidades: string;
+  alerta_atualizacao_btn_agora: string;
+  alerta_atualizacao_btn_recarregar: string;
+  alerta_atualizacao_btn_adiar: string;
+  alerta_atualizacao_adiar_tooltip: string;
+  alerta_atualizacao_a_reiniciar: string;
+  alerta_atualizacao_pill_tooltip: string;
+  alerta_atualizacao_pill_disponivel: string;
+  alerta_atualizacao_pill_btn: string;
 }
 
 export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
@@ -399,6 +413,20 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     onboarding_concluir: "ENTRAR NO PAINEL ➔",
     onboarding_concluir_btn: "CONCLUIR",
     onboarding_raio_rotulo: "Raio",
+
+    // Alerta de Atualização (PWA / Cockpit)
+    alerta_atualizacao_titulo: "SISTEMA AERONÁUTICO • NOVA VERSÃO DISPONÍVEL",
+    alerta_atualizacao_desc_prefix: "Uma nova versão do ",
+    alerta_atualizacao_desc_sufixo: " foi compilada e está pronta para entrar em ação no teu ecrã.",
+    alerta_atualizacao_novidades: "NOVIDADES:",
+    alerta_atualizacao_btn_agora: "ATUALIZAR AGORA",
+    alerta_atualizacao_btn_recarregar: "(Recarregar)",
+    alerta_atualizacao_btn_adiar: "⏱️ ADIAR",
+    alerta_atualizacao_adiar_tooltip: "Lembrar novamente daqui a 15 minutos",
+    alerta_atualizacao_a_reiniciar: "A REINICIAR SISTEMA...",
+    alerta_atualizacao_pill_tooltip: "Clica para ver detalhes da nova versão",
+    alerta_atualizacao_pill_disponivel: "DISPONÍVEL",
+    alerta_atualizacao_pill_btn: "ATUALIZAR",
   },
 
   en: {
@@ -590,6 +618,20 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     onboarding_concluir: "ENTER PANEL ➔",
     onboarding_concluir_btn: "FINISH",
     onboarding_raio_rotulo: "Radius",
+
+    // Update Alert (PWA / Cockpit)
+    alerta_atualizacao_titulo: "AERONAUTICAL SYSTEM • NEW VERSION AVAILABLE",
+    alerta_atualizacao_desc_prefix: "A new version of ",
+    alerta_atualizacao_desc_sufixo: " has been compiled and is ready to take flight on your screen.",
+    alerta_atualizacao_novidades: "WHAT'S NEW:",
+    alerta_atualizacao_btn_agora: "UPDATE NOW",
+    alerta_atualizacao_btn_recarregar: "(Reload)",
+    alerta_atualizacao_btn_adiar: "⏱️ POSTPONE",
+    alerta_atualizacao_adiar_tooltip: "Remind again in 15 minutes",
+    alerta_atualizacao_a_reiniciar: "RESTARTING SYSTEM...",
+    alerta_atualizacao_pill_tooltip: "Click to view new version details",
+    alerta_atualizacao_pill_disponivel: "AVAILABLE",
+    alerta_atualizacao_pill_btn: "UPDATE",
   },
 
   fr: {
@@ -781,6 +823,20 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     onboarding_concluir: "OUVRIR LE PANNEAU ➔",
     onboarding_concluir_btn: "TERMINER",
     onboarding_raio_rotulo: "Rayon",
+
+    // Alerte de mise à jour (PWA / Cockpit)
+    alerta_atualizacao_titulo: "SYSTÈME AÉRONAUTIQUE • NOUVELLE VERSION DISPONIBLE",
+    alerta_atualizacao_desc_prefix: "Une nouvelle version de ",
+    alerta_atualizacao_desc_sufixo: " a été compilée et est prête à entrer en action sur votre écran.",
+    alerta_atualizacao_novidades: "NOUVEAUTÉS :",
+    alerta_atualizacao_btn_agora: "METTRE À JOUR",
+    alerta_atualizacao_btn_recarregar: "(Recharger)",
+    alerta_atualizacao_btn_adiar: "⏱️ REPORTER",
+    alerta_atualizacao_adiar_tooltip: "Rappeler dans 15 minutes",
+    alerta_atualizacao_a_reiniciar: "REDÉMARRAGE DU SYSTÈME...",
+    alerta_atualizacao_pill_tooltip: "Cliquez pour voir les détails de la nouvelle version",
+    alerta_atualizacao_pill_disponivel: "DISPONIBLE",
+    alerta_atualizacao_pill_btn: "METTRE À JOUR",
   },
 
   es: {
@@ -972,6 +1028,20 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     onboarding_concluir: "ENTRAR AL PANEL ➔",
     onboarding_concluir_btn: "FINALIZAR",
     onboarding_raio_rotulo: "Radio",
+
+    // Alerta de Actualización (PWA / Cockpit)
+    alerta_atualizacao_titulo: "SISTEMA AERONÁUTICO • NUEVA VERSIÓN DISPONIBLE",
+    alerta_atualizacao_desc_prefix: "Una nueva versión de ",
+    alerta_atualizacao_desc_sufixo: " ha sido compilada y está lista para entrar en acción en tu pantalla.",
+    alerta_atualizacao_novidades: "NOVEDADES:",
+    alerta_atualizacao_btn_agora: "ACTUALIZAR AHORA",
+    alerta_atualizacao_btn_recarregar: "(Recargar)",
+    alerta_atualizacao_btn_adiar: "⏱️ POSPONER",
+    alerta_atualizacao_adiar_tooltip: "Recordar en 15 minutos",
+    alerta_atualizacao_a_reiniciar: "REINICIANDO SISTEMA...",
+    alerta_atualizacao_pill_tooltip: "Haz clic para ver detalles de la nueva versión",
+    alerta_atualizacao_pill_disponivel: "DISPONIBLE",
+    alerta_atualizacao_pill_btn: "ACTUALIZAR",
   },
 };
 

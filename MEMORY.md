@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.9.0  
+**Versão:** v2.10.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-20  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, suporte completo a Milhas por Hora (MPH) em velocidade e telemetria, botões directos de teste e refresh de posição geográfica (GPS/IP) no modal de opções, e eliminação total de listas de localidades predefinidas.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, e internacionalização integral do alerta de nova versão nos 4 idiomas (PT, EN, FR, ES) com sincronização reativa imediata.
 
 ---
 
@@ -609,5 +609,27 @@
    - Indicador discreto com lua (`🌙`) na barra de estado e dica flutuante translúcida.
    - Persistência das preferências em `localStorage` e traduções completas nos 4 idiomas (PT, EN, FR, ES) em `lib/i18n.ts`.
 **Consequência:** Experiência visual do Ecrã 2 unificada com o detalhe aeronáutico de topo, e proteção completa do repouso noturno com silêncio e escuridão automáticos sem necessidade de desligar o dispositivo.
+
+### ADR-074 — Internacionalização Completa do Alerta de Atualização / Cockpit PWA (2026-10-20)
+**Contexto:** O utilizador reportou que o modal flutuante de alerta de nova versão compilada continuava a apresentar os seus textos fixos em português (`SISTEMA AERONÁUTICO • NOVA VERSÃO DISPONÍVEL`, `Uma nova versão do Flight Panel foi compilada e está pronta para entrar em ação no teu ecrã.`, `NOVIDADES:`, `ATUALIZAR AGORA (RECARREGAR)`, `ADIAR`), devendo obedecer dinamicamente ao idioma ativo na aplicação.
+
+**Decisão:**
+1. **Internacionalização em `lib/i18n.ts`:**
+   - Adicionadas 12 novas chaves ao contrato `DicionarioTraducoes` e respetivas traduções nativas para Português, Inglês, Francês e Espanhol:
+     - `alerta_atualizacao_titulo`
+     - `alerta_atualizacao_desc_prefix` & `alerta_atualizacao_desc_sufixo`
+     - `alerta_atualizacao_novidades`
+     - `alerta_atualizacao_btn_agora` & `alerta_atualizacao_btn_recarregar`
+     - `alerta_atualizacao_btn_adiar` & `alerta_atualizacao_adiar_tooltip`
+     - `alerta_atualizacao_a_reiniciar`
+     - `alerta_atualizacao_pill_tooltip`, `alerta_atualizacao_pill_disponivel` & `alerta_atualizacao_pill_btn`
+2. **Componente Reativo `components/AlertaAtualizacao.tsx`:**
+   - Integração com `useMemo(() => TRADUCOES[idioma] || TRADUCOES.en, [idioma])`.
+   - Leitura de preferências de idioma em `localStorage` (`flightpanel_idioma` e `flight_panel_user_settings.idioma`) no ciclo de montagem.
+   - Escuta síncrona do evento customizado `flightpanel_idioma_alterado` e do evento de janela `storage`, permitindo atualização visual imediata de todo o texto do alerta sem necessidade de recarregar a página.
+   - Suporte para `descricaoMultilingue` no payload da API `/api/versao` (`lib/versao.ts`), garantindo que o resumo de novidades de novas compilações é automaticamente traduzido na língua selecionada.
+3. **Emissão de Eventos em `app/painel/page.tsx`:**
+   - Adicionada a emissão de `window.dispatchEvent(new CustomEvent("flightpanel_idioma_alterado", { detail: novo }))` nas funções `alternarIdioma` e `guardarDefinicoes`.
+**Consequência:** Experiência 100% harmonizada e localizada em todas as línguas suportadas; o popup de nova versão adapta-se em tempo real ao idioma em exibição no painel.
 
 

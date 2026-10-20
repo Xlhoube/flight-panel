@@ -1810,6 +1810,7 @@ export default function PainelAnalogicoMobileFullscreen() {
       const configSalva = localStorage.getItem("flight_panel_user_settings");
       const parsed = configSalva ? JSON.parse(configSalva) : {};
       localStorage.setItem("flight_panel_user_settings", JSON.stringify({ ...parsed, idioma: novo, raioKm }));
+      window.dispatchEvent(new CustomEvent("flightpanel_idioma_alterado", { detail: novo }));
     } catch { }
     if (somAtivo) {
       tocarSomFlapClack(0.2);
@@ -1993,6 +1994,10 @@ export default function PainelAnalogicoMobileFullscreen() {
       localStorage.setItem("flight_panel_luminosidade_auto", valorAutoLum.toString());
       localStorage.setItem("flightpanel_idioma", defs.idioma);
       localStorage.setItem("flight_panel_raio_km", valorRaio.toString());
+      if (defs.idioma) {
+        setIdioma(defs.idioma);
+        window.dispatchEvent(new CustomEvent("flightpanel_idioma_alterado", { detail: defs.idioma }));
+      }
     } catch { }
   };
 

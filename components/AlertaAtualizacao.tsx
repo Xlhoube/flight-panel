@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { INFO_VERSAO, InfoVersao } from "@/lib/versao";
 import { tocarSomFlapClack } from "@/lib/sound";
+import { TRADUCOES, Idioma } from "@/lib/i18n";
 
 export default function AlertaAtualizacao() {
   const [novaVersaoInfo, setNovaVersaoInfo] = useState<InfoVersao | null>(null);
@@ -10,6 +11,50 @@ export default function AlertaAtualizacao() {
   const [atualizando, setAtualizando] = useState(false);
   const [estaAdiado, setEstaAdiado] = useState<boolean>(false);
   const timerAdiadoRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Idioma selecionado pelo utilizador (com arranque padrão em inglês ou restaurado de localStorage)
+  const [idioma, setIdioma] = useState<Idioma>("en");
+
+  // Escuta imediata de alterações de idioma em localStorage e eventos de aplicação
+  useEffect(() => {
+    const carregarIdioma = () => {
+      try {
+        const salvo = localStorage.getItem("flightpanel_idioma");
+        if (salvo === "pt" || salvo === "en" || salvo === "fr" || salvo === "es") {
+          setIdioma(salvo);
+          return;
+        }
+        const userSettings = localStorage.getItem("flight_panel_user_settings");
+        if (userSettings) {
+          const parsed = JSON.parse(userSettings);
+          if (parsed.idioma && ["pt", "en", "fr", "es"].includes(parsed.idioma)) {
+            setIdioma(parsed.idioma);
+          }
+        }
+      } catch { }
+    };
+
+    carregarIdioma();
+
+    const handleCustomIdioma = (e: Event) => {
+      const custom = e as CustomEvent<Idioma>;
+      if (custom.detail && ["pt", "en", "fr", "es"].includes(custom.detail)) {
+        setIdioma(custom.detail);
+      } else {
+        carregarIdioma();
+      }
+    };
+
+    window.addEventListener("flightpanel_idioma_alterado", handleCustomIdioma);
+    window.addEventListener("storage", handleCustomIdioma);
+
+    return () => {
+      window.removeEventListener("flightpanel_idioma_alterado", handleCustomIdioma);
+      window.removeEventListener("storage", handleCustomIdioma);
+    };
+  }, []);
+
+  const t = useMemo(() => TRADUCOES[idioma] || TRADUCOES.en, [idioma]);
 
   // Registo da versão inicial com que a página foi carregada
   const versaoInicialRef = useRef<string>(INFO_VERSAO.versao);
@@ -161,12 +206,12 @@ export default function AlertaAtualizacao() {
             }
           }}
           className="flex items-center gap-2 px-3 py-1.5 bg-[#0f172a]/95 hover:bg-[#1e293b] border border-cyan-400/60 rounded-full text-cyan-300 text-xs font-mono shadow-[0_0_15px_rgba(6,182,212,0.35)] backdrop-blur-md transition-all animate-pulse"
-          title="Clique para ver detalhes da nova versão"
+          title={t.alerta_atualizacao_pill_tooltip}
         >
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-          <span>v{novaVersaoInfo.versao} DISPONÍVEL</span>
+          <span>v{novaVersaoInfo.versao} {t.alerta_atualizacao_pill_disponivel}</span>
           <span className="text-[10px] bg-cyan-950/80 px-1.5 py-0.5 rounded text-cyan-200 border border-cyan-500/30">
-            ATUALIZAR
+            {t.alerta_atualizacao_pill_btn}
           </span>
         </button>
       </div>
@@ -186,7 +231,7 @@ export default function AlertaAtualizacao() {
               <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500 shadow-[0_0_10px_#06b6d4]" />
             </span>
             <span className="font-mono font-black text-xs sm:text-sm tracking-widest text-cyan-300 uppercase">
-              SISTEMA AERONÁUTICO • NOVA VERSÃO DISPONÍVEL
+              {t.alerta_atualizacao_titulo}
             </span>
           </div>
 
@@ -200,13 +245,13 @@ export default function AlertaAtualizacao() {
         {/* Corpo do Alerta */}
         <div className="py-3 font-mono">
           <p className="text-neutral-200 text-xs sm:text-sm leading-relaxed font-semibold">
-            Uma nova versão do <span className="text-cyan-300 font-bold">Flight Panel</span> foi compilada e está pronta para entrar em ação no teu ecrã.
+            {t.alerta_atualizacao_desc_prefix}<span className="text-cyan-300 font-bold">Flight Panel</span>{t.alerta_atualizacao_desc_sufixo}
           </p>
 
-          {novaVersaoInfo.descricao && (
+          {(novaVersaoInfo.descricaoMultilingue?.[idioma] || novaVersaoInfo.descricao) && (
             <div className="mt-2 text-[11px] text-neutral-300 bg-black/40 p-2.5 rounded-lg border border-neutral-800/80 leading-normal">
-              <span className="text-cyan-400 font-bold mr-1.5">NOVIDADES:</span>
-              {novaVersaoInfo.descricao}
+              <span className="text-cyan-400 font-bold mr-1.5">{t.alerta_atualizacao_novidades}</span>
+              {novaVersaoInfo.descricaoMultilingue?.[idioma] || novaVersaoInfo.descricao}
             </div>
           )}
         </div>
@@ -240,12 +285,12 @@ export default function AlertaAtualizacao() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                <span>A REINICIAR SISTEMA...</span>
+                <span>{t.alerta_atualizacao_a_reiniciar}</span>
               </>
             ) : (
               <>
-                <span>🔄 ATUALIZAR AGORA</span>
-                <span className="text-[10px] opacity-75 font-normal">(Recarregar)</span>
+                <span>🔄 {t.alerta_atualizacao_btn_agora}</span>
+                <span className="text-[10px] opacity-75 font-normal">{t.alerta_atualizacao_btn_recarregar}</span>
               </>
             )}
           </button>
@@ -254,12 +299,13 @@ export default function AlertaAtualizacao() {
             onClick={adiarAtualizacao}
             disabled={atualizando}
             className="px-3 py-2.5 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 font-mono text-xs rounded-lg border border-neutral-700/80 transition-all cursor-pointer whitespace-nowrap"
-            title="Lembrar novamente daqui a 15 minutos"
+            title={t.alerta_atualizacao_adiar_tooltip}
           >
-            ⏱️ ADIAR
+            {t.alerta_atualizacao_btn_adiar}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
