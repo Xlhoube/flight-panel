@@ -9,6 +9,7 @@ import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/
 import { resolverInfoAeronave } from "@/lib/aeronaves-db";
 import { EmblemaFabricante } from "@/lib/fabricantes-logos";
 import { IconeBandeira } from "@/components/IconesBandeiras";
+import { INFO_VERSAO } from "@/lib/versao";
 import {
   tocarSomFlapClack,
   tocarRajadaFlaps,
@@ -3637,11 +3638,19 @@ export default function PainelAnalogicoMobileFullscreen() {
           >
             {/* Cabeçalho */}
             <div className="flex items-center justify-between border-b border-white/10 pb-2 shrink-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-base sm:text-lg">⚙️</span>
                 <h2 className="text-xs sm:text-sm font-black tracking-wider uppercase text-amber-400">
                   {t.opcoes_titulo}
                 </h2>
+                {/* Etiqueta com a versão atualizada */}
+                <div
+                  title={`Flight Panel v${INFO_VERSAO.versao} • ${INFO_VERSAO.buildId}`}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 text-[10px] sm:text-xs font-mono font-bold shadow-[0_0_12px_rgba(6,182,212,0.35)]"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  <span>v{INFO_VERSAO.versao}</span>
+                </div>
               </div>
               <button
                 onClick={() => setModalOpcoesAberto(false)}
@@ -4292,12 +4301,19 @@ export default function PainelAnalogicoMobileFullscreen() {
               </button>
             </div>
 
-            {/* Botão Fechar */}
-            <div className="pt-2 border-t border-white/10 flex justify-end shrink-0">
+            {/* Rodapé com Versão Atualizada e Botão Fechar */}
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-2 text-[10px] text-neutral-400 font-mono">
+                <span className="text-neutral-500 font-semibold">Flight Panel</span>
+                <span className="px-1.5 py-0.5 rounded bg-neutral-900 border border-cyan-500/30 text-cyan-300 font-bold">
+                  v{INFO_VERSAO.versao}
+                </span>
+                <span className="hidden sm:inline text-neutral-600 text-[9px]">• {INFO_VERSAO.dataLancamento}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setModalOpcoesAberto(false)}
-                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 active:scale-95 text-black font-black text-xs px-5 py-1.5 rounded-lg transition-all cursor-pointer shadow-md"
+                className="bg-amber-400 hover:bg-amber-300 active:scale-95 text-black font-black text-xs px-5 py-1.5 rounded-lg transition-all cursor-pointer shadow-md"
               >
                 {t.opcoes_guardar_fechar}
               </button>

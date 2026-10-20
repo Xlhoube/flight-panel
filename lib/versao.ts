@@ -9,14 +9,14 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.10.1",
-  buildId: "build-20261020-v2101",
+  versao: "2.10.2",
+  buildId: "build-20261020-v2102",
   dataLancamento: "2026-10-20",
-  descricao: "Internacionalização integral do alerta de nova versão (PWA / Cockpit) nos 4 idiomas (PT, EN, FR, ES) e sincronização reativa imediata.",
+  descricao: "Etiqueta luminosa com a versão atualizada no cabeçalho e rodapé do menu de opções (⚙️ OPÇÕES).",
   descricaoMultilingue: {
-    pt: "Internacionalização integral do alerta de nova versão (PWA / Cockpit) nos 4 idiomas (PT, EN, FR, ES) e sincronização reativa imediata.",
-    en: "Full internationalization of the new version alert (PWA / Cockpit) in 4 languages (PT, EN, FR, ES) with instant reactive sync.",
-    fr: "Internationalisation complète de l'alerte de nouvelle version (PWA / Cockpit) en 4 langues (PT, EN, FR, ES) avec synchronisation réactive.",
-    es: "Internacionalización integral de la alerta de nueva versión (PWA / Cockpit) en 4 idiomas (PT, EN, FR, ES) con sincronización reactiva inmediata.",
+    pt: "Etiqueta luminosa com a versão atualizada no cabeçalho e rodapé do menu de opções (⚙️ OPÇÕES).",
+    en: "Glowing updated version badge in the header and footer of the options menu (⚙️ OPTIONS).",
+    fr: "Badge lumineux avec la version mise à jour dans l'en-tête et pied de page du menu d'options (⚙️ OPTIONS).",
+    es: "Etiqueta luminosa con la versión actualizada en el encabezado y pie de página del menú de opciones (⚙️ OPCIONES).",
   },
 };

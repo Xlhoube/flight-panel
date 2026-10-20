@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.10.1  
+**Versão:** v2.10.2  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-20  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, e internacionalização integral do alerta de nova versão nos 4 idiomas (PT, EN, FR, ES) com sincronização reativa imediata.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização integral do alerta de nova versão nos 4 idiomas (PT, EN, FR, ES) e etiqueta luminosa da versão atualizada no menu de opções.
 
 ---
 
@@ -631,5 +631,18 @@
 3. **Emissão de Eventos em `app/painel/page.tsx`:**
    - Adicionada a emissão de `window.dispatchEvent(new CustomEvent("flightpanel_idioma_alterado", { detail: novo }))` nas funções `alternarIdioma` e `guardarDefinicoes`.
 **Consequência:** Experiência 100% harmonizada e localizada em todas as línguas suportadas; o popup de nova versão adapta-se em tempo real ao idioma em exibição no painel.
+
+### ADR-075 — Etiqueta de Versão Atualizada no Menu de Opções (2026-10-20)
+**Contexto:** O utilizador solicitou uma etiqueta com a versão atualizada no menu de opções (`No menu opções quer uma etiqueta com a versão atualizada`).
+
+**Decisão:**
+1. **Integração no Cabeçalho do Modal (`app/painel/page.tsx`):**
+   - Inclusão de um crachá de estilo cockpit junto ao título `⚙️ OPÇÕES`, com luz de pulso ciano e a versão atualizada (`v2.10.2`).
+   - Configuração de sombra luminescente `shadow-[0_0_12px_rgba(6,182,212,0.35)]`, fundo translúcido `bg-cyan-950/80` e borda `border-cyan-400/50`.
+   - Adição de tooltip nativo com o nome do sistema, número de versão e identificador de compilação (`Flight Panel v2.10.2 • build-20261020-v2102`).
+2. **Carimbo de Rodapé:**
+   - Adicionada menção de rodapé elegante ao lado do botão de fechar com o identificador da versão e respetiva data de lançamento.
+**Consequência:** O utilizador tem agora visibilidade imediata e permanente da versão ativa do Flight Panel sempre que abre o menu de definições.
+
 
 
