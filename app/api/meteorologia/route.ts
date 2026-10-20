@@ -28,12 +28,12 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const rawLat = parseFloat(searchParams.get("lat") || process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.091");
-  const rawLon = parseFloat(searchParams.get("lon") || process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.642");
+  const rawLat = parseFloat(searchParams.get("lat") || process.env.NEXT_PUBLIC_DEFAULT_LATITUDE || "41.047");
+  const rawLon = parseFloat(searchParams.get("lon") || process.env.NEXT_PUBLIC_DEFAULT_LONGITUDE || "-8.599");
 
   // Normalização a 2 casas decimais (~1.1 km) para garantir que telemóvel e PC no mesmo raio partilham exactamente a mesma estação meteorológica
-  const lat = (isNaN(rawLat) ? 41.09 : Number(rawLat.toFixed(2))).toString();
-  const lon = (isNaN(rawLon) ? -8.64 : Number(rawLon.toFixed(2))).toString();
+  const lat = (isNaN(rawLat) ? 41.05 : Number(rawLat.toFixed(2))).toString();
+  const lon = (isNaN(rawLon) ? -8.60 : Number(rawLon.toFixed(2))).toString();
 
   const rawKey = process.env.OPENWEATHER_API_KEY || "";
   const apiKey = rawKey.trim().replace(/^a_/, "");

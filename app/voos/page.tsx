@@ -39,9 +39,9 @@ interface InfoLocalizacao {
 }
 
 const LOCALIZACAO_PADRAO: InfoLocalizacao = {
-  lat: 41.15,
-  lon: -8.62,
-  nome: "VALADARES / PORTO",
+  lat: 41.047,
+  lon: -8.599,
+  nome: "SERZEDO / GAIA",
   origem: "padrao",
 };
 

@@ -9,14 +9,14 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.11.0",
-  buildId: "build-20261020-v2110",
+  versao: "2.11.1",
+  buildId: "build-20261020-v2111",
   dataLancamento: "2026-10-20",
-  descricao: "Implementação completa de SEO, Open Graph & Twitter Card com imagem de pré-visualização oficial, Sitemap, Robots e Dados Estruturados Schema.org.",
+  descricao: "Recalibração geodésica de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia, e motor dinâmico de georresolução reversa.",
   descricaoMultilingue: {
-    pt: "Implementação completa de SEO, Open Graph & Twitter Card com imagem de pré-visualização oficial, Sitemap, Robots e Dados Estruturados Schema.org.",
-    en: "Full SEO, Open Graph & Twitter Card implementation with official app preview image, Sitemap, Robots, and Schema.org Structured Data.",
-    fr: "Implémentation complète de SEO, Open Graph et Twitter Card avec image de prévisualisation officielle, Sitemap, Robots et données structurées Schema.org.",
-    es: "Implementación completa de SEO, Open Graph y Twitter Card con imagen de vista previa oficial, Sitemap, Robots y datos estructurados Schema.org.",
+    pt: "Recalibração geodésica de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia, e motor dinâmico de georresolução reversa.",
+    en: "High-precision geodetic recalibration with full support for Serzedo and Gaia parishes, plus dynamic reverse geocoding engine.",
+    fr: "Recalibrage géodésique de haute précision avec prise en charge intégrale de Serzedo et des paroisses de Gaia, et moteur dynamique de géoréférencement inverse.",
+    es: "Recalibración geodésica de alta precisión con soporte integral para Serzedo y parroquias de Gaia, y motor dinámico de georresolución inversa.",
   },
 };

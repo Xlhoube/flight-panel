@@ -1665,9 +1665,9 @@ export interface InfoLocalizacao {
 }
 
 export const LOCALIZACAO_PADRAO: InfoLocalizacao = {
-  lat: 41.091,
-  lon: -8.642,
-  nome: "VALADARES / GAIA",
+  lat: 41.047,
+  lon: -8.599,
+  nome: "SERZEDO / GAIA",
   origem: "padrao",
 };
 
@@ -2248,13 +2248,29 @@ export default function PainelAnalogicoMobileFullscreen() {
         setLocalizacao(novo);
         setStatusGps("ativo");
         if (!silencioso) {
-          setDetalheErroGps(`Sinal GPS fixado (${acc ? acc + "m de precisão" : "Excelente"}).`);
+          setDetalheErroGps(`Sinal GPS fixado em ${nomeGeo} (${acc ? "±" + acc + "m" : "Excelente"}).`);
         }
         setLatManual(novo.lat.toString());
         setLonManual(novo.lon.toString());
         try {
           localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
         } catch { }
+
+        // Refinamento assíncrono em tempo real da localidade exata (freguesia / concelho)
+        fetch(`/api/georresolucao?lat=${latFix}&lon=${lonFix}`)
+          .then((r) => r.json())
+          .then((geoData) => {
+            if (geoData?.sucesso && geoData?.nome && geoData.nome !== nomeGeo) {
+              setLocalizacao((atual) => {
+                const atualizado = { ...atual, nome: geoData.nome };
+                try {
+                  localStorage.setItem("flight_panel_user_location", JSON.stringify(atualizado));
+                } catch { }
+                return atualizado;
+              });
+            }
+          })
+          .catch(() => { });
       },
       (err) => {
         // Se o GPS falhar por timeout (comum em PC sem antena) ou permissão, aciona o fallback por IP
