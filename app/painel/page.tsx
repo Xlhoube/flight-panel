@@ -1615,6 +1615,19 @@ function calcularDistanciaHaversineKm(lat1: number, lon1: number, lat2: number, 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function formatarDistanciaDisplay(distKmNum: number | null | undefined, unidade: "KM" | "NM" | "MI"): string {
+  if (distKmNum == null || isNaN(distKmNum)) return "--";
+  if (unidade === "NM") {
+    const nm = distKmNum / 1.852;
+    return `${nm < 10 ? nm.toFixed(1) : Math.round(nm)} NM`;
+  }
+  if (unidade === "MI") {
+    const mi = distKmNum / 1.60934;
+    return `${mi < 10 ? mi.toFixed(1) : Math.round(mi)} MI`;
+  }
+  return `${distKmNum < 10 ? distKmNum.toFixed(1) : Math.round(distKmNum)} KM`;
+}
+
 function converterTemperatura(tempCelsius: number, unidade: "C" | "F"): { valor: number; simbolo: string; str: string } {
   if (unidade === "F") {
     const f = Math.round((tempCelsius * 9) / 5 + 32);
@@ -1622,6 +1635,25 @@ function converterTemperatura(tempCelsius: number, unidade: "C" | "F"): { valor:
   }
   const c = Math.round(tempCelsius);
   return { valor: c, simbolo: "°C", str: `${c}°C` };
+}
+
+function estaNoHorarioNoturno(inicio: string, fim: string, horaAtualStr: string): boolean {
+  if (!inicio || !fim || !horaAtualStr) return false;
+  const [hIni, mIni] = inicio.split(":").map(Number);
+  const [hFim, mFim] = fim.split(":").map(Number);
+  const [hAtu, mAtu] = horaAtualStr.split(":").map(Number);
+
+  if (isNaN(hIni) || isNaN(hFim) || isNaN(hAtu)) return false;
+
+  const minIni = hIni * 60 + (mIni || 0);
+  const minFim = hFim * 60 + (mFim || 0);
+  const minAtu = hAtu * 60 + (mAtu || 0);
+
+  if (minIni <= minFim) {
+    return minAtu >= minIni && minAtu < minFim;
+  } else {
+    return minAtu >= minIni || minAtu < minFim;
+  }
 }
 
 export interface InfoLocalizacao {
@@ -1637,8 +1669,6 @@ export const LOCALIZACAO_PADRAO: InfoLocalizacao = {
   nome: "VALADARES / GAIA",
   origem: "padrao",
 };
-
-
 
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
@@ -1667,6 +1697,12 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [luminosidadeAuto, setLuminosidadeAuto] = useState<boolean>(true);
   const [brilhoBoostAtivo, setBrilhoBoostAtivo] = useState<boolean>(false);
   const timerBrilhoBoostRef = useRef<NodeJS.Timeout | null>(null);
+  const [modoNoturnoManual, setModoNoturnoManual] = useState<boolean>(false);
+  const [modoNoturnoAuto, setModoNoturnoAuto] = useState<boolean>(false);
+  const [modoNoturnoInicio, setModoNoturnoInicio] = useState<string>("23:00");
+  const [modoNoturnoFim, setModoNoturnoFim] = useState<string>("07:00");
+  const [modoNoturnoAcordadoTemporario, setModoNoturnoAcordadoTemporario] = useState<boolean>(false);
+  const timerAcordarNoturnoRef = useRef<NodeJS.Timeout | null>(null);
   const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
   const [raioInput, setRaioInput] = useState<string>("20");
@@ -1726,6 +1762,18 @@ export default function PainelAnalogicoMobileFullscreen() {
           const rClamp = Math.max(1, Math.min(250, Math.round(parsed.raioKm)));
           setRaioKm(rClamp);
           setRaioInput(rClamp.toString());
+        }
+        if (typeof parsed.modoNoturnoManual === "boolean") {
+          setModoNoturnoManual(parsed.modoNoturnoManual);
+        }
+        if (typeof parsed.modoNoturnoAuto === "boolean") {
+          setModoNoturnoAuto(parsed.modoNoturnoAuto);
+        }
+        if (typeof parsed.modoNoturnoInicio === "string" && parsed.modoNoturnoInicio) {
+          setModoNoturnoInicio(parsed.modoNoturnoInicio);
+        }
+        if (typeof parsed.modoNoturnoFim === "string" && parsed.modoNoturnoFim) {
+          setModoNoturnoFim(parsed.modoNoturnoFim);
         }
       }
 
@@ -1847,6 +1895,67 @@ export default function PainelAnalogicoMobileFullscreen() {
     guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, luminosidadeManual, luminosidadeAuto, idioma, raioKm: rClamp });
   };
 
+  const alternarModoNoturnoManual = (novo: boolean) => {
+    setModoNoturnoManual(novo);
+    guardarDefinicoes({
+      somAtivo,
+      volumeSom,
+      unidadeAltitude,
+      unidadeVelocidade,
+      unidadeDistancia,
+      unidadeTemperatura,
+      luminosidadeManual,
+      luminosidadeAuto,
+      idioma,
+      raioKm,
+      modoNoturnoManual: novo,
+      modoNoturnoAuto,
+      modoNoturnoInicio,
+      modoNoturnoFim,
+    });
+  };
+
+  const alternarModoNoturnoAuto = (novo: boolean) => {
+    setModoNoturnoAuto(novo);
+    guardarDefinicoes({
+      somAtivo,
+      volumeSom,
+      unidadeAltitude,
+      unidadeVelocidade,
+      unidadeDistancia,
+      unidadeTemperatura,
+      luminosidadeManual,
+      luminosidadeAuto,
+      idioma,
+      raioKm,
+      modoNoturnoManual,
+      modoNoturnoAuto: novo,
+      modoNoturnoInicio,
+      modoNoturnoFim,
+    });
+  };
+
+  const alterarHorarioNoturno = (inicio: string, fim: string) => {
+    setModoNoturnoInicio(inicio);
+    setModoNoturnoFim(fim);
+    guardarDefinicoes({
+      somAtivo,
+      volumeSom,
+      unidadeAltitude,
+      unidadeVelocidade,
+      unidadeDistancia,
+      unidadeTemperatura,
+      luminosidadeManual,
+      luminosidadeAuto,
+      idioma,
+      raioKm,
+      modoNoturnoManual,
+      modoNoturnoAuto,
+      modoNoturnoInicio: inicio,
+      modoNoturnoFim: fim,
+    });
+  };
+
   const guardarDefinicoes = (defs: {
     somAtivo: boolean;
     volumeSom: number;
@@ -1858,6 +1967,10 @@ export default function PainelAnalogicoMobileFullscreen() {
     luminosidadeAuto?: boolean;
     idioma: Idioma;
     raioKm?: number;
+    modoNoturnoManual?: boolean;
+    modoNoturnoAuto?: boolean;
+    modoNoturnoInicio?: string;
+    modoNoturnoFim?: string;
   }) => {
     try {
       const valorRaio = defs.raioKm ?? raioKm;
@@ -1870,6 +1983,10 @@ export default function PainelAnalogicoMobileFullscreen() {
         luminosidadeManual: valorLum,
         luminosidadeAuto: valorAutoLum,
         raioKm: valorRaio,
+        modoNoturnoManual: defs.modoNoturnoManual ?? modoNoturnoManual,
+        modoNoturnoAuto: defs.modoNoturnoAuto ?? modoNoturnoAuto,
+        modoNoturnoInicio: defs.modoNoturnoInicio ?? modoNoturnoInicio,
+        modoNoturnoFim: defs.modoNoturnoFim ?? modoNoturnoFim,
       };
       localStorage.setItem("flight_panel_user_settings", JSON.stringify(payload));
       localStorage.setItem("flight_panel_luminosidade", valorLum.toString());
@@ -1952,6 +2069,7 @@ export default function PainelAnalogicoMobileFullscreen() {
 
   const [totalNoRadar, setTotalNoRadar] = useState(0);
   const [horaAtual, setHoraAtual] = useState("12:00");
+  const [horaComSegundos, setHoraComSegundos] = useState("12:00:00");
   const [dataAtual, setDataAtual] = useState("08 SET");
   const [rotasMap, setRotasMap] = useState<Record<string, any>>({});
   const rotasMapRef = useRef<Record<string, any>>({});
@@ -1961,15 +2079,46 @@ export default function PainelAnalogicoMobileFullscreen() {
     const atualizarTempo = () => {
       const agora = new Date();
       const h = agora.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+      const hSeg = agora.toLocaleTimeString("pt-PT");
       const dia = agora.getDate().toString().padStart(2, "0");
       const mes = obterMesAbreviado(agora.getMonth(), idioma);
       setHoraAtual(h);
+      setHoraComSegundos(hSeg);
       setDataAtual(`${dia} ${mes}`);
     };
     atualizarTempo();
     const interval = setInterval(atualizarTempo, 1000);
     return () => clearInterval(interval);
   }, [idioma]);
+
+  // Verificação de Modo Noturno ativo (manual ou por horário automático)
+  const estaNoHorarioNoturnoAtivo = useMemo(() => {
+    if (!modoNoturnoAuto) return false;
+    return estaNoHorarioNoturno(modoNoturnoInicio, modoNoturnoFim, horaAtual);
+  }, [modoNoturnoAuto, modoNoturnoInicio, modoNoturnoFim, horaAtual]);
+
+  const modoNoturnoAtivo = modoNoturnoManual || estaNoHorarioNoturnoAtivo;
+
+  // Ao ativar ou desativar o modo noturno, silencia ou restaura o motor de som
+  useEffect(() => {
+    if (modoNoturnoAtivo) {
+      definirSomHabilitado(false);
+    } else {
+      definirSomHabilitado(somAtivo);
+    }
+  }, [modoNoturnoAtivo, somAtivo]);
+
+  // Função para acordar temporariamente o ecrã no escuro ao tocar (15 segundos)
+  const acordarModoNoturnoTemporario = useCallback(() => {
+    if (!modoNoturnoAtivo) return;
+    setModoNoturnoAcordadoTemporario(true);
+    if (timerAcordarNoturnoRef.current) {
+      clearTimeout(timerAcordarNoturnoRef.current);
+    }
+    timerAcordarNoturnoRef.current = setTimeout(() => {
+      setModoNoturnoAcordadoTemporario(false);
+    }, 15000);
+  }, [modoNoturnoAtivo]);
 
   // Sincronização direta de coordenadas via URL (?lat=X&lon=Y) para partilha imediata PC -> Telemóvel
   useEffect(() => {
@@ -2530,7 +2679,13 @@ export default function PainelAnalogicoMobileFullscreen() {
       return;
     }
 
-    // 2. Apenas toca se estiver no Ecrã 1
+    // 2. Se o modo noturno estiver ativo, silêncio absoluto e sem boost de luminosidade
+    if (modoNoturnoAtivo) {
+      ultimoVooExibidoIdRef.current = idVoo;
+      return;
+    }
+
+    // 2.1 Apenas toca se estiver no Ecrã 1
     if (ecraAtivo !== "principal") {
       ultimoVooExibidoIdRef.current = idVoo;
       return;
@@ -2555,7 +2710,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     }
     ultimoVooExibidoIdRef.current = idVoo;
     ultimoSomTocadoTimestampRef.current = agora;
-  }, [vooAtual, ecraAtivo, luminosidadeAuto, dispararBoostLuminosidade]);
+  }, [vooAtual, ecraAtivo, luminosidadeAuto, dispararBoostLuminosidade, modoNoturnoAtivo]);
 
   // Assegura carregamento imediato da meteorologia ao entrar no 3º ecrã
   useEffect(() => {
@@ -2579,14 +2734,21 @@ export default function PainelAnalogicoMobileFullscreen() {
     : null;
 
   const infoVoo = vooAtual ? resolverVooInfo(vooAtual, rotasMap) : null;
-  const brilhoEfetivo = brilhoBoostAtivo ? 100 : luminosidadeManual;
-  const opacidadeDimmer = ((100 - brilhoEfetivo) / 100) * 0.88;
+  const emModoNoturnoEscuro = modoNoturnoAtivo && !modoNoturnoAcordadoTemporario;
+  const brilhoEfetivo = emModoNoturnoEscuro ? 2 : (brilhoBoostAtivo ? 100 : luminosidadeManual);
+  const opacidadeDimmer = emModoNoturnoEscuro ? 0.96 : ((100 - brilhoEfetivo) / 100) * 0.88;
 
   return (
     <main
-      onTouchStart={lidarComInicioArrasto}
+      onTouchStart={(e) => {
+        acordarModoNoturnoTemporario();
+        lidarComInicioArrasto(e);
+      }}
       onTouchEnd={lidarComFimArrasto}
-      onMouseDown={lidarComInicioArrasto}
+      onMouseDown={(e) => {
+        acordarModoNoturnoTemporario();
+        lidarComInicioArrasto(e);
+      }}
       onMouseUp={lidarComFimArrasto}
       className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1 sm:p-2 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.25rem,env(safe-area-inset-bottom))]"
     >
@@ -2673,6 +2835,21 @@ export default function PainelAnalogicoMobileFullscreen() {
                     <span>🛫</span>
                     <span>{Math.max(0, listaVoos.length - 1)}</span>
                   </button>
+
+                  {/* Indicador e Atalho Discreto de Modo Noturno Ativo */}
+                  {modoNoturnoAtivo && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setModalOpcoesAberto(true);
+                      }}
+                      title={t.opcoes_noturno_badge_ativo}
+                      className="h-6 sm:h-7 px-1.5 sm:px-2 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 transition-all flex items-center gap-1 text-[9px] sm:text-[10px] font-mono font-bold shadow-sm cursor-pointer shrink-0 animate-pulse"
+                    >
+                      <span>🌙</span>
+                      <span className="hidden xs:inline">{t.opcoes_noturno_ativar}</span>
+                    </button>
+                  )}
 
                   <button
                     onClick={(e) => {
@@ -3004,36 +3181,39 @@ export default function PainelAnalogicoMobileFullscreen() {
 
       </div >
       ) : ecraAtivo === "restantes" ? (
-        /* ── SEGUNDO ECRÃ: LISTA DOS RESTANTES VOOS (APENAS ORIGEM E DESTINO EM LEDS REDONDOS) ── */
-        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-2 sm:gap-3 overflow-hidden">
-          {/* CABEÇALHO DO SEGUNDO ECRÃ */}
-          <div className="w-full bg-[#10121a] p-2 sm:p-3 rounded-xl border border-white/10 flex items-center justify-between shadow-lg shrink-0">
-            <div className="flex items-center gap-2 sm:gap-3">
+        /* ── SEGUNDO ECRÃ: RADAR ADS-B COM CARTÕES DETALHADOS DE VOO ── */
+        <div className="w-full max-w-5xl h-full max-h-full flex flex-col justify-between gap-2 sm:gap-3 overflow-hidden font-mono">
+          {/* CABEÇALHO DO RADAR ADS-B (ECRÃ 2) */}
+          <header className="w-full bg-[#0c0e14] border border-white/15 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shrink-0">
+            <div className="flex items-center gap-2.5 sm:gap-3">
               <button
                 onClick={irParaPrincipal}
-                className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 text-amber-400 hover:text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                title="Voltar ao Voo Principal"
+                className="flex items-center gap-1.5 bg-sky-500/20 hover:bg-sky-500/35 active:scale-95 text-sky-300 hover:text-white px-2.5 sm:px-3 py-1.5 rounded-lg border border-sky-400/40 text-xs sm:text-sm font-bold font-mono transition-all cursor-pointer shadow-md shrink-0"
+                title={t.tab_voltar}
               >
-                <span>⟵</span>
-                <span className="hidden xs:inline">{t.opcoes_ecra_principal}</span>
+                <span>←</span>
+                <span>{t.tab_voltar}</span>
               </button>
-
-              <div className="flex flex-col">
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  {t.rotulo_radar}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm font-black text-white tracking-wider">
-                    {t.ecra2_titulo}
+              <div>
+                <h1 className="text-xs sm:text-sm font-black tracking-wider text-white uppercase flex items-center gap-2">
+                  <span>RADAR ADS-B</span>
+                  <span className="text-[9px] sm:text-[10px] bg-emerald-950/80 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-mono">
+                    {horaComSegundos}
                   </span>
-                  <span className="text-[10px] sm:text-xs font-mono px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/30 text-amber-300 font-bold">
-                    {Math.max(0, listaVoos.length - 1)} {t.no_radar.toUpperCase()}
-                  </span>
-                </div>
+                </h1>
+                <p className="text-[9px] sm:text-[11px] text-neutral-400">
+                  📍 {localizacao.nome.toUpperCase()} • {t.tab_raio_circular} {raioKm} KM
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs self-end sm:self-center">
+              <span className="bg-white/10 px-2 sm:px-2.5 py-1 rounded-lg border border-white/15 text-neutral-300 font-bold text-[10px] sm:text-xs">
+                {t.estado_em_voo}: <strong className="text-amber-400">{listaVoos.length}</strong>
+              </span>
+              <span className="bg-sky-500/15 px-2 sm:px-2.5 py-1 rounded-lg border border-sky-500/30 text-sky-300 font-bold text-[10px] sm:text-xs">
+                {t.tab_voo}: <strong className="text-white">{Math.max(0, listaVoos.length - 1)}</strong>
+              </span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -3041,68 +3221,218 @@ export default function PainelAnalogicoMobileFullscreen() {
                 }}
                 title={t.btn_opcoes}
                 aria-label={t.btn_opcoes}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-sm sm:text-base shadow-sm cursor-pointer shrink-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/5 hover:bg-white/15 active:scale-90 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center text-xs sm:text-sm shadow-sm cursor-pointer shrink-0"
               >
                 ⚙️
               </button>
             </div>
-          </div>
+          </header>
 
-          {/* LISTA DOS RESTANTES VOOS: APENAS ORIGEM E DESTINO COM LEDS REDONDOS */}
-          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-2.5 sm:gap-3.5">
-            {listaVoos.length <= 1 ? (
-              <div className="h-full flex flex-col items-center justify-center gap-2 text-center p-6 bg-[#10121a]/50 rounded-xl border border-white/5">
-                <LedText text={t.ecra2_sem_outros} size="lg" color="#94a3b8" />
-                <span className="text-xs text-neutral-400 mt-2">
-                  {t.ecra2_voo_principal_aviso}
+          {/* ÁREA DE SCROLL DOS CARTÕES DE VOO */}
+          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-3 sm:gap-4 pb-2">
+            {listaVoos.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center gap-3 text-center p-8 bg-[#10121a]/50 rounded-2xl border border-white/10 my-auto">
+                <span className="text-3xl sm:text-4xl">📡</span>
+                <span className="text-sm sm:text-base font-bold text-neutral-200">{t.tab_sem_outros_voos}</span>
+                <span className="text-xs text-neutral-400 max-w-md">
+                  {t.tab_sem_voos_desc_geral} {raioKm} km.
                 </span>
                 <button
                   onClick={irParaPrincipal}
-                  className="mt-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-amber-400 border border-white/20 transition-all cursor-pointer"
+                  className="mt-3 px-4 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/35 text-xs font-bold text-sky-300 border border-sky-400/30 transition-all cursor-pointer"
                 >
-                  ⟵ {t.opcoes_ecra_principal}
+                  ← {t.tab_voltar}
                 </button>
               </div>
             ) : (
-              listaVoos.slice(1).map((voo, idx) => {
-                const info = resolverVooInfo(voo, rotasMap);
-                return (
-                  <div
-                    key={voo[0] || idx}
-                    className="w-full bg-[#10121a] px-3 py-3 sm:py-4 rounded-xl border border-white/10 flex flex-col items-center justify-center gap-1.5 sm:gap-2 shadow-lg hover:border-white/25 transition-all"
-                  >
-                    {/* ORIGEM E DESTINO EM LEDS REDONDOS (CÓDIGOS IATA PRINCIPAIS) */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-8 flex-wrap">
-                      <div className="flex flex-col items-center">
-                        <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                          {t.ecra2_origem}
+              <>
+                {/* ── 1. VOO PRINCIPAL (MAIS PRÓXIMO) ── */}
+                {(() => {
+                  const voo = listaVoos[0];
+                  const info = resolverVooInfo(voo, rotasMap);
+                  const distKmNum =
+                    voo[6] != null && voo[5] != null
+                      ? calcularDistanciaHaversineKm(localizacao.lat, localizacao.lon, voo[6], voo[5])
+                      : null;
+                  const textoDistancia = formatarDistanciaDisplay(distKmNum, unidadeDistancia);
+
+                  return (
+                    <section className="bg-gradient-to-r from-emerald-950/40 via-[#10131d] to-[#0c0e14] border border-emerald-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg flex flex-col gap-2 shrink-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          {t.tab_voo_principal}
                         </span>
-                        <LedText text={info.origemCode || "---"} size="xl" color="#f4f9ff" />
-                      </div>
-
-                      <div className="flex flex-col items-center justify-center pt-2">
-                        <span className="text-amber-400 text-xl sm:text-2xl font-black">➔</span>
-                      </div>
-
-                      <div className="flex flex-col items-center">
-                        <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                          {t.ecra2_destino}
+                        <span className="text-xs sm:text-sm font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30 tabular-nums">
+                          📍 {textoDistancia}
                         </span>
-                        <LedText text={info.destinoCode || "---"} size="xl" color="#f4f9ff" />
                       </div>
-                    </div>
 
-                    {/* NOMES DAS CIDADES OU AEROPORTOS EM LEDS REDONDOS COMPLEMENTARES */}
-                    {(info.origem || info.destino) && (
-                      <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap pt-1.5 border-t border-white/5 w-full">
-                        <LedText text={info.origem || info.origemCode} size="sm" color="#fbbf24" />
-                        <span className="text-amber-400 text-xs font-bold">➔</span>
-                        <LedText text={info.destino || info.destinoCode} size="sm" color="#fbbf24" />
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <AirlineLogo
+                            icao={info.icao}
+                            iata={info.iata}
+                            nome={info.nomeCompanhia}
+                            callsign={info.callsign}
+                            fabricante={info.fabricante}
+                            modeloAeronave={info.aeronave}
+                          />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm sm:text-lg font-black text-white tracking-tight">
+                                {info.numeroVoo}
+                              </span>
+                              {info.callsignIata && info.callsignIata !== info.numeroVoo && (
+                                <span className="text-[9px] sm:text-xs text-sky-400 bg-sky-400/10 px-1.5 py-0.2 rounded border border-sky-400/20 font-bold">
+                                  {info.callsignIata}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] sm:text-xs text-neutral-400 truncate">
+                              {info.nomeCompanhia} • {info.aeronave}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <div className="text-xs sm:text-sm font-black text-amber-400">
+                            {info.origemCode} ➔ {info.destinoCode}
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-neutral-200 font-bold max-w-[260px] sm:max-w-none truncate sm:whitespace-normal">
+                            <span>{info.origem}</span>
+                            {info.origemAeroporto && <span className="text-amber-300/90 font-mono ml-1 font-semibold">({info.origemAeroporto})</span>}
+                            {info.origemPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{traduzirPais(info.origemPais, idioma)}]</span>}
+                            <span className="text-amber-400 mx-1.5">➔</span>
+                            <span>{info.destino}</span>
+                            {info.destinoAeroporto && <span className="text-amber-300/90 font-mono ml-1 font-semibold">({info.destinoAeroporto})</span>}
+                            {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{traduzirPais(info.destinoPais, idioma)}]</span>}
+                          </div>
+                          <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono mt-0.5">
+                            {unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude} • {unidadeVelocidade === "KTS" ? info.velocidadeKts : unidadeVelocidade === "KMH" ? info.velocidadeKmh : info.velocidadeMph} {unidadeVelocidade === "KTS" ? "KTS" : unidadeVelocidade === "KMH" ? "KMS" : "MPH"} • {info.rumo}°
+                          </div>
+                        </div>
                       </div>
-                    )}
+                    </section>
+                  );
+                })()}
+
+                {/* ── 2. SECÇÃO DOS VOOS RESTANTES NO RADAR ── */}
+                <section className="flex flex-col gap-2.5">
+                  <div className="flex items-center justify-between px-1">
+                    <h2 className="text-xs sm:text-sm font-black tracking-widest uppercase text-neutral-300 flex items-center gap-2">
+                      <span>✈️ {t.ecra2_titulo}</span>
+                      <span className="text-[10px] text-neutral-400 font-normal">
+                        ({t.tab_distancia})
+                      </span>
+                    </h2>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {t.tab_total}: {Math.max(0, listaVoos.length - 1)}
+                    </span>
                   </div>
-                );
-              })
+
+                  {listaVoos.length <= 1 ? (
+                    <div className="bg-[#10121a] p-6 sm:p-8 rounded-xl border border-white/10 text-center text-neutral-400 text-xs sm:text-sm font-mono flex flex-col items-center justify-center gap-2">
+                      <span className="text-2xl">📡</span>
+                      <span className="text-neutral-200 font-bold">{t.tab_sem_outros_voos}</span>
+                      <span className="text-[11px] text-neutral-400 max-w-md">
+                        {t.tab_sem_outros_voos_desc_com_principal} {raioKm} km.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2.5">
+                      {listaVoos.slice(1).map((voo, idx) => {
+                        const info = resolverVooInfo(voo, rotasMap);
+                        const distKmNum =
+                          voo[6] != null && voo[5] != null
+                            ? calcularDistanciaHaversineKm(localizacao.lat, localizacao.lon, voo[6], voo[5])
+                            : null;
+                        const textoDistancia = formatarDistanciaDisplay(distKmNum, unidadeDistancia);
+
+                        return (
+                          <div
+                            key={voo[0] || idx}
+                            className="bg-[#10121a] hover:bg-[#141824] border border-white/10 hover:border-white/20 rounded-xl p-3 sm:p-4 shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0"
+                          >
+                            {/* Esquerda: Ordem, Logótipo, Voo e Aeronave */}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className="text-xs font-bold text-neutral-400 font-mono w-6 text-center shrink-0">
+                                #{idx + 2}
+                              </span>
+
+                              <AirlineLogo
+                                icao={info.icao}
+                                iata={info.iata}
+                                nome={info.nomeCompanhia}
+                                callsign={info.callsign}
+                                fabricante={info.fabricante}
+                                modeloAeronave={info.aeronave}
+                              />
+
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm sm:text-base font-black text-white tracking-wider">
+                                    {info.numeroVoo}
+                                  </span>
+                                  {info.callsignIata && info.callsignIata !== info.numeroVoo && (
+                                    <span className="text-[9px] sm:text-[10px] text-sky-400 bg-sky-400/10 px-1.5 py-0.5 rounded border border-sky-400/20 font-bold font-mono">
+                                      {info.callsignIata}
+                                    </span>
+                                  )}
+                                  <span className="text-[9px] sm:text-[10px] text-neutral-400 font-mono bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+                                    {traduzirPais(info.origemPais, idioma) || info.origemCode}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] sm:text-xs text-neutral-400 truncate mt-0.5 font-bold">
+                                  {info.nomeCompanhia}
+                                </p>
+                                <p className="text-[9px] sm:text-[10px] text-neutral-300 truncate">
+                                  {info.aeronave}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Direita: Rota, Telemetria e Distância */}
+                            <div className="flex items-end sm:items-end justify-between sm:justify-center flex-row sm:flex-col gap-1 shrink-0 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                              {/* Distância */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs sm:text-sm font-black text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/30 tabular-nums">
+                                  📍 {textoDistancia}
+                                </span>
+                              </div>
+
+                              {/* Rota */}
+                              <div className="text-right">
+                                <div className="text-xs sm:text-sm font-black text-amber-400">
+                                  {info.origemCode} ➔ {info.destinoCode}
+                                </div>
+                                <div className="text-[9px] sm:text-[10px] text-neutral-300 font-bold truncate max-w-[280px]">
+                                  <span>{info.origem}</span>
+                                  {info.origemAeroporto && <span className="text-amber-300/90 font-mono ml-0.5">({info.origemAeroporto})</span>}
+                                  {info.origemPais && <span className="text-sky-400 font-mono ml-0.5">[{traduzirPais(info.origemPais, idioma)}]</span>}
+                                  <span className="text-amber-400 mx-1">➔</span>
+                                  <span>{info.destino}</span>
+                                  {info.destinoAeroporto && <span className="text-amber-300/90 font-mono ml-0.5">({info.destinoAeroporto})</span>}
+                                  {info.destinoPais && <span className="text-sky-400 font-mono ml-0.5">[{traduzirPais(info.destinoPais, idioma)}]</span>}
+                                </div>
+                              </div>
+
+                              {/* Telemetria */}
+                              <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono text-right flex items-center gap-1.5">
+                                <span>{unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude}</span>
+                                <span>•</span>
+                                <span>{unidadeVelocidade === "KTS" ? info.velocidadeKts : unidadeVelocidade === "KMH" ? info.velocidadeKmh : info.velocidadeMph} {unidadeVelocidade === "KTS" ? "KTS" : unidadeVelocidade === "KMH" ? "KMS" : "MPH"}</span>
+                                <span>•</span>
+                                <span>{info.rumo}°</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              </>
             )}
           </div>
 
@@ -3535,6 +3865,91 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <span>✨</span>
                   <span>{t.opcoes_luminosidade_testar_btn}</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Opção Nova: Modo Noturno / Sono (Silêncio total e ecrã ultra escuro) */}
+            <div className="flex flex-col gap-2 shrink-0 bg-gradient-to-r from-indigo-950/30 via-[#0c0e18] to-indigo-950/20 border border-indigo-500/30 p-2.5 sm:p-3 rounded-xl shadow-inner">
+              <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base sm:text-lg">🌙</span>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-indigo-300 uppercase tracking-wide">
+                      {t.opcoes_noturno_titulo}
+                    </span>
+                    <span className="text-[9px] text-neutral-400">
+                      {t.opcoes_noturno_subtitulo}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Botão de Ativação Manual Imediata */}
+                <button
+                  type="button"
+                  onClick={() => alternarModoNoturnoManual(!modoNoturnoManual)}
+                  className={`py-1 px-2.5 rounded-lg border text-[10px] font-bold font-mono transition-all shrink-0 cursor-pointer ${
+                    modoNoturnoManual
+                      ? "bg-indigo-500/35 border-indigo-400 text-indigo-200 shadow-md ring-1 ring-indigo-400/40"
+                      : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"
+                  }`}
+                >
+                  {modoNoturnoManual ? t.opcoes_noturno_ativado : t.opcoes_noturno_desativado}
+                </button>
+              </div>
+
+              {/* Ativação Automática por Horário de Sono */}
+              <div className="pt-2 border-t border-white/5 flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-neutral-300 flex items-center gap-1">
+                      <span>⏰</span>
+                      <span>{t.opcoes_noturno_auto}</span>
+                    </span>
+                    <span className="text-[8px] sm:text-[9px] text-neutral-400 leading-tight">
+                      {t.opcoes_noturno_auto_desc}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => alternarModoNoturnoAuto(!modoNoturnoAuto)}
+                    className={`py-1 px-2.5 rounded-lg border text-[10px] font-bold font-mono transition-all shrink-0 cursor-pointer ${
+                      modoNoturnoAuto
+                        ? "bg-indigo-500/30 border-indigo-400 text-indigo-200 shadow-sm"
+                        : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"
+                    }`}
+                  >
+                    {modoNoturnoAuto ? t.opcoes_noturno_ativado : t.opcoes_noturno_desativado}
+                  </button>
+                </div>
+
+                {/* Configuração do Horário de Início e Fim */}
+                {modoNoturnoAuto && (
+                  <div className="grid grid-cols-2 gap-2 bg-black/50 p-2 rounded-lg border border-indigo-500/20">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[9px] text-neutral-400 uppercase font-mono font-bold">
+                        {t.opcoes_noturno_inicio}:
+                      </label>
+                      <input
+                        type="time"
+                        value={modoNoturnoInicio}
+                        onChange={(e) => alterarHorarioNoturno(e.target.value, modoNoturnoFim)}
+                        className="bg-white/5 border border-white/15 rounded px-2 py-1 text-xs font-mono text-white focus:outline-none focus:border-indigo-400 cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[9px] text-neutral-400 uppercase font-mono font-bold">
+                        {t.opcoes_noturno_fim}:
+                      </label>
+                      <input
+                        type="time"
+                        value={modoNoturnoFim}
+                        onChange={(e) => alterarHorarioNoturno(modoNoturnoInicio, e.target.value)}
+                        className="bg-white/5 border border-white/15 rounded px-2 py-1 text-xs font-mono text-white focus:outline-none focus:border-indigo-400 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -4352,6 +4767,14 @@ export default function PainelAnalogicoMobileFullscreen() {
         }}
         aria-hidden="true"
       />
+
+      {/* Dica discreta durante o Modo Noturno ativo */}
+      {emModoNoturnoEscuro && (
+        <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[9995] pointer-events-none text-[8px] sm:text-[9px] font-mono text-white/40 tracking-widest uppercase flex items-center gap-1.5 select-none bg-black/60 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+          <span>🌙</span>
+          <span>{t.opcoes_noturno_toque_acordar}</span>
+        </div>
+      )}
     </main>
   );
 }

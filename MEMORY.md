@@ -590,6 +590,24 @@
 4. **Qualidade de Código e Linter:**
    - Corrigido `prefer-const` em `app/api/geolocalizacao-ip/route.ts`.
    - Corrigida a pureza do ciclo de renderização em `components/AlertaAtualizacao.tsx` substituindo a leitura síncrona de `Date.now()` por gestão via estado e temporizador.
-**Consequência:** Suporte aeronáutico completo às 3 unidades internacionais de velocidade, controlo geográfico ágil e sem listas de cidades desnecessárias, e coerência linguística rigorosa a 100% em toda a tabela de voos e em todos os idiomas suportados.
+### ADR-073 — Enriquecimento do Ecrã 2 (Radar ADS-B) e Novo Modo Noturno / Sono (2026-10-20)
+**Contexto:** O utilizador solicitou duas funcionalidades fulcrais:
+1. `Quero esta informação no Ecra 2`: Substituir a lista simplificada com apenas 2 caixas LED de Origem e Destino do Ecrã 2 pelos cartões ricos e detalhados do Radar ADS-B presentes na página `/voos` (logótipos reais das companhias aéreas, callsigns com badges IATA, modelo de aeronave, distância exata em badge com pin, rota com cidades/aeroportos/países e telemetria completa de altitude, velocidade e rumo).
+2. `Cria nas opções o modo noturno, para que quando se estiver a dormir, nem a luz do ecra nem toques incomodem quem estejano mesmo local`: Implementar nas opções um Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro (quase desligado, com 96% de opacidade e brilho a 2%), impedindo toques de novos voos, cliques mecânicos de flaps e flashes de luz no quarto, com ativação manual, programação horária e toque suave no ecrã para espreitar temporariamente durante 15 segundos.
+
+**Decisão:**
+1. **Enriquecimento do Ecrã 2 (`ecraAtivo === "restantes"`):**
+   - Cabeçalho de alta fidelidade: botão de regresso ao painel (`← {t.tab_voltar}`), relógio com segundos em direto (`{horaComSegundos}`), indicador geográfico e badges de contagem de aeronaves em voo (`{t.estado_em_voo}: X` e `{t.tab_voo}: Y`), além do acesso direto às opções (`⚙️`).
+   - Secção 1 — Voo Principal (`● MAIN FLIGHT`): Cartão com destaque em gradiente esmeralda, logótipo da companhia, identificadores, rota com aeroportos e países traduzidos, badge de distância `📍 X KM/NM/MI` e telemetria em tempo real.
+   - Secção 2 — Voos Restantes no Radar (`✈ REMAINING FLIGHTS ON RADAR`): Lista ordenada por distância (`#2`, `#3`...) com cartões idênticos completos, ou estado vazio com antena radar quando não existirem outros voos.
+2. **Modo Noturno / Sono nas Opções:**
+   - Adicionada secção dedicada `MODO NOTURNO / SONO` com ativação manual imediata (`ATIVADO / DESATIVADO`).
+   - Adicionada opção de ativação automática por horário de sono configurável (início e fim, por omissão 23:00 às 07:00).
+   - Silenciamento total automático: desliga o motor de áudio (`definirSomHabilitado(false)`) e anula o som de novo voo (`tocarSomNovoVoo`), flaps e cabine enquanto o modo noturno estiver ativo.
+   - Escurecimento profundo do ecrã: dimmer dinâmico a 96% de opacidade preta e brilho base a 2%, garantindo emissão de luz quase nula no quarto.
+   - Despertar temporário ao toque: qualquer toque no ecrã durante a noite levanta suavemente o véu durante 15 segundos para consulta discreta do voo ou hora, voltando automaticamente a escurecer.
+   - Indicador discreto com lua (`🌙`) na barra de estado e dica flutuante translúcida.
+   - Persistência das preferências em `localStorage` e traduções completas nos 4 idiomas (PT, EN, FR, ES) em `lib/i18n.ts`.
+**Consequência:** Experiência visual do Ecrã 2 unificada com o detalhe aeronáutico de topo, e proteção completa do repouso noturno com silêncio e escuridão automáticos sem necessidade de desligar o dispositivo.
 
 

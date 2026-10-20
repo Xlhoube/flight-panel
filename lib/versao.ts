@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.9.0",
-  buildId: "build-20261020-v290",
+  versao: "2.10.0",
+  buildId: "build-20261020-v2100",
   dataLancamento: "2026-10-20",
-  descricao: "Suporte a milhas por hora (MPH), botões diretos de teste/refresh geográfico sem lista de cidades e eliminação total de idiomas misturados na tabela de voos.",
+  descricao: "Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B) e novo Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro.",
 };

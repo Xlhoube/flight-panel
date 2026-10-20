@@ -115,6 +115,19 @@ export interface DicionarioTraducoes {
   opcoes_luminosidade_auto: string;
   opcoes_luminosidade_auto_desc: string;
   opcoes_luminosidade_testar_btn: string;
+  // Modo Noturno / Sono
+  opcoes_noturno_titulo: string;
+  opcoes_noturno_subtitulo: string;
+  opcoes_noturno_ativar: string;
+  opcoes_noturno_ativado: string;
+  opcoes_noturno_desativado: string;
+  opcoes_noturno_auto: string;
+  opcoes_noturno_auto_desc: string;
+  opcoes_noturno_horario: string;
+  opcoes_noturno_inicio: string;
+  opcoes_noturno_fim: string;
+  opcoes_noturno_badge_ativo: string;
+  opcoes_noturno_toque_acordar: string;
   opcoes_raio_titulo: string;
   opcoes_raio_subtitulo: string;
   opcoes_raio_alcance_exato: string;
@@ -295,6 +308,18 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_luminosidade_auto: "Aumento Automático em Novo Voo",
     opcoes_luminosidade_auto_desc: "Aumenta a luminosidade para 100% durante 5 segundos ao detetar um novo voo.",
     opcoes_luminosidade_testar_btn: "TESTAR AUMENTO DE BRILHO (5 SEGUNDOS)",
+    opcoes_noturno_titulo: "MODO NOTURNO / SONO",
+    opcoes_noturno_subtitulo: "Silêncio absoluto e ecrã ultra escuro",
+    opcoes_noturno_ativar: "Modo Noturno",
+    opcoes_noturno_ativado: "ATIVADO",
+    opcoes_noturno_desativado: "DESATIVADO",
+    opcoes_noturno_auto: "Ativação Automática por Horário",
+    opcoes_noturno_auto_desc: "Silencia todos os sons e apaga a luz do ecrã durante o período de sono configurado.",
+    opcoes_noturno_horario: "Horário de Repouso",
+    opcoes_noturno_inicio: "Início",
+    opcoes_noturno_fim: "Fim",
+    opcoes_noturno_badge_ativo: "MODO NOTURNO ATIVO (SILENCIOSO)",
+    opcoes_noturno_toque_acordar: "Toque no ecrã para iluminar temporariamente (15s)",
     opcoes_raio_titulo: "RAIO DE AÇÃO DO RADAR",
     opcoes_raio_subtitulo: "Alcance circular de deteção (exato)",
     opcoes_raio_alcance_exato: "Raio exato",
@@ -474,6 +499,18 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_luminosidade_auto: "Auto-Boost on New Flight",
     opcoes_luminosidade_auto_desc: "Increases brightness to 100% for 5 seconds when a new flight is detected.",
     opcoes_luminosidade_testar_btn: "TEST BRIGHTNESS BOOST (5 SECONDS)",
+    opcoes_noturno_titulo: "NIGHT / SLEEP MODE",
+    opcoes_noturno_subtitulo: "Total silence & ultra-dim screen",
+    opcoes_noturno_ativar: "Night Mode",
+    opcoes_noturno_ativado: "ENABLED",
+    opcoes_noturno_desativado: "DISABLED",
+    opcoes_noturno_auto: "Automatic Schedule",
+    opcoes_noturno_auto_desc: "Mutes all sounds and dims the screen to prevent disturbance during your configured sleep hours.",
+    opcoes_noturno_horario: "Sleep Schedule",
+    opcoes_noturno_inicio: "Start",
+    opcoes_noturno_fim: "End",
+    opcoes_noturno_badge_ativo: "NIGHT MODE ACTIVE (MUTED)",
+    opcoes_noturno_toque_acordar: "Tap screen to wake temporarily (15s)",
     opcoes_raio_titulo: "RADAR ACTION RADIUS",
     opcoes_raio_subtitulo: "Circular detection range (exact)",
     opcoes_raio_alcance_exato: "Exact radius",
@@ -653,6 +690,18 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_luminosidade_auto: "Augmentation Auto sur Nouveau Vol",
     opcoes_luminosidade_auto_desc: "Augmente la luminosité à 100% pendant 5 secondes lors de la détection d'un nouveau vol.",
     opcoes_luminosidade_testar_btn: "TESTER L'AUGMENTATION DE LUMINOSITÉ (5 SECONDES)",
+    opcoes_noturno_titulo: "MODE NUIT / SOMMEIL",
+    opcoes_noturno_subtitulo: "Silence total et écran ultra sombre",
+    opcoes_noturno_ativar: "Mode Nuit",
+    opcoes_noturno_ativado: "ACTIVÉ",
+    opcoes_noturno_desativado: "DÉSACTIVÉ",
+    opcoes_noturno_auto: "Programmation Automatique",
+    opcoes_noturno_auto_desc: "Coupe tous les sons et assombrit l'écran pour ne pas déranger pendant vos heures de sommeil.",
+    opcoes_noturno_horario: "Plage Horaire de Sommeil",
+    opcoes_noturno_inicio: "Début",
+    opcoes_noturno_fim: "Fin",
+    opcoes_noturno_badge_ativo: "MODE NUIT ACTIF (SILENCIEUX)",
+    opcoes_noturno_toque_acordar: "Touchez l'écran pour éclairer temporairement (15s)",
     opcoes_raio_titulo: "RAYON D'ACTION DU RADAR",
     opcoes_raio_subtitulo: "Portée circulaire de détection (exacte)",
     opcoes_raio_alcance_exato: "Rayon exact",
@@ -832,6 +881,18 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_luminosidade_auto: "Aumento Automático en Nuevo Vuelo",
     opcoes_luminosidade_auto_desc: "Aumenta el brillo al 100% durante 5 segundos al detectar un nuevo vuelo.",
     opcoes_luminosidade_testar_btn: "PROBAR AUMENTO DE BRILLO (5 SEGUNDOS)",
+    opcoes_noturno_titulo: "MODO NOCHE / SUEÑO",
+    opcoes_noturno_subtitulo: "Silencio total y pantalla ultra oscura",
+    opcoes_noturno_ativar: "Modo Noche",
+    opcoes_noturno_ativado: "ACTIVADO",
+    opcoes_noturno_desativado: "DESACTIVADO",
+    opcoes_noturno_auto: "Activación Automática por Horario",
+    opcoes_noturno_auto_desc: "Silencia todos los sonidos y apaga la luz de la pantalla durante tus horas de descanso.",
+    opcoes_noturno_horario: "Horario de Sueño",
+    opcoes_noturno_inicio: "Inicio",
+    opcoes_noturno_fim: "Fin",
+    opcoes_noturno_badge_ativo: "MODO NOCHE ACTIVO (SILENCIOSO)",
+    opcoes_noturno_toque_acordar: "Toca la pantalla para iluminar temporalmente (15s)",
     opcoes_raio_titulo: "RADIO DE ACCIÓN DEL RADAR",
     opcoes_raio_subtitulo: "Alcance circular de detección (exacto)",
     opcoes_raio_alcance_exato: "Radio exacto",
