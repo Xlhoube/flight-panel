@@ -665,6 +665,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const velMs = voo[9] || 0;
   const velocidadeKts = Math.round(velMs * 1.94384);
   const velocidadeKmh = Math.round(velMs * 3.6);
+  const velocidadeMph = Math.round(velMs * 2.23694);
   const rumo = Math.round(voo[10] || 0);
   const codAero = (voo[12] ? String(voo[12]) : (rotaReal?.model || (isFap ? "F16" : "")));
   const infoAero = codAero ? resolverInfoAeronave(codAero) : null;
@@ -690,6 +691,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     altitudeMetros,
     velocidadeKts,
     velocidadeKmh,
+    velocidadeMph,
     rumo,
     aeronave,
     fabricante,
@@ -836,7 +838,7 @@ export default function ListaVoosRestantes() {
   const [carregando, setCarregando] = useState(true);
   const [horaAtual, setHoraAtual] = useState("12:00:00");
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
-  const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+  const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH" | "MPH">("KTS");
   const [unidadeDistancia, setUnidadeDistancia] = useState<"KM" | "NM" | "MI">("KM");
   const [idioma, setIdioma] = useState<Idioma>("en");
   const [raioKm, setRaioKm] = useState<number>(20);
@@ -887,11 +889,14 @@ export default function ListaVoosRestantes() {
         if (parsed.unidadeAltitude === "FT" || parsed.unidadeAltitude === "MT") {
           setUnidadeAltitude(parsed.unidadeAltitude);
         }
-        if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
+        if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH" || parsed.unidadeVelocidade === "MPH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
         }
         if (parsed.unidadeDistancia === "KM" || parsed.unidadeDistancia === "NM" || parsed.unidadeDistancia === "MI") {
           setUnidadeDistancia(parsed.unidadeDistancia);
+        }
+        if (parsed.idioma && (parsed.idioma === "pt" || parsed.idioma === "en" || parsed.idioma === "fr" || parsed.idioma === "es")) {
+          setIdioma(parsed.idioma);
         }
         if (typeof parsed.raioKm === "number" && !isNaN(parsed.raioKm)) {
           setRaioKm(Math.max(1, Math.min(250, Math.round(parsed.raioKm))));
@@ -1072,7 +1077,7 @@ export default function ListaVoosRestantes() {
                 </span>
               </h1>
               <p className="text-[10px] sm:text-xs text-neutral-400">
-                📍 {localizacao.nome} • RAIO CIRCULAR DE 20 KM
+                📍 {localizacao.nome} • {t.tab_raio_circular} {raioKm} KM
               </p>
             </div>
           </div>
@@ -1149,7 +1154,7 @@ export default function ListaVoosRestantes() {
                     {info.destinoPais && <span className="text-sky-400 text-[9px] sm:text-[10px] font-mono ml-1">[{traduzirPais(info.destinoPais, idioma)}]</span>}
                   </div>
                   <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono mt-0.5">
-                    {unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude} • {unidadeVelocidade === "KTS" ? info.velocidadeKts : info.velocidadeKmh} {unidadeVelocidade === "KTS" ? "KTS" : "KMS"} • {info.rumo}°
+                    {unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude} • {unidadeVelocidade === "KTS" ? info.velocidadeKts : unidadeVelocidade === "KMH" ? info.velocidadeKmh : info.velocidadeMph} {unidadeVelocidade === "KTS" ? "KTS" : unidadeVelocidade === "KMH" ? "KMS" : "MPH"} • {info.rumo}°
                   </div>
                 </div>
               </div>
@@ -1167,7 +1172,7 @@ export default function ListaVoosRestantes() {
               </span>
             </h2>
             <span className="text-[10px] text-neutral-400 font-mono">
-              TOTAL: {voosRestantes.length}
+              {t.tab_total}: {voosRestantes.length}
             </span>
           </div>
 
@@ -1181,11 +1186,11 @@ export default function ListaVoosRestantes() {
           {!carregando && voosRestantes.length === 0 && (
             <div className="bg-[#10121a] p-8 rounded-xl border border-white/10 text-center text-neutral-400 text-xs sm:text-sm font-mono flex flex-col items-center justify-center gap-2">
               <span className="text-2xl">📡</span>
-              <span className="text-neutral-200 font-bold">NÃO HÁ OUTROS VOOS MAIS DISTANTES DETETADOS</span>
+              <span className="text-neutral-200 font-bold">{t.tab_sem_outros_voos}</span>
               <span className="text-[11px] text-neutral-400 max-w-md">
                 {vooPrincipal
-                  ? "Apenas o voo principal acima está a sobrevoar a zona circular de 20 km neste momento."
-                  : "Não foram detetadas aeronaves comerciais no raio de 20 km."}
+                  ? `${t.tab_sem_outros_voos_desc_com_principal} ${raioKm} km.`
+                  : `${t.tab_sem_voos_desc_geral} ${raioKm} km.`}
               </span>
             </div>
           )}
@@ -1271,7 +1276,7 @@ export default function ListaVoosRestantes() {
                     <div className="text-[9px] sm:text-[10px] text-neutral-300 font-mono text-right flex items-center gap-1.5">
                       <span>{unidadeAltitude === "FT" ? info.altitudePes : info.altitudeMetros} {unidadeAltitude}</span>
                       <span>•</span>
-                      <span>{unidadeVelocidade === "KTS" ? info.velocidadeKts : info.velocidadeKmh} {unidadeVelocidade === "KTS" ? "KTS" : "KMS"}</span>
+                      <span>{unidadeVelocidade === "KTS" ? info.velocidadeKts : unidadeVelocidade === "KMH" ? info.velocidadeKmh : info.velocidadeMph} {unidadeVelocidade === "KTS" ? "KTS" : unidadeVelocidade === "KMH" ? "KMS" : "MPH"}</span>
                       <span>•</span>
                       <span>{info.rumo}°</span>
                     </div>

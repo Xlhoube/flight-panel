@@ -794,6 +794,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const velocidadeMs = voo[9] != null ? voo[9] : 0;
   const velocidadeKts = Math.round(velocidadeMs * 1.94384);
   const velocidadeKmh = Math.round(velocidadeMs * 3.6);
+  const velocidadeMph = Math.round(velocidadeMs * 2.23694);
   const rumo = voo[10] != null ? Math.round(voo[10]) : 0;
 
   // Determinar nome legível e elegante para a companhia ou tipo de operação
@@ -919,6 +920,7 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     altitudeMetros,
     velocidadeKts,
     velocidadeKmh,
+    velocidadeMph,
     rumo,
     noSolo: voo[8],
   };
@@ -1155,7 +1157,7 @@ interface MiniRadarDisplayProps {
   rumoVoo?: number;
   distKm: number;
   raioMaxKm: number;
-  unidadeVelocidade: "KTS" | "KMH";
+  unidadeVelocidade: "KTS" | "KMH" | "MPH";
   unidadeDistancia?: "KM" | "NM" | "MI";
 }
 
@@ -1195,7 +1197,7 @@ function MiniRadarDisplay({
   // Formatação de distância respeitando a unidade escolhida (KM, NM ou MI)
   const distNm = distKm / 1.852;
   const distMi = distKm / 1.60934;
-  const unidadeAtiva = unidadeDistancia || (unidadeVelocidade === "KTS" ? "NM" : "KM");
+  const unidadeAtiva = unidadeDistancia || (unidadeVelocidade === "KTS" ? "NM" : unidadeVelocidade === "MPH" ? "MI" : "KM");
 
   let valorDisplay = "";
   let subtextoSecundario = "";
@@ -1636,23 +1638,7 @@ export const LOCALIZACAO_PADRAO: InfoLocalizacao = {
   origem: "padrao",
 };
 
-export const LOCAIS_PREDEFINIDOS = [
-  { nome: "VILA NOVA DE GAIA", regiao: "Gaia Centro / Mafamude / Devesas", lat: 41.133, lon: -8.617 },
-  { nome: "VALADARES / GAIA", regiao: "Gaia Sul / Litoral", lat: 41.091, lon: -8.642 },
-  { nome: "PORTO / CENTRO", regiao: "Porto Centro / Boavista", lat: 41.158, lon: -8.629 },
-  { nome: "AEROPORTO DO PORTO", regiao: "Francisco Sá Carneiro (OPO)", lat: 41.242, lon: -8.681 },
-  { nome: "MATOSINHOS", regiao: "Litoral Norte", lat: 41.182, lon: -8.690 },
-  { nome: "MAIA", regiao: "Grande Porto Norte", lat: 41.233, lon: -8.621 },
-  { nome: "ESPINHO", regiao: "Litoral Sul", lat: 40.993, lon: -8.641 },
-  { nome: "LISBOA / AEROPORTO", regiao: "Humberto Delgado (LIS)", lat: 38.776, lon: -9.135 },
-  { nome: "CASCAIS / OEIRAS", regiao: "Linha de Cascais / Tires", lat: 38.726, lon: -9.355 },
-  { nome: "FARO / ALGARVE", regiao: "Aeroporto de Faro (FAO)", lat: 37.018, lon: -7.97 },
-  { nome: "COIMBRA", regiao: "Centro de Portugal", lat: 40.206, lon: -8.42 },
-  { nome: "BRAGA", regiao: "Minho / Palmeira", lat: 41.587, lon: -8.445 },
-  { nome: "FUNCHAL / MADEIRA", regiao: "Cristiano Ronaldo (FNC)", lat: 32.7, lon: -16.774 },
-  { nome: "PONTA DELGADA", regiao: "João Paulo II (PDL) - Açores", lat: 37.741, lon: -25.698 },
-  { nome: "MADRID / ESPANHA", regiao: "Adolfo Suárez (MAD)", lat: 40.484, lon: -3.568 },
-];
+
 
 export default function PainelAnalogicoMobileFullscreen() {
   const [listaVoos, setListaVoos] = useState<EstadoVoo[]>([]);
@@ -1674,7 +1660,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [somAtivo, setSomAtivo] = useState<boolean>(true);
   const [volumeSom, setVolumeSom] = useState<number>(80);
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
-  const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH">("KTS");
+  const [unidadeVelocidade, setUnidadeVelocidade] = useState<"KTS" | "KMH" | "MPH">("KTS");
   const [unidadeDistancia, setUnidadeDistancia] = useState<"KM" | "NM" | "MI">("KM");
   const [unidadeTemperatura, setUnidadeTemperatura] = useState<"C" | "F">("C");
   const [luminosidadeManual, setLuminosidadeManual] = useState<number>(100);
@@ -1720,7 +1706,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         if (parsed.unidadeAltitude === "FT" || parsed.unidadeAltitude === "MT") {
           setUnidadeAltitude(parsed.unidadeAltitude);
         }
-        if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH") {
+        if (parsed.unidadeVelocidade === "KTS" || parsed.unidadeVelocidade === "KMH" || parsed.unidadeVelocidade === "MPH") {
           setUnidadeVelocidade(parsed.unidadeVelocidade);
         }
         if (parsed.unidadeDistancia === "KM" || parsed.unidadeDistancia === "NM" || parsed.unidadeDistancia === "MI") {
@@ -1811,7 +1797,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude: novo, unidadeVelocidade, unidadeDistancia, unidadeTemperatura, idioma, raioKm });
   };
 
-  const alternarVelocidade = (novo: "KTS" | "KMH") => {
+  const alternarVelocidade = (novo: "KTS" | "KMH" | "MPH") => {
     setUnidadeVelocidade(novo);
     guardarDefinicoes({ somAtivo, volumeSom, unidadeAltitude, unidadeVelocidade: novo, unidadeDistancia, unidadeTemperatura, idioma, raioKm });
   };
@@ -1865,7 +1851,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     somAtivo: boolean;
     volumeSom: number;
     unidadeAltitude: "FT" | "MT";
-    unidadeVelocidade: "KTS" | "KMH";
+    unidadeVelocidade: "KTS" | "KMH" | "MPH";
     unidadeDistancia?: "KM" | "NM" | "MI";
     unidadeTemperatura?: "C" | "F";
     luminosidadeManual?: number;
@@ -2203,23 +2189,7 @@ export default function PainelAnalogicoMobileFullscreen() {
     obterGpsDoDispositivo(true, true);
   }, [obterGpsDoDispositivo]);
 
-  const selecionarLocalPredefinido = (local: typeof LOCAIS_PREDEFINIDOS[0]) => {
-    const novo: InfoLocalizacao = {
-      lat: local.lat,
-      lon: local.lon,
-      nome: local.nome,
-      origem: "preset",
-    };
-    setLocalizacao(novo);
-    setStatusGps("fixo");
-    setDetalheErroGps("");
-    setLatManual(local.lat.toString());
-    setLonManual(local.lon.toString());
-    try {
-      localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
-    } catch { }
-    setModalLocalizacaoAberto(false);
-  };
+
 
   const guardarCoordenadasManuais = () => {
     const lat = parseFloat(latManual);
@@ -2808,11 +2778,11 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </span>
                 <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <LedText
-                    text={`${unidadeVelocidade === "KTS" ? infoVoo.velocidadeKts : infoVoo.velocidadeKmh}`}
+                    text={`${unidadeVelocidade === "KTS" ? infoVoo.velocidadeKts : unidadeVelocidade === "KMH" ? infoVoo.velocidadeKmh : infoVoo.velocidadeMph}`}
                     size="md"
                   />
                   <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold">
-                    {unidadeVelocidade === "KTS" ? "KTS" : "KMS"}
+                    {unidadeVelocidade === "KTS" ? "KTS" : unidadeVelocidade === "KMH" ? "KMS" : "MPH"}
                   </span>
                 </div>
               </div>
@@ -3600,7 +3570,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <span className="font-bold text-neutral-300">{t.opcoes_velocidade_titulo}</span>
                   <span className="text-[9px] text-neutral-400">{t.opcoes_velocidade_subtitulo}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5">
                   <button
                     type="button"
                     onClick={() => alternarVelocidade("KTS")}
@@ -3614,6 +3584,13 @@ export default function PainelAnalogicoMobileFullscreen() {
                     className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "KMH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
                   >
                     <span>{t.opcoes_unidade_kmh}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => alternarVelocidade("MPH")}
+                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${unidadeVelocidade === "MPH" ? "bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm" : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10"}`}
+                  >
+                    <span>{t.opcoes_unidade_mph}</span>
                   </button>
                 </div>
               </div>
@@ -3763,23 +3740,62 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
             </div>
 
-            {/* Opção 5: Localização do Radar */}
-            <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0">
+            {/* Opção: Localização do Radar (Teste e Refresh Direto) */}
+            <div className="border-t border-white/10 pt-2 flex flex-col gap-1.5 shrink-0 bg-white/[0.02] border border-white/5 p-2 sm:p-2.5 rounded-xl">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-bold text-neutral-300">{t.opcoes_localizacao_titulo}</span>
-                <span className="text-[9px] text-emerald-400 font-mono">📍 {localizacao.nome}</span>
+                <span className="font-bold text-neutral-300 flex items-center gap-1.5">
+                  <span>📍</span>
+                  <span>{t.opcoes_localizacao_titulo}</span>
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                  📍 {localizacao.nome}
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setModalOpcoesAberto(false);
-                  setModalLocalizacaoAberto(true);
-                }}
-                className="w-full py-1.5 px-3 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>📍</span>
-                <span>{t.opcoes_localizacao_btn}</span>
-              </button>
+
+              {/* Detalhes de Coordenadas e Precisão */}
+              <div className="flex items-center justify-between text-[9px] font-mono text-neutral-400 px-0.5">
+                <span>
+                  {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W
+                  {precisaoMetros ? ` (±${precisaoMetros}m)` : ""}
+                </span>
+                <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${statusGps === "ativo" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-sky-500/20 text-sky-400 border border-sky-500/30"}`}>
+                  {localizacao.origem.toUpperCase()}
+                </span>
+              </div>
+
+              {/* Botões Diretos de Teste de Posição Geográfica e Refresh */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    obterGpsDoDispositivo(true, false);
+                    tocarSomFlapClack(0.2);
+                  }}
+                  disabled={statusGps === "iniciando"}
+                  className="py-1.5 px-2 bg-emerald-500/15 hover:bg-emerald-500/25 active:scale-[0.99] border border-emerald-500/50 rounded-lg text-emerald-300 font-mono text-[10px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                >
+                  <span className={statusGps === "iniciando" ? "animate-spin" : ""}>📡</span>
+                  <span>{statusGps === "iniciando" ? t.opcoes_localizacao_a_obter : t.opcoes_localizacao_gps_btn}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    obterLocalizacaoPorIp(false);
+                    tocarSomFlapClack(0.2);
+                  }}
+                  className="py-1.5 px-2 bg-sky-500/15 hover:bg-sky-500/25 active:scale-[0.99] border border-sky-500/50 rounded-lg text-sky-300 font-mono text-[10px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                >
+                  <span>🌐</span>
+                  <span>{t.opcoes_localizacao_ip_btn}</span>
+                </button>
+              </div>
+
+              {detalheErroGps && (
+                <p className="text-[9px] text-amber-300/90 font-mono bg-amber-950/30 p-1.5 rounded border border-amber-500/20 leading-tight">
+                  {detalheErroGps}
+                </p>
+              )}
             </div>
 
             {/* Opção 5: Navegação entre os 3 Ecrãs */}
@@ -4035,37 +4051,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 )}
               </div>
 
-              {/* Seleção Rápida de Localidades Predefinidas */}
-              <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  SELEÇÃO RÁPIDA DE LOCALIDADE:
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                  {LOCAIS_PREDEFINIDOS.map((loc) => {
-                    const isAtivo =
-                      Math.abs(localizacao.lat - loc.lat) < 0.015 &&
-                      Math.abs(localizacao.lon - loc.lon) < 0.015;
-                    return (
-                      <button
-                        key={loc.nome}
-                        type="button"
-                        onClick={() => {
-                          selecionarLocalPredefinido(loc);
-                          tocarSomFlapClack(0.2);
-                        }}
-                        className={`p-2 rounded-xl border text-left flex flex-col gap-0.5 transition-all cursor-pointer ${
-                          isAtivo
-                            ? "bg-amber-400/20 border-amber-400 text-amber-300 shadow-md ring-1 ring-amber-400/50"
-                            : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white hover:border-white/20"
-                        }`}
-                      >
-                        <span className="text-[11px] font-black truncate">{loc.nome}</span>
-                        <span className="text-[9px] text-neutral-400 truncate">{loc.regiao}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+
 
               {/* Entrada Manual de Coordenadas */}
               <div className="flex flex-col gap-2 pt-2 border-t border-white/10">

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const realIp = request.headers.get("x-real-ip");
   const cfConnectingIp = request.headers.get("cf-connecting-ip");
 
-  let clienteIp = cfConnectingIp || realIp || (forwardedFor ? forwardedFor.split(",")[0].trim() : "");
+  const clienteIp = cfConnectingIp || realIp || (forwardedFor ? forwardedFor.split(",")[0].trim() : "");
 
   // Se for localhost ou IP privado, deixar vazio para que os serviços detectem o IP público de saída
   const isPrivadoOuLocal =

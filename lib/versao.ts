@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.8.2",
-  buildId: "build-20261020-v282",
+  versao: "2.9.0",
+  buildId: "build-20261020-v290",
   dataLancamento: "2026-10-20",
-  descricao: "Remoção do nome do ficheiro (/Flight.mp3) no botão de teste de som e internacionalização nas 4 línguas.",
+  descricao: "Suporte a milhas por hora (MPH), botões diretos de teste/refresh geográfico sem lista de cidades e eliminação total de idiomas misturados na tabela de voos.",
 };

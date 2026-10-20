@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.8.2  
+**Versão:** v2.9.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-20  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização total dos modais de onboarding e de opções em 4 idiomas (PT, EN, FR, ES), bandeiras vetoriais SVG nítidas, pesquisa silenciosa de GPS/IP no arranque e rótulo limpo do botão de teste de som sem menção a ficheiros técnicos.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, suporte completo a Milhas por Hora (MPH) em velocidade e telemetria, botões directos de teste e refresh de posição geográfica (GPS/IP) no modal de opções, e eliminação total de listas de localidades predefinidas.
 
 ---
 
@@ -568,4 +568,28 @@
    - ES: `"PROBAR SONIDO DE NUEVO VUELO"`  
 3. **Ligação no Painel:** Substituição do texto em `app/painel/page.tsx` por `{t.opcoes_testar_som_novo_voo}`.  
 **Consequência:** Interface de utilizador polida, profissional e uniforme em todos os idiomas suportados, sem expor artefactos ou nomes de ficheiros internos.
+
+### ADR-072 — Suporte a Unidade de Velocidade MPH e Botões Diretos de Teste/Refresh Geográfico (2026-10-20)
+**Contexto:** O utilizador solicitou duas melhorias essenciais de experiência e usabilidade:  
+1. A velocidade aeronáutica deve suportar também milhas por hora (`Speed tambem deve ter milhas`), complementando os nós (`KTS`) e quilómetros por hora (`KM/H` / `KMS`).  
+2. No modal de opções, na secção de localização do radar (`RADAR LOCATION`), não deve existir nenhuma lista de cidades predefinidas, devendo apenas existir a capacidade de testar a posição geográfica ou fazer um refresh de localização em tempo real (`Aqui não deve ter nenhuma lista de localizações, apenas testar a posição geografica ou fazer um refresh de localização`).  
+**Decisão:**  
+1. **Unidade de Velocidade MPH:**
+   - Adicionada a unidade `"MPH"` ao tipo `unidadeVelocidade` (`"KTS" | "KMH" | "MPH"`).
+   - Cálculo automático da velocidade em milhas por hora: `Math.round(velMs * 2.23694)`.
+   - Adicionada a tradução `opcoes_unidade_mph` nos 4 idiomas (`MILHAS/H (MPH)`, `MILES/H (MPH)`, `MILLES/H (MPH)`, `MILLAS/H (MPH)`).
+   - Inclusão do 3º botão tátil no modal de opções em grelha de 3 colunas e atualização dinâmica da telemetria no Ecrã 1, Ecrã 2 e `/voos`.
+2. **Botões Diretos de Teste e Refresh Geográfico no Modal de Opções:**
+   - Remoção do botão de salto para o modal secundário (`CHANGE CITY OR COORDINATES`).
+   - Apresentação direta na secção `RADAR LOCATION` das coordenadas atuais (`lat°N, lon°W`), margem de precisão do dispositivo (`±Xm`) e proveniência (`GPS` ou `IP`).
+   - Disponibilização de dois botões diretos de teste/refresh: `📡 TESTAR / REFRESH GPS` (com animação de deteção e fallback de rede) e `🌐 REFRESH POR IP`.
+   - Remoção integral da lista estática de cidades predefinidas (`LOCAIS_PREDEFINIDOS`), garantindo que o radar reflete a localização física genuína do utilizador sem dados artificiais.
+3. **Eliminação de Idiomas Misturados na Tabela de Voos (`/voos`):**
+   - Sincronização do idioma ativo a partir das preferências do utilizador guardadas em `localStorage` (`flight_panel_user_settings.idioma`).
+   - Substituição das strings fixas em português no cabeçalho e no estado vazio da tabela (`RAIO CIRCULAR DE 20 KM`, `NÃO HÁ OUTROS VOOS MAIS DISTANTES DETETADOS`, e respetivos subtítulos) pelas novas chaves de tradução do dicionário `i18n.ts` (`tab_raio_circular`, `tab_sem_outros_voos`, `tab_sem_outros_voos_desc_com_principal`, `tab_sem_voos_desc_geral` e `tab_total`).
+4. **Qualidade de Código e Linter:**
+   - Corrigido `prefer-const` em `app/api/geolocalizacao-ip/route.ts`.
+   - Corrigida a pureza do ciclo de renderização em `components/AlertaAtualizacao.tsx` substituindo a leitura síncrona de `Date.now()` por gestão via estado e temporizador.
+**Consequência:** Suporte aeronáutico completo às 3 unidades internacionais de velocidade, controlo geográfico ágil e sem listas de cidades desnecessárias, e coerência linguística rigorosa a 100% em toda a tabela de voos e em todos os idiomas suportados.
+
 

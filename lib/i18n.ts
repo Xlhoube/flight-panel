@@ -99,6 +99,7 @@ export interface DicionarioTraducoes {
   opcoes_velocidade_subtitulo: string;
   opcoes_unidade_nos: string;
   opcoes_unidade_kmh: string;
+  opcoes_unidade_mph: string;
   opcoes_distancia_titulo: string;
   opcoes_distancia_subtitulo: string;
   opcoes_unidade_km: string;
@@ -120,6 +121,9 @@ export interface DicionarioTraducoes {
   loc_raio_titulo: string;
   opcoes_localizacao_titulo: string;
   opcoes_localizacao_btn: string;
+  opcoes_localizacao_gps_btn: string;
+  opcoes_localizacao_ip_btn: string;
+  opcoes_localizacao_a_obter: string;
   opcoes_navegacao_titulo: string;
   opcoes_ecra_principal: string;
   opcoes_ecra_restantes: string;
@@ -151,6 +155,11 @@ export interface DicionarioTraducoes {
   tab_distancia: string;
   tab_aeronave: string;
   tab_voo_principal: string;
+  tab_raio_circular: string;
+  tab_sem_outros_voos: string;
+  tab_sem_outros_voos_desc_com_principal: string;
+  tab_sem_voos_desc_geral: string;
+  tab_total: string;
 
   // Onboarding (Primeira Abertura)
   onboarding_passo_1_badge: string;
@@ -270,6 +279,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Ar",
     opcoes_unidade_nos: "NÓS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_unidade_mph: "MILHAS/H (MPH)",
     opcoes_distancia_titulo: "DISTÂNCIA",
     opcoes_distancia_subtitulo: "Radar e Voos",
     opcoes_unidade_km: "QUILÓMETROS (KM)",
@@ -291,6 +301,9 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     loc_raio_titulo: "RAIO DE AÇÃO",
     opcoes_localizacao_titulo: "LOCALIZAÇÃO DO RADAR",
     opcoes_localizacao_btn: "ALTERAR LOCALIDADE OU COORDENADAS",
+    opcoes_localizacao_gps_btn: "TESTAR / REFRESH GPS",
+    opcoes_localizacao_ip_btn: "REFRESH POR IP",
+    opcoes_localizacao_a_obter: "A DETETAR POSIÇÃO...",
     opcoes_navegacao_titulo: "NAVEGAÇÃO ENTRE ECRÃS (3 ECRÃS)",
     opcoes_ecra_principal: "1. VOO PRINCIPAL",
     opcoes_ecra_restantes: "2. RESTANTES",
@@ -322,6 +335,11 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTÂNCIA",
     tab_aeronave: "AERONAVE",
     tab_voo_principal: "VOO PRINCIPAL",
+    tab_raio_circular: "RAIO CIRCULAR DE",
+    tab_sem_outros_voos: "NÃO HÁ OUTROS VOOS MAIS DISTANTES DETETADOS",
+    tab_sem_outros_voos_desc_com_principal: "Apenas o voo principal acima está a sobrevoar a zona circular de",
+    tab_sem_voos_desc_geral: "Não foram detetadas aeronaves comerciais no raio de",
+    tab_total: "TOTAL",
 
     // Onboarding (Primeira Abertura)
     onboarding_passo_1_badge: "PASSO 1 DE 2",
@@ -440,6 +458,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Air",
     opcoes_unidade_nos: "KNOTS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_unidade_mph: "MILES/H (MPH)",
     opcoes_distancia_titulo: "DISTANCE",
     opcoes_distancia_subtitulo: "Radar & Flights",
     opcoes_unidade_km: "KILOMETERS (KM)",
@@ -461,6 +480,9 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     loc_raio_titulo: "ACTION RADIUS",
     opcoes_localizacao_titulo: "RADAR LOCATION",
     opcoes_localizacao_btn: "CHANGE CITY OR COORDINATES",
+    opcoes_localizacao_gps_btn: "TEST / REFRESH GPS",
+    opcoes_localizacao_ip_btn: "REFRESH VIA IP",
+    opcoes_localizacao_a_obter: "DETECTING POSITION...",
     opcoes_navegacao_titulo: "SCREEN NAVIGATION (3 SCREENS)",
     opcoes_ecra_principal: "1. MAIN FLIGHT",
     opcoes_ecra_restantes: "2. REMAINING",
@@ -492,6 +514,11 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTANCE",
     tab_aeronave: "AIRCRAFT",
     tab_voo_principal: "MAIN FLIGHT",
+    tab_raio_circular: "CIRCULAR RADIUS OF",
+    tab_sem_outros_voos: "NO OTHER DISTANT FLIGHTS DETECTED",
+    tab_sem_outros_voos_desc_com_principal: "Only the main flight above is flying within the circular zone of",
+    tab_sem_voos_desc_geral: "No commercial aircraft detected in the circular radius of",
+    tab_total: "TOTAL",
 
     // Onboarding (First Launch)
     onboarding_passo_1_badge: "STEP 1 OF 2",
@@ -610,6 +637,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Air",
     opcoes_unidade_nos: "NŒUDS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_unidade_mph: "MILLES/H (MPH)",
     opcoes_distancia_titulo: "DISTANCE",
     opcoes_distancia_subtitulo: "Radar et Vols",
     opcoes_unidade_km: "KILOMÈTRES (KM)",
@@ -631,6 +659,9 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     loc_raio_titulo: "RAYON D'ACTION",
     opcoes_localizacao_titulo: "POSITION DU RADAR",
     opcoes_localizacao_btn: "CHANGER DE VILLE OU COORDONNÉES",
+    opcoes_localizacao_gps_btn: "TESTER / ACTUALISER GPS",
+    opcoes_localizacao_ip_btn: "ACTUALISER PAR IP",
+    opcoes_localizacao_a_obter: "DÉTECTION DE POSITION...",
     opcoes_navegacao_titulo: "NAVIGATION ENTRE ÉCRANS (3 ÉCRANS)",
     opcoes_ecra_principal: "1. VOL PRINCIPAL",
     opcoes_ecra_restantes: "2. RESTANTS",
@@ -662,6 +693,11 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTANCE",
     tab_aeronave: "AÉRONEF",
     tab_voo_principal: "VOL PRINCIPAL",
+    tab_raio_circular: "RAYON CIRCULAIRE DE",
+    tab_sem_outros_voos: "AUCUN AUTRE VOL PLUS ÉLOIGNÉ DÉTECTÉ",
+    tab_sem_outros_voos_desc_com_principal: "Seul le vol principal ci-dessus survole la zone circulaire de",
+    tab_sem_voos_desc_geral: "Aucun aéronef commercial détecté dans le rayon de",
+    tab_total: "TOTAL",
 
     // Onboarding (Première Ouverture)
     onboarding_passo_1_badge: "ÉTAPE 1 SUR 2",
@@ -780,6 +816,7 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_velocidade_subtitulo: "Aire",
     opcoes_unidade_nos: "NUDOS (KTS)",
     opcoes_unidade_kmh: "KM/H (KMS)",
+    opcoes_unidade_mph: "MILLAS/H (MPH)",
     opcoes_distancia_titulo: "DISTANCIA",
     opcoes_distancia_subtitulo: "Radar y Vuelos",
     opcoes_unidade_km: "KILÓMETROS (KM)",
@@ -801,6 +838,9 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     loc_raio_titulo: "RADIO DE ACCIÓN",
     opcoes_localizacao_titulo: "UBICACIÓN DEL RADAR",
     opcoes_localizacao_btn: "CAMBIAR CIUDAD O COORDENADAS",
+    opcoes_localizacao_gps_btn: "PROBAR / ACTUALIZAR GPS",
+    opcoes_localizacao_ip_btn: "ACTUALIZAR POR IP",
+    opcoes_localizacao_a_obter: "DETECTANDO POSICIÓN...",
     opcoes_navegacao_titulo: "NAVEGACIÓN ENTRE PANTALLAS (3 PANTALLAS)",
     opcoes_ecra_principal: "1. VUELO PRINCIPAL",
     opcoes_ecra_restantes: "2. RESTANTES",
@@ -832,6 +872,11 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_distancia: "DISTANCIA",
     tab_aeronave: "AERONAVE",
     tab_voo_principal: "VUELO PRINCIPAL",
+    tab_raio_circular: "RADIO CIRCULAR DE",
+    tab_sem_outros_voos: "NO SE DETECTAN OTROS VUELOS MÁS DISTANTES",
+    tab_sem_outros_voos_desc_com_principal: "Solo el vuelo principal superior sobrevuela la zona circular de",
+    tab_sem_voos_desc_geral: "No se han detectado aeronaves comerciales en el radio de",
+    tab_total: "TOTAL",
 
     // Onboarding (Primera Apertura)
     onboarding_passo_1_badge: "PASO 1 DE 2",

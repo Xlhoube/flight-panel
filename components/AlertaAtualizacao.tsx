@@ -8,7 +8,8 @@ export default function AlertaAtualizacao() {
   const [novaVersaoInfo, setNovaVersaoInfo] = useState<InfoVersao | null>(null);
   const [alertaVisivel, setAlertaVisivel] = useState(false);
   const [atualizando, setAtualizando] = useState(false);
-  const [adiadoAte, setAdiadoAte] = useState<number | null>(null);
+  const [estaAdiado, setEstaAdiado] = useState<boolean>(false);
+  const timerAdiadoRef = useRef<NodeJS.Timeout | null>(null);
 
   // Registo da versão inicial com que a página foi carregada
   const versaoInicialRef = useRef<string>(INFO_VERSAO.versao);
@@ -137,19 +138,28 @@ export default function AlertaAtualizacao() {
 
   // Adiar por 15 minutos
   const adiarAtualizacao = () => {
-    setAdiadoAte(Date.now() + 15 * 60 * 1000);
+    setEstaAdiado(true);
+    if (timerAdiadoRef.current) clearTimeout(timerAdiadoRef.current);
+    timerAdiadoRef.current = setTimeout(() => {
+      setEstaAdiado(false);
+      timerAdiadoRef.current = null;
+    }, 15 * 60 * 1000);
   };
 
   if (!novaVersaoInfo) return null;
-
-  const estaAdiado = adiadoAte !== null && Date.now() < adiadoAte;
 
   // Se o utilizador adiou, mostra apenas um pill discreto no canto superior
   if (estaAdiado) {
     return (
       <div className="fixed top-3 right-3 z-[9999]">
         <button
-          onClick={() => setAdiadoAte(null)}
+          onClick={() => {
+            setEstaAdiado(false);
+            if (timerAdiadoRef.current) {
+              clearTimeout(timerAdiadoRef.current);
+              timerAdiadoRef.current = null;
+            }
+          }}
           className="flex items-center gap-2 px-3 py-1.5 bg-[#0f172a]/95 hover:bg-[#1e293b] border border-cyan-400/60 rounded-full text-cyan-300 text-xs font-mono shadow-[0_0_15px_rgba(6,182,212,0.35)] backdrop-blur-md transition-all animate-pulse"
           title="Clique para ver detalhes da nova versão"
         >
