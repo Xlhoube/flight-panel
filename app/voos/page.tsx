@@ -1057,6 +1057,11 @@ export default function ListaVoosRestantes() {
       onMouseUp={lidarComFimArrasto}
       className="min-h-screen w-full bg-[#050608] text-white p-3 sm:p-6 font-mono select-none overflow-y-auto"
     >
+      {/* Título semântico para motores de pesquisa e acessibilidade (SEO) */}
+      <h1 className="sr-only">
+        Tabela de Tráfego Aéreo e Restantes Voos — Flight Panel
+      </h1>
+
       <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 pb-8">
 
         {/* ── CABEÇALHO COM BOTÃO DE REGRESSO E INFORMAÇÃO DA ESTAÇÃO ── */}

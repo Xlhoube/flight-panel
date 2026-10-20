@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.10.2  
+**Versão:** v2.11.0  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-20  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização integral do alerta de nova versão nos 4 idiomas (PT, EN, FR, ES) e etiqueta luminosa da versão atualizada no menu de opções.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização nos 4 idiomas (PT, EN, FR, ES), etiqueta de versão no menu de opções e infraestrutura completa de SEO, Open Graph & Twitter Cards com imagem oficial de pré-visualização, Sitemap, Robots e Dados Estruturados Schema.org.
 
 ---
 
@@ -643,6 +643,24 @@
 2. **Carimbo de Rodapé:**
    - Adicionada menção de rodapé elegante ao lado do botão de fechar com o identificador da versão e respetiva data de lançamento.
 **Consequência:** O utilizador tem agora visibilidade imediata e permanente da versão ativa do Flight Panel sempre que abre o menu de definições.
+
+### ADR-076 — Otimização Completa de SEO, Open Graph & Imagem de Pré-Visualização Social (2026-10-20)
+**Contexto:** O utilizador solicitou os mecanismos necessários para que o site apareça nos motores de pesquisa na Web (Google, Bing, etc.) e surja com uma imagem de exemplo ilustrativa da aplicação ao partilhar ligações (redes sociais, WhatsApp, Telegram, etc.): *"Cria aquelas coisas para que aparece o site na pesquisa web e que apareca uma imagem com exemplo da app. Não me lembro do nome desta função"*.
+
+**Decisão:**
+1. **Identificação e Arquitetura das Tecnologias:**
+   - **SEO (Search Engine Optimization):** Indexação orgânica nos motores de busca através de meta tags canónicas, títulos semânticos, palavras-chave e descrições detalhadas.
+   - **Open Graph (OG) & Twitter Cards:** Especificação de cartões sociais ricos com pré-visualização visual de grande formato (`summary_large_image`).
+   - **Sitemap XML (`app/sitemap.ts`):** Mapa do site automático com frequências de atualização diárias para `/`, `/painel` e `/voos`.
+   - **Robots TXT (`app/robots.ts`):** Regras de rastreio para Googlebot e indexadores web, permitindo acesso total a todas as páginas e bloqueando rotas internas de API.
+   - **Dados Estruturados Schema.org (`application/ld+json`):** Esquema oficial de `WebApplication` com nome, suporte de sistemas operativos, capturas de ecrã e lista de funcionalidades para rich snippets da Google.
+2. **Geração da Imagem Oficial de Pré-Visualização:**
+   - Criação de uma imagem de topo em resolução 16:9 (`1200x675`) ilustrando o painel Solari split-flap mecânico, radar CRT verde/âmbar, cartões de telemetria e pintura da aeronave.
+   - Exportação para `public/og-preview.png`, `public/og-preview.jpg`, `app/opengraph-image.jpg` e `app/twitter-image.jpg`.
+3. **Estrutura Semântica e Acessibilidade:**
+   - Adicionados cabeçalhos semânticos `<h1>` ocultos visualmente (`sr-only`) em `app/painel/page.tsx` e `app/voos/page.tsx` para assegurar conformidade total com as normas W3C e algoritmos de indexação.
+**Consequência:** O Flight Panel apresenta agora cartões de pré-visualização de alta fidelidade ao ser partilhado em qualquer plataforma e possui todos os ficheiros e metadados requeridos para indexação nos motores de pesquisa globais.
+
 
 
 

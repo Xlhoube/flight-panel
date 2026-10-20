@@ -2758,6 +2758,10 @@ export default function PainelAnalogicoMobileFullscreen() {
       onMouseUp={lidarComFimArrasto}
       className="h-[100dvh] w-[100dvw] max-h-[100dvh] max-w-[100dvw] bg-[#050608] text-white flex flex-col items-center justify-between p-1 sm:p-2 select-none font-mono cursor-default relative overflow-hidden board-texture pb-[max(0.25rem,env(safe-area-inset-bottom))]"
     >
+      {/* Título semântico para motores de pesquisa e acessibilidade (SEO) */}
+      <h1 className="sr-only">
+        Flight Panel — Radar ADS-B e Painel Mecânico Split-Flap de Voos em Tempo Real
+      </h1>
 
       {/* ── SELETOR DE ECRÃ: PAINEL PRINCIPAL (VOO MAIS PRÓXIMO) vs SEGUNDO ECRÃ (RESTANTES VOOS) ── */}
       {ecraAtivo === "principal" ? (
