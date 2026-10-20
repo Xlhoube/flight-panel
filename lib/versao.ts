@@ -11,8 +11,8 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.7.2",
-  buildId: "build-20261017-v272",
-  dataLancamento: "2026-10-17",
-  descricao: "Restauro da escala visual heróica e imponente das palhetas split-flaps, logótipos e telemetria.",
+  versao: "2.8.0",
+  buildId: "build-20261020-v280",
+  dataLancamento: "2026-10-20",
+  descricao: "Internacionalização integral do onboarding e pesquisa automática e silenciosa de localização no arranque.",
 };

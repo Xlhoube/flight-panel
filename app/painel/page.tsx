@@ -2016,8 +2016,10 @@ export default function PainelAnalogicoMobileFullscreen() {
   const obterLocalizacaoPorIp = useCallback(async (silencioso = false) => {
     if (typeof window === "undefined") return;
 
-    setStatusGps("iniciando");
-    setDetalheErroGps("A consultar localização aproximada através do IP da rede...");
+    if (!silencioso) {
+      setStatusGps("iniciando");
+      setDetalheErroGps("A consultar localização aproximada através do IP da rede...");
+    }
 
     try {
       const res = await fetch("/api/geolocalizacao-ip");
@@ -2037,13 +2039,15 @@ export default function PainelAnalogicoMobileFullscreen() {
         setLocalizacao(novo);
         setStatusGps("ativo");
         setPrecisaoMetros(null);
-        setDetalheErroGps(`Localização obtida por IP da rede (${nomeGeo}).`);
+        if (!silencioso) {
+          setDetalheErroGps(`Localização obtida por IP da rede (${nomeGeo}).`);
+          tocarSomFlapClack(0.3);
+        }
         setLatManual(novo.lat.toString());
         setLonManual(novo.lon.toString());
         try {
           localStorage.setItem("flight_panel_user_location", JSON.stringify(novo));
         } catch { }
-        tocarSomFlapClack(0.3);
         return true;
       } else {
         if (!silencioso) {
@@ -2062,23 +2066,29 @@ export default function PainelAnalogicoMobileFullscreen() {
   }, []);
 
   // Motor de Geolocalização com fallback automático por IP para PCs
-  const obterGpsDoDispositivo = useCallback((altaPrecisao = true) => {
+  const obterGpsDoDispositivo = useCallback((altaPrecisao = true, silencioso = false) => {
     if (typeof window === "undefined") return;
 
     if (!("geolocation" in navigator)) {
-      setDetalheErroGps("Navegador sem GPS físico. A tentar obter localização por IP...");
-      obterLocalizacaoPorIp(false);
+      if (!silencioso) {
+        setDetalheErroGps("Navegador sem GPS físico. A tentar obter localização por IP...");
+      }
+      obterLocalizacaoPorIp(silencioso);
       return;
     }
 
     if (window.isSecureContext === false) {
-      setDetalheErroGps("Contexto HTTP inseguro. A obter localização por IP...");
-      obterLocalizacaoPorIp(false);
+      if (!silencioso) {
+        setDetalheErroGps("Contexto HTTP inseguro. A obter localização por IP...");
+      }
+      obterLocalizacaoPorIp(silencioso);
       return;
     }
 
-    setStatusGps("iniciando");
-    setDetalheErroGps("A solicitar coordenadas de satélite / rede...");
+    if (!silencioso) {
+      setStatusGps("iniciando");
+      setDetalheErroGps("A solicitar coordenadas de satélite / rede...");
+    }
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -2095,7 +2105,9 @@ export default function PainelAnalogicoMobileFullscreen() {
         };
         setLocalizacao(novo);
         setStatusGps("ativo");
-        setDetalheErroGps(`Sinal GPS fixado (${acc ? acc + "m de precisão" : "Excelente"}).`);
+        if (!silencioso) {
+          setDetalheErroGps(`Sinal GPS fixado (${acc ? acc + "m de precisão" : "Excelente"}).`);
+        }
         setLatManual(novo.lat.toString());
         setLonManual(novo.lon.toString());
         try {
@@ -2105,10 +2117,12 @@ export default function PainelAnalogicoMobileFullscreen() {
       (err) => {
         // Se o GPS falhar por timeout (comum em PC sem antena) ou permissão, aciona o fallback por IP
         if (altaPrecisao && err.code === err.TIMEOUT) {
-          obterGpsDoDispositivo(false);
+          obterGpsDoDispositivo(false, silencioso);
         } else {
-          setDetalheErroGps(`GPS não disponível no PC (${err.message}). A obter localização por IP da rede...`);
-          obterLocalizacaoPorIp(false);
+          if (!silencioso) {
+            setDetalheErroGps(`GPS não disponível no PC (${err.message}). A obter localização por IP da rede...`);
+          }
+          obterLocalizacaoPorIp(silencioso);
         }
       },
       { timeout: 7000, enableHighAccuracy: altaPrecisao, maximumAge: 10000 }
@@ -2156,16 +2170,12 @@ export default function PainelAnalogicoMobileFullscreen() {
     };
   }, []);
 
-  // Recuperar localização guardada no dispositivo (localStorage) e gerir onboarding de primeira abertura
+  // Recuperar localização guardada no dispositivo (localStorage) e gerir arranque com pesquisa automática de localização
   useEffect(() => {
-    let devePedirGps = true;
     try {
       // 1. Verificar se é a primeira vez que a app é aberta
       const salvoOnboarding = localStorage.getItem("flight_panel_onboarding_v1");
       if (!salvoOnboarding) {
-        // Primeira abertura: não dispara o GPS de imediato para permitir o fluxo dos 2 popups:
-        // Passo 1: Instalação PWA -> Passo 2: Coordenadas do Dispositivo (GPS)
-        devePedirGps = false;
         const eStandalone = typeof window !== "undefined" && (
           Boolean((window.navigator as any)?.standalone) ||
           window.matchMedia("(display-mode: standalone)").matches
@@ -2173,7 +2183,7 @@ export default function PainelAnalogicoMobileFullscreen() {
         setOnboardingPasso(eStandalone ? "gps" : "instalacao");
       }
 
-      // 2. Recuperar localização previamente gravada
+      // 2. Recuperar localização previamente gravada como base imediata (zero tempo de espera)
       const salvo = localStorage.getItem("flight_panel_user_location");
       if (salvo) {
         const parsed = JSON.parse(salvo);
@@ -2182,17 +2192,14 @@ export default function PainelAnalogicoMobileFullscreen() {
           setStatusGps(parsed.origem === "gps" ? "ativo" : "fixo");
           setLatManual(parsed.lat.toString());
           setLonManual(parsed.lon.toString());
-          // Se o utilizador já definiu um local predefinido ou manual, manter essa escolha para garantir paridade entre dispositivos
-          if (parsed.origem === "preset" || parsed.origem === "manual") {
-            devePedirGps = false;
-          }
         }
       }
     } catch { }
 
-    if (devePedirGps) {
-      obterGpsDoDispositivo(true);
-    }
+    // 3. Pesquisa de localização automática e silenciosa a cada abertura (seja primeira vez ou subsequente).
+    // Desta forma, se a app for aberta noutra cidade ou país, as coordenadas reais do dispositivo são
+    // atualizadas em segundo plano com as ferramentas integradas (GPS com fallback para IP), sem ruído nem bloqueios.
+    obterGpsDoDispositivo(true, true);
   }, [obterGpsDoDispositivo]);
 
   const selecionarLocalPredefinido = (local: typeof LOCAIS_PREDEFINIDOS[0]) => {
@@ -4120,10 +4127,10 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-black tracking-widest uppercase">
-                      PASSO 1 DE 2
+                      {t.onboarding_passo_1_badge}
                     </span>
                     <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">
-                      INSTALAÇÃO PWA
+                      {t.onboarding_instalacao_pwa_badge}
                     </span>
                   </div>
                   <h2 className="text-sm sm:text-base font-black tracking-wider text-amber-400 uppercase mt-0.5">
@@ -4143,23 +4150,23 @@ export default function PainelAnalogicoMobileFullscreen() {
               <div className="flex flex-col items-center gap-1">
                 <span className="text-base">⚡</span>
                 <span className="text-[9px] font-bold text-neutral-200 uppercase leading-tight">
-                  Ecrã Inteiro
+                  {t.onboarding_card_ecra_inteiro}
                 </span>
-                <span className="text-[8px] text-neutral-400 leading-tight">Sem barras</span>
+                <span className="text-[8px] text-neutral-400 leading-tight">{t.onboarding_card_sem_barras}</span>
               </div>
               <div className="flex flex-col items-center gap-1 border-x border-white/10 px-1">
                 <span className="text-base">🔊</span>
                 <span className="text-[9px] font-bold text-neutral-200 uppercase leading-tight">
-                  Áudio Cockpit
+                  {t.onboarding_card_audio}
                 </span>
-                <span className="text-[8px] text-neutral-400 leading-tight">Jingle Solari</span>
+                <span className="text-[8px] text-neutral-400 leading-tight">{t.onboarding_card_jingle}</span>
               </div>
               <div className="flex flex-col items-center gap-1">
                 <span className="text-base">📡</span>
                 <span className="text-[9px] font-bold text-neutral-200 uppercase leading-tight">
-                  Radar Direto
+                  {t.onboarding_card_radar}
                 </span>
-                <span className="text-[8px] text-neutral-400 leading-tight">Tempo Real</span>
+                <span className="text-[8px] text-neutral-400 leading-tight">{t.onboarding_card_tempo_real}</span>
               </div>
             </div>
 
@@ -4189,8 +4196,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 }}
                 className="w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.99] text-black font-black text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-amber-300/50"
               >
-                <span>📲</span>
-                <span>{promptInstalacao ? t.onboarding_instalar_btn : `${t.opcoes_guardar_fechar.toUpperCase()} / SEGUINTE ➔`}</span>
+                <span>{promptInstalacao ? t.onboarding_instalar_btn : `${t.opcoes_guardar_fechar.toUpperCase()} / ${t.onboarding_seguinte} ➔`}</span>
               </button>
 
               <button
@@ -4224,10 +4230,10 @@ export default function PainelAnalogicoMobileFullscreen() {
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded font-black tracking-widest uppercase">
-                      PASSO 2 DE 2
+                      {t.onboarding_passo_2_badge}
                     </span>
                     <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">
-                      COORDENADAS & RADAR
+                      {t.onboarding_coordenadas_badge}
                     </span>
                   </div>
                   <h2 className="text-sm sm:text-base font-black tracking-wider text-emerald-400 uppercase mt-0.5">
@@ -4246,7 +4252,7 @@ export default function PainelAnalogicoMobileFullscreen() {
             <div className="bg-[#141720] p-3 rounded-xl border border-white/10 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                  ESTADO DO SINAL
+                  {t.onboarding_estado_sinal}
                 </span>
                 <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
                   statusGps === "ativo"
@@ -4255,7 +4261,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse"
                     : "bg-neutral-800 text-neutral-400"
                 }`}>
-                  {statusGps === "ativo" ? "CONECTADO" : statusGps === "iniciando" ? "SINTONIZANDO" : "AGUARDANDO"}
+                  {statusGps === "ativo" ? t.onboarding_status_conectado : statusGps === "iniciando" ? t.onboarding_status_sintonizando : t.onboarding_status_aguardando}
                 </span>
               </div>
 
@@ -4269,7 +4275,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     📍 {localizacao.nome} {precisaoMetros ? `(±${precisaoMetros}m)` : ""}
                   </span>
                   <span className="text-[10px] text-neutral-400 font-mono">
-                    {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • Raio {raioKm} KM
+                    {localizacao.lat.toFixed(4)}°N, {localizacao.lon.toFixed(4)}°W • {t.onboarding_raio_rotulo} {raioKm} KM
                   </span>
                 </div>
               ) : statusGps === "iniciando" ? (
@@ -4283,7 +4289,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 </div>
               ) : (
                 <div className="text-[11px] text-neutral-400">
-                  Clica no botão abaixo para permitir o acesso à localização do teu dispositivo.
+                  {t.onboarding_instrucao_gps}
                 </div>
               )}
             </div>
@@ -4326,7 +4332,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     className="w-full bg-sky-700/80 hover:bg-sky-600 active:scale-[0.99] text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer border border-sky-400/30"
                   >
                     <span>🌐</span>
-                    <span>OBTER POR IP DA REDE (PC)</span>
+                    <span>{t.onboarding_obter_ip_btn}</span>
                   </button>
                 </>
               )}
@@ -4342,7 +4348,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                 }}
                 className="w-full bg-white/10 hover:bg-white/15 active:scale-[0.99] text-neutral-300 hover:text-white font-bold text-[11px] sm:text-xs py-2 px-3 rounded-xl transition-all cursor-pointer text-center"
               >
-                {statusGps === "ativo" ? "CONCLUIR" : t.onboarding_gps_padrao_btn}
+                {statusGps === "ativo" ? t.onboarding_concluir_btn : t.onboarding_gps_padrao_btn}
               </button>
             </div>
           </div>

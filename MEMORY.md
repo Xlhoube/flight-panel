@@ -8,10 +8,10 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.7.0  
+**Versão:** v2.8.0  
 **Data de início:** 2026-09-06  
-**Última sessão:** 2026-10-17  
-**Estado:** PWA internacional completa com 3 ecrãs integrados, controlo manual e automático de luminosidade do ecrã com aumento para 100% durante 5 segundos ao detetar novo voo no radar, proteção anti-corte e calibração dinâmica vertical para telemóveis em modo horizontal (landscape 100dvh, viewportFit cover, FlapCells calibradas com dvh e contenção rígida da barra de telemetria), fixação e estabilização de altura da barra inferior, reativação do assistente de instalação PWA, eliminação de popups nativos de fullscreen do Android, internacionalização para LOADING e diretivas notranslate.
+**Última sessão:** 2026-10-20  
+**Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização total dos modais de onboarding (passos 1 e 2, vantagens, badges e botões) e de localização em 4 idiomas (PT, EN, FR, ES), eliminação de emojis duplicados, e pesquisa automática e silenciosa de localização em segundo plano a cada arranque da aplicação (GPS com fallback automático para IP da rede).
 
 ---
 
@@ -542,16 +542,10 @@
 4. **Proteção Vertical 100dvh Mantida:** A contenção estrita `html, body { height: 100dvh; overflow: hidden; }` e `flex-1 min-h-0` na linha central garante que o layout preenche 100% da viewport sem transbordar o ecrã.  
 **Consequência:** Equilíbrio visual perfeito com impacto estético imersivo e sem qualquer elemento encolhido.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+### ADR-069 — Internacionalização Integral do Onboarding e Pesquisa Automática e Silenciosa de Localização no Arranque (2026-10-20)
+**Contexto:** O utilizador reportou que, mesmo com o idioma configurado em inglês, o assistente de instalação inicial e calibração de radar (onboarding) exibia elementos em português misturados (ex: "PASSO 1 DE 2", "INSTALAÇÃO PWA", "ECRÃ INTEIRO / Sem barras", "ÁUDIO COCKPIT", "RADAR DIRETO", "ESTADO DO SINAL", "CONECTADO", "CONCLUIR" e emoji duplicado `📲 📲`). Adicionalmente, solicitou que ao abrir a aplicação — seja pela primeira vez ou não — seja feita automaticamente e de forma silenciosa uma pesquisa de localização com as ferramentas integradas (GPS e IP), para que ao mudar de localidade o painel reflita de imediato as coordenadas reais do utilizador em vez de manter a primeira verificação antiga.  
+**Decisão:**  
+1. **Internacionalização Integral dos Modais (i18n):** Adicionadas todas as chaves em falta na interface `DicionarioTraducoes` (`onboarding_passo_1_badge`, `onboarding_instalacao_pwa_badge`, `onboarding_card_ecra_inteiro`, `onboarding_card_sem_barras`, `onboarding_card_audio`, `onboarding_card_jingle`, `onboarding_card_radar`, `onboarding_card_tempo_real`, `onboarding_seguinte`, `onboarding_passo_2_badge`, `onboarding_coordenadas_badge`, `onboarding_estado_sinal`, `onboarding_status_conectado`, `onboarding_status_sintonizando`, `onboarding_status_aguardando`, `onboarding_instrucao_gps`, `onboarding_obter_ip_btn`, `onboarding_concluir_btn`, `onboarding_raio_rotulo`, `opcoes_reabrir_onboarding`, `loc_subtitulo`, `loc_ponto_activo`) com traduções rigorosas em PT, EN, FR e ES.  
+2. **Remoção de Emojis Duplicados:** Eliminado o `<span>📲</span>` redundante que antecedia `t.onboarding_instalar_btn`, garantindo apresentação limpa `📲 INSTALL APP`.  
+3. **Pesquisa Automática e Silenciosa no Arranque:** Implementado modo `silencioso` em `obterGpsDoDispositivo(true, true)` e `obterLocalizacaoPorIp(true)`. No `useEffect` de inicialização, a aplicação carrega instantaneamente os dados de cache para zero latência visual e simultaneamente executa a verificação e atualização de localização em segundo plano. Caso o utilizador se desloque para outra cidade, país ou aeroporto, as novas coordenadas e o espaço aéreo são atualizados automaticamente sem interrupção nem ruído sonoro.  
+**Consequência:** Coerência linguística a 100% em qualquer idioma e precisão geográfica dinâmica automática entre diferentes cidades.

@@ -125,9 +125,12 @@ export interface DicionarioTraducoes {
   opcoes_ecra_meteo: string;
   opcoes_ver_tabela: string;
   opcoes_guardar_fechar: string;
+  opcoes_reabrir_onboarding: string;
 
   // Modal de Localização
   loc_titulo: string;
+  loc_subtitulo: string;
+  loc_ponto_activo: string;
   loc_cidade: string;
   loc_lat: string;
   loc_lon: string;
@@ -149,19 +152,38 @@ export interface DicionarioTraducoes {
   tab_voo_principal: string;
 
   // Onboarding (Primeira Abertura)
+  onboarding_passo_1_badge: string;
+  onboarding_instalacao_pwa_badge: string;
   onboarding_instalar_titulo: string;
   onboarding_instalar_subtitulo: string;
+  onboarding_card_ecra_inteiro: string;
+  onboarding_card_sem_barras: string;
+  onboarding_card_audio: string;
+  onboarding_card_jingle: string;
+  onboarding_card_radar: string;
+  onboarding_card_tempo_real: string;
   onboarding_instalar_btn: string;
   onboarding_instalar_mais_tarde: string;
   onboarding_instalar_dica_ios: string;
+  onboarding_seguinte: string;
+  onboarding_passo_2_badge: string;
+  onboarding_coordenadas_badge: string;
   onboarding_gps_titulo: string;
   onboarding_gps_subtitulo: string;
+  onboarding_estado_sinal: string;
+  onboarding_status_conectado: string;
+  onboarding_status_sintonizando: string;
+  onboarding_status_aguardando: string;
+  onboarding_instrucao_gps: string;
   onboarding_gps_btn: string;
   onboarding_gps_padrao_btn: string;
+  onboarding_obter_ip_btn: string;
   onboarding_gps_a_obter: string;
   onboarding_gps_sucesso: string;
   onboarding_gps_erro: string;
   onboarding_concluir: string;
+  onboarding_concluir_btn: string;
+  onboarding_raio_rotulo: string;
 }
 
 export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
@@ -273,9 +295,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_ecra_meteo: "3. METEOROLOGIA",
     opcoes_ver_tabela: "VER TABELA COMPLETA DE VOOS",
     opcoes_guardar_fechar: "GUARDAR E FECHAR",
+    opcoes_reabrir_onboarding: "REABRIR ASSISTENTE DE INSTALAÇÃO & GPS",
 
     // Modal de Localização
     loc_titulo: "Localização do Radar",
+    loc_subtitulo: "Define o centro do raio circular de",
+    loc_ponto_activo: "PONTO ACTUAL ACTIVO",
     loc_cidade: "CIDADE OU REGIÃO",
     loc_lat: "LATITUDE",
     loc_lon: "LONGITUDE",
@@ -297,19 +322,38 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_voo_principal: "VOO PRINCIPAL",
 
     // Onboarding (Primeira Abertura)
+    onboarding_passo_1_badge: "PASSO 1 DE 2",
+    onboarding_instalacao_pwa_badge: "INSTALAÇÃO PWA",
     onboarding_instalar_titulo: "BEM-VINDO AO FLIGHT PANEL",
     onboarding_instalar_subtitulo: "Instala a aplicação no teu ecrã inicial para uma experiência imersiva de ecrã inteiro sem barras do navegador e com áudio de cabine.",
+    onboarding_card_ecra_inteiro: "Ecrã Inteiro",
+    onboarding_card_sem_barras: "Sem barras",
+    onboarding_card_audio: "Áudio Cockpit",
+    onboarding_card_jingle: "Jingle Solari",
+    onboarding_card_radar: "Radar Direto",
+    onboarding_card_tempo_real: "Tempo Real",
     onboarding_instalar_btn: "📲 INSTALAR APLICAÇÃO",
     onboarding_instalar_mais_tarde: "CONTINUAR NO NAVEGADOR",
     onboarding_instalar_dica_ios: "Dica iOS: toca em Partilhar ⎋ e seleciona 'Ecrã Principal'.",
+    onboarding_seguinte: "SEGUINTE",
+    onboarding_passo_2_badge: "PASSO 2 DE 2",
+    onboarding_coordenadas_badge: "COORDENADAS & RADAR",
     onboarding_gps_titulo: "CALIBRAÇÃO DO RADAR",
     onboarding_gps_subtitulo: "O Flight Panel necessita da localização do teu dispositivo para detetar os aviões que estão a passar por cima de ti em tempo real.",
+    onboarding_estado_sinal: "ESTADO DO SINAL",
+    onboarding_status_conectado: "CONECTADO",
+    onboarding_status_sintonizando: "SINTONIZANDO",
+    onboarding_status_aguardando: "AGUARDANDO",
+    onboarding_instrucao_gps: "Clica no botão abaixo para permitir o acesso à localização do teu dispositivo.",
     onboarding_gps_btn: "📡 ATIVAR LOCALIZAÇÃO GPS",
     onboarding_gps_padrao_btn: "USAR LOCALIZAÇÃO PADRÃO (PORTO, PT)",
+    onboarding_obter_ip_btn: "OBTER POR IP DA REDE (PC)",
     onboarding_gps_a_obter: "A sintonizar satélites GPS...",
     onboarding_gps_sucesso: "Sinal GPS fixado com sucesso!",
     onboarding_gps_erro: "Não foi possível obter o sinal GPS.",
     onboarding_concluir: "ENTRAR NO PAINEL ➔",
+    onboarding_concluir_btn: "CONCLUIR",
+    onboarding_raio_rotulo: "Raio",
   },
 
   en: {
@@ -420,9 +464,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_ecra_meteo: "3. WEATHER",
     opcoes_ver_tabela: "VIEW FULL FLIGHT TABLE",
     opcoes_guardar_fechar: "SAVE AND CLOSE",
+    opcoes_reabrir_onboarding: "REOPEN INSTALLATION & GPS WIZARD",
 
     // Location Modal
     loc_titulo: "Radar Location",
+    loc_subtitulo: "Sets the center of the circular radius of",
+    loc_ponto_activo: "CURRENT ACTIVE POINT",
     loc_cidade: "CITY OR REGION",
     loc_lat: "LATITUDE",
     loc_lon: "LONGITUDE",
@@ -444,19 +491,38 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_voo_principal: "MAIN FLIGHT",
 
     // Onboarding (First Launch)
+    onboarding_passo_1_badge: "STEP 1 OF 2",
+    onboarding_instalacao_pwa_badge: "PWA INSTALLATION",
     onboarding_instalar_titulo: "WELCOME TO FLIGHT PANEL",
     onboarding_instalar_subtitulo: "Install the app on your home screen for an immersive full-screen cockpit experience without browser bars.",
+    onboarding_card_ecra_inteiro: "Full Screen",
+    onboarding_card_sem_barras: "No bars",
+    onboarding_card_audio: "Cockpit Audio",
+    onboarding_card_jingle: "Solari Jingle",
+    onboarding_card_radar: "Live Radar",
+    onboarding_card_tempo_real: "Real Time",
     onboarding_instalar_btn: "📲 INSTALL APP",
     onboarding_instalar_mais_tarde: "CONTINUE IN BROWSER",
     onboarding_instalar_dica_ios: "iOS tip: tap Share ⎋ and select 'Add to Home Screen'.",
+    onboarding_seguinte: "NEXT",
+    onboarding_passo_2_badge: "STEP 2 OF 2",
+    onboarding_coordenadas_badge: "COORDINATES & RADAR",
     onboarding_gps_titulo: "RADAR CALIBRATION",
     onboarding_gps_subtitulo: "Flight Panel needs your device location to detect flights passing right above you in real time.",
+    onboarding_estado_sinal: "SIGNAL STATUS",
+    onboarding_status_conectado: "CONNECTED",
+    onboarding_status_sintonizando: "TUNING",
+    onboarding_status_aguardando: "WAITING",
+    onboarding_instrucao_gps: "Click the button below to allow access to your device's location.",
     onboarding_gps_btn: "📡 ENABLE GPS LOCATION",
     onboarding_gps_padrao_btn: "USE DEFAULT LOCATION (PORTO, PT)",
+    onboarding_obter_ip_btn: "GET VIA NETWORK IP (PC)",
     onboarding_gps_a_obter: "Tuning GPS satellites...",
     onboarding_gps_sucesso: "GPS signal locked successfully!",
     onboarding_gps_erro: "Unable to acquire GPS signal.",
     onboarding_concluir: "ENTER PANEL ➔",
+    onboarding_concluir_btn: "FINISH",
+    onboarding_raio_rotulo: "Radius",
   },
 
   fr: {
@@ -567,9 +633,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_ecra_meteo: "3. MÉTÉO",
     opcoes_ver_tabela: "VOIR LE TABLEAU COMPLET DES VOLS",
     opcoes_guardar_fechar: "ENREGISTRER ET FERMER",
+    opcoes_reabrir_onboarding: "ROUVRIR L'ASSISTANT D'INSTALLATION & GPS",
 
     // Modal de Localisation
     loc_titulo: "Position du Radar",
+    loc_subtitulo: "Définit le centre du rayon circulaire de",
+    loc_ponto_activo: "POINT ACTIF ACTUEL",
     loc_cidade: "VILLE OU RÉGION",
     loc_lat: "LATITUDE",
     loc_lon: "LONGITUDE",
@@ -591,19 +660,38 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_voo_principal: "VOL PRINCIPAL",
 
     // Onboarding (Première Ouverture)
+    onboarding_passo_1_badge: "ÉTAPE 1 SUR 2",
+    onboarding_instalacao_pwa_badge: "INSTALLATION PWA",
     onboarding_instalar_titulo: "BIENVENUE SUR FLIGHT PANEL",
     onboarding_instalar_subtitulo: "Installez l'application sur votre écran d'accueil pour une expérience plein écran immersive sans barre de navigation.",
+    onboarding_card_ecra_inteiro: "Plein Écran",
+    onboarding_card_sem_barras: "Sans barres",
+    onboarding_card_audio: "Audio Cockpit",
+    onboarding_card_jingle: "Jingle Solari",
+    onboarding_card_radar: "Radar Direct",
+    onboarding_card_tempo_real: "Temps Réel",
     onboarding_instalar_btn: "📲 INSTALLER L'APPLICATION",
     onboarding_instalar_mais_tarde: "CONTINUER SUR LE NAVIGATEUR",
     onboarding_instalar_dica_ios: "Astuce iOS: touchez Partager ⎋ et sélectionnez 'Sur l'écran d'accueil'.",
+    onboarding_seguinte: "SUIVANT",
+    onboarding_passo_2_badge: "ÉTAPE 2 SUR 2",
+    onboarding_coordenadas_badge: "COORDONNÉES & RADAR",
     onboarding_gps_titulo: "CALIBRAGE DU RADAR",
     onboarding_gps_subtitulo: "Flight Panel a besoin de la position de votre appareil pour détecter les vols au-dessus de vous en temps réel.",
+    onboarding_estado_sinal: "ÉTAT DU SIGNAL",
+    onboarding_status_conectado: "CONNECTÉ",
+    onboarding_status_sintonizando: "SYNTONISATION",
+    onboarding_status_aguardando: "EN ATTENTE",
+    onboarding_instrucao_gps: "Cliquez sur le bouton ci-dessous pour autoriser l'accès à la localisation de votre appareil.",
     onboarding_gps_btn: "📡 ACTIVER LA POSITION GPS",
     onboarding_gps_padrao_btn: "UTILISER LA POSITION PAR DÉFAUT (PORTO, PT)",
+    onboarding_obter_ip_btn: "OBTENIR PAR IP RÉSEAU (PC)",
     onboarding_gps_a_obter: "Recherche des satellites GPS...",
     onboarding_gps_sucesso: "Signal GPS verrouillé avec succès!",
     onboarding_gps_erro: "Impossible d'acquérir le signal GPS.",
     onboarding_concluir: "OUVRIR LE PANNEAU ➔",
+    onboarding_concluir_btn: "TERMINER",
+    onboarding_raio_rotulo: "Rayon",
   },
 
   es: {
@@ -714,9 +802,12 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     opcoes_ecra_meteo: "3. METEOROLOGÍA",
     opcoes_ver_tabela: "VER TABLA COMPLETA DE VUELOS",
     opcoes_guardar_fechar: "GUARDAR Y CERRAR",
+    opcoes_reabrir_onboarding: "REABRIR ASISTENTE DE INSTALACIÓN Y GPS",
 
     // Modal de Ubicación
     loc_titulo: "Ubicación del Radar",
+    loc_subtitulo: "Define el centro del radio circular de",
+    loc_ponto_activo: "PUNTO ACTUAL ACTIVO",
     loc_cidade: "CIUDAD O REGIÓN",
     loc_lat: "LATITUD",
     loc_lon: "LONGITUD",
@@ -738,19 +829,38 @@ export const TRADUCOES: Record<Idioma, DicionarioTraducoes> = {
     tab_voo_principal: "VUELO PRINCIPAL",
 
     // Onboarding (Primera Apertura)
+    onboarding_passo_1_badge: "PASO 1 DE 2",
+    onboarding_instalacao_pwa_badge: "INSTALACIÓN PWA",
     onboarding_instalar_titulo: "BIENVENIDO A FLIGHT PANEL",
     onboarding_instalar_subtitulo: "Instala la aplicación en tu pantalla de inicio para una experiencia inmersiva a pantalla completa sin barras del navegador.",
+    onboarding_card_ecra_inteiro: "Pantalla Completa",
+    onboarding_card_sem_barras: "Sin barras",
+    onboarding_card_audio: "Audio Cockpit",
+    onboarding_card_jingle: "Jingle Solari",
+    onboarding_card_radar: "Radar en Vivo",
+    onboarding_card_tempo_real: "Tiempo Real",
     onboarding_instalar_btn: "📲 INSTALAR APLICACIÓN",
     onboarding_instalar_mais_tarde: "CONTINUAR EN EL NAVEGADOR",
     onboarding_instalar_dica_ios: "Consejo iOS: pulsa Compartir ⎋ y selecciona 'Añadir a pantalla de inicio'.",
+    onboarding_seguinte: "SIGUIENTE",
+    onboarding_passo_2_badge: "PASO 2 DE 2",
+    onboarding_coordenadas_badge: "COORDENADAS Y RADAR",
     onboarding_gps_titulo: "CALIBRACIÓN DEL RADAR",
     onboarding_gps_subtitulo: "Flight Panel necesita la ubicación de tu dispositivo para detectar los vuelos sobre ti en tiempo real.",
+    onboarding_estado_sinal: "ESTADO DE LA SEÑAL",
+    onboarding_status_conectado: "CONECTADO",
+    onboarding_status_sintonizando: "SINTONIZANDO",
+    onboarding_status_aguardando: "ESPERANDO",
+    onboarding_instrucao_gps: "Haz clic en el botón de abajo para permitir el acceso a la ubicación de tu dispositivo.",
     onboarding_gps_btn: "📡 ACTIVAR UBICACIÓN GPS",
     onboarding_gps_padrao_btn: "USAR UBICACIÓN PREDETERMINADA (PORTO, PT)",
+    onboarding_obter_ip_btn: "OBTENER POR IP DE RED (PC)",
     onboarding_gps_a_obter: "Sintonizando satélites GPS...",
     onboarding_gps_sucesso: "¡Señal GPS fijada con éxito!",
     onboarding_gps_erro: "No fue posible obtener la señal GPS.",
     onboarding_concluir: "ENTRAR AL PANEL ➔",
+    onboarding_concluir_btn: "FINALIZAR",
+    onboarding_raio_rotulo: "Radio",
   },
 };
 
