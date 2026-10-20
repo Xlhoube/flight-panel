@@ -8,7 +8,7 @@
 
 **Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.8.0  
+**Versão:** v2.8.1  
 **Data de início:** 2026-09-06  
 **Última sessão:** 2026-10-20  
 **Estado:** PWA internacional completa com 3 ecrãs integrados, internacionalização total dos modais de onboarding (passos 1 e 2, vantagens, badges e botões) e de localização em 4 idiomas (PT, EN, FR, ES), eliminação de emojis duplicados, e pesquisa automática e silenciosa de localização em segundo plano a cada arranque da aplicação (GPS com fallback automático para IP da rede).
@@ -549,3 +549,10 @@
 2. **Remoção de Emojis Duplicados:** Eliminado o `<span>📲</span>` redundante que antecedia `t.onboarding_instalar_btn`, garantindo apresentação limpa `📲 INSTALL APP`.  
 3. **Pesquisa Automática e Silenciosa no Arranque:** Implementado modo `silencioso` em `obterGpsDoDispositivo(true, true)` e `obterLocalizacaoPorIp(true)`. No `useEffect` de inicialização, a aplicação carrega instantaneamente os dados de cache para zero latência visual e simultaneamente executa a verificação e atualização de localização em segundo plano. Caso o utilizador se desloque para outra cidade, país ou aeroporto, as novas coordenadas e o espaço aéreo são atualizados automaticamente sem interrupção nem ruído sonoro.  
 **Consequência:** Coerência linguística a 100% em qualquer idioma e precisão geográfica dinâmica automática entre diferentes cidades.
+
+### ADR-070 — Substituição de Emojis por Bandeiras Vetoriais SVG no Seletor de Idioma (2026-10-20)
+**Contexto:** O utilizador reportou que os botões do seletor de idioma apresentavam texto com códigos de país duplicados (ex: "PT PT", "GB EN", "FR FR", "ES ES"). Esta anomalia ocorre porque os sistemas operativos Windows não renderizam emojis de bandeiras nacionais por omissão na fonte Segoe UI Emoji, substituindo os caracteres de bandeira Unicode pelos pares de letras regionais (ex: 🇵🇹 torna-se "PT", 🇬🇧 torna-se "GB").  
+**Decisão:**  
+1. **Componentes Vetoriais SVG Dedicados (`components/IconesBandeiras.tsx`):** Criação dos gráficos vetoriais autênticos e proporcionados para Portugal (verde, vermelho, esfera armilar e quinas), Reino Unido (Union Jack autêntica), França (tricolor vertical) e Espanha (vermelho/amarelo com brasão simplificado).  
+2. **Substituição Visual:** No modal de opções (`app/painel/page.tsx`), o seletor de idiomas passou a renderizar `<IconeBandeira>` com cantos subtilmente arredondados e sombra discreta tanto no título do idioma ativo como no interior de cada um dos quatro botões táteis.  
+**Consequência:** Apresentação gráfica nítida e consistente de bandeiras em qualquer sistema operativo (Windows, macOS, Linux, Android e iOS), eliminando completamente a duplicação de texto.

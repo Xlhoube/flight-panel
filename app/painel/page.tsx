@@ -8,6 +8,7 @@ import { obterDadosAeroporto } from "@/lib/aeroportos";
 import { resolverLocalidadePorCoordenadas, formatarNomeEstacaoDisplay } from "@/lib/localidades";
 import { resolverInfoAeronave } from "@/lib/aeronaves-db";
 import { EmblemaFabricante } from "@/lib/fabricantes-logos";
+import { IconeBandeira } from "@/components/IconesBandeiras";
 import {
   tocarSomFlapClack,
   tocarRajadaFlaps,
@@ -3352,8 +3353,9 @@ export default function PainelAnalogicoMobileFullscreen() {
                   <span>🌐</span>
                   <span>{t.opcoes_idioma_titulo}</span>
                 </span>
-                <span className="text-[9px] text-amber-400 font-mono font-bold">
-                  {IDIOMAS_DISPONIVEIS.find(i => i.codigo === idioma)?.bandeira} {IDIOMAS_DISPONIVEIS.find(i => i.codigo === idioma)?.nomeNativo}
+                <span className="text-[10px] text-amber-400 font-mono font-bold flex items-center gap-1.5">
+                  <IconeBandeira codigo={idioma} className="w-4 h-2.5" />
+                  <span>{IDIOMAS_DISPONIVEIS.find(i => i.codigo === idioma)?.nomeNativo}</span>
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-1.5">
@@ -3362,14 +3364,14 @@ export default function PainelAnalogicoMobileFullscreen() {
                     key={item.codigo}
                     type="button"
                     onClick={() => alternarIdioma(item.codigo)}
-                    className={`py-1.5 px-1 rounded-lg border text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 cursor-pointer ${
+                    className={`py-1.5 px-1 rounded-lg border text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer ${
                       idioma === item.codigo
                         ? "bg-amber-400/25 border-amber-400 text-amber-300 shadow-sm"
                         : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <span className="text-sm">{item.bandeira}</span>
-                    <span className="text-[10px] font-mono">{item.rotulo}</span>
+                    <IconeBandeira codigo={item.codigo} className="w-5 h-3.5" />
+                    <span className="text-[11px] font-mono">{item.rotulo}</span>
                   </button>
                 ))}
               </div>
