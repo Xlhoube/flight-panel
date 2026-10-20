@@ -6,27 +6,32 @@
 
 ## Contexto Actual
 
-**Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)  
-**Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).  
-**Versão:** v2.11.1  
-**Data de início:** 2026-09-06  
-**Última sessão:** 2026-10-20  
+**Projecto:** Flight Panel — Painel de monitorização aérea e meteorológica (*The Flight Wall Official Replica*)
+
+**Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).
+
+**Versão:** v2.11.1
+
+**Data de início:** 2026-09-06
+
+**Última sessão:** 2026-10-20
+
 **Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização nos 4 idiomas (PT, EN, FR, ES), etiqueta de versão no menu de opções, SEO & Open Graph com imagem oficial de pré-visualização, e motor de georresolução de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia.
 
 ---
 
 ## Stack
 
-| Componente      | Tecnologia                        | Justificação                                       |
-|-----------------|-----------------------------------|---------------------------------------------------|
-| Framework       | Next.js 16 (App Router) + PWA     | SSR + Route Handlers + Web App Manifest           |
-| Linguagem       | TypeScript                        | Segurança estrita de tipos                        |
-| PWA / Mobile    | Service Worker + Manifest + Icons | Instalação nativa direta no ecrã do telemóvel     |
-| Estilos         | Tailwind CSS v4 + Split-Flap CSS  | Células de palhetas mecânicas brancas 3D          |
-| Áudio           | Web Audio API (Flap Clack)        | Som mecânico sintetizado ao alternar palhetas    |
-| Imagens         | FlightAware ICAO DB + Aviasales   | Base de dados com milhares de logótipos por ICAO  |
-| Voos            | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo               |
-| Meteorologia    | OpenWeatherMap (gratuito)         | API meteorológica em PT                           |
+| Componente   | Tecnologia                        | Justificação                                     |
+| ------------ | --------------------------------- | ------------------------------------------------ |
+| Framework    | Next.js 16 (App Router) + PWA     | SSR + Route Handlers + Web App Manifest          |
+| Linguagem    | TypeScript                        | Segurança estrita de tipos                       |
+| PWA / Mobile | Service Worker + Manifest + Icons | Instalação nativa direta no ecrã do telemóvel    |
+| Estilos      | Tailwind CSS v4 + Split-Flap CSS  | Células de palhetas mecânicas brancas 3D         |
+| Áudio        | Web Audio API (Flap Clack)        | Som mecânico sintetizado ao alternar palhetas    |
+| Imagens      | FlightAware ICAO DB + Aviasales   | Base de dados com milhares de logótipos por ICAO |
+| Voos         | OpenSky Network (gratuito)        | Telemetria pública de tráfego aéreo              |
+| Meteorologia | OpenWeatherMap (gratuito)         | API meteorológica em PT                          |
 
 ---
 
@@ -35,226 +40,312 @@
 ### ADR-001 a 020 — (Ver sessões anteriores)
 
 ### ADR-021 — Remoção da Moldura de Fundo / Layout Borderless (2026-09-07)
-**Contexto:** O utilizador solicitou a remoção da moldura de fundo externa para eliminar margens e molduras artificiais.  
-**Decisão:** Eliminar os contornos e sombras da moldura exterior circundante, permitindo que as secções do painel preencham o ecrã de forma limpa e borderless *edge-to-edge*.  
+
+**Contexto:** O utilizador solicitou a remoção da moldura de fundo externa para eliminar margens e molduras artificiais.
+
+**Decisão:** Eliminar os contornos e sombras da moldura exterior circundante, permitindo que as secções do painel preencham o ecrã de forma limpa e borderless *edge-to-edge*.
+
 **Consequência:** Estética minimalista e maximização do espaço útil do ecrã.
 
 ### ADR-022 — Instalador PWA para Telemóveis Android e iPhone (2026-09-07)
-**Contexto:** O utilizador solicitou um instalador para usar o painel no telemóvel como uma aplicação dedicada.  
-**Decisão:** Implementar a arquitetura completa de Progressive Web App (PWA): manifest.json, ícones dedicados (192x192 e 512x512), Service Worker (sw.js), metadados Apple Mobile Web App e botão/prompt nativo de instalação.  
+
+**Contexto:** O utilizador solicitou um instalador para usar o painel no telemóvel como uma aplicação dedicada.
+
+**Decisão:** Implementar a arquitetura completa de Progressive Web App (PWA): manifest.json, ícones dedicados (192x192 e 512x512), Service Worker (sw.js), metadados Apple Mobile Web App e botão/prompt nativo de instalação.
+
 **Consequência:** A aplicação pode ser instalada com 1 toque no telemóvel, abrindo com o seu próprio ícone no ecrã principal sem barras de navegação do browser em modo landscape autónomo.
 
 ### ADR-023 — Publicação no GitHub e Deploy na Nuvem Vercel (2026-09-07)
-**Contexto:** O utilizador solicitou o envio do código para o GitHub (https://github.com/Xlhoube/flight-panel.git) e a disponibilização na Vercel para acesso a partir de qualquer rede ou telemóvel.  
-**Decisão:** Configurar o repositório remoto `origin` ligado ao GitHub oficial do utilizador, sincronizar a branch `main` e preparar a integração contínua com a Vercel.  
+
+**Contexto:** O utilizador solicitou o envio do código para o GitHub (<https://github.com/Xlhoube/flight-panel.git>) e a disponibilização na Vercel para acesso a partir de qualquer rede ou telemóvel.
+
+**Decisão:** Configurar o repositório remoto `origin` ligado ao GitHub oficial do utilizador, sincronizar a branch `main` e preparar a integração contínua com a Vercel.
+
 **Consequência:** A aplicação passa a estar acessível globalmente a partir de qualquer dispositivo ou rede através de um endereço web seguro HTTPS com CI/CD automático.
 
 ### ADR-025 — Abertura Automática em Modo Ecrã Inteiro / Fullscreen (2026-09-19)
-**Contexto:** O utilizador solicitou que a aplicação abra automaticamente em fullscreen.  
-**Decisão:** Configurar o Web App Manifest com `"display": "fullscreen"` (para abertura nativa em ecrã inteiro total quando instalada no telemóvel ou PC). No cliente web, acionar `requestFullscreen()` e `WakeLock` imediatamente na montagem do componente e associar listeners globais de gesto passivo para que, caso o browser imponha restrições de segurança que impeçam fullscreen não solicitado, o primeiro toque em qualquer ponto do ecrã acione instantaneamente o modo ecrã inteiro.  
+
+**Contexto:** O utilizador solicitou que a aplicação abra automaticamente em fullscreen.
+
+**Decisão:** Configurar o Web App Manifest com `"display": "fullscreen"` (para abertura nativa em ecrã inteiro total quando instalada no telemóvel ou PC). No cliente web, acionar `requestFullscreen()` e `WakeLock` imediatamente na montagem do componente e associar listeners globais de gesto passivo para que, caso o browser imponha restrições de segurança que impeçam fullscreen não solicitado, o primeiro toque em qualquer ponto do ecrã acione instantaneamente o modo ecrã inteiro.
+
 **Consequência:** A aplicação arranca de imediato ou no primeiro toque em ecrã inteiro total, sem barras de navegador nem distrações.
 
 ### ADR-026 — Botão de Opções, Controlo de Áudio e Conversão de Unidades (2026-09-19)
-**Contexto:** O utilizador solicitou um botão para opções onde se possa desligar o som e mudar as medidas de altitude de FT (pés) para MT (metros) e de velocidade de KTS (nós) para KMS (km/h).  
-**Decisão:** Adicionar o botão `⚙️ OPÇÕES` no cabeçalho do painel principal e criar um modal de opções com alternadores táteis e persistência em `localStorage`. Suportar muting do sintetizador de palhetas e do ficheiro `/Flight.mp3`, bem como cálculo e formatação instantânea de unidades métricas e aeronáuticas (`FT`/`MT` e `KTS`/`KMS`) no painel e na lista de voos.  
+
+**Contexto:** O utilizador solicitou um botão para opções onde se possa desligar o som e mudar as medidas de altitude de FT (pés) para MT (metros) e de velocidade de KTS (nós) para KMS (km/h).
+
+**Decisão:** Adicionar o botão `⚙️ OPÇÕES` no cabeçalho do painel principal e criar um modal de opções com alternadores táteis e persistência em `localStorage`. Suportar muting do sintetizador de palhetas e do ficheiro `/Flight.mp3`, bem como cálculo e formatação instantânea de unidades métricas e aeronáuticas (`FT`/`MT` e `KTS`/`KMS`) no painel e na lista de voos.
+
 **Consequência:** Controlo absoluto do utilizador sobre o ambiente sonoro e visual da aplicação, com opções preservadas entre sessões.
 
 ### ADR-027 — Nome Oficial do Aeroporto em Origens e Destinos (2026-09-19)
-**Contexto:** O utilizador solicitou a inclusão do nome do aeroporto nas origens e destinos.  
-**Decisão:** Integrar dicionário exaustivo de nomes de aeroportos oficiais (`AEROPORTOS_NOMES`), enriquecer a rota com dados da API ADS-B/FlightRadar24 (`origemAeroporto` e `destinoAeroporto`), e apresentá-los com tipografia dedicada em âmbar suave no painel principal e na lista de voos restantes (`/voos`).  
+
+**Contexto:** O utilizador solicitou a inclusão do nome do aeroporto nas origens e destinos.
+
+**Decisão:** Integrar dicionário exaustivo de nomes de aeroportos oficiais (`AEROPORTOS_NOMES`), enriquecer a rota com dados da API ADS-B/FlightRadar24 (`origemAeroporto` e `destinoAeroporto`), e apresentá-los com tipografia dedicada em âmbar suave no painel principal e na lista de voos restantes (`/voos`).
+
 **Consequência:** Identificação transparente e inequívoca do aeroporto específico (ex: "FRANCISCO SÁ CARNEIRO", "HUMBERTO DELGADO", "CHARLES DE GAULLE", "HEATHROW", "ADOLFO SUÁREZ BARAJAS").
 
 ### ADR-028 — Navegação entre Voos Restantes por Arrasto Lateral / Swipe (2026-09-19)
-**Contexto:** O utilizador solicitou que a lista dos restantes voos seja apresentada através do arrasto para os lados do ecrã.  
-**Decisão:** Implementar sistema de gestos táteis e de rato com deteção de arrasto horizontal (`deltaX > 35px` com tolerância angular vertical). No painel principal (`/painel`), arrastar para a esquerda avança para os voos restantes mais distantes, e arrastar para a direita recua em direção ao voo mais próximo. Ao navegar entre voos, acionar o som mecânico de palhetas Solari (`tocarSomFlapClack`), mantendo o jingle de cabine (`/Flight.mp3`) reservado para novos voos detetados no espaço aéreo. Na página `/voos`, arrastar para a direita transita de volta para o painel principal.  
+
+**Contexto:** O utilizador solicitou que a lista dos restantes voos seja apresentada através do arrasto para os lados do ecrã.
+
+**Decisão:** Implementar sistema de gestos táteis e de rato com deteção de arrasto horizontal (`deltaX > 35px` com tolerância angular vertical). No painel principal (`/painel`), arrastar para a esquerda avança para os voos restantes mais distantes, e arrastar para a direita recua em direção ao voo mais próximo. Ao navegar entre voos, acionar o som mecânico de palhetas Solari (`tocarSomFlapClack`), mantendo o jingle de cabine (`/Flight.mp3`) reservado para novos voos detetados no espaço aéreo. Na página `/voos`, arrastar para a direita transita de volta para o painel principal.
+
 **Consequência:** Navegação fluida, tátil e intuitiva entre todos os voos captados, sem perder o acesso direto à tabela completa.
 
 ### ADR-029 — Paridade Meteorológica entre Telemóvel e PC (2026-09-19)
-**Contexto:** O utilizador reportou que o painel meteorológico apresentava informações divergentes entre o telemóvel e o computador.  
-**Decisão:** Normalização de coordenadas a 2 casas decimais (~1 km), fuso horário explícito `Europe/Lisbon` para horas solares, correção de chave OpenWeatherMap, desativação de cache e respeito rigoroso pelas preferências de localização do utilizador.  
+
+**Contexto:** O utilizador reportou que o painel meteorológico apresentava informações divergentes entre o telemóvel e o computador.
+
+**Decisão:** Normalização de coordenadas a 2 casas decimais (~1 km), fuso horário explícito `Europe/Lisbon` para horas solares, correção de chave OpenWeatherMap, desativação de cache e respeito rigoroso pelas preferências de localização do utilizador.
+
 **Consequência:** Dados meteorológicos sincronizados e consistentes entre dispositivos.
 
 ### ADR-030 — Remoção dos Emblemas de Telemetria da Linha 1 (2026-09-19)
-**Contexto:** O utilizador solicitou a remoção da informação secundária (emblemas de distância em km, número de callsign e contador no radar) exibida junto ao rótulo `VOO / FLIGHT`.  
-**Decisão:** Eliminar os elementos de telemetria secundária da Linha 1, mantendo apenas a etiqueta pura `VOO / FLIGHT` e o número do voo em matriz LED de grandes dimensões. A navegação entre voos continua 100% ativa através do arrasto lateral do ecrã (swipe) e a tabela completa de voos fica acessível de forma discreta dentro do menu `⚙️ OPÇÕES`.  
+
+**Contexto:** O utilizador solicitou a remoção da informação secundária (emblemas de distância em km, número de callsign e contador no radar) exibida junto ao rótulo `VOO / FLIGHT`.
+
+**Decisão:** Eliminar os elementos de telemetria secundária da Linha 1, mantendo apenas a etiqueta pura `VOO / FLIGHT` e o número do voo em matriz LED de grandes dimensões. A navegação entre voos continua 100% ativa através do arrasto lateral do ecrã (swipe) e a tabela completa de voos fica acessível de forma discreta dentro do menu `⚙️ OPÇÕES`.
+
 **Consequência:** Design purificado, foco absoluto na identidade visual do voo e eliminação de distrações visuais no cabeçalho.
 
 ### ADR-031 — Redesign e Reposicionamento do Botão de Opções (2026-09-19)
-**Contexto:** O utilizador solicitou a melhoria do posicionamento do botão de opções e a simplificação para exibir apenas o ícone, sem texto.  
-**Decisão:** Retirar o botão com texto da etiqueta `AIRCRAFT` e `LOCALIZAÇÃO / ESTAÇÃO`. Criar um botão quadrado arredondado exclusivo (`w-7 h-7 sm:w-8 sm:h-8`), com fundo translúcido e rebordo subtil, contendo exclusivamente o ícone `⚙️`, perfeitamente alinhado na extremidade direita do cabeçalho da Linha 1 tanto no modo de voo como no modo meteorológico.  
+
+**Contexto:** O utilizador solicitou a melhoria do posicionamento do botão de opções e a simplificação para exibir apenas o ícone, sem texto.
+
+**Decisão:** Retirar o botão com texto da etiqueta `AIRCRAFT` e `LOCALIZAÇÃO / ESTAÇÃO`. Criar um botão quadrado arredondado exclusivo (`w-7 h-7 sm:w-8 sm:h-8`), com fundo translúcido e rebordo subtil, contendo exclusivamente o ícone `⚙️`, perfeitamente alinhado na extremidade direita do cabeçalho da Linha 1 tanto no modo de voo como no modo meteorológico.
+
 **Consequência:** Layout desafogado, eliminação de sobreposição com as legendas de aeronave e localização, e posicionamento consistente e ergonómico em todos os ecrãs.
 
 ### ADR-032 — Design Compacto e Responsivo do Modal de Opções para Telemóveis em Modo Paisagem (2026-09-19)
-**Contexto:** O utilizador reportou que o quadro de opções ultrapassava a altura do ecrã do telemóvel ("o quadro das opções é maior que o ecra do telemovel"), especialmente no modo horizontal/paisagem.  
-**Decisão:** Reestruturar o modal de opções para altura máxima dinâmica (`max-h-[92dvh]`) com barra de desfasamento vertical interna (`overflow-y-auto`), fundir as opções de unidades de altitude e velocidade numa grelha responsiva de 2 colunas (`grid-cols-1 sm:grid-cols-2`), compactar os espaçamentos e preenchimentos (`p-3 sm:p-5`, `gap-2.5 sm:gap-3.5`) e garantir que todos os botões e títulos cabem confortavelmente em qualquer dispositivo móvel.  
+
+**Contexto:** O utilizador reportou que o quadro de opções ultrapassava a altura do ecrã do telemóvel ("o quadro das opções é maior que o ecra do telemovel"), especialmente no modo horizontal/paisagem.
+
+**Decisão:** Reestruturar o modal de opções para altura máxima dinâmica (`max-h-[92dvh]`) com barra de desfasamento vertical interna (`overflow-y-auto`), fundir as opções de unidades de altitude e velocidade numa grelha responsiva de 2 colunas (`grid-cols-1 sm:grid-cols-2`), compactar os espaçamentos e preenchimentos (`p-3 sm:p-5`, `gap-2.5 sm:gap-3.5`) e garantir que todos os botões e títulos cabem confortavelmente em qualquer dispositivo móvel.
+
 **Consequência:** Encaixe perfeito no ecrã do telemóvel em modo horizontal e vertical, sem cortes nem botões inacessíveis.
 
 ### ADR-033 — Controlo de Volume Independente de Áudio nas Opções (2026-09-19)
-**Contexto:** O utilizador solicitou a adição de um controlo de volume nas opções para que o som da aplicação seja regulado independentemente do som do sistema operativo.  
-**Decisão:** Implementar controlo de ganho independente (`globalVolume`) no sintetizador de palhetas mecânicas Solari (`tocarSomFlapClack`), no reprodutor de áudio (`/Flight.mp3`) e no motor `SplitFlapAudioEngine`. No modal de opções, disponibilizar um controlo deslizante (*slider range*) com percentagem em tempo real (0% a 100%), ícones sonoros dinâmicos (`🔇`, `🔉`, `🔊`), quatro atalhos tácteis predefinidos (`25%`, `50%`, `75%`, `100%`), feedback sonoro imediato de calibração e persistência em `localStorage`.  
+
+**Contexto:** O utilizador solicitou a adição de um controlo de volume nas opções para que o som da aplicação seja regulado independentemente do som do sistema operativo.
+
+**Decisão:** Implementar controlo de ganho independente (`globalVolume`) no sintetizador de palhetas mecânicas Solari (`tocarSomFlapClack`), no reprodutor de áudio (`/Flight.mp3`) e no motor `SplitFlapAudioEngine`. No modal de opções, disponibilizar um controlo deslizante (*slider range*) com percentagem em tempo real (0% a 100%), ícones sonoros dinâmicos (`🔇`, `🔉`, `🔊`), quatro atalhos tácteis predefinidos (`25%`, `50%`, `75%`, `100%`), feedback sonoro imediato de calibração e persistência em `localStorage`.
+
 **Consequência:** Ajuste preciso do volume sonoro na aplicação sem necessidade de alterar o volume principal do telemóvel ou do computador.
 
 ### ADR-034 — Alternância por Swipe entre Painel Principal e Segundo Ecrã de Restantes Voos em LEDs Redondos (2026-09-19)
-**Contexto:** O utilizador solicitou que o painel principal exiba fixamente o voo mais próximo (sem alternar voo a voo por swipe) e que o gesto de swipe seja utilizado para alternar entre o painel principal e um segundo ecrã contendo a lista dos restantes voos, onde cada voo exibe exclusivamente a Origem e o Destino com o layout dos LEDs redondos físicos.  
-**Decisão:** Fixar o painel principal em `listaVoos[0]`. Configurar os gestos de arrasto lateral horizontal: arrastar para a esquerda no painel principal transita para o segundo ecrã de restantes voos com som de flap, e arrastar para a direita no segundo ecrã regressa ao painel principal. No segundo ecrã (`RestantesVoos`), iterar sobre `listaVoos.slice(1)` e apresentar apenas os códigos IATA e cidades de Origem e Destino com o componente de LEDs redondos (`LedText` com diodos circulares SVG Dot-Matrix), sem qualquer elemento secundário ou telemetria dispersiva. Disponibilizar também botão táctil na Linha 1 do painel e no menu de opções.  
+
+**Contexto:** O utilizador solicitou que o painel principal exiba fixamente o voo mais próximo (sem alternar voo a voo por swipe) e que o gesto de swipe seja utilizado para alternar entre o painel principal e um segundo ecrã contendo a lista dos restantes voos, onde cada voo exibe exclusivamente a Origem e o Destino com o layout dos LEDs redondos físicos.
+
+**Decisão:** Fixar o painel principal em `listaVoos[0]`. Configurar os gestos de arrasto lateral horizontal: arrastar para a esquerda no painel principal transita para o segundo ecrã de restantes voos com som de flap, e arrastar para a direita no segundo ecrã regressa ao painel principal. No segundo ecrã (`RestantesVoos`), iterar sobre `listaVoos.slice(1)` e apresentar apenas os códigos IATA e cidades de Origem e Destino com o componente de LEDs redondos (`LedText` com diodos circulares SVG Dot-Matrix), sem qualquer elemento secundário ou telemetria dispersiva. Disponibilizar também botão táctil na Linha 1 do painel e no menu de opções.
+
 **Consequência:** Navegação fluida de ecrã duplo sem sair da aplicação, foco puro no voo mais próximo no ecrã principal e catálogo ultra-legível em matriz LED analógica para os restantes voos no segundo ecrã.
 
 ### ADR-035 — Preservação do Fallback Automático e Adição do 3º Ecrã de Meteorologia Dedicada (2026-09-19)
-**Contexto:** O utilizador solicitou que se mantenha ativa a funcionalidade de alternar automaticamente para a meteorologia quando não houver voos no radar e que se adicione um 3º ecrã dedicado à meteorologia.  
-**Decisão:** Preservar a transição automática no ecrã principal (`principal`): quando `listaVoos.length === 0` (ou `!vooAtual`), o painel comuta automaticamente para o modo meteorológico com relógio LED, estação e condições atmosféricas. Criar o 3º ecrã dedicado (`meteo`), acessível a qualquer momento através de swipe (arrasto para a esquerda a partir do 2º ecrã ou a partir do 1º se não houver outros voos), botões táteis no cabeçalho/rodapé e atalho direto no menu de opções (`⚙️`). No 3º ecrã, disponibilizar a estação meteorológica completa com telemetria (vento, altímetro QNH, humidade, nascer/pôr do sol e índice UV) e radar integrado com contagem de voos no ar.  
+
+**Contexto:** O utilizador solicitou que se mantenha ativa a funcionalidade de alternar automaticamente para a meteorologia quando não houver voos no radar e que se adicione um 3º ecrã dedicado à meteorologia.
+
+**Decisão:** Preservar a transição automática no ecrã principal (`principal`): quando `listaVoos.length === 0` (ou `!vooAtual`), o painel comuta automaticamente para o modo meteorológico com relógio LED, estação e condições atmosféricas. Criar o 3º ecrã dedicado (`meteo`), acessível a qualquer momento através de swipe (arrasto para a esquerda a partir do 2º ecrã ou a partir do 1º se não houver outros voos), botões táteis no cabeçalho/rodapé e atalho direto no menu de opções (`⚙️`). No 3º ecrã, disponibilizar a estação meteorológica completa com telemetria (vento, altímetro QNH, humidade, nascer/pôr do sol e índice UV) e radar integrado com contagem de voos no ar.
+
 **Consequência:** Arquitetura trilateral perfeita de 3 ecrãs: o utilizador pode consultar a meteorologia sempre que desejar sem perder o conforto da transição automática quando o espaço aéreo fica sem voos.
 
 ### ADR-036 — Internacionalização Multilíngue (i18n) em 4 Idiomas com Alternância Instantânea (2026-09-20)
-**Contexto:** O utilizador solicitou a funcionalidade: "Internacionalização & Design: 4 Idiomas suportados com alternância instantânea (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES)".  
-**Decisão:** Criar módulo central de internacionalização (`lib/i18n.ts`) com tipos fortes `Idioma = "pt" | "en" | "fr" | "es"` e dicionários completos para as quatro línguas, abrangendo todos os ecrãs (Painel principal de voo, Ecrã 2 de Restantes Voos, Ecrã 3 de Meteorologia Dedicada, Fallback meteorológico automático, Modal de Opções, Modal de Localização e Tabela de Voos `/voos`). Adicionar dicionário multilíngue de nomes de países (`traduzirPais`). Integrar botão de alternância rápida de idioma diretamente no cabeçalho ao lado de `⚙️` (`🇵🇹 PT` / `🇬🇧 EN` / `🇫🇷 FR` / `🇪🇸 ES`) e um seletor visual com 4 botões e bandeiras no modal de opções. Implementar persistência local instantânea em `localStorage` sob as chaves `flightpanel_idioma` e `flight_panel_user_settings.idioma`, sincronização reativa imediata sem recarregar o ecrã e feedback sonoro Flap-Clack Solari ao trocar de língua.  
+
+**Contexto:** O utilizador solicitou a funcionalidade: "Internacionalização & Design: 4 Idiomas suportados com alternância instantânea (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES)".
+
+**Decisão:** Criar módulo central de internacionalização (`lib/i18n.ts`) com tipos fortes `Idioma = "pt" | "en" | "fr" | "es"` e dicionários completos para as quatro línguas, abrangendo todos os ecrãs (Painel principal de voo, Ecrã 2 de Restantes Voos, Ecrã 3 de Meteorologia Dedicada, Fallback meteorológico automático, Modal de Opções, Modal de Localização e Tabela de Voos `/voos`). Adicionar dicionário multilíngue de nomes de países (`traduzirPais`). Integrar botão de alternância rápida de idioma diretamente no cabeçalho ao lado de `⚙️` (`🇵🇹 PT` / `🇬🇧 EN` / `🇫🇷 FR` / `🇪🇸 ES`) e um seletor visual com 4 botões e bandeiras no modal de opções. Implementar persistência local instantânea em `localStorage` sob as chaves `flightpanel_idioma` e `flight_panel_user_settings.idioma`, sincronização reativa imediata sem recarregar o ecrã e feedback sonoro Flap-Clack Solari ao trocar de língua.
+
 **Consequência:** Experiência global nativa em 4 idiomas, com mudança a quente instantânea com 1 toque, garantindo total clareza internacional e fidelidade estética.
 
 ### ADR-037 — Centralização da Seleção de Idioma Dentro das Definições (2026-10-16)
-**Contexto:** O utilizador solicitou a remoção da seleção de idioma do Ecrã 1 para dentro das definições.  
-**Decisão:** Eliminar os botões de alternância rápida de idioma presentes nos cabeçalhos dos ecrãs (Ecrã 1 no modo voo e modo meteorologia fallback, bem como Ecrã 2 e Ecrã 3). A seleção e configuração do idioma (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) passa a residir de forma exclusiva e dedicada dentro do modal de definições (`⚙️ OPÇÕES / DEFINIÇÕES`), onde se encontra a grelha visual com bandeiras e títulos nativos.  
+
+**Contexto:** O utilizador solicitou a remoção da seleção de idioma do Ecrã 1 para dentro das definições.
+
+**Decisão:** Eliminar os botões de alternância rápida de idioma presentes nos cabeçalhos dos ecrãs (Ecrã 1 no modo voo e modo meteorologia fallback, bem como Ecrã 2 e Ecrã 3). A seleção e configuração do idioma (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) passa a residir de forma exclusiva e dedicada dentro do modal de definições (`⚙️ OPÇÕES / DEFINIÇÕES`), onde se encontra a grelha visual com bandeiras e títulos nativos.
+
 **Consequência:** Design purificado e limpo nos cabeçalhos analógicos dos ecrãs, alinhado com a autenticidade Solari, mantendo controlo total da internacionalização centralizado nas opções.
 
 ### ADR-038 — Base Global de 7.900+ Aeroportos IATA e Resolução Simétrica de Origem/Destino (2026-10-16)
-**Contexto:** O utilizador reportou que em certos voos faltava informação na Origem comparado ao Destino (ex: voo cargueiro DHL BCS57D com origem em Vitória/Foronda `VIT`, onde as palhetas e LEDs apresentavam apenas a sigla `VIT` sem o nome do aeroporto nem o país, enquanto o destino `PORTO` exibia cidade, nome oficial do aeroporto e país).  
-**Decisão:** Identificada a causa raiz: dependência de dicionários estáticos reduzidos que cobriam apenas cerca de 60 aeroportos. Implementada uma base global de dados com mais de 7.900 aeroportos IATA do mundo (`lib/aeroportos-db.ts`), integrada com sobreposição de alta qualidade para aeroportos e cidades ibéricas e europeias (`lib/aeroportos.ts`), mapeador completo de países ISO para português e suporte multilíngue em `PAISES_TRADUCOES`. Na API de voos (`/api/voos`) e no cliente (`/painel` e `/voos`), todas as origens e destinos são agora enriquecidos com resolução O(1) de latência zero: `cidade` por extenso, `aeroporto` oficial consagrado (ex: `FORONDA` para `VIT`) e `país` normalizado (ex: `ESPANHA` / `SPAIN`), eliminando qualquer assimetria ou falta de dados.  
+
+**Contexto:** O utilizador reportou que em certos voos faltava informação na Origem comparado ao Destino (ex: voo cargueiro DHL BCS57D com origem em Vitória/Foronda `VIT`, onde as palhetas e LEDs apresentavam apenas a sigla `VIT` sem o nome do aeroporto nem o país, enquanto o destino `PORTO` exibia cidade, nome oficial do aeroporto e país).
+
+**Decisão:** Identificada a causa raiz: dependência de dicionários estáticos reduzidos que cobriam apenas cerca de 60 aeroportos. Implementada uma base global de dados com mais de 7.900 aeroportos IATA do mundo (`lib/aeroportos-db.ts`), integrada com sobreposição de alta qualidade para aeroportos e cidades ibéricas e europeias (`lib/aeroportos.ts`), mapeador completo de países ISO para português e suporte multilíngue em `PAISES_TRADUCOES`. Na API de voos (`/api/voos`) e no cliente (`/painel` e `/voos`), todas as origens e destinos são agora enriquecidos com resolução O(1) de latência zero: `cidade` por extenso, `aeroporto` oficial consagrado (ex: `FORONDA` para `VIT`) e `país` normalizado (ex: `ESPANHA` / `SPAIN`), eliminando qualquer assimetria ou falta de dados.
+
 **Consequência:** Cobertura global de 100% de aeroportos IATA comerciais, civis e cargueiros, com exibição simétrica e rica de cidade, aeroporto e país em todos os voos.
 
 ### ADR-039 — Áudio de Novo Voo Exclusivo para o Ecrã 1 / Voo Principal (2026-10-16)
-**Contexto:** O utilizador solicitou: "O som de novo voo so deve ser aplicado quando um novo voo aparece no ecra1, deve ignorar os voos do ecra 2". Anteriormente, o efeito sonoro de cabine (`/Flight.mp3`) era despoletado sempre que qualquer aeronave secundária entrava no alcance do radar, mesmo que ficasse posicionada apenas na lista do Ecrã 2.  
-**Decisão:** Reformular o gatilho de áudio de novo voo em `app/painel/page.tsx` para monitorizar exclusivamente o identificador da aeronave do Ecrã 1 (`vooAtual = listaVoos[0]`). O jingle `/Flight.mp3` toca unicamente quando um voo surge pela primeira vez no Ecrã 1 ou quando o voo principal em destaque é substituído por outro mais próximo. Qualquer entrada ou saída de voos secundários confinados ao Ecrã 2 (`listaVoos.slice(1)`) é totalmente silenciada.  
+
+**Contexto:** O utilizador solicitou: "O som de novo voo so deve ser aplicado quando um novo voo aparece no ecra1, deve ignorar os voos do ecra 2". Anteriormente, o efeito sonoro de cabine (`/Flight.mp3`) era despoletado sempre que qualquer aeronave secundária entrava no alcance do radar, mesmo que ficasse posicionada apenas na lista do Ecrã 2.
+
+**Decisão:** Reformular o gatilho de áudio de novo voo em `app/painel/page.tsx` para monitorizar exclusivamente o identificador da aeronave do Ecrã 1 (`vooAtual = listaVoos[0]`). O jingle `/Flight.mp3` toca unicamente quando um voo surge pela primeira vez no Ecrã 1 ou quando o voo principal em destaque é substituído por outro mais próximo. Qualquer entrada ou saída de voos secundários confinados ao Ecrã 2 (`listaVoos.slice(1)`) é totalmente silenciada.
+
 **Consequência:** Experiência sonora focada e autêntica, eliminando alertas supérfluos causados por tráfego distante secundário no radar.
 
 ---
 
 ## Histórico
 
-| Data       | Versão | Acção                                                                  |
-|------------|--------|------------------------------------------------------------------------|
-| 2026-09-06 | v0.1.0 | Projecto inicializado, estrutura base criada e segura                  |
-| 2026-09-07 | v0.2.0 | Redesign completo para painel analógico Split-Flap (Solari di Udine)   |
-| 2026-09-07 | v0.2.1 | Reformulação minimalista (Logótipo + Voo + Rota) e correcção do som    |
-| 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista      |
-| 2026-09-07 | v0.2.3 | Correcção do corte de letras e alinhamento responsivo das palhetas    |
-| 2026-09-07 | v0.3.0 | Recriação fiel do painel clássico de partidas (DEPARTURES board)       |
-| 2026-09-07 | v0.3.1 | Ajuste para exibição exclusiva de 1 único voo de cada vez              |
-| 2026-09-07 | v0.4.0 | Purificação da interface: 100% monocromático (Logo + Voo + Origem + Destino)|
-| 2026-09-07 | v0.4.1 | Conversão do logótipo da companhia para Pixel Art 8-bit monocromático  |
-| 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                    |
-| 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache        |
-| 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis      |
-| 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)|
-| 2026-09-07 | v0.7.0 | Painel analógico aeroporto Solari Split-Flap vintage em Landscape 16:9 |
-| 2026-09-07 | v0.7.1 | Remoção de cabeçalhos/rodapés redundantes e simplificação do layout    |
-| 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas|
-| 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis    |
-| 2026-09-07 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%        |
-| 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar |
-| 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens |
-| 2026-09-07 | v0.9.0 | Chassis preenchido sem vazios e base global de logótipos ICAO         |
-| 2026-09-07 | v0.9.1 | Remoção da moldura de fundo externa (design borderless edge-to-edge)  |
-| 2026-09-07 | v1.0.0 | Lançamento oficial v1.0.0 com suporte completo a instalador PWA Mobile |
-| 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral |
-| 2026-09-12 | v1.1.0 | Ecrã híbrido: Palhetas apenas nos códigos IATA (3 letras) e LED display para todo o resto |
-| 2026-09-12 | v1.2.0 | LEDs redondos individuais (SVG Dot-Matrix 5x7) com pitch espaçado e GPS 100% automático na abertura |
-| 2026-09-19 | v1.3.0 | Remoção de swipe lateral, fixação no voo mais próximo, nova página /voos e áudio Flight.mp3 ao detetar voo |
-| 2026-09-19 | v1.3.1 | Inclusão de informação do país em origens e destinos no painel principal e na lista de voos |
-| 2026-09-19 | v1.3.2 | Abertura e ativação automática em modo ecrã inteiro (fullscreen nativo e PWA) |
-| 2026-09-19 | v1.3.3 | Remoção total da barra inferior de status e libertação de espaço vertical |
-| 2026-09-19 | v1.4.0 | Modal de Opções: botão de controlo de som (muting) e conversor de medidas (FT/MT e KTS/KMS) |
-| 2026-09-19 | v1.5.0 | Exibição do nome oficial do aeroporto (origens e destinos) no painel e na lista de voos |
-| 2026-09-19 | v1.6.0 | Navegação entre todos os voos restantes por arrasto lateral (ecrã tátil e rato) e botões dedicados |
-| 2026-09-19 | v1.6.1 | Correção e sincronização da telemetria meteorológica entre telemóvel e computador |
-| 2026-09-19 | v1.6.2 | Remoção dos emblemas de telemetria da Linha 1 para design minimalista limpo |
-| 2026-09-19 | v1.6.3 | Reposicionamento do botão de opções com ícone ⚙️ minimalista à direita |
-| 2026-09-19 | v1.6.4 | Design compacto do modal de opções com scroll interno e grelha 2-col para telemóveis em modo paisagem |
-| 2026-09-19 | v1.7.0 | Controlo de volume de áudio independente (0 a 100%) nas opções com slider e atalhos rápidos |
-| 2026-09-19 | v1.8.0 | Alternância por swipe entre painel principal e segundo ecrã de restantes voos em LEDs redondos |
-| 2026-09-19 | v1.9.0 | Preservação do fallback automático de meteorologia e adição do 3º ecrã de meteorologia dedicada |
-| 2026-09-19 | v1.9.1 | Remoção do botão de restantes voos (+X RESTANTES ➔) do cabeçalho da Linha 1 |
-| 2026-09-19 | v1.9.2 | Remoção do botão METEO dos cabeçalhos e eliminação total das barras inferiores de navegação (Rodapés) |
-| 2026-09-20 | v2.0.0 | Internacionalização completa (i18n): 4 idiomas (🇵🇹 PT, 🇬🇧 EN, 🇫🇷 FR, 🇪🇸 ES) com alternância instantânea |
-| 2026-10-16 | v2.0.1 | Remoção do botão de idioma dos cabeçalhos dos ecrãs; seleção centralizada exclusivamente nas definições |
-| 2026-10-16 | v2.0.2 | Base global de 7.900+ aeroportos IATA; resolução completa de cidade, aeroporto e país em origens e destinos |
-| 2026-10-16 | v2.0.3 | Áudio de novo voo restrito exclusivamente ao Ecrã 1, ignorando entradas no Ecrã 2 |
-| 2026-10-16 | v2.0.4 | Resolução geográfica de estações por GPS, eliminação de strings técnicas e blindagem contra sobreposição no relógio |
-| 2026-10-16 | v2.0.5 | Purificação e consistência estrita de idiomas (i18n): eliminação de rótulos bilingues, tradução de condições meteorológicas e meses no relógio |
-| 2026-10-16 | v2.0.6 | Simplificação e purificação do modal de localização: remoção da grelha de localidades predefinidas e do botão de cópia de link para telemóvel |
-| 2026-10-16 | v2.0.7 | Adição do seletor exato de Raio de Ação do Radar (KM/NM) com filtro Haversine rigoroso e persistência local |
-| 2026-10-16 | v2.0.8 | Inversão simétrica dos flaps e leds na Linha 2 de rota: flaps no centro e leds nas extremidades exteriores |
-| 2026-10-16 | v2.0.9 | Blindagem e deduplicação estrita do som de novo voo: exclusivo ao Ecrã 1, sem repetições por oscilação ou alternância de voos |
-| 2026-10-16 | v2.1.0 | Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de telemetria com varrimento animado, azimute e distância exata (KM/NM) |
-| 2026-10-16 | v2.1.1 | Transferência da companhia aérea para o bloco esquerdo (junto ao voo) e adição do fabricante sob o modelo da aeronave à direita |
+| Data       | Versão | Acção                                                                                                                                                                 |
+| ---------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-06 | v0.1.0 | Projecto inicializado, estrutura base criada e segura                                                                                                                 |
+| 2026-09-07 | v0.2.0 | Redesign completo para painel analógico Split-Flap (Solari di Udine)                                                                                                  |
+| 2026-09-07 | v0.2.1 | Reformulação minimalista (Logótipo + Voo + Rota) e correcção do som                                                                                                   |
+| 2026-09-07 | v0.2.2 | Resolução do campo Origem e melhoria visual do layout minimalista                                                                                                     |
+| 2026-09-07 | v0.2.3 | Correcção do corte de letras e alinhamento responsivo das palhetas                                                                                                    |
+| 2026-09-07 | v0.3.0 | Recriação fiel do painel clássico de partidas (DEPARTURES board)                                                                                                      |
+| 2026-09-07 | v0.3.1 | Ajuste para exibição exclusiva de 1 único voo de cada vez                                                                                                             |
+| 2026-09-07 | v0.4.0 | Purificação da interface: 100% monocromático (Logo + Voo + Origem + Destino)                                                                                          |
+| 2026-09-07 | v0.4.1 | Conversão do logótipo da companhia para Pixel Art 8-bit monocromático                                                                                                 |
+| 2026-09-07 | v0.4.2 | Aumento da definição da matriz Pixel Art para 64x64                                                                                                                   |
+| 2026-09-07 | v0.4.3 | Correcção do erro de parsing em @swc/helpers e limpeza de cache                                                                                                       |
+| 2026-09-07 | v0.5.0 | Implementação do 'The Flight Wall Mobile Edition' para telemóveis                                                                                                     |
+| 2026-09-07 | v0.6.0 | Réplica autêntica do estilo oficial The Flight Wall (Livery + Telemetria)                                                                                             |
+| 2026-09-07 | v0.7.0 | Painel analógico aeroporto Solari Split-Flap vintage em Landscape 16:9                                                                                                |
+| 2026-09-07 | v0.7.1 | Remoção de cabeçalhos/rodapés redundantes e simplificação do layout                                                                                                   |
+| 2026-09-07 | v0.7.2 | Aumento do tamanho das letras e correcção de quebras de linha das palhetas                                                                                            |
+| 2026-09-07 | v0.7.3 | Adaptação fluida e responsiva com clamp() para ecrãs de telemóveis                                                                                                    |
+| 2026-09-07 | v0.8.0 | Fullscreen com 1 toque no ecrã e todas as letras em branco 100%                                                                                                       |
+| 2026-09-07 | v0.8.1 | Logótipos garantidos para todas as companhias e transição meteo no ar                                                                                                 |
+| 2026-09-07 | v0.8.2 | Encaixe perfeito 100dvh sem scroll em fullscreen e cidades nas origens                                                                                                |
+| 2026-09-07 | v0.9.0 | Chassis preenchido sem vazios e base global de logótipos ICAO                                                                                                         |
+| 2026-09-07 | v0.9.1 | Remoção da moldura de fundo externa (design borderless edge-to-edge)                                                                                                  |
+| 2026-09-07 | v1.0.0 | Lançamento oficial v1.0.0 com suporte completo a instalador PWA Mobile                                                                                                |
+| 2026-09-07 | v1.0.2 | Resolução definitiva de imagens quebradas, emblema aeronáutico e suporte a aviação geral                                                                              |
+| 2026-09-12 | v1.1.0 | Ecrã híbrido: Palhetas apenas nos códigos IATA (3 letras) e LED display para todo o resto                                                                             |
+| 2026-09-12 | v1.2.0 | LEDs redondos individuais (SVG Dot-Matrix 5x7) com pitch espaçado e GPS 100% automático na abertura                                                                   |
+| 2026-09-19 | v1.3.0 | Remoção de swipe lateral, fixação no voo mais próximo, nova página /voos e áudio Flight.mp3 ao detetar voo                                                            |
+| 2026-09-19 | v1.3.1 | Inclusão de informação do país em origens e destinos no painel principal e na lista de voos                                                                           |
+| 2026-09-19 | v1.3.2 | Abertura e ativação automática em modo ecrã inteiro (fullscreen nativo e PWA)                                                                                         |
+| 2026-09-19 | v1.3.3 | Remoção total da barra inferior de status e libertação de espaço vertical                                                                                             |
+| 2026-09-19 | v1.4.0 | Modal de Opções: botão de controlo de som (muting) e conversor de medidas (FT/MT e KTS/KMS)                                                                           |
+| 2026-09-19 | v1.5.0 | Exibição do nome oficial do aeroporto (origens e destinos) no painel e na lista de voos                                                                               |
+| 2026-09-19 | v1.6.0 | Navegação entre todos os voos restantes por arrasto lateral (ecrã tátil e rato) e botões dedicados                                                                    |
+| 2026-09-19 | v1.6.1 | Correção e sincronização da telemetria meteorológica entre telemóvel e computador                                                                                     |
+| 2026-09-19 | v1.6.2 | Remoção dos emblemas de telemetria da Linha 1 para design minimalista limpo                                                                                           |
+| 2026-09-19 | v1.6.3 | Reposicionamento do botão de opções com ícone ⚙️ minimalista à direita                                                                                                |
+| 2026-09-19 | v1.6.4 | Design compacto do modal de opções com scroll interno e grelha 2-col para telemóveis em modo paisagem                                                                 |
+| 2026-09-19 | v1.7.0 | Controlo de volume de áudio independente (0 a 100%) nas opções com slider e atalhos rápidos                                                                           |
+| 2026-09-19 | v1.8.0 | Alternância por swipe entre painel principal e segundo ecrã de restantes voos em LEDs redondos                                                                        |
+| 2026-09-19 | v1.9.0 | Preservação do fallback automático de meteorologia e adição do 3º ecrã de meteorologia dedicada                                                                       |
+| 2026-09-19 | v1.9.1 | Remoção do botão de restantes voos (+X RESTANTES ➔) do cabeçalho da Linha 1                                                                                           |
+| 2026-09-19 | v1.9.2 | Remoção do botão METEO dos cabeçalhos e eliminação total das barras inferiores de navegação (Rodapés)                                                                 |
+| 2026-09-20 | v2.0.0 | Internacionalização completa (i18n): 4 idiomas (PT, EN, FR, ES) com alternância instantânea                                                                           |
+| 2026-10-16 | v2.0.1 | Remoção do botão de idioma dos cabeçalhos dos ecrãs; seleção centralizada exclusivamente nas definições                                                               |
+| 2026-10-16 | v2.0.2 | Base global de 7.900+ aeroportos IATA; resolução completa de cidade, aeroporto e país em origens e destinos                                                           |
+| 2026-10-16 | v2.0.3 | Áudio de novo voo restrito exclusivamente ao Ecrã 1, ignorando entradas no Ecrã 2                                                                                     |
+| 2026-10-16 | v2.0.4 | Resolução geográfica de estações por GPS, eliminação de strings técnicas e blindagem contra sobreposição no relógio                                                   |
+| 2026-10-16 | v2.0.5 | Purificação e consistência estrita de idiomas (i18n): eliminação de rótulos bilingues, tradução de condições meteorológicas e meses no relógio                        |
+| 2026-10-16 | v2.0.6 | Simplificação e purificação do modal de localização: remoção da grelha de localidades predefinidas e do botão de cópia de link para telemóvel                         |
+| 2026-10-16 | v2.0.7 | Adição do seletor exato de Raio de Ação do Radar (KM/NM) com filtro Haversine rigoroso e persistência local                                                           |
+| 2026-10-16 | v2.0.8 | Inversão simétrica dos flaps e leds na Linha 2 de rota: flaps no centro e leds nas extremidades exteriores                                                            |
+| 2026-10-16 | v2.0.9 | Blindagem e deduplicação estrita do som de novo voo: exclusivo ao Ecrã 1, sem repetições por oscilação ou alternância de voos                                         |
+| 2026-10-16 | v2.1.0 | Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de telemetria com varrimento animado, azimute e distância exata (KM/NM)                                             |
+| 2026-10-16 | v2.1.1 | Transferência da companhia aérea para o bloco esquerdo (junto ao voo) e adição do fabricante sob o modelo da aeronave à direita                                       |
 | 2026-10-16 | v2.1.2 | Otimização total e blindagem de proporções para ecrãs de telemóvel na horizontal (landscape): eliminação de flex-wrap na rota, escala proporcional e encaixe perfeito |
-| 2026-10-16 | v2.2.0 | Fluxo de boas-vindas e onboarding sequencial na primeira abertura: popup 1 de instalação PWA seguido do popup 2 de calibração de GPS |
+| 2026-10-16 | v2.2.0 | Fluxo de boas-vindas e onboarding sequencial na primeira abertura: popup 1 de instalação PWA seguido do popup 2 de calibração de GPS                                  |
 
 ---
 
 ### ADR-040 — Resolução Geográfica de Estações e Blindagem do Cabeçalho Meteorológico (2026-10-16)
-**Contexto:** O utilizador reportou que no cabeçalho meteorológico por vezes aparecia a string cortada `"GPS SATELITE ("` em vez do nome da localidade e que, dependendo do tamanho da palavra, o bloco da estação colidia e sobrepunha-se fisicamente sobre o relógio e a data.  
-**Causa Raiz:** O hook de geolocalização guardava em `localizacao.nome` strings técnicas brutas com parêntesis abertos (ex: `"GPS SATÉLITE (±15M)"`), as quais eram truncadas a 14 caracteres (`"GPS SATELITE ("`). Quando o ecrã continha voos no radar, `setMeteorologia(null)` limpava a meteorologia, forçando o fallback para essa string técnica. Além disso, o relógio e a data não tinham `shrink-0` nem `whitespace-nowrap`, permitindo que a data quebrasse de linha e colidisse com o bloco da direita.  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que no cabeçalho meteorológico por vezes aparecia a string cortada `"GPS SATELITE ("` em vez do nome da localidade e que, dependendo do tamanho da palavra, o bloco da estação colidia e sobrepunha-se fisicamente sobre o relógio e a data.
+
+**Causa Raiz:** O hook de geolocalização guardava em `localizacao.nome` strings técnicas brutas com parêntesis abertos (ex: `"GPS SATÉLITE (±15M)"`), as quais eram truncadas a 14 caracteres (`"GPS SATELITE ("`). Quando o ecrã continha voos no radar, `setMeteorologia(null)` limpava a meteorologia, forçando o fallback para essa string técnica. Além disso, o relógio e a data não tinham `shrink-0` nem `whitespace-nowrap`, permitindo que a data quebrasse de linha e colidisse com o bloco da direita.
+
+**Decisão:**
+
 1. Criar `lib/localidades.ts` com cálculo de menor distância Haversine a mais de 80 localidades e concelhos de Portugal e Ibéria, resolvendo nomes reais (ex: `"VALADARES / GAIA"`, `"PORTO"`, etc.).  
 2. Atribuir o nome geográfico resolvido diretamente em `getCurrentPosition` e `watchPosition`, expurgando qualquer string técnica com parêntesis da interface.  
 3. Assegurar carregamento imediato e preservação dos dados meteorológicos ao transitar para o 3º ecrã, mesmo com aeronaves detetadas no radar.  
 4. Reestruturar o cabeçalho meteorológico (no Fallback do Ecrã 1 e no 3º Ecrã) com `shrink-0` e alinhamento horizontal inquebrável para o relógio e a data (`horaAtual` em `lg` e `dataAtual` em `sm`), limitando o bloco da estação a `max-w-[45%]` com dimensionamento dinâmico no `LedText` (`xs`, `sm` ou `md`).  
+
 **Consequência:** Eliminação total de colisões visuais, relógio sempre estável e legível, e exibição limpa da estação meteorológica geográfica real.
 
 ### ADR-041 — Purificação e Consistência Estrita de Idiomas (i18n) (2026-10-16)
-**Contexto:** O utilizador reportou a existência de misturas de idiomas na interface (ex: termos em inglês a aparecer em português ou rótulos bilingues com barras).  
-**Causa Raiz:**  
+
+**Contexto:** O utilizador reportou a existência de misturas de idiomas na interface (ex: termos em inglês a aparecer em português ou rótulos bilingues com barras).
+
+**Causa Raiz:**
+
 1. Rótulos compostos antigos com barras bilingues residuais (`VOO / FLIGHT`, `ORIGEM / DEPARTURE`, `DESTINO / DESTINATION`, `RUMO / HEADING`, `AIRCRAFT`).  
-2. Textos estáticos fixados em português no template JSX (`3º ECRÃ • `, `ALTÍMETRO`, `RELATIVA`, `AURORA`, `CREPÚSCULO`, `MODERADO`, `RADAR METEOROLÓGICO ATIVO`, `CONDIÇÃO ATMOSFÉRICA`).  
+2. Textos estáticos fixados em português no template JSX (`3º ECRÃ •`, `ALTÍMETRO`, `RELATIVA`, `AURORA`, `CREPÚSCULO`, `MODERADO`, `RADAR METEOROLÓGICO ATIVO`, `CONDIÇÃO ATMOSFÉRICA`).  
 3. Descrições textuais das condições atmosféricas fornecidas pela API OpenWeatherMap em português (ex: `CEU LIMPO`, `NUBLADO`) sem tradução dinâmica para os restantes idiomas.  
 4. Nomes de meses no relógio fixos em português (`OUT`) mesmo com idioma inglês, francês ou espanhol selecionado.  
-**Decisão:**  
+
+**Decisão:**
+
 1. Purificar completamente os 4 dicionários em `lib/i18n.ts` (`pt`, `en`, `fr`, `es`), garantindo que cada idioma utiliza exclusivamente termos puros da sua própria língua sem barras bilingues nem termos estrangeiros residuais.  
 2. Adicionar novas chaves ao dicionário: `cabecalho_ecra3`, `cabecalho_radar`, `meteo_temperatura_sensacao`, `meteo_min`, `meteo_max`, `meteo_precipitacao`, e subtítulos dedicados para os 6 cartões de telemetria meteorológica.  
 3. Implementar a função `traduzirCondicaoMeteo(condicao, idioma)` para traduzir dinamicamente as condições atmosféricas da API para o idioma ativo.  
 4. Implementar a função `obterMesAbreviado(mesIndex, idioma)` e reativar a atualização da data no relógio ao alternar o idioma.  
+
 **Consequência:** 100% de coerência e pureza linguística em todos os ecrãs (Ecrã 1 Voo/Fallback, Ecrã 2 Restantes Voos, Ecrã 3 Meteorologia e tabela `/voos`), sem qualquer mistura de línguas.
 
 ### ADR-042 — Simplificação do Modal de Localização / Radar (2026-10-16)
-**Contexto:** O utilizador solicitou a remoção da grelha de botões de localidades predefinidas (`OU SELECCIONA A TUA LOCALIDADE (1 TOQUE)`) e do botão de partilha de link para telemóvel (`COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL`) do modal de localização.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou a remoção da grelha de botões de localidades predefinidas (`OU SELECCIONA A TUA LOCALIDADE (1 TOQUE)`) e do botão de partilha de link para telemóvel (`COPIAR LINK DE COORDENADAS PARA O TELEMÓVEL`) do modal de localização.
+
+**Decisão:**
+
 1. Remover cirurgicamente o bloco de cópia de coordenadas e respetiva legenda explicativa.  
 2. Remover a secção e a grelha de localidades predefinidas (`LOCAIS_PREDEFINIDOS`).  
 3. Preservar o bloco de telemetria ativa (`PONTO ACTUAL ACTIVO` com nome geográfico e precisão em metros), o botão direto de GPS (`OBTER COORDENADAS POR GPS (TELEMÓVEL / PC)`) e a secção de coordenadas manuais personalizadas com botão de gravação.  
+
 **Consequência:** Modal muito mais limpo, minimalista e sem poluição visual ou elementos redundantes.
 
 ### ADR-043 — Controlo Exato e Dinâmico do Raio de Ação do Radar (2026-10-16)
-**Contexto:** O utilizador solicitou a adição de uma opção exata para configurar o raio de ação do radar. Anteriormente o raio estava fixado em 20 km no código do cliente e com limites restritivos no backend.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou a adição de uma opção exata para configurar o raio de ação do radar. Anteriormente o raio estava fixado em 20 km no código do cliente e com limites restritivos no backend.
+
+**Decisão:**
+
 1. **Controlo de UI Unificado e Flexível:** Adicionar a secção `RAIO DE AÇÃO DO RADAR` tanto no Modal de Opções Gerais como no Modal de Localização, com botões de seleção rápida (5, 10, 20, 30 e 50 KM), slider deslizante contínuo e campo de entrada numérico manual para digitação de qualquer valor exato ao quilómetro (de 1 a 250 KM), acompanhado da conversão náutica aeronáutica em tempo real (`NM`).  
 2. **Filtragem Circular Rigorosa (Haversine):** No backend (`/api/voos`), alargar o parâmetro `radius` para permitir qualquer valor exato entre 1 e 250 km e manter o filtro circular estrito `calcularDistanciaHaversineKm <= radiusKm`. No cliente (`/painel` e `/voos`), substituir os valores fixos de 20 km pelo estado dinâmico `raioKm`, garantindo exatidão geométrica perfeita.  
 3. **Persistência e Reatividade Imediata:** Guardar a preferência em `localStorage` sob `flight_panel_user_settings.raioKm` e `flight_panel_raio_km`. Qualquer alteração no raio aciona um novo pedido de voos imediato sem recarregar a página.  
+
 **Consequência:** O utilizador tem controlo milimétrico e absoluto sobre o alcance de deteção aérea, adaptável a aeroportos próximos ou a espaço aéreo alargado.
- 
+
 ### ADR-044 — Inversão Simétrica de Flaps e LEDs na Linha 2 de Rota (2026-10-16)
-**Contexto:** O utilizador solicitou trocar de lado os LEDs com os flaps na Linha 2 de rota aérea (`Muda de lado os leds com os flaps`), anexando uma imagem do bloco de destino.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou trocar de lado os LEDs com os flaps na Linha 2 de rota aérea (`Muda de lado os leds com os flaps`), anexando uma imagem do bloco de destino.
+
+**Decisão:**
+
 1. Inverter a disposição interna dos elementos de rota para uma composição com simetria central:
    - **Origem (à esquerda do ecrã):** Posicionar os LEDs informativos (`LedText` com cidade, aeroporto e país) à esquerda (exterior) e as 3 palhetas Split-Flap (`FlapWord`) à direita (centro).
    - **Destino (à direita do ecrã):** Posicionar as 3 palhetas Split-Flap (`FlapWord`) à esquerda (centro) e os LEDs informativos (`LedText` com cidade, aeroporto e país) à direita (exterior).
 2. Layout global resultante: `[LEDS ORIGEM] [FLAP ORIGEM]` ➔ ✈ ➔ `[FLAP DESTINO] [LEDS DESTINO]`. Os flaps mecânicos unem-se no centro da rota ao redor do ícone do avião, e os leds informativos equilibram harmoniosamente as extremidades laterais.  
+
 **Consequência:** Simetria visual e equilíbrio estético no Ecrã 1, mantendo total responsividade e legibilidade de todas as informações aeroportuárias.
 
 ### ADR-045 — Blindagem e Deduplicação Estrita do Áudio de Novo Voo (/Flight.mp3) (2026-10-16)
-**Contexto:** O utilizador reportou que o som de novo voo parecia estar a repetir demasiadas vezes e exigiu que apenas deve tocar para o voo que estiver no Ecrã 1 (`Verifica o som de novo voo, parece estar a repetir demasiadas vezes. apenas deve tocar para o voo que estiver no ecra 1`).  
-**Causa Raiz:**  
+
+**Contexto:** O utilizador reportou que o som de novo voo parecia estar a repetir demasiadas vezes e exigiu que apenas deve tocar para o voo que estiver no Ecrã 1 (`Verifica o som de novo voo, parece estar a repetir demasiadas vezes. apenas deve tocar para o voo que estiver no ecra 1`).
+
+**Causa Raiz:**
+
 1. **Alternância no Topo (#1):** Quando 2 ou mais voos sobrevoam o radar com distâncias próximas, pequenas variações de cálculo faziam-nos alternar entre 1º e 2º lugar a cada 15 segundos; como a referência anterior guardava apenas o ID do último voo, cada transição disparava o som repetidamente em loop.  
 2. **Oscilação de Rede/API:** Se a OpenSky devolvesse temporariamente 0 estados ou desse timeout por um ciclo, a lista de voos era esvaziada e, no ciclo seguinte, o mesmo voo reaparecia e disparava o som de novo.  
 3. **Reprodução Fora do Ecrã 1:** O efeito disparava mesmo quando o utilizador estava a visualizar o Ecrã 2 (Restantes Voos) ou o Ecrã 3 (Meteorologia).  
-**Decisão:**  
+
+**Decisão:**
+
 1. **Verificação de Ecrã Ativo:** Condicionar a reprodução estritamente a `ecraAtivo === "principal"` e `vooAtual !== null`. Se o utilizador estiver noutro ecrã, o áudio nunca toca.  
 2. **Deduplicação Persistente por Aeronave:** Implementar `voosJaTocadosRef` (`Map<string, number>`) indexado pela chave única da aeronave (`ICAO24` ou `Callsign`). Uma aeronave toca no máximo **uma única vez** por sessão (com janela de expiração de 45 min).  
 3. **Prevenção de Falso Alarme no Arranque:** Ao carregar a aplicação pela primeira vez com voos já presentes, as aeronaves existentes são registadas como já conhecidas, evitando disparos abruptos imediatos.  
 4. **Cooldown de Segurança:** Limitar o intervalo entre toques a um mínimo de 15 segundos para evitar qualquer disparo em rajada.  
 5. **Estabilização do GPS:** Impedir re-renders redundantes no hook `watchPosition` quando a latitude e longitude não sofreram alterações.  
+
 **Consequência:** O som `/Flight.mp3` toca com precisão cirúrgica apenas quando uma nova aeronave entra no Ecrã 1, eliminando completamente repetições irritantes ou loops de áudio.
 
 ### ADR-046 — Mini-Radar de Proximidade Cockpit TCAS na Linha 3 de Telemetria (2026-10-16)
-**Contexto:** O utilizador solicitou a criação de uma espécie de radar que informa a que distância está o avião do utilizador (`Cria uma especie de radar que informa a que distançia esta o aviao do utiizador`).  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou a criação de uma espécie de radar que informa a que distância está o avião do utilizador (`Cria uma especie de radar que informa a que distançia esta o aviao do utiizador`).
+
+**Decisão:**
+
 1. **Módulo de Radar na Telemetria:** Expandir a Linha 3 de 3 para 4 módulos balanceados (`grid-cols-2 sm:grid-cols-4`): `ALTITUDE`, `VELOCIDADE`, `RUMO` e `DISTÂNCIA / RADAR`.
 2. **Componente Visual `MiniRadarDisplay`:**
    - Scope circular escuro com acabamento esmeralda fosforescente (`#03090e`, borda `emerald-500/40` e sombra de cockpit).
@@ -266,32 +357,46 @@
 3. **Leitura Numérica Estilo Cockpit LED:**
    - Exibição em grande formato numérico `LedText` da distância com adaptação automática de unidade: `NM` (milhas náuticas) quando a velocidade está em `KTS`, ou `KM` quando a velocidade está em `KMH`.
    - Subtítulo com direção cardeal e graus de azimute (ex: `NE • 042°`) e equivalência métrica/náutica secundária.
+
 **Consequência:** Informação de proximidade aeronáutica em tempo real de nível profissional, integrando perfeitamente a estética oficial do display sem comprometer o espaço útil do ecrã.
 
 ### ADR-047 — Reorganização da Linha 1: Companhia Aérea à Esquerda e Fabricante do Avião à Direita (2026-10-16)
-**Contexto:** O utilizador solicitou mudar de lado o nome da companhia aérea e adicionar o fabricante do avião (`Muda o nome da companhia e adiciona o fabricante do aviao`), desenhando na captura de ecrã uma seta a transferir a companhia da direita para a esquerda.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou mudar de lado o nome da companhia aérea e adicionar o fabricante do avião (`Muda o nome da companhia e adiciona o fabricante do aviao`), desenhando na captura de ecrã uma seta a transferir a companhia da direita para a esquerda.
+
+**Decisão:**
+
 1. **Transferência da Companhia Aérea:** Mover o nome da companhia (`infoVoo.nomeCompanhia`, ex: `RYANAIR`) para o bloco esquerdo da Linha 1, posicionado harmoniosamente por baixo do número de voo em LED e junto ao logótipo oficial.
 2. **Resolução Automática do Fabricante:** Criar a função `obterFabricanteAeronave(codAeronave, nomeAeronave)` que analisa os códigos ICAO e designações para determinar com precisão o construtor aeronáutico (`BOEING`, `AIRBUS`, `EMBRAER`, `ATR`, `BOMBARDIER`, `CESSNA`, `DASSAULT`, `GULFSTREAM`, `BEECHCRAFT`, `PILATUS`, `CIRRUS`, `SIKORSKY`, `LOCKHEED MARTIN`, `ROBINSON`, `LEONARDO`, etc.).
 3. **Exibição do Fabricante:** No bloco direito da Linha 1, por baixo do modelo da aeronave em LEDs (`B737 MAX 8`, `A320NEO`, etc.), exibir em destaque o fabricante aeronáutico resolvido (`infoVoo.fabricante`).  
+
 **Consequência:** Linha 1 perfeitamente equilibrada e contextualizada: a identidade da operadora (logótipo, voo e companhia) fica concentrada à esquerda, e a ficha técnica da máquina (rótulo, modelo e fabricante) fica concentrada à direita.
 
 ### ADR-048 — Otimização Estrita para Ecrãs de Telemóvel na Horizontal (Landscape) (2026-10-16)
-**Contexto:** O utilizador relembrou que a aplicação é concebida prioritariamente para ecrãs de telemóvel na horizontal (modo paisagem/landscape) e exigiu que todos os elementos têm de encaixar com perfeição absoluta sem cortes ou distorções (`Lembra-te que esta app é para ser usada em ecra de telemovel na horizontal, não te esqueças que tem de encaizar tudo muito bem`).  
-**Causa Raiz:**  
+
+**Contexto:** O utilizador relembrou que a aplicação é concebida prioritariamente para ecrãs de telemóvel na horizontal (modo paisagem/landscape) e exigiu que todos os elementos têm de encaixar com perfeição absoluta sem cortes ou distorções (`Lembra-te que esta app é para ser usada em ecra de telemovel na horizontal, não te esqueças que tem de encaizar tudo muito bem`).
+
+**Causa Raiz:**
+
 1. Em ecrãs móveis landscape (ex: 844x390, 896x414, 915x412), a largura do dispositivo ativa os prefixos `sm:` do Tailwind que aumentam o padding e os tamanhos das fontes, enquanto a altura útil real é muito reduzida (~380px a 410px).  
 2. Na Linha 2 de rota aérea, o contentor usava `flex-wrap`, provocando quebras de linha indesejadas que empurravam as palhetas split-flap ou os LEDs para uma segunda linha, dobrando a altura vertical exigida e cortando os elementos na base.  
 3. As palhetas mecânicas Split-Flap (`FlapWord`) com tamanho `hero` excediam a altura disponível quando conjugadas com o cabeçalho e a telemetria da Linha 3.  
-**Decisão:**  
+
+**Decisão:**
+
 1. **Linha 2 (Rota) Inquebrável:** Substituir `flex-wrap` por `flex-nowrap shrink-0` em toda a extensão da rota: `[CIDADES + AEROPORTO] [FLAP] --- ✈ --- [FLAP] [CIDADES + AEROPORTO]`. Reduzir `FlapWord` de `hero` para `xl`, que possui a altura mecânica ideal (~38px) para ecrãs horizontais móveis com altura <= 430px.  
 2. **Compactação Proporcional da Linha 1 (Cabeçalho):** Ajustar o padding vertical para `px-2 py-1 sm:px-3 sm:py-1.5`, com logótipo proporcional (`w-8 h-8 sm:w-10 sm:h-10`) e distribuição harmoniosa entre o bloco da companhia à esquerda e o fabricante à direita.  
 3. **Alinhamento da Linha 3 (Telemetria):** Configurar `grid-cols-4` compacto numa única linha contínua (`py-1 sm:py-1.5`), mantendo o Mini-Radar de Proximidade e os módulos de Altitude, Velocidade e Rumo com proporções milimétricas.  
 4. **Proteção Anti-Transbordo:** Ajustar os espaçamentos gerais para `gap-1 sm:gap-1.5`, padding perimetral de segurança `p-1 sm:p-2` e `overflow-hidden` sem barras de scroll.  
+
 **Consequência:** Encaixe perfeito e milimétrico em 100% da área visível de qualquer telemóvel na horizontal (resoluções de 380px a 430px de altura), com 100% dos dados legíveis, zero quebras de linha e fidelidade total ao painel analógico Solari.
 
 ### ADR-049 — Fluxo de Boas-Vindas e Onboarding Sequencial na Primeira Abertura (2026-10-16)
-**Contexto:** O utilizador solicitou que, ao abrir a aplicação pela primeira vez, surja um popup de instalação seguido de outro popup para obter as coordenadas do dispositivo (`Quando se abre pela primeira vez a app, popup de instalação, seguido de outro popup para obter cordenadas do dispositivo`).  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou que, ao abrir a aplicação pela primeira vez, surja um popup de instalação seguido de outro popup para obter as coordenadas do dispositivo (`Quando se abre pela primeira vez a app, popup de instalação, seguido de outro popup para obter cordenadas do dispositivo`).
+
+**Decisão:**
+
 1. **Deteção de Primeira Abertura:**  
    - Utilização da chave de armazenamento `localStorage.getItem("flight_panel_onboarding_v1")`. Se inexistente, ativa o assistente de boas-vindas com transição suave.
    - O disparo automático e invasivo do GPS nativo do browser no primeiro carregamento foi suprimido até que o utilizador chegue ao passo dedicado de geolocalização.
@@ -309,26 +414,38 @@
    - Ao concluir o fluxo, grava `flight_panel_onboarding_v1 = "concluido"` e emite o feedback sonoro de palhetas Solari (`tocarSomFlapClack()`). Em todas as sessões futuras, a aplicação arranca imediatamente no painel de voos sem qualquer interrupção.  
 5. **Internacionalização Estrita (i18n):**  
    - Todas as mensagens, botões e notas explicativas foram integradas nativamente nos 4 idiomas suportados (`pt`, `en`, `fr`, `es`).  
+
 **Consequência:** Experiência de utilizador moderna, ergonómica e guiada desde o primeiro segundo, assegurando taxa máxima de adoção de PWA e calibração imediata do radar com consentimento claro do utilizador.
 
 ### ADR-050 — Base de Dados Dedicada de Aeronaves ICAO com Foco em Jatos Executivos (2026-10-17)
-**Contexto:** O utilizador reportou que jatos privados como o HondaJet surgiam identificados de forma crua pelo código ICAO (`HDJT` tanto no modelo como no fabricante).  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que jatos privados como o HondaJet surgiam identificados de forma crua pelo código ICAO (`HDJT` tanto no modelo como no fabricante).
+
+**Decisão:**
+
 1. Criação do módulo dedicado `lib/aeronaves-db.ts` contendo mais de 150 códigos ICAO de jatos executivos (HondaJet, Embraer Phenom/Praetor/Legacy, Cessna Citation M2/CJ/XLS/Latitude/Longitude, Bombardier Challenger/Global/Learjet, Gulfstream G150 a G800, Dassault Falcon, Pilatus PC-12/PC-24, Beechcraft King Air/Premier, Cirrus Vision Jet, Eclipse, Daher TBM, etc.), além de aviões comerciais e militares.  
 2. Implementação da função `resolverInfoAeronave` que resolve modelos para a matriz LED (ex: `HDJT` ➔ `HONDAJET`) e determina o fabricante oficial (ex: `HONDA AIRCRAFT`), eliminando repetições brutas.  
+
 **Consequência:** Apresentação elegante, profissional e precisa de qualquer jato particular ou comercial no painel principal e na lista de voos.
 
 ### ADR-051 — Centralização e Ampliação das Palhetas Split-Flap com Áudio Mecânico Ativo (2026-10-17)
-**Contexto:** O utilizador questionou sobre juntar os painéis de palhetas no centro, aumentá-los ligeiramente e se o som de rotação mecânica continuava ativo ao mudarem de letra.  
-**Decisão:**  
+
+**Contexto:** O utilizador questionou sobre juntar os painéis de palhetas no centro, aumentá-los ligeiramente e se o som de rotação mecânica continuava ativo ao mudarem de letra.
+
+**Decisão:**
+
 1. **Layout Centralizado em 3 Colunas:** Reorganizar a Linha 2 de forma simétrica: Origem em LEDs no exterior esquerdo, painéis de palhetas (`FlapWord`) agrupados no centro com moldura e sombra interna analógica (`[ ORIGEM ] ✈ [ DESTINO ]`), e Destino em LEDs no exterior direito.  
 2. **Ampliação Responsiva (`hero`):** Aumentar a escala das palhetas com regras dinâmicas `clamp()` seguras para visualização em telemóveis horizontais.  
 3. **Áudio Mecânico Autêntico na Rotação:** Criar a função `tocarRajadaFlaps()` e associá-la à mudança de texto no componente `FlapWord`. Sempre que os códigos IATA mudam, o sistema dispara uma rajada percussiva de 4 cliques rápidos (Web Audio API sintetizada), reproduzindo o som físico de palhetas Solari a rodar.  
+
 **Consequência:** Linha 2 com foco imponente no centro, estética autêntica de painel de aeroporto e feedback sonoro realista a cada rotação de voo.
 
 ### ADR-052 — Emblemas Oficiais de Construtores Aeronáuticos OEM para Jatos Executivos e Voos Sem Logótipo (2026-10-17)
-**Contexto:** Em voos executivos particulares (ex: HondaJet, Cessna Citation, Embraer Phenom, Gulfstream) ou voos sem companhia aérea registada, surgia uma caixa quadrada genérica escura ou um espaço vazio, quebrando a estética de luxo do cockpit. O utilizador escolheu a Opção 1: exibir o emblema oficial do fabricante da aeronave (OEM).  
-**Decisão:**  
+
+**Contexto:** Em voos executivos particulares (ex: HondaJet, Cessna Citation, Embraer Phenom, Gulfstream) ou voos sem companhia aérea registada, surgia uma caixa quadrada genérica escura ou um espaço vazio, quebrando a estética de luxo do cockpit. O utilizador escolheu a Opção 1: exibir o emblema oficial do fabricante da aeronave (OEM).
+
+**Decisão:**
+
 1. Criação do componente vetorial dedicado `lib/fabricantes-logos.tsx` contendo logótipos SVG oficiais de alta fidelidade e emblemas estilizados dos principais construtores aeronáuticos mundiais:
    - **Honda / HondaJet:** Asas estilizadas e tipografia oficial HondaJet.
    - **Cessna:** Emblema histórico do brasão e asas Cessna Citation.
@@ -343,11 +460,15 @@
 2. Atualização dos componentes `AirlineLogo` no painel principal (`/painel`) e na lista de voos (`/voos`):
    - Se existir logótipo da companhia aérea comercial via CDN, continua a ser apresentado.
    - Se o logótipo não existir ou falhar, o sistema deteta automaticamente o fabricante e o modelo da aeronave através de `aeronaves-db.ts` e renderiza o emblema vetorial oficial com moldura escura de luxo (`#0d0f16` com rebordo `border-neutral-800`), sem caixas brancas desfasadas.  
+
 **Consequência:** Aspeto premium de fábrica aeronáutica (OEM), eliminando caixas vazias ou genéricas e enriquecendo imediatamente a presença visual de jatos executivos.
 
 ### ADR-053 — Unificação Arquitetural do Motor de Áudio Split-Flap e Cabine (2026-10-17)
-**Contexto:** Existiam implementações dispersas de Web Audio API e gestão de volume entre `lib/sound.ts` e `app/painel/page.tsx`, gerando código redundante e variáveis globais não sincronizadas.  
-**Decisão:**  
+
+**Contexto:** Existiam implementações dispersas de Web Audio API e gestão de volume entre `lib/sound.ts` e `app/painel/page.tsx`, gerando código redundante e variáveis globais não sincronizadas.
+
+**Decisão:**
+
 1. **Consolidação em `lib/sound.ts`:**  
    - Classe Singleton `SplitFlapAudioEngine` com controlo de estado (`volume`, `isMuted`), gestão preguiçosa e resiliente do `AudioContext` (`resume()`), e sintetizador de impacto mecânico com amortecimento exponencial e ressonância metálica.  
    - Métodos dedicados: `playMechanicalClick()`, `playBurst()` (rajadas percussivas de rotação rápida de palhetas) e `playNewFlight()` (jingle oficial `/Flight.mp3` com fallback mecânico).  
@@ -356,11 +477,15 @@
 3. **Refatorização de `app/painel/page.tsx`:**  
    - Eliminação de todo o código redundante de sintetizador local e variáveis globais soltas.  
    - Conexão direta dos seletores de áudio do modal de opções `⚙️` e dos componentes `FlapCell` ao motor unificado.  
+
 **Consequência:** Arquitetura limpa, ficheiro `lib/sound.ts` totalmente ativo como fonte única da verdade para o áudio, e desempenho sem fugas de memória nem colisões de `AudioContext`.
 
 ### ADR-054 — Geolocalização Híbrida Inteligente com Suporte a IP de Rede para Computadores / PC (2026-10-17)
-**Contexto:** No computador (PC de secretária ou portátil ligado por cabo Ethernet ou sem antenas de satélite ativas), o navegador disparava erro de tempo esgotado (`Timeout expired`), impedindo a obtenção automática de coordenadas para o radar de proximidade.  
-**Decisão:**  
+
+**Contexto:** No computador (PC de secretária ou portátil ligado por cabo Ethernet ou sem antenas de satélite ativas), o navegador disparava erro de tempo esgotado (`Timeout expired`), impedindo a obtenção automática de coordenadas para o radar de proximidade.
+
+**Decisão:**
+
 1. **Endpoint de Servidor Dedicado (`/api/geolocalizacao-ip`):**  
    - Criação da rota Route Handler com múltiplos fornecedores em cascata (`ipapi.co`, `ipwho.is`, `freeipapi.com`) com timeout de segurança e leitura de cabeçalhos de proxy (`x-forwarded-for`, `x-real-ip`).  
    - Devolve latitude, longitude, cidade e país com precisão aproximada (~2 a 4 km) e imunidade a bloqueadores de anúncios (adblockers).  
@@ -369,11 +494,15 @@
    - Se ocorrer erro de satélite (`TIMEOUT`, `PERMISSION_DENIED` ou `POSITION_UNAVAILABLE`), o sistema aciona de imediato e de forma transparente o fallback por IP, resolvendo a cidade e fixando o radar de voos sem bloquear o utilizador com ecrãs de erro.  
 3. **Controlos Dedicados:**  
    - Adição do botão táctil `🌐 OBTER LOCALIZAÇÃO POR IP (IDEAL PARA PC)` tanto no modal `⚙️ OPÇÕES` como no Passo 2 do assistente de boas-vindas (*Onboarding*).  
+
 **Consequência:** Resolução instantânea e sem atritos da localização em computadores sem antena de satélite GPS, garantindo experiência suave e radar ativo em qualquer dispositivo à primeira tentativa.
 
 ### ADR-055 — Integração com Padrões ICAO, Catálogo jets.flights e Diretório aviapages (2026-10-17)
-**Contexto:** O utilizador forneceu três referências essenciais de aviação: o portal da ICAO (International Civil Aviation Organization), o catálogo de jatos executivos `jets.flights/catalog/` e o diretório de operadores charter `aviapages.com/companies/`. Era necessário enriquecer a base de dados para garantir que qualquer jato executivo, táxi aéreo ou operador VIP europeu ou global seja imediatamente identificado com o modelo exato, classe, fabricante e logótipo oficial.  
-**Decisão:**  
+
+**Contexto:** O utilizador forneceu três referências essenciais de aviação: o portal da ICAO (International Civil Aviation Organization), o catálogo de jatos executivos `jets.flights/catalog/` e o diretório de operadores charter `aviapages.com/companies/`. Era necessário enriquecer a base de dados para garantir que qualquer jato executivo, táxi aéreo ou operador VIP europeu ou global seja imediatamente identificado com o modelo exato, classe, fabricante e logótipo oficial.
+
+**Decisão:**
+
 1. **Catálogo de Aeronaves ICAO Doc 8643 (`lib/aeronaves-db.ts`):**  
    - Expansão de modelos executivos e bimotores: Grob SPn (`G180`), SyberJet (`SJ30`), Nextant 400XTI/G90XT (`BE4W`, `G90X`), Mitsubishi Diamond (`MU30`), Gulfstream G100 / Astra (`ASTR`), Westwind (`WW24`), Vulcanair P68 (`P68`), Tecnam P2006T/P2012 (`P206`, `P201`).  
    - Helicópteros executivos e VIP de luxo: Leonardo AW109/AW139/AW169 (`A109`, `A139`, `A169`), Sikorsky S-76 e S-92 VIP (`S76`, `S92`), Bell 206 e 429 (`B06`, `B429`), Airbus Helicopters H130 e Dauphin H155 (`EC30`, `EC55`).  
@@ -383,11 +512,15 @@
 3. **Emblemas Vetoriais Oficiais OEM e Operadores (`lib/fabricantes-logos.tsx`):**  
    - Criação de insígnias oficiais vetoriais para: **NetJets** (estrela de diamante/asas em preto e platina), **VistaJet** (listra carmesim icónica horizontal), **Flexjet** (asas rubi e ouro), **GlobeAir** (ave geométrica rubi), **Daher TBM** (vórtice aerodinâmico azul e laranja), e **Piaggio Aerospace** (escudo clássico com P alado).  
    - Despacho dinâmico inteligente em `EmblemaFabricante` por fabricante, modelo ou indicativo de chamada (*callsign*).  
+
 **Consequência:** Cobertura de aviação executiva e privada de nível profissional em estrita conformidade com os padrões da ICAO e as principais referências do setor aeronáutico internacional.
 
 ### ADR-056 — Sistema Ativo de Deteção e Notificação de Novas Versões para Aplicações em Execução Permanente (2026-10-17)
-**Contexto:** Sendo o Flight Panel uma aplicação concebida para funcionar continuamente ligada num ecrã dedicado, tablet, monitor de parede ou quiosque (24 horas por dia, 7 dias por semana), o utilizador necessitava que qualquer nova versão publicada emitisse um alerta visível e ativo enquanto a aplicação está aberta, permitindo atualizar de imediato com um toque.  
-**Decisão:**  
+
+**Contexto:** Sendo o Flight Panel uma aplicação concebida para funcionar continuamente ligada num ecrã dedicado, tablet, monitor de parede ou quiosque (24 horas por dia, 7 dias por semana), o utilizador necessitava que qualquer nova versão publicada emitisse um alerta visível e ativo enquanto a aplicação está aberta, permitindo atualizar de imediato com um toque.
+
+**Decisão:**
+
 1. **Configuração de Versão Central (`lib/versao.ts`):**  
    - Definição canónica de `INFO_VERSAO` contendo `versao`, `buildId`, `dataLancamento` e `descricao` das novidades.  
 2. **Endpoint em Tempo Real (`/api/versao`):**  
@@ -401,15 +534,21 @@
    - Botão de ação primária `🔄 ATUALIZAR AGORA (RECARREGAR)` que limpa caches da PWA e recarrega instantaneamente.  
    - Botão de adiamento `⏱️ ADIAR` (15 min) que preserva um *pill* discreto e pulsante no canto do ecrã para atualização posterior a qualquer momento.  
    - Sinal sonoro discreto de aviso ao disparar pela primeira vez no cockpit.  
+
 **Consequência:** Experiência ininterrupta e autonomia total para ecrãs dedicados — o utilizador é sempre informado no exato momento em que uma nova compilação é disponibilizada na nuvem.
 
 ### ADR-057 — Correção do Disparo de Som de Novo Voo, Pré-Carregamento e Chime de Cabine Resiliente (2026-10-17)
-**Contexto:** O utilizador reportou que o som de novo voo (`/Flight.mp3`) deixou de funcionar.  
-**Diagnóstico & Causa Raiz:**  
+
+**Contexto:** O utilizador reportou que o som de novo voo (`/Flight.mp3`) deixou de funcionar.
+
+**Diagnóstico & Causa Raiz:**
+
 1. **Deduplicação Inicial Ultra-Agressiva:** No arranque do painel, o código anterior iterava por todos os voos retornados pela API e marcava toda a lista como já tocada. Quando o voo mais próximo (#1) mudava para outro avião que já constava na lista da área, o som era bloqueado e nunca chegava a tocar.  
 2. **Políticas de Autoplay dos Navegadores:** O navegador bloqueava chamadas a `new Audio().play()` geradas por timers assíncronos (`useEffect`/`fetch`) sem prévia interação com o elemento.  
 3. **Falta de Desbloqueio Global:** O `AudioContext` permanecia em estado `suspended` na ausência de retoma associada aos gestos globais do utilizador.  
-**Decisão:**  
+
+**Decisão:**
+
 1. **Reestruturação da Lógica de Deteção em `app/painel/page.tsx`:**  
    - Rastreio estrito de `ultimoVooExibidoIdRef`. No arranque inicial, apenas a aeronave atual é registada como linha de base.  
    - Assim que o voo em destaque no Ecrã 1 (#1) muda para outra aeronave, dispara de imediato `tocarSomNovoVoo()` com um cooldown de segurança de 6 segundos.  
@@ -419,11 +558,15 @@
    - Criação de sintetizador nativo de **Chime de Cabine Aeronáutica** (*Ding-Dong* com dois tons senoidais Fá#5 e Ré#5) através de Web Audio API, garantindo som instantâneo mesmo que o ficheiro MP3 seja barrado por políticas de navegador.  
 3. **Botão de Teste no Modal `⚙️ OPÇÕES`:**  
    - Adição do botão `🔔 TESTAR SOM DE NOVO VOO (/Flight.mp3)` que permite ao utilizador testar e ouvir o som imediatamente.  
+
 **Consequência:** Som de novo voo 100% restaurado, imune a bloqueios de autoplay e com feedback auditivo garantido.
 
 ### ADR-058 — Padronização Canónica de Arranque Sempre em Inglês (2026-10-17)
-**Contexto:** O utilizador solicitou expressamente que a aplicação deve arrancar sempre em inglês ("en"), alinhando o Flight Panel com o padrão internacional da aviação civil comercial e executiva.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou expressamente que a aplicação deve arrancar sempre em inglês ("en"), alinhando o Flight Panel com o padrão internacional da aviação civil comercial e executiva.
+
+**Decisão:**
+
 1. **Configuração de Idioma Raiz em `app/layout.tsx`:**  
    - Atualização da propriedade `<html lang="en">` no layout principal.  
 2. **Inicialização de Estado em `app/painel/page.tsx` e `app/voos/page.tsx`:**  
@@ -431,11 +574,15 @@
    - O fallback das traduções é configurado para `TRADUCOES.en`.  
    - A rotina de montagem de componentes (`useEffect`) deixa de restaurar idiomas locais anteriores gravados no navegador, assegurando que, independentemente do dispositivo ou histórico anterior de sessões, cada novo carregamento ou abertura da aplicação arranca sempre em Inglês.  
    - A alternância dinâmica de idioma durante a sessão continua disponível através do seletor de 4 bandeiras (PT, EN, FR, ES) no modal `⚙️ OPÇÕES`.  
+
 **Consequência:** Consistência internacional aeronáutica e respeito integral pela especificação de arranque do utilizador.
 
 ### ADR-059 — Unidades Internacionais de Temperatura (°C / °F) e Distância (KM / NM / MI) (2026-10-17)
-**Contexto:** O utilizador solicitou o suporte para outras medidas de temperatura no painel meteorológico e unidades de milhas junto aos quilómetros para internacionalização completa da aplicação.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou o suporte para outras medidas de temperatura no painel meteorológico e unidades de milhas junto aos quilómetros para internacionalização completa da aplicação.
+
+**Decisão:**
+
 1. **Internacionalização em `lib/i18n.ts`:**  
    - Adicionadas 9 novas chaves de tradução nos 4 idiomas (PT, EN, FR, ES) para títulos, subtítulos e unidades de distância (`KM`, `NM`, `MI`) e temperatura (`°C`, `°F`).  
 2. **Temperatura Configurável (°C vs °F):**  
@@ -446,40 +593,56 @@
    - A página de voos restantes (`/voos`) lê a preferência do utilizador e formata automaticamente os crachás de proximidade do voo principal e a lista de tráfego aéreo.  
 4. **Modal `⚙️ OPÇÕES`:**  
    - Adicionados dois novos blocos de controlo tátil com botões interativos para Distância e Temperatura, com persistência imediata em `localStorage`.  
+
 **Consequência:** Aplicação 100% internacionalizada, compatível com os padrões aeronáuticos e preferências dos utilizadores de qualquer região do mundo.
 
 ### ADR-060 — Desativação do Popup Nativo de Tradução do Google Chrome / Edge (2026-10-17)
-**Contexto:** Ao iniciar canonicamente a aplicação em Inglês num navegador com idioma de sistema em Português, o Google Chrome e Microsoft Edge ativam automaticamente uma caixa de diálogo flutuante (*popup*) do Google Tradutor ("inglês | português"), sobrepondo-se ao painel. O utilizador questionou se é possível desativar este popup.  
-**Decisão:**  
+
+**Contexto:** Ao iniciar canonicamente a aplicação em Inglês num navegador com idioma de sistema em Português, o Google Chrome e Microsoft Edge ativam automaticamente uma caixa de diálogo flutuante (*popup*) do Google Tradutor ("inglês | português"), sobrepondo-se ao painel. O utilizador questionou se é possível desativar este popup.
+
+**Decisão:**
+
 1. **Atributo HTML5 `translate="no"`:** Adicionado ao elemento `<html lang="en" translate="no" className="notranslate">`.  
 2. **Meta Tags de Bloqueio Canónico:** Inseridas no `<head>`:  
    - `<meta name="google" content="notranslate" />`  
    - `<meta name="googlebot" content="notranslate" />`  
 3. **Metadados Next.js:** Adicionada a propriedade `other: { google: "notranslate" }` em `export const metadata: Metadata`.  
 4. **Classe CSS de Isenção:** Classe `notranslate` atribuída a `<html>` e `<body>`.  
+
 **Consequência:** Os motores de tradução automática do Google Chrome, Edge e Chromium respeitam a diretiva oficial e não voltam a apresentar a caixa de tradução automática, mantendo o ecrã limpo.
 
 ### ADR-061 — Internacionalização do Ecrã de Carregamento para LOADING no Arranque (2026-10-17)
-**Contexto:** O ecrã inicial de montagem enquanto os voos são recolhidos continha a string estática "A CARREGAR" codificada no template, em vez de respeitar o arranque em inglês ("LOADING").  
-**Decisão:**  
+
+**Contexto:** O ecrã inicial de montagem enquanto os voos são recolhidos continha a string estática "A CARREGAR" codificada no template, em vez de respeitar o arranque em inglês ("LOADING").
+
+**Decisão:**
+
 1. **Chave de Tradução `estado_carregando`:** Adicionada à interface `DicionarioTraducoes` em `lib/i18n.ts` com os valores `"LOADING"` (EN), `"A CARREGAR"` (PT), `"CHARGEMENT"` (FR) e `"CARGANDO"` (ES).  
 2. **Substituição Dinâmica no Painel:** O componente `PainelAnalogicoMobileFullscreen` consome agora `t.estado_carregando || "LOADING"` no visor de matriz LED central (`LedText`).  
+
 **Consequência:** Consistência linguística absoluta desde o primeiro milissegundo de arranque da aplicação, apresentando `LOADING` por defeito.
 
 ### ADR-062 — Eliminação do Balão de Sistema de Ecrã Inteiro do Android (2026-10-17)
-**Contexto:** O navegador Android exibia um balão nativo flutuante de segurança ("Para sair do ecrã inteiro, arraste a partir da parte superior...") sobreposto aos dados de voo no fundo do ecrã.  
-**Decisão:**  
+
+**Contexto:** O navegador Android exibia um balão nativo flutuante de segurança ("Para sair do ecrã inteiro, arraste a partir da parte superior...") sobreposto aos dados de voo no fundo do ecrã.
+
+**Decisão:**
+
 1. **Identificação da Causa Raiz:** O aviso é emitido obrigatoriamente pelo sistema operativo Android sempre que a API Web `document.documentElement.requestFullscreen()` é invocada programaticamente num separador normal do browser. Como o código anterior possuía um ouvinte global nos eventos `pointerdown`, `click` e `touchstart` que chamava `acionarFs()` a cada toque, o sistema Android forçava a notificação de segurança.  
 2. **Remoção de Invocação Automática:** Removida a chamada compulsiva de `requestFullscreen()` dos ouvintes globais de toque em `app/painel/page.tsx` e `app/voos/page.tsx`.  
 3. **Preservação de Funcionalidades Críticas:**  
    - O `navigator.wakeLock` permanece ativo, garantindo que o ecrã não se desliga.  
    - O desbloqueio de áudio global no primeiro toque continua a funcionar perfeitamente.  
    - Como PWA instalada, a aplicação corre nativamente em modo de aplicação sem barras nem popups de sistema.  
+
 **Consequência:** Desaparecimento total da notificação flutuante cinzenta do Android, mantendo a visualização nítida de ponta a ponta.
 
 ### ADR-063 — Reativação do Popup de Instalação PWA e Calibração na Primeira Abertura (2026-10-17)
-**Contexto:** O utilizador reportou que, ao abrir a aplicação pela primeira vez, o sistema não estava a questionar se pretendia instalar ou não a PWA.  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que, ao abrir a aplicação pela primeira vez, o sistema não estava a questionar se pretendia instalar ou não a PWA.
+
+**Decisão:**
+
 1. **Ativação no `useEffect` de Montagem:**  
    - Adicionada a verificação da chave `localStorage.getItem("flight_panel_onboarding_v1")` e deteção de modo autónomo (`display-mode: standalone`).  
    - Se o utilizador aceder pela primeira vez no navegador (sem chave de conclusão e fora de modo standalone), o estado `onboardingPasso` é automaticamente inicializado em `"instalacao"`.  
@@ -488,28 +651,40 @@
    - **Passo 2 (Coordenadas & Radar):** Transita para a permissão de GPS ou geolocalização por IP e calibração do radar, concluindo o onboarding e gravando a preferência.  
 3. **Botão de Reabertura nas Opções:**  
    - Adicionado o botão `📲 REABRIR ASSISTENTE DE INSTALAÇÃO & GPS` dentro do modal `⚙️ OPÇÕES` para permitir testar ou reinstalar a qualquer momento sem necessidade de limpar os dados do navegador.  
+
 **Consequência:** Fluxo de boas-vindas e instalação 100% reposto e acessível a qualquer momento.
 
 ### ADR-064 — Fixação e Estabilização de Altura da Barra Inferior de Telemetria (2026-10-17)
-**Contexto:** O utilizador reportou que "Os kms da distançia alteram o tamanho da barra inferior". Quando a distância era calculada ou quando a quilometragem variava (1 dígito, 2 dígitos, 3 dígitos ou com casas decimais), o módulo do radar de distância expandia verticalmente, fazendo com que toda a grelha inferior de telemetria (Altitude, Velocidade, Rumo e Distância) mudasse de altura e provocasse saltos visuais no painel principal.  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que "Os kms da distançia alteram o tamanho da barra inferior". Quando a distância era calculada ou quando a quilometragem variava (1 dígito, 2 dígitos, 3 dígitos ou com casas decimais), o módulo do radar de distância expandia verticalmente, fazendo com que toda a grelha inferior de telemetria (Altitude, Velocidade, Rumo e Distância) mudasse de altura e provocasse saltos visuais no painel principal.
+
+**Decisão:**
+
 1. **Padronização Tipográfica (`LedText size="md"`):** No componente `MiniRadarDisplay`, o valor numérico da distância foi ajustado de `size="lg"` para `size="md"`, igualando a altura exata dos módulos de Altitude, Velocidade e Rumo.  
 2. **Compactação Proporcional do Scope de Radar:** O círculo do radar analógico foi ajustado de `w-8 h-8 sm:w-11 sm:h-11` para `w-6 h-6 sm:w-8 sm:h-8 shrink-0`, integrando-se perfeitamente no cartão sem forçar a expansão vertical.  
 3. **Travamento Rígido de Altura da Grelha:** A grelha da Linha 3 foi bloqueada com `h-13 sm:h-16 shrink-0` e cada um dos 4 cartões com `h-full overflow-hidden flex flex-col items-center justify-center`.  
 4. **Alinhamento dos Rótulos e Subtextos:** Atribuído `leading-none shrink-0` aos cabeçalhos e `truncate max-w-full` ao azimute, eliminando quebras de linha acidentais.  
+
 **Consequência:** A barra inferior tem agora uma altura perfeitamente fixa e imutável, permanecendo milimetricamente nivelada e estável quer a distância seja de 1 dígito, 3 dígitos, esteja em KM/NM/MI ou em espera (`---`).
 
 ### ADR-065 — Proteção Anti-Corte Vertical e Adaptação Dinâmica para Telemóveis em Modo Horizontal (2026-10-17)
-**Contexto:** O utilizador reportou que "Sempre que se faz uma atualização, o tamanho fica grande e passa o tamanho do ecra para baixo. Não é em todos os telemoveis." Em telemóveis em modo horizontal/paisagem, a largura superior a 640px ativava cegamente as classes utilitárias `sm:` do Tailwind (concebidas para ecrãs de computadores e tablets), inflando os tamanhos dos logótipos (`sm:w-14 sm:h-14`), das palhetas mecânicas e da barra de telemetria. Simultaneamente, ao recarregar ou atualizar a página, as barras de navegação nativas do navegador reapareciam, reduzindo a altura útil disponível da viewport para menos de 300px e forçando a barra inferior para fora do ecrã visível.  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que "Sempre que se faz uma atualização, o tamanho fica grande e passa o tamanho do ecra para baixo. Não é em todos os telemoveis." Em telemóveis em modo horizontal/paisagem, a largura superior a 640px ativava cegamente as classes utilitárias `sm:` do Tailwind (concebidas para ecrãs de computadores e tablets), inflando os tamanhos dos logótipos (`sm:w-14 sm:h-14`), das palhetas mecânicas e da barra de telemetria. Simultaneamente, ao recarregar ou atualizar a página, as barras de navegação nativas do navegador reapareciam, reduzindo a altura útil disponível da viewport para menos de 300px e forçando a barra inferior para fora do ecrã visível.
+
+**Decisão:**
+
 1. **Bloqueio de Viewport e Scroll Global:** No ficheiro `app/globals.css`, configurado `html, body` com `height: 100dvh; overflow: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch;`.  
 2. **Ativação de `viewportFit: "cover"`:** No ficheiro `app/layout.tsx`, adicionado `viewportFit: "cover"` aos metadados de viewport para eliminar recalibrações de escala espúrias no recarregamento.  
 3. **Migração de `vh` para `dvh` em FlapCells:** No componente `FlapCell`, as fórmulas `clamp()` passaram a usar `dvh` (Dynamic Viewport Height) com tetos calibrados (`11dvh` em vez de `12vh` teóricos sem barras), garantindo que as palhetas encolhem proporcionalmente em ecrãs com altura reduzida.  
+
 **Consequência:** A aplicação cabe agora na perfeição em 100% dos telemóveis, mesmo com as barras de navegação do browser abertas e após qualquer atualização ou recarregamento de página.
 
 ### ADR-066 — Controlo Manual e Automático de Luminosidade com Boost em Novo Voo (2026-10-17)
-**Contexto:** O utilizador solicitou a capacidade de regular a luminosidade do ecrã manualmente ou automaticamente. Em modo automático, sempre que um novo voo entra no radar, a luminosidade do ecrã sobe para 100% e, 5 segundos depois, reduz-se suavemente de volta para o nível manual configurado. Esta funcionalidade tem de ser configurável e passível de desativação dentro do menu de opções.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou a capacidade de regular a luminosidade do ecrã manualmente ou automaticamente. Em modo automático, sempre que um novo voo entra no radar, a luminosidade do ecrã sobe para 100% e, 5 segundos depois, reduz-se suavemente de volta para o nível manual configurado. Esta funcionalidade tem de ser configurável e passível de desativação dentro do menu de opções.
+
+**Decisão:**
+
 1. **Camada de Dimmer com Transição Suave (700ms):** Implementado overlay analógico `fixed inset-0 pointer-events-none z-[9990]` com `backgroundColor: #000000` e opacidade calculada `(100 - brilhoEfetivo) / 100 * 0.88` com `transition-opacity duration-700 ease-out`. Esta solução atua em qualquer dispositivo móvel e ecrã sem artefactos gráficos e sem afetar a fidelidade das cores.  
 2. **Gatilho de Boost Temporário (5 segundos):** Ligado ao mesmo observador de estado que reproduz o áudio oficial de cabine quando uma nova aeronave assume o topo do radar (`tocarSomNovoVoo`). Se `luminosidadeAuto` estiver ativo, o brilho sobre instantaneamente para 100% (`brilhoBoostAtivo = true`) e um temporizador de 5000ms restaura suavemente o nível manual.  
 3. **Controlos Completos no Modal de Opções:**  
@@ -518,11 +693,15 @@
    - Alternador tátil (Toggle ON/OFF) para o aumento automático em novo voo.  
    - Botão interativo `✨ TESTAR AUMENTO DE BRILHO (5 SEGUNDOS)` para pré-visualização imediata.  
 4. **Persistência Local e Internacionalização:** Valores guardados em `localStorage` sob `flight_panel_luminosidade` e `flight_panel_luminosidade_auto`, com suporte multilíngue em PT, EN, FR e ES.  
+
 **Consequência:** Experiência visual imersiva tipo cockpit e quiosque noturno, permitindo poupar energia/luz em repouso e chamar a atenção com classe sempre que surge tráfego aéreo.
 
 ### ADR-067 — Animação Mecânica de Split-Flaps de 1.5 Segundos em Cascata ao Entrar Novo Voo (2026-10-17)
-**Contexto:** O utilizador solicitou uma animação realista das palhetas Split-Flap logo após um novo voo entrar no radar, girando durante 1.5 segundos antes de fixar nos códigos IATA de origem e destino correspondentes.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou uma animação realista das palhetas Split-Flap logo após um novo voo entrar no radar, girando durante 1.5 segundos antes de fixar nos códigos IATA de origem e destino correspondentes.
+
+**Decisão:**
+
 1. **Duração Exata de 1.5 Segundos e Paragem em Cascata (Solari di Udine):**  
    - Intervalo mecânico de rotação configurado para 65ms por ciclo, alternando caracteres alfanuméricos realistas (`A-Z0-9`).  
    - Para um efeito autêntico de painel de aeroporto mecânico, as palhetas de cada palavra param de forma desfasada em cascata: o primeiro caractere fixa aos ~1.15s, o segundo aos ~1.325s e o terceiro exatamente aos 1.50s (`1150 + (index % 3) * 175 ms`).  
@@ -532,34 +711,51 @@
 3. **Disparo Automático e Manual:**  
    - Disparo automático integrado no hook de deteção de novas aeronaves no ecrã principal (`setTriggerFlapsNovoVoo(agora)`).  
    - Disparo manual incluído nos botões de teste do Modal de Opções (teste de áudio e teste de luminosidade) para validação e demonstração instantânea.  
+
 ### ADR-068 — Restauro da Escala Visual Heróica das Palhetas Split-Flap, Logótipos e Telemetria (2026-10-17)
-**Contexto:** O utilizador reportou que "ficou tudo mais pequeno", enviando uma captura de ecrã em modo paisagem onde as palhetas centrais, logótipos e telemetria apareciam diminutos com vazios excessivos no ecrã.  
-**Causa Raiz:** A regra `@media (max-height: 440px)` em `app/globals.css` estava a forçar com `!important` tamanhos reduzidos em telemóveis em modo horizontal (`height: clamp(1.35rem, 11dvh, 2.2rem) !important` e telemetria a `2.75rem !important`). Em conjunto com limites conservadores no componente JSX, as flaps perdiam a imponência visual pretendida.  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que "ficou tudo mais pequeno", enviando uma captura de ecrã em modo paisagem onde as palhetas centrais, logótipos e telemetria apareciam diminutos com vazios excessivos no ecrã.
+
+**Causa Raiz:** A regra `@media (max-height: 440px)` em `app/globals.css` estava a forçar com `!important` tamanhos reduzidos em telemóveis em modo horizontal (`height: clamp(1.35rem, 11dvh, 2.2rem) !important` e telemetria a `2.75rem !important`). Em conjunto com limites conservadores no componente JSX, as flaps perdiam a imponência visual pretendida.
+
+**Decisão:**
+
 1. **Remoção da Regra Restritiva com `!important`:** Eliminado o bloco forçado de `@media (max-height: 440px)` de `app/globals.css`, permitindo que o cálculo responsivo flexível governe o painel naturalmente.  
 2. **Restauro das Dimensões Heróicas de `FlapCell`:** O tamanho `hero` foi calibrado para `w-[clamp(1.5rem,min(5.4vw,11vh),3.4rem)] h-[clamp(2.1rem,min(7.4vw,15vh),4.3rem)] text-[clamp(1.4rem,min(5vw,10.5vh),2.8rem)]`, preenchendo a Linha 2 com destaque mecânico digno de aeroporto.  
 3. **Escala Nobre de Companhias e Cidades:** O logótipo voltou para `w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16` e as cidades de origem e destino passaram a adotar `"md"` para nomes correntes (ex: `PARIS`, `PORTO`), com a telemetria inferior a recuperar a altura sólida de `h-13 sm:h-15 md:h-16`.  
 4. **Proteção Vertical 100dvh Mantida:** A contenção estrita `html, body { height: 100dvh; overflow: hidden; }` e `flex-1 min-h-0` na linha central garante que o layout preenche 100% da viewport sem transbordar o ecrã.  
+
 **Consequência:** Equilíbrio visual perfeito com impacto estético imersivo e sem qualquer elemento encolhido.
 
 ### ADR-069 — Internacionalização Integral do Onboarding e Pesquisa Automática e Silenciosa de Localização no Arranque (2026-10-20)
-**Contexto:** O utilizador reportou que, mesmo com o idioma configurado em inglês, o assistente de instalação inicial e calibração de radar (onboarding) exibia elementos em português misturados (ex: "PASSO 1 DE 2", "INSTALAÇÃO PWA", "ECRÃ INTEIRO / Sem barras", "ÁUDIO COCKPIT", "RADAR DIRETO", "ESTADO DO SINAL", "CONECTADO", "CONCLUIR" e emoji duplicado `📲 📲`). Adicionalmente, solicitou que ao abrir a aplicação — seja pela primeira vez ou não — seja feita automaticamente e de forma silenciosa uma pesquisa de localização com as ferramentas integradas (GPS e IP), para que ao mudar de localidade o painel reflita de imediato as coordenadas reais do utilizador em vez de manter a primeira verificação antiga.  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que, mesmo com o idioma configurado em inglês, o assistente de instalação inicial e calibração de radar (onboarding) exibia elementos em português misturados (ex: "PASSO 1 DE 2", "INSTALAÇÃO PWA", "ECRÃ INTEIRO / Sem barras", "ÁUDIO COCKPIT", "RADAR DIRETO", "ESTADO DO SINAL", "CONECTADO", "CONCLUIR" e emoji duplicado `📲 📲`). Adicionalmente, solicitou que ao abrir a aplicação — seja pela primeira vez ou não — seja feita automaticamente e de forma silenciosa uma pesquisa de localização com as ferramentas integradas (GPS e IP), para que ao mudar de localidade o painel reflita de imediato as coordenadas reais do utilizador em vez de manter a primeira verificação antiga.
+
+**Decisão:**
+
 1. **Internacionalização Integral dos Modais (i18n):** Adicionadas todas as chaves em falta na interface `DicionarioTraducoes` (`onboarding_passo_1_badge`, `onboarding_instalacao_pwa_badge`, `onboarding_card_ecra_inteiro`, `onboarding_card_sem_barras`, `onboarding_card_audio`, `onboarding_card_jingle`, `onboarding_card_radar`, `onboarding_card_tempo_real`, `onboarding_seguinte`, `onboarding_passo_2_badge`, `onboarding_coordenadas_badge`, `onboarding_estado_sinal`, `onboarding_status_conectado`, `onboarding_status_sintonizando`, `onboarding_status_aguardando`, `onboarding_instrucao_gps`, `onboarding_obter_ip_btn`, `onboarding_concluir_btn`, `onboarding_raio_rotulo`, `opcoes_reabrir_onboarding`, `loc_subtitulo`, `loc_ponto_activo`) com traduções rigorosas em PT, EN, FR e ES.  
 2. **Remoção de Emojis Duplicados:** Eliminado o `<span>📲</span>` redundante que antecedia `t.onboarding_instalar_btn`, garantindo apresentação limpa `📲 INSTALL APP`.  
 3. **Pesquisa Automática e Silenciosa no Arranque:** Implementado modo `silencioso` em `obterGpsDoDispositivo(true, true)` e `obterLocalizacaoPorIp(true)`. No `useEffect` de inicialização, a aplicação carrega instantaneamente os dados de cache para zero latência visual e simultaneamente executa a verificação e atualização de localização em segundo plano. Caso o utilizador se desloque para outra cidade, país ou aeroporto, as novas coordenadas e o espaço aéreo são atualizados automaticamente sem interrupção nem ruído sonoro.  
+
 **Consequência:** Coerência linguística a 100% em qualquer idioma e precisão geográfica dinâmica automática entre diferentes cidades.
 
 ### ADR-070 — Substituição de Emojis por Bandeiras Vetoriais SVG no Seletor de Idioma (2026-10-20)
-**Contexto:** O utilizador reportou que os botões do seletor de idioma apresentavam texto com códigos de país duplicados (ex: "PT PT", "GB EN", "FR FR", "ES ES"). Esta anomalia ocorre porque os sistemas operativos Windows não renderizam emojis de bandeiras nacionais por omissão na fonte Segoe UI Emoji, substituindo os caracteres de bandeira Unicode pelos pares de letras regionais (ex: 🇵🇹 torna-se "PT", 🇬🇧 torna-se "GB").  
-**Decisão:**  
+
+**Contexto:** O utilizador reportou que os botões do seletor de idioma apresentavam texto com códigos de país duplicados (ex: "PT PT", "GB EN", "FR FR", "ES ES"). Esta anomalia ocorre porque os sistemas operativos Windows não renderizam emojis de bandeiras nacionais por omissão na fonte Segoe UI Emoji, substituindo os caracteres de bandeira Unicode pelos pares de letras regionais (ex: 🇵🇹 torna-se "PT", 🇬🇧 torna-se "GB").
+
+**Decisão:**
+
 1. **Componentes Vetoriais SVG Dedicados (`components/IconesBandeiras.tsx`):** Criação dos gráficos vetoriais autênticos e proporcionados para Portugal (verde, vermelho, esfera armilar e quinas), Reino Unido (Union Jack autêntica), França (tricolor vertical) e Espanha (vermelho/amarelo com brasão simplificado).  
 2. **Substituição Visual:** No modal de opções (`app/painel/page.tsx`), o seletor de idiomas passou a renderizar `<IconeBandeira>` com cantos subtilmente arredondados e sombra discreta tanto no título do idioma ativo como no interior de cada um dos quatro botões táteis.  
+
 **Consequência:** Apresentação gráfica nítida e consistente de bandeiras em qualquer sistema operativo (Windows, macOS, Linux, Android e iOS), eliminando completamente a duplicação de texto.
 
 ### ADR-071 — Remoção do Nome de Ficheiro no Botão de Teste de Som e Internacionalização (2026-10-20)
-**Contexto:** O utilizador solicitou a remoção do nome do ficheiro técnico (`(/Flight.mp3)`) presente no botão de teste de áudio do modal de opções, o qual exibia `TESTAR SOM DE NOVO VOO (/Flight.mp3)`.  
-**Decisão:**  
+
+**Contexto:** O utilizador solicitou a remoção do nome do ficheiro técnico (`(/Flight.mp3)`) presente no botão de teste de áudio do modal de opções, o qual exibia `TESTAR SOM DE NOVO VOO (/Flight.mp3)`.
+
+**Decisão:**
+
 1. **Remoção de Detalhes de Implementação da Interface:** Eliminação da menção técnica ao caminho `/Flight.mp3` no botão de teste.  
 2. **Internacionalização Estrita:** Criação da chave `opcoes_testar_som_novo_voo` em `lib/i18n.ts` com traduções completas nas 4 línguas:
    - PT: `"TESTAR SOM DE NOVO VOO"`
@@ -567,13 +763,18 @@
    - FR: `"TESTER LE SON DU NOUVEAU VOL"`
    - ES: `"PROBAR SONIDO DE NUEVO VUELO"`  
 3. **Ligação no Painel:** Substituição do texto em `app/painel/page.tsx` por `{t.opcoes_testar_som_novo_voo}`.  
+
 **Consequência:** Interface de utilizador polida, profissional e uniforme em todos os idiomas suportados, sem expor artefactos ou nomes de ficheiros internos.
 
 ### ADR-072 — Suporte a Unidade de Velocidade MPH e Botões Diretos de Teste/Refresh Geográfico (2026-10-20)
-**Contexto:** O utilizador solicitou duas melhorias essenciais de experiência e usabilidade:  
+
+**Contexto:** O utilizador solicitou duas melhorias essenciais de experiência e usabilidade:
+
 1. A velocidade aeronáutica deve suportar também milhas por hora (`Speed tambem deve ter milhas`), complementando os nós (`KTS`) e quilómetros por hora (`KM/H` / `KMS`).  
 2. No modal de opções, na secção de localização do radar (`RADAR LOCATION`), não deve existir nenhuma lista de cidades predefinidas, devendo apenas existir a capacidade de testar a posição geográfica ou fazer um refresh de localização em tempo real (`Aqui não deve ter nenhuma lista de localizações, apenas testar a posição geografica ou fazer um refresh de localização`).  
-**Decisão:**  
+
+**Decisão:**
+
 1. **Unidade de Velocidade MPH:**
    - Adicionada a unidade `"MPH"` ao tipo `unidadeVelocidade` (`"KTS" | "KMH" | "MPH"`).
    - Cálculo automático da velocidade em milhas por hora: `Math.round(velMs * 2.23694)`.
@@ -590,12 +791,16 @@
 4. **Qualidade de Código e Linter:**
    - Corrigido `prefer-const` em `app/api/geolocalizacao-ip/route.ts`.
    - Corrigida a pureza do ciclo de renderização em `components/AlertaAtualizacao.tsx` substituindo a leitura síncrona de `Date.now()` por gestão via estado e temporizador.
+
 ### ADR-073 — Enriquecimento do Ecrã 2 (Radar ADS-B) e Novo Modo Noturno / Sono (2026-10-20)
+
 **Contexto:** O utilizador solicitou duas funcionalidades fulcrais:
+
 1. `Quero esta informação no Ecra 2`: Substituir a lista simplificada com apenas 2 caixas LED de Origem e Destino do Ecrã 2 pelos cartões ricos e detalhados do Radar ADS-B presentes na página `/voos` (logótipos reais das companhias aéreas, callsigns com badges IATA, modelo de aeronave, distância exata em badge com pin, rota com cidades/aeroportos/países e telemetria completa de altitude, velocidade e rumo).
 2. `Cria nas opções o modo noturno, para que quando se estiver a dormir, nem a luz do ecra nem toques incomodem quem estejano mesmo local`: Implementar nas opções um Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro (quase desligado, com 96% de opacidade e brilho a 2%), impedindo toques de novos voos, cliques mecânicos de flaps e flashes de luz no quarto, com ativação manual, programação horária e toque suave no ecrã para espreitar temporariamente durante 15 segundos.
 
 **Decisão:**
+
 1. **Enriquecimento do Ecrã 2 (`ecraAtivo === "restantes"`):**
    - Cabeçalho de alta fidelidade: botão de regresso ao painel (`← {t.tab_voltar}`), relógio com segundos em direto (`{horaComSegundos}`), indicador geográfico e badges de contagem de aeronaves em voo (`{t.estado_em_voo}: X` e `{t.tab_voo}: Y`), além do acesso direto às opções (`⚙️`).
    - Secção 1 — Voo Principal (`● MAIN FLIGHT`): Cartão com destaque em gradiente esmeralda, logótipo da companhia, identificadores, rota com aeroportos e países traduzidos, badge de distância `📍 X KM/NM/MI` e telemetria em tempo real.
@@ -608,12 +813,15 @@
    - Despertar temporário ao toque: qualquer toque no ecrã durante a noite levanta suavemente o véu durante 15 segundos para consulta discreta do voo ou hora, voltando automaticamente a escurecer.
    - Indicador discreto com lua (`🌙`) na barra de estado e dica flutuante translúcida.
    - Persistência das preferências em `localStorage` e traduções completas nos 4 idiomas (PT, EN, FR, ES) em `lib/i18n.ts`.
+
 **Consequência:** Experiência visual do Ecrã 2 unificada com o detalhe aeronáutico de topo, e proteção completa do repouso noturno com silêncio e escuridão automáticos sem necessidade de desligar o dispositivo.
 
 ### ADR-074 — Internacionalização Completa do Alerta de Atualização / Cockpit PWA (2026-10-20)
+
 **Contexto:** O utilizador reportou que o modal flutuante de alerta de nova versão compilada continuava a apresentar os seus textos fixos em português (`SISTEMA AERONÁUTICO • NOVA VERSÃO DISPONÍVEL`, `Uma nova versão do Flight Panel foi compilada e está pronta para entrar em ação no teu ecrã.`, `NOVIDADES:`, `ATUALIZAR AGORA (RECARREGAR)`, `ADIAR`), devendo obedecer dinamicamente ao idioma ativo na aplicação.
 
 **Decisão:**
+
 1. **Internacionalização em `lib/i18n.ts`:**
    - Adicionadas 12 novas chaves ao contrato `DicionarioTraducoes` e respetivas traduções nativas para Português, Inglês, Francês e Espanhol:
      - `alerta_atualizacao_titulo`
@@ -630,24 +838,30 @@
    - Suporte para `descricaoMultilingue` no payload da API `/api/versao` (`lib/versao.ts`), garantindo que o resumo de novidades de novas compilações é automaticamente traduzido na língua selecionada.
 3. **Emissão de Eventos em `app/painel/page.tsx`:**
    - Adicionada a emissão de `window.dispatchEvent(new CustomEvent("flightpanel_idioma_alterado", { detail: novo }))` nas funções `alternarIdioma` e `guardarDefinicoes`.
+
 **Consequência:** Experiência 100% harmonizada e localizada em todas as línguas suportadas; o popup de nova versão adapta-se em tempo real ao idioma em exibição no painel.
 
 ### ADR-075 — Etiqueta de Versão Atualizada no Menu de Opções (2026-10-20)
+
 **Contexto:** O utilizador solicitou uma etiqueta com a versão atualizada no menu de opções (`No menu opções quer uma etiqueta com a versão atualizada`).
 
 **Decisão:**
+
 1. **Integração no Cabeçalho do Modal (`app/painel/page.tsx`):**
    - Inclusão de um crachá de estilo cockpit junto ao título `⚙️ OPÇÕES`, com luz de pulso ciano e a versão atualizada (`v2.10.2`).
    - Configuração de sombra luminescente `shadow-[0_0_12px_rgba(6,182,212,0.35)]`, fundo translúcido `bg-cyan-950/80` e borda `border-cyan-400/50`.
    - Adição de tooltip nativo com o nome do sistema, número de versão e identificador de compilação (`Flight Panel v2.10.2 • build-20261020-v2102`).
 2. **Carimbo de Rodapé:**
    - Adicionada menção de rodapé elegante ao lado do botão de fechar com o identificador da versão e respetiva data de lançamento.
+
 **Consequência:** O utilizador tem agora visibilidade imediata e permanente da versão ativa do Flight Panel sempre que abre o menu de definições.
 
 ### ADR-076 — Otimização Completa de SEO, Open Graph & Imagem de Pré-Visualização Social (2026-10-20)
+
 **Contexto:** O utilizador solicitou os mecanismos necessários para que o site apareça nos motores de pesquisa na Web (Google, Bing, etc.) e surja com uma imagem de exemplo ilustrativa da aplicação ao partilhar ligações (redes sociais, WhatsApp, Telegram, etc.): *"Cria aquelas coisas para que aparece o site na pesquisa web e que apareca uma imagem com exemplo da app. Não me lembro do nome desta função"*.
 
 **Decisão:**
+
 1. **Identificação e Arquitetura das Tecnologias:**
    - **SEO (Search Engine Optimization):** Indexação orgânica nos motores de busca através de meta tags canónicas, títulos semânticos, palavras-chave e descrições detalhadas.
    - **Open Graph (OG) & Twitter Cards:** Especificação de cartões sociais ricos com pré-visualização visual de grande formato (`summary_large_image`).
@@ -659,17 +873,21 @@
    - Exportação para `public/og-preview.png`, `public/og-preview.jpg`, `app/opengraph-image.jpg` e `app/twitter-image.jpg`.
 3. **Estrutura Semântica e Acessibilidade:**
    - Adicionados cabeçalhos semânticos `<h1>` ocultos visualmente (`sr-only`) em `app/painel/page.tsx` e `app/voos/page.tsx` para assegurar conformidade total com as normas W3C e algoritmos de indexação.
+
 **Consequência:** O Flight Panel apresenta agora cartões de pré-visualização de alta fidelidade ao ser partilhado em qualquer plataforma e possui todos os ficheiros e metadados requeridos para indexação nos motores de pesquisa globais.
 
 ### ADR-077 — Resolução Geodésica de Alta Precisão (Serzedo e Freguesias de Gaia) (2026-10-20)
+
 **Contexto:** O utilizador reportou que ao testar a localização GPS a aplicação indicava que estava em Valadares, quando na realidade se encontrava em Serzedo: *"O teste de GPS diz-me que estou em Valadares mas narealidade estou em Serzedo"*.
 
 **Diagnóstico & Causa Raiz:**
+
 1. As coordenadas captadas pelo chip GPS do dispositivo do utilizador eram reais e precisas (em Serzedo, ~`41.047°N, -8.599°W`).
 2. No entanto, o motor de resolução offline de localidades (`lib/localidades.ts`) apenas continha centros municipais maiores e tinha `VALADARES / GAIA` como ponto de referência, não possuindo a freguesia de `SERZEDO`. Por cálculo de proximidade euclidiana/Haversine, as coordenadas de Serzedo (~6 km de Valadares) eram atribuídas ao ponto mais próximo da lista, batizando a estação de "VALADARES / GAIA".
 3. A constante `LOCALIZACAO_PADRAO` em `app/painel/page.tsx` e `app/voos/page.tsx` e as coordenadas de contingência em `app/api/meteorologia/route.ts` estavam configuradas com as coordenadas de Valadares (`41.091, -8.642`).
 
 **Decisão:**
+
 1. **Enriquecimento Cartográfico Offline (`lib/localidades.ts`):**
    - Adicionada a freguesia de `SERZEDO / GAIA` (`lat: 41.047, lon: -8.599`) e todas as freguesias circundantes de Vila Nova de Gaia (`PEROSINHO`, `GRIJÓ`, `ARCOZELO`, `SÃO FÉLIX DA MARINHA`, `CANELAS`, `CARVALHOS / PEDROSO`, `FRANCELOS`, `MADALENA`, `CANIDELO`, `AFURADA`, `AVINTES`, `VILAR DE ANDORINHO`, `OLIVEIRA DO DOURO`, etc.).
 2. **Motor Dinâmico de Georresolução (`app/api/georresolucao/route.ts`):**
@@ -677,9 +895,5 @@
    - Refinamento em segundo plano sem qualquer latência: o painel assume instantaneamente a resolução geométrica local e refina de forma assíncrona a freguesia exata.
 3. **Atualização da Posição Padrão:**
    - Atualizada a `LOCALIZACAO_PADRAO` em `app/painel/page.tsx` e `app/voos/page.tsx` para as coordenadas genuínas de Serzedo (`41.047, -8.599`).
+
 **Consequência:** As coordenadas de satélite do utilizador identificam agora imediatamente `SERZEDO / GAIA` com 100% de exatidão topográfica.
-
-
-
-
-
