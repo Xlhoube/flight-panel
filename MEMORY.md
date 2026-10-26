@@ -10,13 +10,13 @@
 
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).
 
-**Versão:** v2.11.1
+**Versão:** v2.12.0
 
 **Data de início:** 2026-09-06
 
-**Última sessão:** 2026-10-20
+**Última sessão:** 2026-10-26
 
-**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização nos 4 idiomas (PT, EN, FR, ES), etiqueta de versão no menu de opções, SEO & Open Graph com imagem oficial de pré-visualização, e motor de georresolução de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), identificação e suporte militar à Royal Air Force (RAF) britânica com Roundel oficial e catálogo Boeing C-17A Globemaster III, Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização nos 4 idiomas (PT, EN, FR, ES), etiqueta de versão no menu de opções, SEO & Open Graph com imagem oficial de pré-visualização, e motor de georresolução de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia.
 
 ---
 
@@ -245,6 +245,7 @@
 | 2026-10-16 | v2.1.1 | Transferência da companhia aérea para o bloco esquerdo (junto ao voo) e adição do fabricante sob o modelo da aeronave à direita                                       |
 | 2026-10-16 | v2.1.2 | Otimização total e blindagem de proporções para ecrãs de telemóvel na horizontal (landscape): eliminação de flex-wrap na rota, escala proporcional e encaixe perfeito |
 | 2026-10-16 | v2.2.0 | Fluxo de boas-vindas e onboarding sequencial na primeira abertura: popup 1 de instalação PWA seguido do popup 2 de calibração de GPS                                  |
+| 2026-10-26 | v2.12.0| Reconhecimento oficial da Royal Air Force (RAF), Roundel militar britânico, Boeing C-17A Globemaster III e MoD Boscombe Down (QUA)                                    |
 
 ---
 
@@ -897,3 +898,31 @@
    - Atualizada a `LOCALIZACAO_PADRAO` em `app/painel/page.tsx` e `app/voos/page.tsx` para as coordenadas genuínas de Serzedo (`41.047, -8.599`).
 
 **Consequência:** As coordenadas de satélite do utilizador identificam agora imediatamente `SERZEDO / GAIA` com 100% de exatidão topográfica.
+
+### ADR-078 — Reconhecimento da Royal Air Force (RAF), Roundel Militar e Boeing C-17A Globemaster III (2026-10-26)
+
+**Contexto:** O utilizador reportou que num voo militar captado no radar (callsign `RRR6236`, avião de transporte pesado da Royal Air Force do Reino Unido) a aplicação apresentava a designação genérica `OPERADOR (ZZ178) • C17` com o fallback de asas douradas, sem indicar que a aeronave pertencia à Royal Air Force (RAF) britânica nem identificar o fabricante Boeing ou o aeroporto militar de Boscombe Down (`QUA`).
+
+**Diagnóstico & Causa Raiz:**
+
+1. O callsign `RRR6236` utiliza o prefixo ICAO `RRR` (indicativo de rádio oficial "ASCOT" da Força Aérea Real britânica - Royal Air Force). Este código não constava no dicionário de operadoras `COMPANHIAS`.
+2. Como a rota não vinha preenchida pelo feed simples do FR24 e o prefixo não estava catalogado, o fallback atribuía `OPERADOR (${voo[2]})`, onde `voo[2]` correspondia à matrícula militar `ZZ178`.
+3. O modelo `C17` não constava com correspondência direta no catálogo `AERONAVES_DB`, resultando na exibição simplificada de `C17` com fabricante genérico, o que ativava o fallback `LogoVipWings` (asas douradas com texto "RRR6") em vez do Roundel oficial da RAF.
+4. O aeroporto de partida `QUA` (MoD Boscombe Down / Amesbury) não estava mapeado na base de dados de sobreposição, sendo exibido como `QUA (QUA)` sem o país nem o nome do aeródromo.
+
+**Decisão:**
+
+1. **Reconhecimento Oficial da Royal Air Force (RAF):**
+   - Integração dos códigos `RRR`, `RAF` e `ASCOT` em `COMPANHIAS` (`app/painel/page.tsx` e `app/voos/page.tsx`), associados à operadora `"ROYAL AIR FORCE (RAF)"` com código `RR` e país `"REINO UNIDO"`.
+   - Implementação da deteção inteligente `isRaf` baseada no prefixo de callsign (`RRR`, `RAF`, `ASCOT`, `SHF`, `SYS`, `TARTAN`, `CWL`), prefixo ICAO e matrículas militares britânicas (`ZZ...`, `ZM...`, `ZH...`).
+   - Adicionada também a catalogação de outras forças aéreas aliadas (`USAF` / `RCH`, `Ejército del Aire` / `AME`, `Armée de l'Air` / `CTM`, `Luftwaffe` / `GAF`).
+2. **Emblema Roundel Oficial da Royal Air Force (`RoundelRAF`):**
+   - Criação do componente vetorial SVG `RoundelRAF` com as cores e proporções oficiais da RAF: aro exterior táctico escuro, anel exterior Azul Real (`#00247D`), anel intermédio Branco (`#FFFFFF`), disco central Vermelho (`#CF142B`) e a legenda militar `ROYAL AIR FORCE`.
+   - Integração direta em `AirlineLogo` no Ecrã 1, Ecrã 2 e `/voos`, bem como em `lib/fabricantes-logos.tsx` (`LogoRaf`).
+3. **Catálogo Aeronáutico Militar Boeing C-17A Globemaster III (`lib/aeronaves-db.ts`):**
+   - Catalogação direta do código `C17`: modelo `"C-17A GLOBEMASTER III"`, fabricante `"BOEING"` e classe `"Heavy Military Transport"`.
+   - Adicionadas também as aeronaves militares `A400M ATLAS` (Airbus), `C-130J SUPER HERCULES` (Lockheed Martin), `KC-390 MILLENNIUM` (Embraer), `EUROFIGHTER TYPHOON` e `KC-135 STRATOTANKER` (Boeing).
+4. **Resolução do Aeroporto Militar de Boscombe Down (`QUA`):**
+   - Mapeamento em `lib/aeroportos.ts` e `app/api/voos/route.ts`: cidade `"AMESBURY"`, aeroporto `"MOD BOSCOMBE DOWN"`, país `"REINO UNIDO"`. Adicionadas também as bases aéreas `RAF Brize Norton` (`BZZ`) e `RAF Waddington` (`WAD`).
+
+**Consequência:** Voos da Royal Air Force (como o `RRR6236`) são agora reconhecidos imediatamente com o Roundel oficial da RAF britânica, exibição do operador `"ROYAL AIR FORCE (RAF)"`, modelo `"C-17A GLOBEMASTER III"`, fabricante `"BOEING"` e rota enriquecida com Amesbury / MoD Boscombe Down no Reino Unido.

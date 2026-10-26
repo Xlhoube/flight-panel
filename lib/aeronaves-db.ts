@@ -213,12 +213,19 @@ export const AERONAVES_DB: Record<string, InfoAeronave> = {
   CRJX: { modelo: "CRJ-1000", fabricante: "BOMBARDIER", classe: "Regional Jet", categoria: "comercial" },
 
   // ─── MILITARES E FORÇAS AÉREAS ──────────────────────────────────────────────
+  C17: { modelo: "C-17A GLOBEMASTER III", fabricante: "BOEING", classe: "Heavy Military Transport", categoria: "militar" },
+  A400: { modelo: "A400M ATLAS", fabricante: "AIRBUS", classe: "Military Transport", categoria: "militar" },
+  A400M: { modelo: "A400M ATLAS", fabricante: "AIRBUS", classe: "Military Transport", categoria: "militar" },
+  C30J: { modelo: "C-130J SUPER HERCULES", fabricante: "LOCKHEED MARTIN", classe: "Tactical Transport", categoria: "militar" },
+  EUFI: { modelo: "EUROFIGHTER TYPHOON", fabricante: "EUROFIGHTER", classe: "Air Defense Fighter", categoria: "militar" },
+  K35R: { modelo: "KC-135 STRATOTANKER", fabricante: "BOEING", classe: "Aerial Refueling Tanker", categoria: "militar" },
   H60: { modelo: "UH-60 BLACK HAWK", fabricante: "SIKORSKY", classe: "Military Utility", categoria: "militar" },
   UH60: { modelo: "UH-60 BLACK HAWK", fabricante: "SIKORSKY", classe: "Military Utility", categoria: "militar" },
   S70: { modelo: "SIKORSKY S-70", fabricante: "SIKORSKY", classe: "Military Utility", categoria: "militar" },
   F16: { modelo: "F-16M FALCON", fabricante: "LOCKHEED MARTIN", classe: "Multirole Fighter", categoria: "militar" },
   C130: { modelo: "LOCKHEED C-130H", fabricante: "LOCKHEED MARTIN", classe: "Tactical Transport", categoria: "militar" },
   C390: { modelo: "EMBRAER KC-390", fabricante: "EMBRAER", classe: "Tactical Transport", categoria: "militar" },
+  KC390: { modelo: "EMBRAER KC-390", fabricante: "EMBRAER", classe: "Tactical Transport", categoria: "militar" },
   C295: { modelo: "AIRBUS C-295M", fabricante: "AIRBUS", classe: "Tactical Transport", categoria: "militar" },
   E101: { modelo: "EH-101 MERLIN", fabricante: "LEONARDO", classe: "SAR Helicopter", categoria: "militar" },
   A119: { modelo: "AW119 KOALA", fabricante: "LEONARDO", classe: "Light Helicopter", categoria: "militar" },
@@ -284,8 +291,12 @@ export function resolverInfoAeronave(codAeronaveRaw: string, nomeRaw?: string): 
   }
 
   // Boeing
-  if (/^B7\d|B3[789X]M|^7[0-9]{2}|BOEING|DREAMLINER|MAX\s*[7891]/i.test(codLimpo) || /BOEING|B737|B747|B757|B767|B777|B787/i.test(nomeLimpo)) {
+  if (/^C17$|^C-17|^B7\d|B3[789X]M|^7[0-9]{2}|BOEING|DREAMLINER|GLOBEMASTER|MAX\s*[7891]/i.test(codLimpo) || /BOEING|GLOBEMASTER|B737|B747|B757|B767|B777|B787/i.test(nomeLimpo)) {
     fabricante = "BOEING";
+    if (/^C17$|^C-17/i.test(codLimpo) || /GLOBEMASTER/i.test(nomeLimpo)) {
+      modelo = "C-17A GLOBEMASTER III";
+      return { modelo, fabricante, classe: "Heavy Military Transport", categoria: "militar" };
+    }
   }
   // Airbus
   else if (/^A[23][0-9]{2}|AIRBUS|^A3[123458][0-9N]|BELUGA|^BCS/i.test(codLimpo) || /AIRBUS|^A[23][0-9]{2}/i.test(nomeLimpo)) {

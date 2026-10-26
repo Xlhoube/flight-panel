@@ -9,14 +9,14 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.11.1",
-  buildId: "build-20261020-v2111",
-  dataLancamento: "2026-10-20",
-  descricao: "Recalibração geodésica de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia, e motor dinâmico de georresolução reversa.",
+  versao: "2.12.0",
+  buildId: "build-20261026-v2120",
+  dataLancamento: "2026-10-26",
+  descricao: "Reconhecimento oficial de forças aéreas internacionais (Royal Air Force / RAF britânica com Roundel militar), catálogo Boeing C-17A Globemaster III e aeroporto militar de Boscombe Down (QUA).",
   descricaoMultilingue: {
-    pt: "Recalibração geodésica de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia, e motor dinâmico de georresolução reversa.",
-    en: "High-precision geodetic recalibration with full support for Serzedo and Gaia parishes, plus dynamic reverse geocoding engine.",
-    fr: "Recalibrage géodésique de haute précision avec prise en charge intégrale de Serzedo et des paroisses de Gaia, et moteur dynamique de géoréférencement inverse.",
-    es: "Recalibración geodésica de alta precisión con soporte integral para Serzedo y parroquias de Gaia, y motor dinámico de georresolución inversa.",
+    pt: "Reconhecimento oficial de forças aéreas internacionais (Royal Air Force / RAF britânica com Roundel militar), catálogo Boeing C-17A Globemaster III e aeroporto militar de Boscombe Down (QUA).",
+    en: "Official recognition of international air forces (United Kingdom Royal Air Force with official military Roundel), Boeing C-17A Globemaster III catalog, and MoD Boscombe Down airfield (QUA).",
+    fr: "Reconnaissance officielle des forces aériennes internationales (Royal Air Force britannique avec cocarde militaire officielle), catalogue Boeing C-17A Globemaster III et aéroport MoD Boscombe Down (QUA).",
+    es: "Reconocimiento oficial de fuerzas aéreas internacionales (Royal Air Force británica con escarapela militar oficial), catálogo Boeing C-17A Globemaster III y aeródromo MoD Boscombe Down (QUA).",
   },
 };

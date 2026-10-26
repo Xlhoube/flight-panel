@@ -355,6 +355,23 @@ export function LogoPiaggio({ className = "w-full h-full" }: LogoProps) {
   );
 }
 
+// ─── 16. ROYAL AIR FORCE (RAF) ────────────────────────────────────────────────
+export function LogoRaf({ className = "w-full h-full" }: LogoProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center bg-[#070b14] p-1 rounded-lg border border-sky-500/40 shadow-inner ${className}`}>
+      <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="48" fill="#0d1424" stroke="#1e293b" strokeWidth="2.5" />
+        <circle cx="50" cy="50" r="44" fill="#00247d" />
+        <circle cx="50" cy="50" r="29" fill="#f8fafc" />
+        <circle cx="50" cy="50" r="15" fill="#cf142b" />
+      </svg>
+      <span className="font-mono font-black text-[5px] sm:text-[6px] text-sky-400 tracking-widest uppercase mt-0.5 leading-none">
+        ROYAL AIR FORCE
+      </span>
+    </div>
+  );
+}
+
 /**
  * Componente que resolve e renderiza o emblema oficial do fabricante da aeronave (OEM)
  * ou do operador líder de aviação executiva caso seja um voo charter.
@@ -373,6 +390,21 @@ export function EmblemaFabricante({
   const fab = (fabricante || "").toUpperCase();
   const mod = (modelo || "").toUpperCase();
   const call = (callsign || "").toUpperCase();
+
+  // Forças Aéreas e Militares (RAF, etc.)
+  if (
+    call.startsWith("RRR") ||
+    call.startsWith("RAF") ||
+    call.startsWith("ASCOT") ||
+    call.startsWith("SHF") ||
+    call.startsWith("SYS") ||
+    call.startsWith("TARTAN") ||
+    call.startsWith("CWL") ||
+    fab.includes("ROYAL AIR FORCE") ||
+    fab.includes("RAF")
+  ) {
+    return <LogoRaf className={className} />;
+  }
 
   // Operadores de Jatos Executivos e Charters (Aviapages & ICAO Doc 8585)
   if (call.startsWith("NJE") || call.startsWith("EJA") || fab.includes("NETJETS")) {

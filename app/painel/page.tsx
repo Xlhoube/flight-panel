@@ -116,9 +116,16 @@ const CIDADES_PAISES: Record<string, { cidade: string; code: string }> = {
 // ─── Dicionário Expandido de Companhias Aéreas ────────────────────────────────
 
 const COMPANHIAS: Record<string, InfoCompanhia> = {
-  // Força Aérea Portuguesa / Militar
+  // Forças Aéreas e Aviação Militar
   FAP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BA8 OVAR", destino: "MISSÃO TÁTICA", origemCode: "OVR", destinoCode: "OPS", aeronave: "UH-60 BLACK HAWK" },
   AFP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP", origem: "BASE AÉREA", destino: "MISSÃO TÁTICA", origemCode: "FAP", destinoCode: "OPS", aeronave: "F-16M FALCON" },
+  RRR: { nome: "ROYAL AIR FORCE (RAF)", iata: "RR", origem: "OXFORD", destino: "PORTO", origemCode: "BZZ", destinoCode: "OPO", aeronave: "C-17A GLOBEMASTER III" },
+  RAF: { nome: "ROYAL AIR FORCE (RAF)", iata: "RR", origem: "OXFORD", destino: "PORTO", origemCode: "BZZ", destinoCode: "OPO", aeronave: "A400M ATLAS" },
+  ASCOT: { nome: "ROYAL AIR FORCE (RAF)", iata: "RR", origem: "OXFORD", destino: "PORTO", origemCode: "BZZ", destinoCode: "OPO", aeronave: "C-17A GLOBEMASTER III" },
+  RCH: { nome: "US AIR FORCE (USAF)", iata: "AF", origem: "RAMSTEIN", destino: "PORTO", origemCode: "RMS", destinoCode: "OPO", aeronave: "C-17A GLOBEMASTER III" },
+  AME: { nome: "EJÉRCITO DEL AIRE (ES)", iata: "EA", origem: "MADRID", destino: "PORTO", origemCode: "TOJ", destinoCode: "OPO", aeronave: "A400M ATLAS" },
+  CTM: { nome: "ARMÉE DE L'AIR (FR)", iata: "FA", origem: "PARIS", destino: "PORTO", origemCode: "VIY", destinoCode: "OPO", aeronave: "A400M ATLAS" },
+  GAF: { nome: "LUFTWAFFE (DE)", iata: "GA", origem: "COLÓNIA", destino: "PORTO", origemCode: "CGN", destinoCode: "OPO", aeronave: "A400M ATLAS" },
 
   // Principais em Portugal
   TAP: { nome: "TAP AIR PORTUGAL", iata: "TP", origem: "PORTO", destino: "LISBOA", origemCode: "OPO", destinoCode: "LIS", aeronave: "A320-251N" },
@@ -696,10 +703,28 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     (voo[12] && String(voo[12]).toUpperCase().includes("H60")) ||
     (rotaReal?.airline && /air\s*force|for[cç]a\s*[aá]erea/i.test(rotaReal.airline) && /portug/i.test(rotaReal.airline + " " + paisUpper));
 
+  // ── DETEÇÃO INTELIGENTE DE AVIAÇÃO MILITAR DA ROYAL AIR FORCE (RAF) ───────
+  const isRaf =
+    csLimpo.startsWith("RRR") ||
+    csLimpo.startsWith("RAF") ||
+    csLimpo.startsWith("ASCOT") ||
+    csLimpo.startsWith("SHF") ||
+    csLimpo.startsWith("SYS") ||
+    csLimpo.startsWith("TARTAN") ||
+    csLimpo.startsWith("CWL") ||
+    prefixo3 === "RRR" ||
+    prefixo3 === "RAF" ||
+    /^(ZZ|ZM|ZH|ZG|ZK|ZD)\d{3}/i.test(voo[2] || "") ||
+    (rotaReal?.airline && /royal\s*air\s*force|raf\b/i.test(rotaReal.airline));
+
   if (isFap) {
     icao = "FAP";
     iata = "FAP";
     info = COMPANHIAS.FAP;
+  } else if (isRaf) {
+    icao = "RRR";
+    iata = "RR";
+    info = COMPANHIAS.RRR;
   }
 
   let origem = "DESCONHECIDO";
@@ -802,6 +827,8 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   let nomeFinalCompanhia = "AVIAÇÃO COMERCIAL";
   if (isFap) {
     nomeFinalCompanhia = "FORÇA AÉREA PORTUGUESA";
+  } else if (isRaf) {
+    nomeFinalCompanhia = "ROYAL AIR FORCE (RAF)";
   } else if (rotaReal?.airline) {
     nomeFinalCompanhia = rotaReal.airline.toUpperCase();
   } else if (info?.nome) {
@@ -809,12 +836,19 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   } else if (regPais) {
     nomeFinalCompanhia = `AVIAÇÃO PRIVADA (${regPais.pais})`;
   } else if (voo[2]) {
-    nomeFinalCompanhia = `OPERADOR (${voo[2].toUpperCase()})`;
+    const v2 = String(voo[2]).trim().toUpperCase();
+    if (/^[A-Z0-9-]{3,8}$/.test(v2)) {
+      nomeFinalCompanhia = `AERONAVE PRIVADA (${v2})`;
+    } else {
+      nomeFinalCompanhia = `OPERADOR (${v2})`;
+    }
   }
 
   let codAeronave = (voo[12] ? String(voo[12]).toUpperCase() : (rotaReal?.model || info?.aeronave || (regPais ? "AERONAVE PRIVADA" : "A320")));
   if (csLimpo.startsWith("BLACK") || codAeronave === "H60" || (voo[12] && String(voo[12]).toUpperCase().includes("H60"))) {
     codAeronave = "UH-60 BLACK HAWK";
+  } else if (codAeronave === "C17" || (voo[12] && String(voo[12]).toUpperCase() === "C17")) {
+    codAeronave = "C-17A GLOBEMASTER III";
   }
   const nomeAeronave = formatarNomeAeronave(codAeronave);
   const fabricante = obterFabricanteAeronave(codAeronave, nomeAeronave);
@@ -828,6 +862,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     if (!origemPais && origemCode && origemCode !== "---" && origemCode !== "N/D") {
       origemPais = obterPaisDoAeroporto(origemCode);
     }
+    if (!origemPais && isRaf) {
+      origemPais = "REINO UNIDO";
+    }
     if (!origemPais && info?.origemCode) {
       origemPais = obterPaisDoAeroporto(info.origemCode);
     }
@@ -837,6 +874,9 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 
     if (!destinoPais && destinoCode && destinoCode !== "---" && destinoCode !== "N/D") {
       destinoPais = obterPaisDoAeroporto(destinoCode);
+    }
+    if (!destinoPais && isRaf) {
+      destinoPais = "PORTUGAL";
     }
     if (!destinoPais && info?.destinoCode) {
       destinoPais = obterPaisDoAeroporto(info.destinoCode);
@@ -1037,6 +1077,27 @@ function RoundelFAP() {
   );
 }
 
+// ─── Emblema Roundel da Royal Air Force (RAF - Reino Unido) ────────────────────
+function RoundelRAF() {
+  return (
+    <div className="w-full h-full bg-[#070b14] rounded-md sm:rounded-lg flex flex-col items-center justify-center p-0.5 border border-sky-500/40 shadow-inner overflow-hidden">
+      <svg className="w-full h-full max-w-[48px] max-h-[48px] drop-shadow-md" viewBox="0 0 100 100">
+        {/* Aro Exterior Tático Escuro */}
+        <circle cx="50" cy="50" r="48" fill="#0d1424" stroke="#1e293b" strokeWidth="2.5" />
+        {/* Anel Exterior Azul Real RAF (#00247D) */}
+        <circle cx="50" cy="50" r="44" fill="#00247d" />
+        {/* Anel Intermédio Branco (#FFFFFF) */}
+        <circle cx="50" cy="50" r="29" fill="#f8fafc" />
+        {/* Disco Central Vermelho RAF (#CF142B) */}
+        <circle cx="50" cy="50" r="15" fill="#cf142b" />
+      </svg>
+      <span className="font-mono font-black text-[5px] sm:text-[6px] text-sky-400 tracking-widest uppercase leading-none mt-0.5">
+        ROYAL AIR FORCE
+      </span>
+    </div>
+  );
+}
+
 interface AirlineLogoProps {
   icao?: string;
   iata?: string | null;
@@ -1057,9 +1118,24 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
     (nome && nome.includes("FORÇA AÉREA PORTUGUESA")) ||
     (callsign && callsign.startsWith("BLACK"));
 
+  // Verificação de Aviação Militar da Royal Air Force (RAF - Reino Unido)
+  const isMilitarRaf =
+    icao === "RRR" ||
+    icao === "RAF" ||
+    (nome && (nome.includes("ROYAL AIR FORCE") || nome.includes("RAF"))) ||
+    (callsign && (
+      callsign.startsWith("RRR") ||
+      callsign.startsWith("RAF") ||
+      callsign.startsWith("ASCOT") ||
+      callsign.startsWith("SHF") ||
+      callsign.startsWith("SYS") ||
+      callsign.startsWith("TARTAN") ||
+      callsign.startsWith("CWL")
+    ));
+
   // Lista de URLs prioritárias em CDN globais
   const urls = useMemo(() => {
-    if (isMilitarFap) return [];
+    if (isMilitarFap || isMilitarRaf) return [];
     const list: string[] = [];
     const icaoUp = (icao || "").trim().toUpperCase();
     const iataUp = (iata || "").trim().toUpperCase();
@@ -1074,7 +1150,7 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
       list.push(`https://pics.avs.io/200/200/${iataUp}.png`);
     }
     return list;
-  }, [icao, iata, isMilitarFap]);
+  }, [icao, iata, isMilitarFap, isMilitarRaf]);
 
   // Sempre que mudar a aeronave ou o voo, reiniciar tentativas
   useEffect(() => {
@@ -1086,6 +1162,14 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
     return (
       <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-red-500/50 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-black p-0.5 transition-all">
         <RoundelFAP />
+      </div>
+    );
+  }
+
+  if (isMilitarRaf) {
+    return (
+      <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border border-sky-500/50 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-[#070b14] p-0.5 transition-all">
+        <RoundelRAF />
       </div>
     );
   }

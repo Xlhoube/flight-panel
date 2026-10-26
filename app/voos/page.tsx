@@ -103,6 +103,13 @@ const COMPANHIAS: Record<string, { nome: string; iata: string }> = {
   SAT: { nome: "SATA AIR ACORES", iata: "SP" },
   FAP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP" },
   AFP: { nome: "FORÇA AÉREA PORTUGUESA", iata: "FAP" },
+  RRR: { nome: "ROYAL AIR FORCE (RAF)", iata: "RR" },
+  RAF: { nome: "ROYAL AIR FORCE (RAF)", iata: "RR" },
+  ASCOT: { nome: "ROYAL AIR FORCE (RAF)", iata: "RR" },
+  RCH: { nome: "US AIR FORCE (USAF)", iata: "AF" },
+  AME: { nome: "EJÉRCITO DEL AIRE (ES)", iata: "EA" },
+  CTM: { nome: "ARMÉE DE L'AIR (FR)", iata: "FA" },
+  GAF: { nome: "LUFTWAFFE (DE)", iata: "GA" },
   NJE: { nome: "NETJETS EUROPE", iata: "1I" },
   NPT: { nome: "NETJETS EUROPE", iata: "1I" },
   EJA: { nome: "NETJETS", iata: "QS" },
@@ -540,6 +547,10 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     else if (prefixo2 === "RO") { iata = "RO"; icao = "ROT"; }
   }
 
+  const rotaReal = rotasMap ? (rotasMap[csLimpo] || rotasMap[cs]) : null;
+  const numeroVoo = csLimpo || voo[0].toUpperCase();
+  const callsignIata = rotaReal?.flightNumber || rotaReal?.callsignIata || null;
+
   const isFap =
     csLimpo.startsWith("BLACK") ||
     csLimpo.startsWith("FAP") ||
@@ -554,15 +565,28 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     csLimpo.startsWith("KOALA") ||
     voo[2] === "29807";
 
+  const isRaf =
+    csLimpo.startsWith("RRR") ||
+    csLimpo.startsWith("RAF") ||
+    csLimpo.startsWith("ASCOT") ||
+    csLimpo.startsWith("SHF") ||
+    csLimpo.startsWith("SYS") ||
+    csLimpo.startsWith("TARTAN") ||
+    csLimpo.startsWith("CWL") ||
+    prefixo3 === "RRR" ||
+    prefixo3 === "RAF" ||
+    /^(ZZ|ZM|ZH|ZG|ZK|ZD)\d{3}/i.test(voo[2] || "") ||
+    (rotaReal?.airline && /royal\s*air\s*force|raf\b/i.test(rotaReal.airline));
+
   if (isFap) {
     icao = "FAP";
     iata = "FAP";
     info = COMPANHIAS.FAP;
+  } else if (isRaf) {
+    icao = "RRR";
+    iata = "RR";
+    info = COMPANHIAS.RRR;
   }
-
-  const rotaReal = rotasMap ? (rotasMap[csLimpo] || rotasMap[cs]) : null;
-  const numeroVoo = csLimpo || voo[0].toUpperCase();
-  const callsignIata = rotaReal?.flightNumber || rotaReal?.callsignIata || null;
 
   let nomeCompanhia = info
     ? info.nome
@@ -572,6 +596,8 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
 
   if (isFap) {
     nomeCompanhia = "FORÇA AÉREA PORTUGUESA";
+  } else if (isRaf) {
+    nomeCompanhia = "ROYAL AIR FORCE (RAF)";
   }
 
   let origem = "ORIGEM";
@@ -592,6 +618,11 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
     if (rotaReal.destinationIata) destinoCode = rotaReal.destinationIata;
     else if (rotaReal.destinationIcao) destinoCode = rotaReal.destinationIcao;
     if (rotaReal.destinationCity) destino = rotaReal.destinationCity.toUpperCase();
+  } else if (isRaf) {
+    origem = "RAF BRIZE NORTON";
+    origemCode = "BZZ";
+    destino = "PORTO";
+    destinoCode = "OPO";
   }
 
   let origemPais = rotaReal?.origemPais || "";
@@ -599,6 +630,16 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   if (isFap) {
     origemPais = "PORTUGAL";
     destinoPais = "PORTUGAL";
+  } else if (isRaf) {
+    if (!origemPais && origemCode && origemCode !== "---" && origemCode !== "N/D") {
+      origemPais = obterPaisDoAeroporto(origemCode);
+    }
+    if (!origemPais) origemPais = "REINO UNIDO";
+
+    if (!destinoPais && destinoCode && destinoCode !== "---" && destinoCode !== "N/D") {
+      destinoPais = obterPaisDoAeroporto(destinoCode);
+    }
+    if (!destinoPais) destinoPais = "PORTUGAL";
   } else {
     if (!origemPais && origemCode && origemCode !== "---" && origemCode !== "N/D") {
       origemPais = obterPaisDoAeroporto(origemCode);
@@ -667,10 +708,10 @@ function resolverVooInfo(voo: EstadoVoo, rotasMap?: Record<string, any>) {
   const velocidadeKmh = Math.round(velMs * 3.6);
   const velocidadeMph = Math.round(velMs * 2.23694);
   const rumo = Math.round(voo[10] || 0);
-  const codAero = (voo[12] ? String(voo[12]) : (rotaReal?.model || (isFap ? "F16" : "")));
+  const codAero = (voo[12] ? String(voo[12]) : (rotaReal?.model || (isFap ? "F16" : isRaf ? "C17" : "")));
   const infoAero = codAero ? resolverInfoAeronave(codAero) : null;
-  const aeronave = infoAero?.modelo || rotaReal?.aircraftName || rotaReal?.aircraftType || (isFap ? "AERONAVE MILITAR" : "AERONAVE COMERCIAL");
-  const fabricante = infoAero?.fabricante || (isFap ? "FORÇA AÉREA PORTUGUESA" : "");
+  const aeronave = infoAero?.modelo || rotaReal?.aircraftName || rotaReal?.aircraftType || (isFap ? "AERONAVE MILITAR" : isRaf ? "C-17A GLOBEMASTER III" : "AERONAVE COMERCIAL");
+  const fabricante = infoAero?.fabricante || (isFap ? "FORÇA AÉREA PORTUGUESA" : isRaf ? "BOEING" : "");
 
   return {
     icao,
@@ -725,6 +766,23 @@ function RoundelFAP() {
   );
 }
 
+// ─── Emblema Roundel da Royal Air Force (RAF - Reino Unido) ────────────────────
+function RoundelRAF() {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center p-0.5 select-none bg-[#070b14] rounded-md sm:rounded-lg border border-sky-500/40 shadow-inner overflow-hidden">
+      <svg viewBox="0 0 100 100" className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 drop-shadow-md">
+        <circle cx="50" cy="50" r="48" fill="#0d1424" stroke="#1e293b" strokeWidth="2.5" />
+        <circle cx="50" cy="50" r="44" fill="#00247d" />
+        <circle cx="50" cy="50" r="29" fill="#f8fafc" />
+        <circle cx="50" cy="50" r="15" fill="#cf142b" />
+      </svg>
+      <span className="font-mono font-black text-[5px] sm:text-[6px] text-sky-400 tracking-widest uppercase leading-none mt-0.5">
+        ROYAL AIR FORCE
+      </span>
+    </div>
+  );
+}
+
 // ─── Logótipo da Companhia Aérea ──────────────────────────────────────────────
 
 interface AirlineLogoProps {
@@ -746,8 +804,22 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
     (nome && nome.includes("FORÇA AÉREA PORTUGUESA")) ||
     (callsign && callsign.startsWith("BLACK"));
 
+  const isMilitarRaf =
+    icao === "RRR" ||
+    icao === "RAF" ||
+    (nome && (nome.includes("ROYAL AIR FORCE") || nome.includes("RAF"))) ||
+    (callsign && (
+      callsign.startsWith("RRR") ||
+      callsign.startsWith("RAF") ||
+      callsign.startsWith("ASCOT") ||
+      callsign.startsWith("SHF") ||
+      callsign.startsWith("SYS") ||
+      callsign.startsWith("TARTAN") ||
+      callsign.startsWith("CWL")
+    ));
+
   const urls = useMemo(() => {
-    if (isMilitarFap) return [];
+    if (isMilitarFap || isMilitarRaf) return [];
     const list: string[] = [];
     const icaoUp = (icao || "").trim().toUpperCase();
     const iataUp = (iata || "").trim().toUpperCase();
@@ -760,7 +832,7 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
       list.push(`https://pics.avs.io/200/200/${iataUp}.png`);
     }
     return list;
-  }, [icao, iata, isMilitarFap]);
+  }, [icao, iata, isMilitarFap, isMilitarRaf]);
 
   useEffect(() => {
     setUrlIndex(0);
@@ -771,6 +843,14 @@ function AirlineLogo({ icao, iata, nome, callsign, fabricante, modeloAeronave }:
     return (
       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-red-500/50 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-black p-0.5">
         <RoundelFAP />
+      </div>
+    );
+  }
+
+  if (isMilitarRaf) {
+    return (
+      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-sky-500/50 shadow-md flex items-center justify-center shrink-0 overflow-hidden bg-[#070b14] p-0.5">
+        <RoundelRAF />
       </div>
     );
   }
