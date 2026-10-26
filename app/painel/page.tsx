@@ -1244,6 +1244,7 @@ interface MiniRadarDisplayProps {
   raioMaxKm: number;
   unidadeVelocidade: "KTS" | "KMH" | "MPH";
   unidadeDistancia?: "KM" | "NM" | "MI";
+  onAbrirRadar?: () => void;
 }
 
 function MiniRadarDisplay({
@@ -1256,8 +1257,9 @@ function MiniRadarDisplay({
   raioMaxKm,
   unidadeVelocidade,
   unidadeDistancia,
+  onAbrirRadar,
 }: MiniRadarDisplayProps) {
-  // Cálculo do azimute (direção cardeal do avião relativa ao utilizador)
+  // Cálculo do azimute real (direção cardeal do avião relativa ao utilizador)
   const bearing = useMemo(() => {
     if (latVoo == null || lonVoo == null) return 0;
     return Math.round(calcularBearingGraus(latUtilizador, lonUtilizador, latVoo, lonVoo));
@@ -1265,19 +1267,37 @@ function MiniRadarDisplay({
 
   const cardeal = useMemo(() => obterCardeal(bearing), [bearing]);
 
-  // Posição no radar circular SVG (cx=24, cy=24, R=20)
-  const { px, py } = useMemo(() => {
-    const cx = 24;
-    const cy = 24;
-    const R = 20;
-    // Escala normalizada entre 0.15 e 0.88 do raio do visor
-    const frac = Math.min(0.88, Math.max(0.18, distKm / Math.max(raioMaxKm, 1)));
-    const angRad = ((bearing - 90) * Math.PI) / 180;
+  // Posição no radar circular SVG (cx=50, cy=50, R=42 no viewBox 0 0 100 100)
+  // Calibração geométrica estrita: sem clamp artificial cego, com expansão suave terminal para
+  // que aviões que passem a 1 a 3 km da estação fiquem claramente descolados do centro (ao lado).
+  const { px, py, vx, vy, isOverfly } = useMemo(() => {
+    const cx = 50;
+    const cy = 50;
+    const R = 42;
+    const fracLinear = Math.max(0, Math.min(1, distKm / Math.max(raioMaxKm, 0.5)));
+    // Curva de sensibilidade de proximidade: afasta visualmente o avião do ponto central quando passa próximo
+    const frac = Math.min(0.92, Math.pow(fracLinear, 0.84));
+    const angRad = (bearing * Math.PI) / 180;
+    const posX = cx + frac * R * Math.sin(angRad);
+    const posY = cy - frac * R * Math.cos(angRad);
+
+    // Vetor de rumo projetado (Heading Vector) à frente da aeronave
+    const radHeading = (rumoVoo * Math.PI) / 180;
+    const compVetor = 10;
+    const vecX = posX + compVetor * Math.sin(radHeading);
+    const vecY = posY - compVetor * Math.cos(radHeading);
+
+    // Verdadeiro sobrevoo de colisão direta (menos de 400 metros do centro)
+    const overfly = distKm < 0.4;
+
     return {
-      px: cx + frac * R * Math.cos(angRad),
-      py: cy + frac * R * Math.sin(angRad),
+      px: posX,
+      py: posY,
+      vx: vecX,
+      vy: vecY,
+      isOverfly: overfly,
     };
-  }, [bearing, distKm, raioMaxKm]);
+  }, [bearing, distKm, raioMaxKm, rumoVoo]);
 
   // Formatação de distância respeitando a unidade escolhida (KM, NM ou MI)
   const distNm = distKm / 1.852;
@@ -1300,54 +1320,78 @@ function MiniRadarDisplay({
   const unidadePrincipal = unidadeAtiva;
 
   return (
-    <div className="flex items-center justify-center gap-1 sm:gap-2 w-full max-w-full overflow-hidden">
-      {/* Scope Circular do Radar com Efeito de Varrimento */}
-      <div className="relative w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#03090e] border border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.25)] flex items-center justify-center overflow-hidden shrink-0">
+    <div
+      onClick={onAbrirRadar}
+      className="flex items-center justify-center gap-1 sm:gap-2.5 w-full max-w-full overflow-hidden cursor-pointer group"
+      title="Radar ADS-B Cockpit • Clique para expandir visão tática"
+    >
+      {/* Scope Circular do Radar com Diâmetro Aumentado e Efeito de Varrimento */}
+      <div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-[#02070b] border border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.3)] flex items-center justify-center overflow-hidden shrink-0 group-hover:border-emerald-300 group-hover:shadow-[0_0_16px_rgba(16,185,129,0.5)] transition-all">
         {/* Feixe rotativo de varredura (Sweep Beam) */}
         <div
-          className="absolute inset-0 rounded-full animate-spin pointer-events-none opacity-40"
+          className="absolute inset-0 rounded-full animate-spin pointer-events-none opacity-45"
           style={{
-            animationDuration: "3.5s",
-            background: "conic-gradient(from 0deg, rgba(16,185,129,0.5) 0deg, rgba(16,185,129,0.05) 60deg, transparent 90deg, transparent 360deg)",
+            animationDuration: "3s",
+            background: "conic-gradient(from 0deg, rgba(16,185,129,0.6) 0deg, rgba(16,185,129,0.08) 55deg, transparent 90deg, transparent 360deg)",
           }}
         />
 
-        {/* Grelha SVG: anéis concêntricos + mira central */}
-        <svg viewBox="0 0 48 48" className="absolute inset-0 w-full h-full pointer-events-none">
-          {/* Anel exterior (100% alcance) */}
-          <circle cx="24" cy="24" r="20" fill="none" stroke="#10b981" strokeWidth="0.8" strokeOpacity="0.4" />
-          {/* Anel intermédio (50% alcance) */}
-          <circle cx="24" cy="24" r="10" fill="none" stroke="#10b981" strokeWidth="0.6" strokeDasharray="1.5,1.5" strokeOpacity="0.3" />
-          {/* Eixos cardeais da mira */}
-          <line x1="24" y1="4" x2="24" y2="44" stroke="#10b981" strokeWidth="0.5" strokeOpacity="0.25" />
-          <line x1="4" y1="24" x2="44" y2="24" stroke="#10b981" strokeWidth="0.5" strokeOpacity="0.25" />
-          {/* Ponto Central (Utilizador / Estação de Radar) */}
-          <circle cx="24" cy="24" r="1.5" fill="#34d399" />
-          {/* Letra N no topo */}
-          <text x="24" y="8" textAnchor="middle" fill="#34d399" fontSize="4.5" fontWeight="bold" opacity="0.7">N</text>
+        {/* Grelha SVG de Alta Precisão (100x100) */}
+        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none">
+          {/* Anel exterior (100% alcance = raioMaxKm) */}
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#10b981" strokeWidth="1.2" strokeOpacity="0.45" />
+          {/* Anel intermédio (66% alcance) */}
+          <circle cx="50" cy="50" r="28" fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="2,2" strokeOpacity="0.3" />
+          {/* Anel interior terminal de aproximação (33% alcance) */}
+          <circle cx="50" cy="50" r="14" fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="1.5,1.5" strokeOpacity="0.35" />
+
+          {/* Eixos cardeais da mira telescópica */}
+          <line x1="50" y1="8" x2="50" y2="92" stroke="#10b981" strokeWidth="0.6" strokeOpacity="0.3" />
+          <line x1="8" y1="50" x2="92" y2="50" stroke="#10b981" strokeWidth="0.6" strokeOpacity="0.3" />
+
+          {/* Letra N no topo em verde luminoso */}
+          <text x="50" y="7" textAnchor="middle" fill="#34d399" fontSize="6.5" fontWeight="bold" opacity="0.85">N</text>
+
+          {/* Ponto Central (Estação do Utilizador) */}
+          <circle cx="50" cy="50" r="1.8" fill="#34d399" />
+          <circle cx="50" cy="50" r="3.6" fill="none" stroke="#34d399" strokeWidth="0.6" strokeOpacity="0.5" />
+
+          {/* Vetor de Rumo Projetado (Heading Vector) — Mostra que a trajetória passa ao lado da estação */}
+          <line
+            x1={px}
+            y1={py}
+            x2={vx}
+            y2={vy}
+            stroke="#fde047"
+            strokeWidth="1.2"
+            strokeDasharray="2,1"
+            strokeOpacity="0.85"
+          />
+
+          {/* Blip da Aeronave com Rotação Nativa Centrada na Coordenada Exata */}
+          <g transform={`translate(${px}, ${py})`}>
+            {/* Halo pulsante de eco de radar */}
+            <circle cx="0" cy="0" r={isOverfly ? "6" : "4"} fill="#fbbf24" fillOpacity="0.3">
+              <animate attributeName="r" values="3;7;3" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2s" repeatCount="indefinite" />
+            </circle>
+
+            {/* Silhueta precisa do avião orientada pelo rumo real */}
+            <g transform={`rotate(${rumoVoo})`}>
+              <path
+                d="M0,-5 L1.3,-1.5 L5.2,0.8 L5.2,2 L1.3,1.2 L1.1,4.2 L2.4,5.4 L2.4,6.2 L0,5.5 L-2.4,6.2 L-2.4,5.4 L-1.1,4.2 L-1.3,1.2 L-5.2,2 L-5.2,0.8 L-1.3,-1.5 Z"
+                fill="#fde047"
+                stroke="#78350f"
+                strokeWidth="0.6"
+              />
+            </g>
+          </g>
         </svg>
 
-        {/* Blip Pulsante da Aeronave */}
-        <div
-          className="absolute z-10 flex items-center justify-center pointer-events-none"
-          style={{
-            left: `${(px / 48) * 100}%`,
-            top: `${(py / 48) * 100}%`,
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          {/* Ponto de eco de radar pulsante */}
-          <span className="absolute w-2 h-2 rounded-full bg-amber-400/40 animate-ping" />
-          {/* Ícone estilizado do avião orientado com o rumo real */}
-          <svg
-            className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.9)]"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            style={{ transform: `rotate(${rumoVoo}deg)` }}
-          >
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-          </svg>
-        </div>
+        {/* Indicador de expansão ao hover */}
+        <span className="absolute bottom-0.5 right-0.5 text-[6px] text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+          ↗
+        </span>
       </div>
 
       {/* Dados Numéricos de Distância e Azimute */}
@@ -1361,6 +1405,335 @@ function MiniRadarDisplay({
           <span className="truncate">{cardeal} • {bearing.toString().padStart(3, "0")}°</span>
           <span className="text-neutral-500 hidden xl:inline">({subtextoSecundario})</span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Componente Visual: Modal Radar Tático Cockpit TCAS em Alta Resolução ─────
+
+interface ModalRadarTaticoProps {
+  aberto: boolean;
+  onFechar: () => void;
+  localizacao: InfoLocalizacao;
+  vooPrincipal: any;
+  infoVooPrincipal?: any;
+  distVooAtual?: number | null;
+  listaVoos: EstadoVoo[];
+  raioKm: number;
+  onAlterarRaio: (novoRaio: number) => void;
+  unidadeDistancia: "KM" | "NM" | "MI";
+  unidadeAltitude: "FT" | "MT";
+  unidadeVelocidade: "KTS" | "KMH" | "MPH";
+}
+
+function ModalRadarTatico({
+  aberto,
+  onFechar,
+  localizacao,
+  vooPrincipal,
+  infoVooPrincipal,
+  distVooAtual,
+  listaVoos,
+  raioKm,
+  onAlterarRaio,
+  unidadeDistancia,
+  unidadeAltitude,
+  unidadeVelocidade,
+}: ModalRadarTaticoProps) {
+  if (!aberto) return null;
+
+  const refLat = localizacao.lat;
+  const refLon = localizacao.lon;
+
+  // Azimute e distância do voo principal
+  const bearingPrincipal = vooPrincipal && vooPrincipal[6] != null && vooPrincipal[5] != null
+    ? Math.round(calcularBearingGraus(refLat, refLon, vooPrincipal[6], vooPrincipal[5]))
+    : 0;
+
+  const cardealPrincipal = obterCardeal(bearingPrincipal);
+
+  // Mapeamento de todos os voos no raio com as suas posições SVG (cx=150, cy=150, R=126 no viewBox 0 0 300 300)
+  const cx = 150;
+  const cy = 150;
+  const R = 126;
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-mono select-none"
+      onClick={(e) => {
+        e.stopPropagation();
+        onFechar();
+      }}
+    >
+      <div
+        className="w-full max-w-lg bg-[#070b10] border border-emerald-500/40 rounded-2xl p-3 sm:p-5 shadow-[0_0_35px_rgba(16,185,129,0.2)] flex flex-col gap-3 text-white max-h-[95vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Cabeçalho do Radar */}
+        <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <div>
+              <h2 className="text-xs sm:text-sm font-black tracking-widest text-emerald-400 uppercase flex items-center gap-2">
+                <span>RADAR TÁTICO ADS-B</span>
+                <span className="text-[9px] bg-emerald-950/80 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                  HD TCAS
+                </span>
+              </h2>
+              <p className="text-[9px] sm:text-[10px] text-neutral-400">
+                📍 {localizacao.nome.toUpperCase()} ({refLat.toFixed(3)}°, {refLon.toFixed(3)}°)
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onFechar}
+            className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 text-lg font-bold cursor-pointer transition-colors"
+            title="Fechar Radar"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Scope Circular de Alta Resolução (ViewBox 0 0 300 300) */}
+        <div className="relative w-64 h-64 sm:w-80 sm:h-80 mx-auto rounded-full bg-[#02070b] border-2 border-emerald-500/60 shadow-[inset_0_0_40px_rgba(16,185,129,0.15)] flex items-center justify-center overflow-hidden shrink-0">
+          {/* Feixe rotativo de varredura militar */}
+          <div
+            className="absolute inset-0 rounded-full animate-spin pointer-events-none opacity-40"
+            style={{
+              animationDuration: "4s",
+              background: "conic-gradient(from 0deg, rgba(16,185,129,0.7) 0deg, rgba(16,185,129,0.1) 60deg, transparent 90deg, transparent 360deg)",
+            }}
+          />
+
+          <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full pointer-events-none">
+            {/* Anéis de distância calibrados com rótulos reais */}
+            {/* 100% alcance */}
+            <circle cx={cx} cy={cy} r={R} fill="none" stroke="#10b981" strokeWidth="1.2" strokeOpacity="0.5" />
+            <text x={cx + R - 4} y={cy - 4} fill="#10b981" fontSize="7" fontWeight="bold" opacity="0.6" textAnchor="end">
+              {raioKm} {unidadeDistancia}
+            </text>
+
+            {/* 75% alcance */}
+            <circle cx={cx} cy={cy} r={R * 0.75} fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="3,3" strokeOpacity="0.3" />
+            <text x={cx + R * 0.75 - 4} y={cy - 4} fill="#10b981" fontSize="6.5" opacity="0.5" textAnchor="end">
+              {Math.round(raioKm * 0.75)} {unidadeDistancia}
+            </text>
+
+            {/* 50% alcance */}
+            <circle cx={cx} cy={cy} r={R * 0.50} fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="3,3" strokeOpacity="0.35" />
+            <text x={cx + R * 0.50 - 4} y={cy - 4} fill="#10b981" fontSize="6.5" opacity="0.5" textAnchor="end">
+              {Math.round(raioKm * 0.50)} {unidadeDistancia}
+            </text>
+
+            {/* 25% alcance terminal de proximidade */}
+            <circle cx={cx} cy={cy} r={R * 0.25} fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="2,2" strokeOpacity="0.4" />
+            <text x={cx + R * 0.25 - 4} y={cy - 4} fill="#10b981" fontSize="6.5" opacity="0.5" textAnchor="end">
+              {Math.round(raioKm * 0.25)} {unidadeDistancia}
+            </text>
+
+            {/* Eixos cardeais e colaterais */}
+            <line x1={cx} y1={cy - R} x2={cx} y2={cy + R} stroke="#10b981" strokeWidth="0.7" strokeOpacity="0.35" />
+            <line x1={cx - R} y1={cy} x2={cx + R} y2={cy} stroke="#10b981" strokeWidth="0.7" strokeOpacity="0.35" />
+
+            {/* Marcas Cardeais */}
+            <text x={cx} y={cy - R + 12} textAnchor="middle" fill="#34d399" fontSize="9" fontWeight="bold">N</text>
+            <text x={cx + R - 10} y={cy + 3} textAnchor="middle" fill="#34d399" fontSize="8" fontWeight="bold">E</text>
+            <text x={cx} y={cy + R - 6} textAnchor="middle" fill="#34d399" fontSize="8" fontWeight="bold">S</text>
+            <text x={cx - R + 10} y={cy + 3} textAnchor="middle" fill="#34d399" fontSize="8" fontWeight="bold">W</text>
+
+            {/* Ponto Central da Estação */}
+            <circle cx={cx} cy={cy} r="3" fill="#34d399" />
+            <circle cx={cx} cy={cy} r="6" fill="none" stroke="#34d399" strokeWidth="1" strokeOpacity="0.6" />
+
+            {/* Plotagem de todos os outros voos secundários no radar */}
+            {listaVoos.map((voo, idx) => {
+              if (!voo || voo[6] == null || voo[5] == null) return null;
+              const isPrincipal = vooPrincipal && voo[0] === vooPrincipal[0];
+              if (isPrincipal) return null; // Renderizado em destaque abaixo
+
+              const dKm = calcularDistanciaHaversineKm(refLat, refLon, voo[6], voo[5]);
+              if (dKm > raioKm) return null;
+
+              const bDeg = calcularBearingGraus(refLat, refLon, voo[6], voo[5]);
+              const fLinear = Math.max(0, Math.min(1, dKm / Math.max(raioKm, 0.5)));
+              const fCurva = Math.min(0.92, Math.pow(fLinear, 0.84));
+              const aRad = (bDeg * Math.PI) / 180;
+              const vX = cx + fCurva * R * Math.sin(aRad);
+              const vY = cy - fCurva * R * Math.cos(aRad);
+              const rumo = voo[10] || 0;
+              const callsign = (voo[1] || "").trim() || voo[0];
+
+              return (
+                <g key={`sec-${idx}-${voo[0]}`} transform={`translate(${vX}, ${vY})`}>
+                  <circle cx="0" cy="0" r="2" fill="#10b981" />
+                  <g transform={`rotate(${rumo})`}>
+                    <path
+                      d="M0,-3 L1,-1 L3,0.5 L3,1.2 L0.8,0.7 L0.7,2.5 L1.5,3.2 L1.5,3.6 L0,3.2 L-1.5,3.6 L-1.5,3.2 L-0.7,2.5 L-0.8,0.7 L-3,1.2 L-3,0.5 L-1,-1 Z"
+                      fill="#34d399"
+                      opacity="0.8"
+                    />
+                  </g>
+                  <text x="5" y="2" fill="#34d399" fontSize="6" opacity="0.75" fontWeight="bold">
+                    {callsign}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Voo Principal em Destaque Absoluto com Vetor de Rumo Estendido */}
+            {vooPrincipal && vooPrincipal[6] != null && vooPrincipal[5] != null && distVooAtual != null && (() => {
+              const fLinear = Math.max(0, Math.min(1, distVooAtual / Math.max(raioKm, 0.5)));
+              const fCurva = Math.min(0.92, Math.pow(fLinear, 0.84));
+              const aRad = (bearingPrincipal * Math.PI) / 180;
+              const pX = cx + fCurva * R * Math.sin(aRad);
+              const pY = cy - fCurva * R * Math.cos(aRad);
+              const rumo = infoVooPrincipal?.rumo || vooPrincipal[10] || 0;
+              const radRumo = (rumo * Math.PI) / 180;
+
+              // Linha do vetor de rumo (Heading Vector) projetada 24 unidades à frente
+              const compVetor = 24;
+              const vecX = pX + compVetor * Math.sin(radRumo);
+              const vecY = pY - compVetor * Math.cos(radRumo);
+
+              // Linha de rastro retrospectivo (cauda) 16 unidades atrás
+              const caudaX = pX - 16 * Math.sin(radRumo);
+              const caudaY = pY + 16 * Math.cos(radRumo);
+
+              return (
+                <g>
+                  {/* Linha retrospectiva de trajetória recente (de onde veio) */}
+                  <line
+                    x1={caudaX}
+                    y1={caudaY}
+                    x2={pX}
+                    y2={pY}
+                    stroke="#f59e0b"
+                    strokeWidth="1.2"
+                    strokeOpacity="0.35"
+                    strokeDasharray="2,2"
+                  />
+
+                  {/* Linha projetada de rumo para onde vai (Flight Path Vector) */}
+                  <line
+                    x1={pX}
+                    y1={pY}
+                    x2={vecX}
+                    y2={vecY}
+                    stroke="#fde047"
+                    strokeWidth="1.6"
+                    strokeDasharray="4,2"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Alvo da aeronave com halos de radar */}
+                  <g transform={`translate(${pX}, ${pY})`}>
+                    <circle cx="0" cy="0" r="8" fill="#fbbf24" fillOpacity="0.25">
+                      <animate attributeName="r" values="4;12;4" dur="2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.7;0.1;0.7" dur="2s" repeatCount="indefinite" />
+                    </circle>
+
+                    <circle cx="0" cy="0" r="3.5" fill="#fde047" />
+
+                    {/* Ícone vetorizado do avião */}
+                    <g transform={`rotate(${rumo})`}>
+                      <path
+                        d="M0,-8 L2,-2.5 L8,1.2 L8,3 L2,1.8 L1.6,6.5 L3.8,8.2 L3.8,9.5 L0,8.5 L-3.8,9.5 L-3.8,8.2 L-1.6,6.5 L-2,1.8 L-8,3 L-8,1.2 L-2,-2.5 Z"
+                        fill="#fde047"
+                        stroke="#78350f"
+                        strokeWidth="0.8"
+                      />
+                    </g>
+
+                    {/* Caixa de Callout / Tag da Aeronave com Rota e Telemetria */}
+                    <g transform="translate(10, -8)">
+                      <rect
+                        x="0"
+                        y="-10"
+                        width="80"
+                        height="26"
+                        rx="4"
+                        fill="#0c131c"
+                        fillOpacity="0.9"
+                        stroke="#f59e0b"
+                        strokeWidth="0.8"
+                      />
+                      <text x="4" y="-2" fill="#fde047" fontSize="8" fontWeight="bold">
+                        {infoVooPrincipal?.callsign || (vooPrincipal[1] || "").trim()}
+                      </text>
+                      <text x="4" y="8" fill="#93c5fd" fontSize="6.5">
+                        {unidadeAltitude === "FT" ? `${infoVooPrincipal?.altitudePes} FT` : `${infoVooPrincipal?.altitudeMetros} M`} • {unidadeVelocidade === "KTS" ? `${infoVooPrincipal?.velocidadeKts} KT` : `${infoVooPrincipal?.velocidadeKmh} KMH`}
+                      </text>
+                    </g>
+                  </g>
+                </g>
+              );
+            })()}
+          </svg>
+        </div>
+
+        {/* Seletores Rápidos de Alcance de Zoom do Radar */}
+        <div className="flex items-center justify-between gap-1.5 bg-[#0c1018] p-2 rounded-xl border border-white/10 shrink-0">
+          <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold">
+            Alcance do Radar:
+          </span>
+          <div className="flex items-center gap-1">
+            {[10, 20, 35, 50, 100].map((alcance) => (
+              <button
+                key={alcance}
+                type="button"
+                onClick={() => onAlterarRaio(alcance)}
+                className={`px-2 py-1 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                  raioKm === alcance
+                    ? "bg-emerald-500 text-black shadow-md scale-105"
+                    : "bg-white/5 hover:bg-white/15 text-neutral-300 border border-white/10"
+                }`}
+              >
+                {alcance} km
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Telemetria Resumida do Voo Principal */}
+        {vooPrincipal && distVooAtual != null ? (
+          <div className="bg-[#0c1018] p-2.5 rounded-xl border border-emerald-500/30 flex items-center justify-between text-xs shrink-0">
+            <div>
+              <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Distância Exata</span>
+              <span className="text-sm font-black text-amber-400">
+                {distVooAtual.toFixed(2)} km
+              </span>
+              <span className="text-[10px] text-neutral-400 ml-1">
+                ({(distVooAtual / 1.852).toFixed(1)} NM)
+              </span>
+            </div>
+            <div className="text-center">
+              <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Azimute / Direção</span>
+              <span className="text-sm font-black text-emerald-400">
+                {cardealPrincipal} • {bearingPrincipal.toString().padStart(3, "0")}°
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Rumo de Voo</span>
+              <span className="text-sm font-black text-sky-400">
+                {infoVooPrincipal?.rumo || vooPrincipal[10] || 0}°
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-xs text-neutral-400 py-2">
+            Nenhum voo ativo diretamente no alcance neste momento.
+          </div>
+        )}
+
+        {/* Botão Fechar */}
+        <button
+          type="button"
+          onClick={onFechar}
+          className="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-500/40 text-emerald-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md"
+        >
+          Fechar Radar
+        </button>
       </div>
     </div>
   );
@@ -1772,6 +2145,7 @@ export default function PainelAnalogicoMobileFullscreen() {
   const [lonManual, setLonManual] = useState<string>("-8.62");
   const [estaEmFullScreen, setEstaEmFullScreen] = useState<boolean>(false);
   const [modalOpcoesAberto, setModalOpcoesAberto] = useState<boolean>(false);
+  const [modalRadarAberto, setModalRadarAberto] = useState<boolean>(false);
   const [somAtivo, setSomAtivo] = useState<boolean>(true);
   const [volumeSom, setVolumeSom] = useState<number>(80);
   const [unidadeAltitude, setUnidadeAltitude] = useState<"FT" | "MT">("FT");
@@ -3086,7 +3460,11 @@ export default function PainelAnalogicoMobileFullscreen() {
               </div>
 
               {/* 4. RADAR DE DISTÂNCIA */}
-              <div className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-emerald-500/20 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden h-full">
+              <div
+                onClick={() => setModalRadarAberto(true)}
+                className="bg-[#10121a] px-1 py-0.5 sm:px-2 sm:py-1 rounded-lg sm:rounded-xl border border-emerald-500/25 hover:border-emerald-500/50 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden h-full cursor-pointer transition-colors"
+                title="Radar ADS-B Cockpit • Clique para expandir visão tática"
+              >
                 <span className="text-[7px] sm:text-[9px] uppercase tracking-wider text-emerald-400 font-bold mb-0.5 flex items-center gap-1 leading-none shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   {t.rotulo_distancia}
@@ -3102,6 +3480,7 @@ export default function PainelAnalogicoMobileFullscreen() {
                     raioMaxKm={raioKm}
                     unidadeVelocidade={unidadeVelocidade}
                     unidadeDistancia={unidadeDistancia}
+                    onAbrirRadar={() => setModalRadarAberto(true)}
                   />
                 ) : (
                   <div className="flex items-center gap-1 shrink-0">
@@ -4882,6 +5261,22 @@ export default function PainelAnalogicoMobileFullscreen() {
           </div>
         </div>
       )}
+
+      {/* ── MODAL RADAR TÁTICO COCKPIT TCAS EM ALTA RESOLUÇÃO ──────── */}
+      <ModalRadarTatico
+        aberto={modalRadarAberto}
+        onFechar={() => setModalRadarAberto(false)}
+        localizacao={localizacao}
+        vooPrincipal={vooAtual}
+        infoVooPrincipal={infoVoo}
+        distVooAtual={distVooAtual}
+        listaVoos={listaVoos}
+        raioKm={raioKm}
+        onAlterarRaio={alternarRaio}
+        unidadeDistancia={unidadeDistancia}
+        unidadeAltitude={unidadeAltitude}
+        unidadeVelocidade={unidadeVelocidade}
+      />
 
       {/* Camada Dinâmica de Luminosidade / Dimmer de Ecrã (Transição Suave de 700ms) */}
       <div

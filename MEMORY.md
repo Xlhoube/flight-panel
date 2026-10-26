@@ -10,13 +10,13 @@
 
 **Objectivo:** Interface inspirada na referência **theflightwall.com**, reproduzindo a estética oficial da marca: moldura física de display inteligente, cartão com fotografia de alta resolução da pintura da aeronave (*Livery Card*), logótipo oficial da companhia, rota em códigos IATA (`OPO` ➔ `LIS`), modelo da aeronave (`Airbus A320-251N`) e barra de telemetria de aviação (altitude em pés, velocidade em nós e bússola em graus).
 
-**Versão:** v2.12.0
+**Versão:** v2.13.0
 
 **Data de início:** 2026-09-06
 
 **Última sessão:** 2026-10-26
 
-**Estado:** PWA internacional completa com 3 ecrãs integrados, Ecrã 2 enriquecido com cartões completos de voo (Radar ADS-B), identificação e suporte militar à Royal Air Force (RAF) britânica com Roundel oficial e catálogo Boeing C-17A Globemaster III, Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização nos 4 idiomas (PT, EN, FR, ES), etiqueta de versão no menu de opções, SEO & Open Graph com imagem oficial de pré-visualização, e motor de georresolução de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia.
+**Estado:** PWA internacional completa com 3 ecrãs integrados, novo Radar ADS-B de alta precisão geométrica com vetor de rumo (Heading Vector) e scope ampliado (36px a 48px), eliminação do falso sobrevoo central através de curva de aproximação terminal e projeção nativa SVG, novo Modal Cockpit TCAS HD de 360° em alta resolução, reconhecimento e suporte à Royal Air Force (RAF) britânica com Roundel oficial e catálogo Boeing C-17A Globemaster III, Modo Noturno / Sono com silenciamento total e ecrã ultra-escuro, internacionalização nos 4 idiomas (PT, EN, FR, ES) e motor de georresolução de alta precisão com suporte integral a Serzedo e todas as freguesias de Gaia.
 
 ---
 
@@ -926,3 +926,29 @@
    - Mapeamento em `lib/aeroportos.ts` e `app/api/voos/route.ts`: cidade `"AMESBURY"`, aeroporto `"MOD BOSCOMBE DOWN"`, país `"REINO UNIDO"`. Adicionadas também as bases aéreas `RAF Brize Norton` (`BZZ`) e `RAF Waddington` (`WAD`).
 
 **Consequência:** Voos da Royal Air Force (como o `RRR6236`) são agora reconhecidos imediatamente com o Roundel oficial da RAF britânica, exibição do operador `"ROYAL AIR FORCE (RAF)"`, modelo `"C-17A GLOBEMASTER III"`, fabricante `"BOEING"` e rota enriquecida com Amesbury / MoD Boscombe Down no Reino Unido.
+
+### ADR-079 — Reformulação Geométrica e de Precisão do Radar ADS-B Cockpit TCAS (2026-10-26)
+
+**Contexto:** O utilizador solicitou melhorias no radar, tanto em dimensão como em precisão, indicando que por vezes o avião passa ao lado do ponto central da estação mas no ecrã do radar é apresentado como se estivesse a passar diretamente por cima do ponto central.
+
+**Diagnóstico & Causa Raiz:**
+1. **Clamp Artificial de Proximidade:** O código original utilizava `Math.max(0.18, distKm / raioMaxKm)`. Desta forma, qualquer aeronave a menos de 3.6 km (num raio de 20 km) ficava estaticamente fixada a 18% do raio do visor, impedindo a aproximação suave e distorcendo a geometria nas passagens laterais.
+2. **Escala Linear em Ecrãs Compactos:** Em ecrãs pequenos (onde o radar tinha apenas 24px a 32px de diâmetro), uma passagem a 1 ou 2 km de distância correspondia a menos de 1 a 1.5 pixels de separação do centro. Com o marcador do avião e o ponto central a medirem vários pixels, a aeronave sobrepunha fisicamente o ponto verde da estação, gerando a ilusão de sobrevoo direto central.
+3. **Ausência de Vetor de Rumo (Flight Path Vector):** Sem indicação direcional projetada para a frente, o utilizador não conseguia distinguir se a trajetória do avião cortava o ponto central ou se passava tangencialmente pela lateral.
+4. **Dimensão Visual Reduzida:** O scope do radar estava restrito a `w-6 h-6 sm:w-8 sm:h-8`, dificultando a leitura dos anéis concêntricos e dos quadrantes cardeais.
+
+**Decisão:**
+1. **Ampliação do Scope do Radar:**
+   - Aumento da dimensão para `w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11` (36px a 44px de diâmetro útil), preenchendo a altura do módulo 4 da barra de telemetria com aro militar esmeralda e sombra luminosa `shadow-[0_0_12px_rgba(16,185,129,0.3)]`.
+2. **Eliminação do Clamp Artificial & Curva Terminal de Proximidade:**
+   - Remoção do clamp `Math.max(0.18)`.
+   - Implementação de curva de aproximação terminal `frac = Math.min(0.92, Math.pow(distKm / raioMaxKm, 0.84))`, garantindo que aviões a 1 km, 2 km ou 3 km fiquem claramente descolados do ponto central (a 4 a 8 unidades SVG do centro), com sobreposição apenas em sobrevoo real (< 400 metros).
+3. **Projeção Nativa SVG & Vetor de Rumo (Heading Vector):**
+   - Transição para viewBox `0 0 100 100` com aeronave vetorizada nativamente em `<g transform="translate(px, py) rotate(rumo)">`.
+   - Adicionado vetor de rumo projetado a partir do nariz da aeronave (`<line stroke="#fde047" strokeDasharray="2,1" />`), permitindo ao utilizador visualizar a linha de trajetória tangencial a passar visivelmente ao lado da estação.
+4. **Novo Modal Cockpit TCAS HD em Alta Resolução (`ModalRadarTatico`):**
+   - Abertura de visor tático de 360° em ecrã expandido (320px a 380px) ao clicar no módulo de radar.
+   - Anéis métricos concêntricos anotados (5 km, 10 km, 15 km, 20 km), plotagem de todos os voos no espaço aéreo com callsigns e seletores rápidos de zoom de alcance (10, 20, 35, 50, 100 km).
+
+**Consequência:** O radar apresenta agora precisão geométrica exata, dimensão visual substancialmente mais imersiva e clara diferenciação entre passagens laterais e sobrevoos diretos.
+

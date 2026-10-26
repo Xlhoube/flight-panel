@@ -9,14 +9,14 @@ export interface InfoVersao {
 }
 
 export const INFO_VERSAO: InfoVersao = {
-  versao: "2.12.0",
-  buildId: "build-20261026-v2120",
+  versao: "2.13.0",
+  buildId: "build-20261026-v2130",
   dataLancamento: "2026-10-26",
-  descricao: "Reconhecimento oficial de forças aéreas internacionais (Royal Air Force / RAF britânica com Roundel militar), catálogo Boeing C-17A Globemaster III e aeroporto militar de Boscombe Down (QUA).",
+  descricao: "Novo radar ADS-B de alta precisão geométrica com vetor de rumo (Heading Vector), scope ampliado com anéis métricos calibrados e modal tático HD Cockpit TCAS.",
   descricaoMultilingue: {
-    pt: "Reconhecimento oficial de forças aéreas internacionais (Royal Air Force / RAF britânica com Roundel militar), catálogo Boeing C-17A Globemaster III e aeroporto militar de Boscombe Down (QUA).",
-    en: "Official recognition of international air forces (United Kingdom Royal Air Force with official military Roundel), Boeing C-17A Globemaster III catalog, and MoD Boscombe Down airfield (QUA).",
-    fr: "Reconnaissance officielle des forces aériennes internationales (Royal Air Force britannique avec cocarde militaire officielle), catalogue Boeing C-17A Globemaster III et aéroport MoD Boscombe Down (QUA).",
-    es: "Reconocimiento oficial de fuerzas aéreas internacionales (Royal Air Force británica con escarapela militar oficial), catálogo Boeing C-17A Globemaster III y aeródromo MoD Boscombe Down (QUA).",
+    pt: "Novo radar ADS-B de alta precisão geométrica com vetor de rumo (Heading Vector), scope ampliado com anéis métricos calibrados e modal tático HD Cockpit TCAS.",
+    en: "New high-precision geometric ADS-B radar with heading vector, enlarged scope with calibrated metric range rings, and HD Cockpit TCAS tactical view modal.",
+    fr: "Nouveau radar ADS-B haute précision géométrique avec vecteur de cap, scope agrandi à anneaux métriques calibrés et modal tactique HD Cockpit TCAS.",
+    es: "Nuevo radar ADS-B de alta precisión geométrica con vector de rumbo, visor ampliado con anillos métricos calibrados y modal táctico HD Cockpit TCAS.",
   },
 };
